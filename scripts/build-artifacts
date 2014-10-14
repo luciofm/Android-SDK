@@ -10,6 +10,10 @@ git clone git@github.com:sharethrough/Android-SDK-Maven.git maven
 pwd
 cp build/outputs/aar/*.aar ${TMP}/maven/sharethrough-android-sdk-${TRAVIS_BUILD_NUMBER}.aar
 cd ${TMP}/maven
+
+git config --global user.email "travis-ci@sharethrough.com"
+git config --global user.name "Automated Build"Tra
+
 git add .
 git commit -m "Travis build ${TRAVIS_BUILD_NUMBER}"
 git push
