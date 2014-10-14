@@ -1,5 +1,8 @@
 language: android
 script:   ./gradlew clean assembleDebugTest
+
+after_success: ./scripts/build-artifacts
+
 android:
   components:
     # Uncomment the lines below if you want to

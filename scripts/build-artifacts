@@ -1,0 +1,15 @@
+#!/bin/sh -ex
+
+TMP=${TMP:-/tmp}
+(
+cd ${TMP}
+rm -rf maven || true
+git clone git@github.com:sharethrough/Android-SDK-Maven.git maven
+)
+
+pwd
+cp build/outputs/aar/sdk*.aar ${TMP}/maven/sharethrough-android-sdk-${TRAVIS_BUILD_NUMBER}.aar
+cd ${TMP}/maven
+git add .
+git commit -m "Travis build ${TRAVIS_BUILD_NUMBER}"
+git push
