@@ -16,4 +16,8 @@ git config --global user.name "Automated Build"Tra
 
 git add .
 git commit -m "Travis build ${TRAVIS_BUILD_NUMBER}"
-git push
+
+git remote rm origin
+git remote add origin https://rloomba:${GH_TOKEN}@github.com:sharethrough/Android-SDK-Maven.git
+
+git push origin master
