@@ -1,7 +1,7 @@
 language: android
 script:   ./gradlew clean assembleDebugTest
 
-after_success: find . -type f # ./scripts/build-artifacts
+after_success: ./scripts/build-artifacts
 
 android:
   components:
