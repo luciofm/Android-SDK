@@ -1,4 +1,5 @@
 language: android
+script:   ./gradlew clean testDebug assembleDebug
 android:
   components:
     # Uncomment the lines below if you want to
