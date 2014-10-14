@@ -1,4 +1,19 @@
 apply plugin: 'com.android.library'
+apply plugin: 'release'
+
+allprojects {
+    version = version
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+//        maven { url "https://oss.sonatype.org/content/groups/public"}
+    }
+    dependencies {
+        classpath 'com.github.townsfolk:gradle-release:1.2'
+    }
+}
 
 android {
     compileSdkVersion 20
