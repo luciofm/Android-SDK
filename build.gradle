@@ -12,7 +12,6 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:0.+'
-        classpath 'com.github.townsfolk:gradle-release:1.2'
     }
 }
 
