@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven'
 
 allprojects {
     version = version
@@ -29,6 +30,21 @@ android {
         release {
             runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+def aarFile = file('build/outputs/aar/sdk-0.1-SNAPSHOT.aar')
+artifacts {
+    archives aarFile
+}
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "file://../app/libs/")
+            pom.groupId = 'com.sharethrough.sdk'
+            pom.artifactId = 'sharethrough-sdk'
+            pom.version = '0.1.0'
         }
     }
 }
