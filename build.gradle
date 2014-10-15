@@ -32,21 +32,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    packagingOptions {
+        exclude 'AndroidManifest.xml'
+    }
 }
 
-def aarFile = file('build/outputs/aar/sdk-0.1-SNAPSHOT.aar')
-artifacts {
-    archives aarFile
-}
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: "file://../app/libs/")
-            pom.groupId = 'com.sharethrough.sdk'
-            pom.artifactId = 'sharethrough-sdk'
-            pom.version = '0.1.0'
-        }
-    }
+task uploadArchives(type: Copy) {
+    from 'build/outputs/aar/'
+    include '*.aar'
+
+    into '../app/libs'
 }
 
 dependencies {
