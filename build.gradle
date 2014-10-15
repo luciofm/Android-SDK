@@ -16,7 +16,7 @@ buildscript {
 }
 
 android {
-    compileSdkVersion 20
+    compileSdkVersion 18
     buildToolsVersion "20.0.0"
 
     defaultConfig {
@@ -38,7 +38,7 @@ task uploadArchives(type: Copy) {
     from 'build/outputs/aar/'
     include '*.aar'
 
-    into '../app/libs'
+    into '../app/lib'
 }
 uploadArchives.dependsOn assembleDebug
 
