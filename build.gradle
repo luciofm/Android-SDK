@@ -32,9 +32,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    packagingOptions {
-        exclude 'AndroidManifest.xml'
-    }
 }
 
 task uploadArchives(type: Copy) {
@@ -43,6 +40,7 @@ task uploadArchives(type: Copy) {
 
     into '../app/libs'
 }
+uploadArchives.dependsOn assembleDebug
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
