@@ -17,7 +17,7 @@ buildscript {
 
 android {
     compileSdkVersion 18
-    buildToolsVersion "20.0.0"
+    buildToolsVersion '19.1.0'
 
     defaultConfig {
         applicationId "com.sharethrough.android.sdk"
