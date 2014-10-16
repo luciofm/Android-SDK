@@ -1,0 +1,30 @@
+{
+  "placement": {
+    "template": "<div/>",
+    "layout": "single"
+  },
+  "creatives": [
+    {
+      "price": 12567,
+      "signature": "c19",
+      "creative": {
+        "creative_key": "ckey",
+        "description": "Description",
+        "media_url": "mediaURL",
+        "share_url": "shareURL",
+        "variant_key": "12345",
+        "advertiser": "Advertiser, Inc",
+        "beacons": {
+          "visible": ["visibleBeacon"],
+          "click": ["clickBeacon"],
+          "play": []
+        },
+        "thumbnail_url": "thumbnailURL",
+        "title": "Title",
+        "action": "clickout"
+      },
+      "priceType": "CPE",
+      "version": 1
+    }
+  ]
+}
