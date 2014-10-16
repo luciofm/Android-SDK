@@ -53,6 +53,7 @@ task uploadArchives(type: Copy) {
     into '../app/lib'
 }
 uploadArchives.dependsOn test
+uploadArchives.dependsOn assembleDebug
 
 
 robolectric {
@@ -61,12 +62,8 @@ robolectric {
 }
 
 dependencies {
-    compile fileTree(dir: 'lib', include: ['*.jar'])
-    //    compile 'com.android.support:appcompat-v7:20.0.0'
-
     compile 'org.codehaus.jackson:jackson-core-asl:1.1.0'
     compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.0'
-
     repositories {
         mavenCentral()
     }
