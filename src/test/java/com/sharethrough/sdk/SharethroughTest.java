@@ -1,19 +1,31 @@
 package com.sharethrough.sdk;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.tester.org.apache.http.TestHttpResponse;
 
+import java.util.concurrent.ExecutorService;
+
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(emulateSdk = 18)
 public class SharethroughTest {
 
     private Sharethrough subject;
+    private ExecutorService executorService;
+
+    @Before
+    public void setUp() throws Exception {
+        executorService = Mockito.mock(ExecutorService.class);
+    }
 
     @Test
     public void settingKey_loadsAdsFromServer() throws Exception {
@@ -52,7 +64,14 @@ public class SharethroughTest {
                         "  ]\n" +
                         "}"));
 
-        subject = new Sharethrough(key);
+        subject = new Sharethrough(executorService, key);
+
+        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(executorService).execute(runnableArgumentCaptor.capture());
+        assertThat(subject.getCreative()).isNull();
+
+        runnableArgumentCaptor.getValue().run();
+
         Response.Creative actualCreative = subject.getCreative();
         assertThat(actualCreative).isNotNull();
         assertThat(actualCreative.price).isEqualTo(121460);
@@ -60,8 +79,17 @@ public class SharethroughTest {
 
     @Test(expected = KeyRequiredException.class)
     public void notSettingKey_throwsExceptionWhenAdIsRequested() {
-        subject = new Sharethrough(null);
+        subject = new Sharethrough(executorService, null);
+
+        runExecutor();
+
         subject.getCreative();
+    }
+
+    private void runExecutor() {
+        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(executorService).execute(runnableArgumentCaptor.capture());
+        runnableArgumentCaptor.getValue().run();
     }
 
     @Test
@@ -69,8 +97,10 @@ public class SharethroughTest {
         String key = "abc";
         Robolectric.addHttpResponseRule("GET", "http://btlr.sharethrough.com/v3?placement_key=" + key,
                 new TestHttpResponse(204, "I got nothing for ya"));
-        subject = new Sharethrough(key);
-        Response.Creative actualCreative = subject.getCreative();
-        assertThat(actualCreative).isNull();
+        subject = new Sharethrough(executorService, key);
+
+        runExecutor();
+
+        assertThat(subject.getCreative()).isNull();
     }
 }
