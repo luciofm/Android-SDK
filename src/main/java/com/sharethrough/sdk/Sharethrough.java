@@ -109,6 +109,10 @@ public class Sharethrough {
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public <V extends View & IAdView> void putCreativeIntoAdView(V adView) {
-        waitingAdViews.add(adView);
+        if (availableCreatives.size() > 0) {
+            availableCreatives.remove(0).putIntoAdView(adView);
+        } else {
+            waitingAdViews.add(adView);
+        }
     }
 }

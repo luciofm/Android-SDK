@@ -186,6 +186,31 @@ public class SharethroughTest {
         verifyNoMoreInteractions(adView);
     }
 
+    @Test
+    public void whenThereAreCreativesPreloaded_usesPreloadedCreative() {
+        String key = "abc";
+        Robolectric.addHttpResponseRule("GET", "http://btlr.sharethrough.com/v3?placement_key=" + key, new TestHttpResponse(200, FIXTURE));
+
+        subject = new Sharethrough(executorService, key);
+
+        ArgumentCaptor<Runnable> creativeFetcherArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(executorService).execute(creativeFetcherArgumentCaptor.capture());
+
+        reset(executorService);
+        creativeFetcherArgumentCaptor.getValue().run();
+
+        Robolectric.addHttpResponseRule("GET", "http://th.umb.na/il/URL", new TestHttpResponse(200, IMAGE_BYTES));
+        ArgumentCaptor<Runnable> imageFetcherArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(executorService).execute(imageFetcherArgumentCaptor.capture());
+        imageFetcherArgumentCaptor.getValue().run();
+
+        subject.putCreativeIntoAdView(adView);
+        verify(adView.getTitle()).setText("Title");
+        verify(adView.getDescription()).setText("Description.");
+        verify(adView.getAdvertiser()).setText("Advertiser");
+        verify(adView.getThumbnail()).setImageBitmap(eq(BitmapFactory.decodeByteArray(IMAGE_BYTES, 0, IMAGE_BYTES.length)));
+    }
+
     private void runExecutor() {
         ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
         verify(executorService).execute(runnableArgumentCaptor.capture());
