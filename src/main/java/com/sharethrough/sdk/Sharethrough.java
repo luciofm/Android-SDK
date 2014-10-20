@@ -26,7 +26,7 @@ public class Sharethrough {
     static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(4); // TODO: pick a reasonable number
     public static final String USER_AGENT = System.getProperty("http.agent");
     private String key;
-    private List<Creative> availableCreatives = new ArrayList<Creative>();
+    private List<Creative> availableCreatives = Collections.synchronizedList(new ArrayList<Creative>());
     private List<IAdView> waitingAdViews = Collections.synchronizedList(new ArrayList<IAdView>());
 
     public Sharethrough(String key) {
@@ -69,11 +69,13 @@ public class Sharethrough {
                                         InputStream imageContent = imageResponse.getEntity().getContent();
                                         byte[] imageBytes = convertInputStreamToByteArray(imageContent);
                                         Creative creative = new Creative(responseCreative, imageBytes);
-                                        if (waitingAdViews.size() > 0) {
-                                            IAdView adView = waitingAdViews.remove(0);
-                                            creative.putIntoAdView(adView);
-                                        } else {
-                                            availableCreatives.add(creative);
+                                        synchronized (waitingAdViews) {
+                                            if (waitingAdViews.size() > 0) {
+                                                IAdView adView = waitingAdViews.remove(0);
+                                                creative.putIntoAdView(adView);
+                                            } else {
+                                                availableCreatives.add(creative);
+                                            }
                                         }
                                     } else {
                                         Log.wtf("Sharethrough", "failed to load image from url: " + imageURI + " ; server said: " + imageResponse.getStatusLine().getStatusCode() + "\t" + imageResponse.getStatusLine().getReasonPhrase());
@@ -109,10 +111,12 @@ public class Sharethrough {
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public <V extends View & IAdView> void putCreativeIntoAdView(V adView) {
-        if (availableCreatives.size() > 0) {
-            availableCreatives.remove(0).putIntoAdView(adView);
-        } else {
-            waitingAdViews.add(adView);
+        synchronized (availableCreatives) {
+            if (availableCreatives.size() > 0) {
+                availableCreatives.remove(0).putIntoAdView(adView);
+            } else {
+                waitingAdViews.add(adView);
+            }
         }
     }
 }
