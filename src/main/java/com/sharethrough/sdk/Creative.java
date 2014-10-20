@@ -1,9 +1,17 @@
 package com.sharethrough.sdk;
 
+import android.app.Dialog;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 public class Creative {
     private final Response.Creative responseCreative;
@@ -25,8 +33,41 @@ public class Creative {
                 adView.getDescription().setText(Creative.this.getDescription());
                 adView.getAdvertiser().setText(Creative.this.getAdvertiser());
                 adView.getThumbnail().setImageBitmap(Creative.this.getThumbnailImage());
+
+                ((View) adView).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showFullscreen(v.getContext());
+                    }
+                });
             }
         });
+    }
+
+    private void showFullscreen(Context context) {
+        Dialog dialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+
+        LinearLayout linearLayout = new LinearLayout(context);
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        dialog.setContentView(linearLayout, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        TextView title = new TextView(context);
+        title.setText(this.getTitle());
+        linearLayout.addView(title);
+
+        TextView description = new TextView(context);
+        description.setText(this.getDescription());
+        linearLayout.addView(description);
+
+        TextView advertiser = new TextView(context);
+        advertiser.setText(this.getAdvertiser());
+        linearLayout.addView(advertiser);
+
+        ImageView thumbnail = new ImageView(context);
+        thumbnail.setImageBitmap(BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length));
+        linearLayout.addView(thumbnail);
+
+        dialog.show();
     }
 
     public String getTitle() {
