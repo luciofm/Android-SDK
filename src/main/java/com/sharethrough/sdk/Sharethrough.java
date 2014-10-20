@@ -2,8 +2,6 @@ package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import org.apache.http.HttpResponse;
@@ -73,7 +71,7 @@ public class Sharethrough {
                                         Creative creative = new Creative(responseCreative, imageBytes);
                                         if (waitingAdViews.size() > 0) {
                                             IAdView adView = waitingAdViews.remove(0);
-                                            putCreativeIntoAdView(creative, adView);
+                                            creative.putIntoAdView(adView);
                                         } else {
                                             availableCreatives.add(creative);
                                         }
@@ -112,19 +110,5 @@ public class Sharethrough {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public <V extends View & IAdView> void putCreativeIntoAdView(V adView) {
         waitingAdViews.add(adView);
-    }
-
-    private static void putCreativeIntoAdView(final Creative creative, final IAdView adView) {
-        // TODO: check that the AdView is attached to the window & avoid memory leaks
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-//        adView.addOnAttachStateChangeListener(null);
-                adView.getTitle().setText(creative.getTitle());
-                adView.getDescription().setText(creative.getDescription());
-                adView.getAdvertiser().setText(creative.getAdvertiser());
-                adView.getThumbnail().setImageBitmap(creative.getThumbnailImage());
-            }
-        });
     }
 }
