@@ -1,6 +1,7 @@
 package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -46,7 +47,7 @@ public class SharethroughTest {
             "          \"click\": [\"clickBeacon\"],\n" +
             "          \"play\": []\n" +
             "        },\n" +
-            "        \"thumbnail_url\": \"thumbnailURL\",\n" +
+            "        \"thumbnail_url\": \"//th.umb.na/il/URL\",\n" +
             "        \"title\": \"Title\",\n" +
             "        \"action\": \"clickout\"\n" +
             "      },\n" +
@@ -55,6 +56,7 @@ public class SharethroughTest {
             "    }\n" +
             "  ]\n" +
             "}";
+    private static final byte[] IMAGE_BYTES = new byte[] {0, 1, 2, 3, 4};
     private Sharethrough subject;
     private ExecutorService executorService;
     private AdView adView;
@@ -90,14 +92,24 @@ public class SharethroughTest {
 
         verifyNoMoreInteractions(adView);
 
+        reset(executorService);
         creativeFetcherArgumentCaptor.getValue().run();
 
         verifyNoMoreInteractions(adView);
+
+        Robolectric.addHttpResponseRule("GET", "http://th.umb.na/il/URL", new TestHttpResponse(200, IMAGE_BYTES));
+        ArgumentCaptor<Runnable> imageFetcherArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(executorService).execute(imageFetcherArgumentCaptor.capture());
+        imageFetcherArgumentCaptor.getValue().run();
+
+        verifyNoMoreInteractions(adView);
+
         Robolectric.unPauseMainLooper();
 
         verify(adView.getTitle()).setText("Title");
         verify(adView.getDescription()).setText("Description.");
         verify(adView.getAdvertiser()).setText("Advertiser");
+        verify(adView.getThumbnail()).setImageBitmap(eq(BitmapFactory.decodeByteArray(IMAGE_BYTES, 0, IMAGE_BYTES.length)));
     }
 
     @Test(expected = KeyRequiredException.class)
@@ -131,9 +143,46 @@ public class SharethroughTest {
 
         ArgumentCaptor<Runnable> creativeFetcherArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
         verify(executorService).execute(creativeFetcherArgumentCaptor.capture());
+
+        reset(executorService);
         creativeFetcherArgumentCaptor.getValue().run();
 
+        Robolectric.addHttpResponseRule("GET", "http://th.umb.na/il/URL", new TestHttpResponse(200, IMAGE_BYTES));
+        ArgumentCaptor<Runnable> imageFetcherArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(executorService).execute(imageFetcherArgumentCaptor.capture());
+        imageFetcherArgumentCaptor.getValue().run();
+
         verify(adView2.getTitle()).setText("Title");
+        verifyNoMoreInteractions(adView);
+    }
+
+    @Test
+    public void whenImageCantBeDownloaded_doesNotUseAd() throws Exception {
+        String key = "abc";
+        Robolectric.addHttpResponseRule("GET", "http://btlr.sharethrough.com/v3?placement_key=" + key, new TestHttpResponse(200, FIXTURE));
+
+        Robolectric.pauseMainLooper();
+
+        subject = new Sharethrough(executorService, key);
+        subject.putCreativeIntoAdView(adView);
+
+        ArgumentCaptor<Runnable> creativeFetcherArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(executorService).execute(creativeFetcherArgumentCaptor.capture());
+
+        verifyNoMoreInteractions(adView);
+
+        reset(executorService);
+        creativeFetcherArgumentCaptor.getValue().run();
+
+        verifyNoMoreInteractions(adView);
+
+        Robolectric.addHttpResponseRule("GET", "http://th.umb.na/il/URL", new TestHttpResponse(404, "NOT FOUND"));
+        ArgumentCaptor<Runnable> imageFetcherArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(executorService).execute(imageFetcherArgumentCaptor.capture());
+        imageFetcherArgumentCaptor.getValue().run();
+
+        Robolectric.unPauseMainLooper();
+
         verifyNoMoreInteractions(adView);
     }
 

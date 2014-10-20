@@ -19,7 +19,7 @@
           "click": ["clickBeacon"],
           "play": []
         },
-        "thumbnail_url": "thumbnailURL",
+        "thumbnail_url": "//th.umb.na/il/URL",
         "title": "Title",
         "action": "clickout"
       },

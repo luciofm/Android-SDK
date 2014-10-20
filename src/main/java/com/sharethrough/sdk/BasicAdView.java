@@ -3,12 +3,16 @@ package com.sharethrough.sdk;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public abstract class BasicAdView extends FrameLayout implements IAdView {
+public class BasicAdView extends FrameLayout implements IAdView {
+    private int titleViewId;
+    private int descriptionViewId;
+    private int advertiserViewId;
+    private int thumbnailViewId;
+
     public BasicAdView(Context context) {
         super(context);
     }
@@ -21,31 +25,33 @@ public abstract class BasicAdView extends FrameLayout implements IAdView {
         super(context, attrs, defStyle);
     }
 
-    public static BasicAdView showAd(Sharethrough sharethrough, final Context context, final int layoutResourceId, final int titleViewId, final int descriptionViewId, final int advertiserViewId) {
-        BasicAdView basicAdView = new BasicAdView(context) {
-            View view = LayoutInflater.from(context).inflate(layoutResourceId, this, true);
+    public BasicAdView showAd(Sharethrough sharethrough, final Context context, final int layoutResourceId, final int titleViewId, final int descriptionViewId, final int advertiserViewId, final int thumbnailViewId) {
+        this.titleViewId = titleViewId;
+        this.descriptionViewId = descriptionViewId;
+        this.advertiserViewId = advertiserViewId;
+        this.thumbnailViewId = thumbnailViewId;
+        addView(LayoutInflater.from(context).inflate(layoutResourceId, this, false));
+        sharethrough.putCreativeIntoAdView(this);
+        return this;
+    }
 
-            @Override
-            public TextView getTitle() {
-                return (TextView) view.findViewById(titleViewId);
-            }
+    @Override
+    public TextView getTitle() {
+        return (TextView) this.findViewById(titleViewId);
+    }
 
-            @Override
-            public TextView getDescription() {
-                return (TextView) view.findViewById(descriptionViewId);
-            }
+    @Override
+    public TextView getDescription() {
+        return (TextView) this.findViewById(descriptionViewId);
+    }
 
-            @Override
-            public TextView getAdvertiser() {
-                return (TextView) view.findViewById(advertiserViewId);
-            }
+    @Override
+    public TextView getAdvertiser() {
+        return (TextView) this.findViewById(advertiserViewId);
+    }
 
-            @Override
-            public ImageView getThumbnail() {
-                return null;//b(ImageView) view.findViewById(thumbnailViewId);
-            }
-        };
-        sharethrough.putCreativeIntoAdView(basicAdView);
-        return basicAdView;
+    @Override
+    public ImageView getThumbnail() {
+        return (ImageView) this.findViewById(thumbnailViewId);
     }
 }
