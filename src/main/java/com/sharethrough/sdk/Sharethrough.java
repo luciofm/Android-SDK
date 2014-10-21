@@ -1,7 +1,10 @@
 package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import org.apache.http.HttpResponse;
@@ -22,26 +25,34 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Sharethrough {
-    public static final String API_URL_PREFIX = "http://btlr.sharethrough.com/v3?placement_key=";
+    private String apiUrlPrefix = "http://btlr.sharethrough.com/v3?placement_key=";
     static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(4); // TODO: pick a reasonable number
     public static final String USER_AGENT = System.getProperty("http.agent");
     private String key;
     private List<Creative> availableCreatives = Collections.synchronizedList(new ArrayList<Creative>());
     private List<IAdView> waitingAdViews = Collections.synchronizedList(new ArrayList<IAdView>());
 
-    public Sharethrough(String key) {
-        this(EXECUTOR_SERVICE, key);
+    public Sharethrough(Context context, String key) {
+        this(context, EXECUTOR_SERVICE, key);
     }
 
-    public Sharethrough(final ExecutorService executorService, final String key) {
+    public Sharethrough(Context context, final ExecutorService executorService, final String key) {
         if (key == null) throw new KeyRequiredException("placement_key is required");
         this.key = key;
+
+        try {
+            Bundle bundle = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA).metaData;
+            String adserverApi = bundle.getString("STR_ADSERVER_API");
+            if (adserverApi != null) apiUrlPrefix = adserverApi;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
         executorService.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    String urlString = API_URL_PREFIX + key;
+                    String urlString = apiUrlPrefix + key;
                     final URI uri = URI.create(urlString);
                     ObjectMapper mapper = new ObjectMapper();
                     mapper.disable(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES);
