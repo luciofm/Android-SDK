@@ -34,12 +34,7 @@ public class CreativeTest {
         responseCreative.creative.advertiser = "advertiser";
         Creative subject = new Creative(responseCreative, new byte[] {1, 2, 3, 4});
 
-        AdView adView = mock(AdView.class);
-        when(adView.getTitle()).thenReturn(mock(TextView.class));
-        when(adView.getDescription()).thenReturn(mock(TextView.class));
-        when(adView.getAdvertiser()).thenReturn(mock(TextView.class));
-        when(adView.getThumbnail()).thenReturn(mock(ImageView.class));
-        when(adView.getContext()).thenReturn(Robolectric.application);
+        AdView adView = mockAdView();
 
         subject.putIntoAdView(adView);
 
@@ -50,7 +45,7 @@ public class CreativeTest {
 
         ArrayList<View> viewsFound = new ArrayList<View>();
 
-        Dialog modal = ShadowDialog.getLatestDialog();
+        Dialog modal = ShadowDialog.getLatestDialog();assertThat(modal).isInstanceOf(YoutubeDialog.class);
         modal.getWindow().getDecorView().findViewsWithText(viewsFound, "title", View.FIND_VIEWS_WITH_TEXT);
         assertThat(viewsFound).hasSize(1);
 
@@ -61,7 +56,34 @@ public class CreativeTest {
         viewsFound.clear();
         modal.getWindow().getDecorView().findViewsWithText(viewsFound, "advertiser", View.FIND_VIEWS_WITH_TEXT);
         assertThat(viewsFound).hasSize(1);
+    }
 
-        // TODO: test the image view
+    @Test
+    public void whenAdIsYoutube() throws Exception {
+        Response.Creative responseCreative = new Response.Creative();
+        responseCreative.creative = new Response.Creative.CreativeInner();
+        responseCreative.creative.mediaUrl = "http://youtu.be/123456";
+
+        AdView adView = mockAdView();
+
+        Creative subject = new Creative(responseCreative, new byte[] {1, 2, 3, 4});
+        subject.putIntoAdView(adView);
+
+        ArgumentCaptor<View.OnClickListener> onClickListenerArgumentCaptor = ArgumentCaptor.forClass(View.OnClickListener.class);
+        verify(adView).setOnClickListener(onClickListenerArgumentCaptor.capture());
+
+        onClickListenerArgumentCaptor.getValue().onClick(adView);
+
+        assertThat(ShadowDialog.getLatestDialog()).isInstanceOf(YoutubeDialog.class);
+    }
+
+    private AdView mockAdView() {
+        AdView adView = mock(AdView.class);
+        when(adView.getTitle()).thenReturn(mock(TextView.class));
+        when(adView.getDescription()).thenReturn(mock(TextView.class));
+        when(adView.getAdvertiser()).thenReturn(mock(TextView.class));
+        when(adView.getThumbnail()).thenReturn(mock(ImageView.class));
+        when(adView.getContext()).thenReturn(Robolectric.application);
+        return adView;
     }
 }

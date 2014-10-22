@@ -7,11 +7,9 @@ import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.*;
+
+import java.util.concurrent.ExecutorService;
 
 public class Creative {
     private final Response.Creative responseCreative;
@@ -23,6 +21,7 @@ public class Creative {
         this.imageBytes = imageBytes;
     }
 
+    // TODO: move this somewhere else
     public void putIntoAdView(final IAdView adView) {
         // TODO: check that the AdView is attached to the window & avoid memory leaks
         new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -44,29 +43,13 @@ public class Creative {
         });
     }
 
-    private void showFullscreen(Context context) {
-        Dialog dialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
-
-        LinearLayout linearLayout = new LinearLayout(context);
-        linearLayout.setOrientation(LinearLayout.VERTICAL);
-        dialog.setContentView(linearLayout, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-        TextView title = new TextView(context);
-        title.setText(this.getTitle());
-        linearLayout.addView(title);
-
-        TextView description = new TextView(context);
-        description.setText(this.getDescription());
-        linearLayout.addView(description);
-
-        TextView advertiser = new TextView(context);
-        advertiser.setText(this.getAdvertiser());
-        linearLayout.addView(advertiser);
-
-        ImageView thumbnail = new ImageView(context);
-        thumbnail.setImageBitmap(BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length));
-        linearLayout.addView(thumbnail);
-
+    private void showFullscreen(final Context context) {
+        Dialog dialog = new YoutubeDialog(context, this, Sharethrough.EXECUTOR_SERVICE, new Provider<VideoView>() {
+            @Override
+            public VideoView get() {
+                return new VideoView(context);
+            }
+        });
         dialog.show();
     }
 
@@ -84,5 +67,13 @@ public class Creative {
 
     public Bitmap getThumbnailImage() {
         return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+    }
+
+    public Creative.Media getMedia() {
+        return new Youtube(responseCreative.creative.mediaUrl);
+    }
+
+    public interface Media {
+        void doWithMediaUrl(ExecutorService executorService, Function<String, Void> mediaUrlHandler);
     }
 }
