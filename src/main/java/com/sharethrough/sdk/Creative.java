@@ -7,7 +7,7 @@ import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
-import android.widget.*;
+import android.widget.VideoView;
 
 import java.util.concurrent.ExecutorService;
 
@@ -71,6 +71,10 @@ public class Creative {
 
     public Creative.Media getMedia() {
         return new Youtube(responseCreative.creative.mediaUrl);
+    }
+
+    public String getShareUrl() {
+        return responseCreative.creative.shareUrl;
     }
 
     public interface Media {

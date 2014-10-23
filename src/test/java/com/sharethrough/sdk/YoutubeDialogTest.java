@@ -1,10 +1,12 @@
 package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.VideoView;
 import com.sharethrough.test.util.Misc;
@@ -21,6 +23,7 @@ import java.util.concurrent.ExecutorService;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import static org.robolectric.Robolectric.shadowOf;
 
 @Config(emulateSdk = 18)
 @RunWith(RobolectricTestRunner.class)
@@ -38,6 +41,7 @@ public class YoutubeDialogTest {
         when(creative.getDescription()).thenReturn("Description");
         when(creative.getAdvertiser()).thenReturn("Advertiser");
         when(creative.getThumbnailImage()).thenReturn(mock(Bitmap.class));
+        when(creative.getShareUrl()).thenReturn("http://share.me/with/friends");
         youtube = mock(Youtube.class);
         when(creative.getMedia()).thenReturn(youtube);
         videoView = mock(VideoView.class);
@@ -86,5 +90,17 @@ public class YoutubeDialogTest {
 
         ViewGroup rootView = (ViewGroup) subject.getWindow().getDecorView().getRootView();
         assertThat(Misc.findViewOfType(VideoView.class, rootView) == videoView).isTrue();
+    }
+
+    @Test
+    public void sharing() throws Exception {
+        ImageView shareButton = Misc.findViewOfType(ImageView.class, (ViewGroup) subject.getWindow().getDecorView().getRootView());
+        assertThat(shadowOf(shareButton).getImageResourceId()).isEqualTo(android.R.drawable.ic_menu_share);
+
+        shareButton.performClick();
+        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+        sharingIntent.setType("text/plain");
+        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Title http://share.me/with/friends");
+        assertThat(shadowOf(Robolectric.application).getNextStartedActivity()).isEqualTo(Intent.createChooser(sharingIntent, "Share with"));
     }
 }
