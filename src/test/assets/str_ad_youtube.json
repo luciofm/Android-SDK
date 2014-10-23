@@ -9,11 +9,11 @@
       "signature": "c19",
       "creative": {
         "creative_key": "ckey",
-        "description": "Description",
+        "description": "Description.",
         "media_url": "mediaURL",
         "share_url": "shareURL",
         "variant_key": "12345",
-        "advertiser": "Advertiser, Inc",
+        "advertiser": "Advertiser",
         "beacons": {
           "visible": ["visibleBeacon"],
           "click": ["clickBeacon"],

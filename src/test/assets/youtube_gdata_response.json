@@ -1,0 +1,16 @@
+{
+  "feed": {
+    "entry": [
+      {
+        "media$group": {
+          "media$content": [
+            {},
+            {
+              "url": "rtsp://cdn.youtube.com/video.3gp"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

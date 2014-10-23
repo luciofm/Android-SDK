@@ -33,11 +33,6 @@ public class Youtube implements Creative.Media {
         }
     }
 
-    static String convertStreamToString(java.io.InputStream is) {
-        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-        return s.hasNext() ? s.next() : "";
-    }
-
     @Override
     public void doWithMediaUrl(ExecutorService executorService, final Function<String, Void> mediaUrlHandler) {
         executorService.execute(new Runnable() {
@@ -47,7 +42,7 @@ public class Youtube implements Creative.Media {
 
                 String json = null;
                 try {
-                    json = convertStreamToString(new DefaultHttpClient().execute(new HttpGet(endpoint)).getEntity().getContent());
+                    json = Misc.convertStreamToString(new DefaultHttpClient().execute(new HttpGet(endpoint)).getEntity().getContent());
 
                     ObjectMapper objectMapper = new ObjectMapper();
                     objectMapper.disable(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES);

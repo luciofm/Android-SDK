@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.sharethrough.test.Fixtures;
 import com.sharethrough.test.util.AdView;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,39 +26,7 @@ import static org.mockito.Mockito.*;
 @RunWith(RobolectricTestRunner.class)
 @Config(emulateSdk = 18)
 public class SharethroughTest {
-
-    // TODO: use fixture file
-//        FileInputStream fixture = Robolectric.application.openFileInput("ads.json");
-    private static final String FIXTURE = "{\n" +
-            "  \"placement\": {\n" +
-            "    \"template\": \"<div/>\"," +
-            "    \"layout\": \"single\"\n" +
-            "  },\n" +
-            "  \"creatives\": [\n" +
-            "    {\n" +
-            "      \"price\": 121460,\n" +
-            "      \"signature\": \"c19\",\n" +
-            "      \"creative\": {\n" +
-            "        \"creative_key\": \"469cc02b\",\n" +
-            "        \"description\": \"Description.\",\n" +
-            "        \"media_url\": \"mediaURL\",\n" +
-            "        \"share_url\": \"shareURL\",\n" +
-            "        \"variant_key\": \"15577\",\n" +
-            "        \"advertiser\": \"Advertiser\",\n" +
-            "        \"beacons\": {\n" +
-            "          \"visible\": [\"visibleBeacon\"],\n" +
-            "          \"click\": [\"clickBeacon\"],\n" +
-            "          \"play\": []\n" +
-            "        },\n" +
-            "        \"thumbnail_url\": \"//th.umb.na/il/URL\",\n" +
-            "        \"title\": \"Title\",\n" +
-            "        \"action\": \"clickout\"\n" +
-            "      },\n" +
-            "      \"priceType\": \"CPE\",\n" +
-            "      \"version\": 1\n" +
-            "    }\n" +
-            "  ]\n" +
-            "}";
+    private static final String FIXTURE = Fixtures.getFile("assets/str_ad_youtube.json");
     private static final byte[] IMAGE_BYTES = new byte[] {0, 1, 2, 3, 4};
     private Sharethrough subject;
     private ExecutorService executorService;

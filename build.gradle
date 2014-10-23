@@ -69,6 +69,12 @@ task uploadArchives(type: Copy) {
 uploadArchives.dependsOn test
 uploadArchives.dependsOn assembleDebug
 
+task copyTestAssets(type: Copy) {
+    from('src/test/assets/')
+    into 'build/test-classes/assets/'
+}
+
+test.dependsOn copyTestAssets
 
 robolectric {
     include '**/*Test.class'
