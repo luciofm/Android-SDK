@@ -1,7 +1,7 @@
 package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.widget.ImageView;
@@ -42,6 +42,7 @@ public class SharethroughTest {
 
     private AdView makeMockAdView() {
         AdView result = mock(AdView.class);
+        when(result.getContext()).thenReturn(Robolectric.application);
         when(result.getTitle()).thenReturn(mock(TextView.class));
         when(result.getDescription()).thenReturn(mock(TextView.class));
         when(result.getAdvertiser()).thenReturn(mock(TextView.class));
@@ -82,7 +83,7 @@ public class SharethroughTest {
         verify(adView.getTitle()).setText("Title");
         verify(adView.getDescription()).setText("Description.");
         verify(adView.getAdvertiser()).setText("Advertiser");
-        verify(adView.getThumbnail()).setImageBitmap(eq(BitmapFactory.decodeByteArray(IMAGE_BYTES, 0, IMAGE_BYTES.length)));
+        verify(adView.getThumbnail()).setImageBitmap(any(Bitmap.class));
     }
 
     @Test(expected = KeyRequiredException.class)
@@ -181,7 +182,7 @@ public class SharethroughTest {
         verify(adView.getTitle()).setText("Title");
         verify(adView.getDescription()).setText("Description.");
         verify(adView.getAdvertiser()).setText("Advertiser");
-        verify(adView.getThumbnail()).setImageBitmap(eq(BitmapFactory.decodeByteArray(IMAGE_BYTES, 0, IMAGE_BYTES.length)));
+        verify(adView.getThumbnail()).setImageBitmap(any(Bitmap.class));
     }
 
     @Test

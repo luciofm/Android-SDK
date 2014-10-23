@@ -1,11 +1,15 @@
 package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
-import android.app.Dialog;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.os.Build;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.sharethrough.android.sdk.R;
 import com.sharethrough.test.util.AdView;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,7 +49,7 @@ public class CreativeTest {
 
         ArrayList<View> viewsFound = new ArrayList<View>();
 
-        Dialog modal = ShadowDialog.getLatestDialog();assertThat(modal).isInstanceOf(YoutubeDialog.class);
+        YoutubeDialog modal = (YoutubeDialog) ShadowDialog.getLatestDialog();
         modal.getWindow().getDecorView().findViewsWithText(viewsFound, "title", View.FIND_VIEWS_WITH_TEXT);
         assertThat(viewsFound).hasSize(1);
 
@@ -75,6 +79,27 @@ public class CreativeTest {
         onClickListenerArgumentCaptor.getValue().onClick(adView);
 
         assertThat(ShadowDialog.getLatestDialog()).isInstanceOf(YoutubeDialog.class);
+    }
+
+    @Test
+    public void getThumbnailImage_overlaysYoutubeIcon() throws Exception {
+        Response.Creative responseCreative = new Response.Creative();
+        responseCreative.creative = new Response.Creative.CreativeInner();
+        responseCreative.creative.title = "title";
+        responseCreative.creative.description = "description";
+        responseCreative.creative.advertiser = "advertiser";
+        byte[] imageBytes = {1, 2, 3, 4};
+        Creative subject = new Creative(responseCreative, imageBytes);
+
+        Bitmap actual = subject.getThumbnailImage(Robolectric.application);
+        Bitmap youtubeOverlay = BitmapFactory.decodeResource(Robolectric.application.getResources(), R.drawable.youtube_squared);
+        Bitmap adBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+
+        Bitmap expected = adBitmap.copy(Bitmap.Config.ARGB_8888, true);
+        Canvas canvas = new Canvas(expected);
+        canvas.drawBitmap(youtubeOverlay, new Matrix(), null);
+
+        assertThat(actual).isEqualTo(expected);
     }
 
     private AdView mockAdView() {

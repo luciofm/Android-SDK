@@ -4,10 +4,13 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 import android.widget.VideoView;
+import com.sharethrough.android.sdk.R;
 
 import java.util.concurrent.ExecutorService;
 
@@ -31,7 +34,7 @@ public class Creative {
                 adView.getTitle().setText((Creative.this).getTitle());
                 adView.getDescription().setText(Creative.this.getDescription());
                 adView.getAdvertiser().setText(Creative.this.getAdvertiser());
-                adView.getThumbnail().setImageBitmap(Creative.this.getThumbnailImage());
+                adView.getThumbnail().setImageBitmap(Creative.this.getThumbnailImage(((View)adView).getContext()));
 
                 ((View) adView).setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -65,8 +68,12 @@ public class Creative {
         return responseCreative.creative.description;
     }
 
-    public Bitmap getThumbnailImage() {
-        return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+    public Bitmap getThumbnailImage(Context context) {
+        Bitmap result = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length).copy(Bitmap.Config.ARGB_8888, true);
+        Canvas canvas = new Canvas(result);
+        Bitmap youtubeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.youtube_squared);
+        canvas.drawBitmap(youtubeIcon, new Matrix(), null);
+        return result;
     }
 
     public Creative.Media getMedia() {

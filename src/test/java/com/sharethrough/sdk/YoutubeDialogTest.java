@@ -1,6 +1,7 @@
 package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -40,7 +41,7 @@ public class YoutubeDialogTest {
         when(creative.getTitle()).thenReturn("Title");
         when(creative.getDescription()).thenReturn("Description");
         when(creative.getAdvertiser()).thenReturn("Advertiser");
-        when(creative.getThumbnailImage()).thenReturn(mock(Bitmap.class));
+        when(creative.getThumbnailImage(any(Context.class))).thenReturn(mock(Bitmap.class));
         when(creative.getShareUrl()).thenReturn("http://share.me/with/friends");
         youtube = mock(Youtube.class);
         when(creative.getMedia()).thenReturn(youtube);
