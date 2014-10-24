@@ -2,17 +2,23 @@ package com.sharethrough.sdk;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Handler;
-import android.os.Looper;
+import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
-
-import java.util.concurrent.ExecutorService;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import com.sharethrough.android.sdk.R;
 
 public class YoutubeDialog extends Dialog {
-    public YoutubeDialog(Context context, final Creative creative, ExecutorService executorService, Provider<VideoView> videoViewProvider) {
+    public YoutubeDialog(Context context, final Creative creative) {
         super(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
 
         final LinearLayout linearLayout = new LinearLayout(context);
@@ -45,21 +51,35 @@ public class YoutubeDialog extends Dialog {
         advertiser.setText(creative.getAdvertiser());
         linearLayout.addView(advertiser);
 
-        final VideoView videoView = videoViewProvider.get();
-        videoView.setMediaController(new MediaController(context));
-        creative.getMedia().doWithMediaUrl(executorService, new Function<String, Void>() {
+        linearLayout.addView(showVideo(context, creative));
+    }
+
+    private WebView showVideo(Context context, Creative creative) {
+        final WebView webView = new WebView(context);
+
+        String html = context.getString(R.string.youtube_html).replace("YOUTUBE_ID", ((Youtube) creative.getMedia()).getId());
+        webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebViewClient(new WebViewClient() {
             @Override
-            public Void apply(final String rtspUrl) {
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        videoView.setVideoPath(rtspUrl);
-                        videoView.start();
-                        linearLayout.addView(videoView);
-                    }
-                });
-                return null;
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                return false;
             }
         });
+        webView.loadDataWithBaseURL("https://www.youtube.com/str/", html, "text/html", "UTF8", "https://www.youtube.com/str/");
+
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            settings.setPluginState(WebSettings.PluginState.ON);
+        }
+
+        setOnCancelListener(new OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                webView.loadUrl("about:");
+            }
+        });
+
+        return webView;
     }
 }

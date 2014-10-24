@@ -36,6 +36,7 @@ public class CreativeTest {
         responseCreative.creative.title = "title";
         responseCreative.creative.description = "description";
         responseCreative.creative.advertiser = "advertiser";
+        responseCreative.creative.mediaUrl = "http://youtu.be/123";
         Creative subject = new Creative(responseCreative, new byte[] {1, 2, 3, 4});
 
         AdView adView = mockAdView();

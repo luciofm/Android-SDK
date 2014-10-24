@@ -73,7 +73,7 @@ public class Sharethrough {
                                     URI imageURI = URIUtils.resolve(uri, responseCreative.creative.thumbnailUrl);
 
                                     HttpGet imageRequest = new HttpGet(imageURI);
-                                    Log.d("Sharethrough", imageURI.toString());
+                                    Log.d("Sharethrough", "fetching image:\t" + imageURI.toString());
                                     imageRequest.addHeader("User-Agent", USER_AGENT);
                                     HttpResponse imageResponse = client.execute(imageRequest);
                                     if (imageResponse.getStatusLine().getStatusCode() == 200) {

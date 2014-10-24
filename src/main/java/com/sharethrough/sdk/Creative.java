@@ -1,6 +1,5 @@
 package com.sharethrough.sdk;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,7 +8,6 @@ import android.graphics.Matrix;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
-import android.widget.VideoView;
 import com.sharethrough.android.sdk.R;
 
 import java.util.concurrent.ExecutorService;
@@ -39,21 +37,11 @@ public class Creative {
                 ((View) adView).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        showFullscreen(v.getContext());
+                        new YoutubeDialog(v.getContext(), Creative.this).show();
                     }
                 });
             }
         });
-    }
-
-    private void showFullscreen(final Context context) {
-        Dialog dialog = new YoutubeDialog(context, this, Sharethrough.EXECUTOR_SERVICE, new Provider<VideoView>() {
-            @Override
-            public VideoView get() {
-                return new VideoView(context);
-            }
-        });
-        dialog.show();
     }
 
     public String getTitle() {

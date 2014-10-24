@@ -7,17 +7,19 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.ImageView;
-import android.widget.MediaController;
 import android.widget.VideoView;
+import com.sharethrough.android.sdk.R;
 import com.sharethrough.test.util.Misc;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowWebView;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -44,15 +46,12 @@ public class YoutubeDialogTest {
         when(creative.getThumbnailImage(any(Context.class))).thenReturn(mock(Bitmap.class));
         when(creative.getShareUrl()).thenReturn("http://share.me/with/friends");
         youtube = mock(Youtube.class);
+        when(youtube.getId()).thenReturn("ABC");
         when(creative.getMedia()).thenReturn(youtube);
         videoView = mock(VideoView.class);
         executorService = mock(ExecutorService.class);
-        subject = new YoutubeDialog(Robolectric.application, creative, executorService, new Provider<VideoView>() {
-            @Override
-            public VideoView get() {
-                return videoView;
-            }
-        });
+        subject = new YoutubeDialog(Robolectric.application, creative);
+        subject.show();
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -76,21 +75,28 @@ public class YoutubeDialogTest {
     public void showsVideo() throws Exception {
         Robolectric.pauseMainLooper();
 
-        ArgumentCaptor<Function> functionArgumentCaptor = ArgumentCaptor.forClass(Function.class);
-        verify(youtube).doWithMediaUrl(eq(executorService), functionArgumentCaptor.capture());
+        WebView webView = Misc.findViewOfType(WebView.class, (ViewGroup) subject.getWindow().getDecorView());
+        ShadowWebView shadowWebView = shadowOf(webView);
+        ShadowWebView.LoadDataWithBaseURL loadedWebData = shadowWebView.getLastLoadDataWithBaseURL();
 
-        String rtspUrl = "rtsp://1.2.3/456.3gp";
-        functionArgumentCaptor.getValue().apply(rtspUrl);
+        assertThat(loadedWebData.data).isEqualTo(Robolectric.application.getString(R.string.youtube_html).replace("YOUTUBE_ID", "ABC"));
+        assertThat(loadedWebData.baseUrl).startsWith("https://www.youtube.com/");
+        assertThat(loadedWebData.historyUrl).startsWith("https://www.youtube.com/");
+        assertThat(loadedWebData.mimeType).isEqualTo("text/html");
 
-        verify(videoView).setMediaController(any(MediaController.class));
-        verifyNoMoreInteractions(videoView);
-        Robolectric.unPauseMainLooper();
+        assertThat(shadowWebView.getWebChromeClient()).isNotNull();
+        assertThat(shadowWebView.getWebViewClient().shouldOverrideUrlLoading(webView, "anything")).isFalse();
+        WebSettings settings = webView.getSettings();
+        assertThat(settings.getJavaScriptEnabled()).isTrue();
+        assertThat(settings.getPluginState()).isEqualTo(WebSettings.PluginState.ON);
+    }
 
-        verify(videoView).setVideoPath(rtspUrl);
-        verify(videoView).start();
+    @Test
+    public void cancelingUnloadsTheWebpage_soTheMusicStops() throws Exception {
+        subject.cancel();
 
-        ViewGroup rootView = (ViewGroup) subject.getWindow().getDecorView().getRootView();
-        assertThat(Misc.findViewOfType(VideoView.class, rootView) == videoView).isTrue();
+        WebView webView = Misc.findViewOfType(WebView.class, (ViewGroup) subject.getWindow().getDecorView());
+        assertThat(shadowOf(webView).getLastLoadedUrl()).isEqualTo("about:");
     }
 
     @Test
