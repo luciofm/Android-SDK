@@ -1,9 +1,11 @@
 package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
-import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.sharethrough.test.Fixtures;
@@ -46,7 +48,9 @@ public class SharethroughTest {
         when(result.getTitle()).thenReturn(mock(TextView.class));
         when(result.getDescription()).thenReturn(mock(TextView.class));
         when(result.getAdvertiser()).thenReturn(mock(TextView.class));
-        when(result.getThumbnail()).thenReturn(mock(ImageView.class));
+        when(result.getThumbnail()).thenReturn(mock(FrameLayout.class));
+        when(result.getThumbnail().getContext()).thenReturn(Robolectric.application);
+        verify(result).getThumbnail(); // clear it out for verifyNoInteractions
         return result;
     }
 
@@ -80,10 +84,19 @@ public class SharethroughTest {
 
         Robolectric.unPauseMainLooper();
 
+        verifyCreativeHasBeenPlacedInAdview(adView);
+    }
+
+    private void verifyCreativeHasBeenPlacedInAdview(AdView adView) {
         verify(adView.getTitle()).setText("Title");
-        verify(adView.getDescription()).setText("Description.");
-        verify(adView.getAdvertiser()).setText("Advertiser");
-        verify(adView.getThumbnail()).setImageBitmap(any(Bitmap.class));
+        verify(this.adView.getDescription()).setText("Description.");
+        verify(this.adView.getAdvertiser()).setText("Advertiser");
+        ArgumentCaptor<View> thumbnailViewCaptor = ArgumentCaptor.forClass(View.class);
+        verify(this.adView.getThumbnail()).addView(thumbnailViewCaptor.capture());
+
+        ImageView thumbnailImageView = (ImageView) thumbnailViewCaptor.getValue();
+        assertThat(thumbnailImageView.getDrawable()).isInstanceOf(BitmapDrawable.class);
+        // TODO: test the actual bitmap?
     }
 
     @Test(expected = KeyRequiredException.class)
@@ -179,10 +192,7 @@ public class SharethroughTest {
         imageFetcherArgumentCaptor.getValue().run();
 
         subject.putCreativeIntoAdView(adView);
-        verify(adView.getTitle()).setText("Title");
-        verify(adView.getDescription()).setText("Description.");
-        verify(adView.getAdvertiser()).setText("Advertiser");
-        verify(adView.getThumbnail()).setImageBitmap(any(Bitmap.class));
+        verifyCreativeHasBeenPlacedInAdview(adView);
     }
 
     @Test

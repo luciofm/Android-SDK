@@ -7,7 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.os.Build;
 import android.view.View;
-import android.widget.ImageView;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.test.util.AdView;
@@ -108,7 +108,8 @@ public class CreativeTest {
         when(adView.getTitle()).thenReturn(mock(TextView.class));
         when(adView.getDescription()).thenReturn(mock(TextView.class));
         when(adView.getAdvertiser()).thenReturn(mock(TextView.class));
-        when(adView.getThumbnail()).thenReturn(mock(ImageView.class));
+        when(adView.getThumbnail()).thenReturn(mock(FrameLayout.class));
+        when(adView.getThumbnail().getContext()).thenReturn(Robolectric.application);
         when(adView.getContext()).thenReturn(Robolectric.application);
         return adView;
     }

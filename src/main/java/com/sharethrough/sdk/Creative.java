@@ -8,6 +8,7 @@ import android.graphics.Matrix;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
+import android.widget.ImageView;
 import com.sharethrough.android.sdk.R;
 
 import java.util.concurrent.ExecutorService;
@@ -32,7 +33,9 @@ public class Creative {
                 adView.getTitle().setText((Creative.this).getTitle());
                 adView.getDescription().setText(Creative.this.getDescription());
                 adView.getAdvertiser().setText(Creative.this.getAdvertiser());
-                adView.getThumbnail().setImageBitmap(Creative.this.getThumbnailImage(((View)adView).getContext()));
+                ImageView thumbnailImage = new ImageView(adView.getThumbnail().getContext());
+                thumbnailImage.setImageBitmap(Creative.this.getThumbnailImage(((View) adView).getContext()));
+                adView.getThumbnail().addView(thumbnailImage);
 
                 ((View) adView).setOnClickListener(new View.OnClickListener() {
                     @Override
