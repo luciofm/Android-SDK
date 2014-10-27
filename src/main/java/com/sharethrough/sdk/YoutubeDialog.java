@@ -57,7 +57,8 @@ public class YoutubeDialog extends Dialog {
     private WebView showVideo(Context context, Creative creative) {
         final WebView webView = new WebView(context);
 
-        String html = context.getString(R.string.youtube_html).replace("YOUTUBE_ID", ((Youtube) creative.getMedia()).getId());
+        String youtubeId = ((Youtube) creative.getMedia()).getId();
+        String html = context.getString(R.string.youtube_html).replace("YOUTUBE_ID", youtubeId);
         webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -65,7 +66,8 @@ public class YoutubeDialog extends Dialog {
                 return false;
             }
         });
-        webView.loadDataWithBaseURL("https://www.youtube.com/str/", html, "text/html", "UTF8", "https://www.youtube.com/str/");
+        String baseUrl = "https://www.youtube.com/str/" + youtubeId;
+        webView.loadDataWithBaseURL(baseUrl, html, "text/html", "UTF8", baseUrl);
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
