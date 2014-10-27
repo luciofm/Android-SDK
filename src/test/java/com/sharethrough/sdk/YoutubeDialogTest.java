@@ -1,7 +1,6 @@
 package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -10,7 +9,6 @@ import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ImageView;
-import android.widget.VideoView;
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.test.util.Misc;
 import org.junit.Before;
@@ -22,10 +20,10 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowWebView;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.robolectric.Robolectric.shadowOf;
 
 @Config(emulateSdk = 18)
@@ -34,8 +32,6 @@ public class YoutubeDialogTest {
     private Creative creative;
     private YoutubeDialog subject;
     private Youtube youtube;
-    private VideoView videoView;
-    private ExecutorService executorService;
 
     @Before
     public void setUp() throws Exception {
@@ -43,13 +39,11 @@ public class YoutubeDialogTest {
         when(creative.getTitle()).thenReturn("Title");
         when(creative.getDescription()).thenReturn("Description");
         when(creative.getAdvertiser()).thenReturn("Advertiser");
-        when(creative.getThumbnailImage(any(Context.class))).thenReturn(mock(Bitmap.class));
+        when(creative.getThumbnailImage()).thenReturn(mock(Bitmap.class));
         when(creative.getShareUrl()).thenReturn("http://share.me/with/friends");
         youtube = mock(Youtube.class);
         when(youtube.getId()).thenReturn("ABC");
         when(creative.getMedia()).thenReturn(youtube);
-        videoView = mock(VideoView.class);
-        executorService = mock(ExecutorService.class);
         subject = new YoutubeDialog(Robolectric.application, creative);
         subject.show();
     }

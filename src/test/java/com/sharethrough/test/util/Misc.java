@@ -1,7 +1,14 @@
 package com.sharethrough.test.util;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.robolectric.Robolectric.shadowOf;
 
 public class Misc {
     public static <V extends View> V findViewOfType(Class<V> viewType, ViewGroup viewGroup) {
@@ -17,5 +24,11 @@ public class Misc {
             }
         }
         return null;
+    }
+
+    public static void assertImageViewFromBytes(ImageView imageView, byte[] imageBytes) {
+        Bitmap expected = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+        Bitmap actual = ((BitmapDrawable) shadowOf(imageView).getDrawable()).getBitmap();
+        assertThat(actual).isEqualTo(expected);
     }
 }

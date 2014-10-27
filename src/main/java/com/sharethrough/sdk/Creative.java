@@ -3,11 +3,11 @@ package com.sharethrough.sdk;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.sharethrough.android.sdk.R;
 
@@ -33,9 +33,21 @@ public class Creative {
                 adView.getTitle().setText((Creative.this).getTitle());
                 adView.getDescription().setText(Creative.this.getDescription());
                 adView.getAdvertiser().setText(Creative.this.getAdvertiser());
-                ImageView thumbnailImage = new ImageView(adView.getThumbnail().getContext());
-                thumbnailImage.setImageBitmap(Creative.this.getThumbnailImage(((View) adView).getContext()));
-                adView.getThumbnail().addView(thumbnailImage);
+
+                FrameLayout thumbnail = adView.getThumbnail();
+                Context context = thumbnail.getContext();
+
+                ImageView thumbnailImage = new ImageView(context);
+                Bitmap thumbnailBitmap = Creative.this.getThumbnailImage();
+                thumbnailImage.setImageBitmap(thumbnailBitmap);
+                thumbnail.addView(thumbnailImage);
+
+                ImageView youtubeIcon = new ImageView(context);
+                youtubeIcon.setImageResource(R.drawable.youtube_squared);
+                youtubeIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                int overlayDimensionMax = Math.min(thumbnailBitmap.getWidth(), thumbnailBitmap.getHeight()) / 4;
+                thumbnail.addView(youtubeIcon,
+                        new FrameLayout.LayoutParams(overlayDimensionMax, overlayDimensionMax, Gravity.TOP | Gravity.LEFT));
 
                 ((View) adView).setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -59,12 +71,8 @@ public class Creative {
         return responseCreative.creative.description;
     }
 
-    public Bitmap getThumbnailImage(Context context) {
-        Bitmap result = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length).copy(Bitmap.Config.ARGB_8888, true);
-        Canvas canvas = new Canvas(result);
-        Bitmap youtubeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.youtube_squared);
-        canvas.drawBitmap(youtubeIcon, new Matrix(), null);
-        return result;
+    public Bitmap getThumbnailImage() {
+        return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
     }
 
     public Creative.Media getMedia() {
