@@ -90,6 +90,7 @@
     <orderEntry type="library" exported="" name="jackson-core-asl-1.9.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="robolectric-2.3" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="asm-5.0.1" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="support-v4-19.1.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="asm-commons-5.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="vtd-xml-2.11" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="junit-4.11" level="project" />

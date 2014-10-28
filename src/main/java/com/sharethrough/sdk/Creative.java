@@ -7,11 +7,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.sharethrough.android.sdk.R;
-
-import java.util.concurrent.ExecutorService;
 
 public class Creative {
     private final Response.Creative responseCreative;
@@ -40,7 +39,9 @@ public class Creative {
                 ImageView thumbnailImage = new ImageView(context);
                 Bitmap thumbnailBitmap = Creative.this.getThumbnailImage();
                 thumbnailImage.setImageBitmap(thumbnailBitmap);
-                thumbnail.addView(thumbnailImage);
+                thumbnailImage.setScaleType(ImageView.ScaleType.FIT_START);
+                thumbnail.addView(thumbnailImage,
+                        new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
                 ImageView youtubeIcon = new ImageView(context);
                 youtubeIcon.setImageResource(R.drawable.youtube_squared);
@@ -84,6 +85,5 @@ public class Creative {
     }
 
     public interface Media {
-        void doWithMediaUrl(ExecutorService executorService, Function<String, Void> mediaUrlHandler);
     }
 }

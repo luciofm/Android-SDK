@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -18,6 +19,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowDialog;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.sharethrough.test.util.Misc.assertImageViewFromBytes;
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -98,21 +100,25 @@ public class CreativeTest {
         subject.putIntoAdView(adView);
 
         ArgumentCaptor<View> imageViewArgumentCaptor = ArgumentCaptor.forClass(View.class);
-        FrameLayout thumbnailFrame = adView.getThumbnail();
-        verify(thumbnailFrame).addView(imageViewArgumentCaptor.capture());
-
-        ImageView thumbnailImageView = (ImageView) imageViewArgumentCaptor.getValue();
-        assertImageViewFromBytes(thumbnailImageView, IMAGE_BYTES);
-
-
-        imageViewArgumentCaptor = ArgumentCaptor.forClass(View.class);
         ArgumentCaptor<FrameLayout.LayoutParams> layoutParamsArgumentCaptor = ArgumentCaptor.forClass(FrameLayout.LayoutParams.class);
-        verify(thumbnailFrame).addView(imageViewArgumentCaptor.capture(), layoutParamsArgumentCaptor.capture());
-        ImageView youtubeIcon = (ImageView) imageViewArgumentCaptor.getValue();
+
+        verify(adView.getThumbnail(), times(2)).addView(imageViewArgumentCaptor.capture(), layoutParamsArgumentCaptor.capture());
+
+        List<View> imageViewsAddedToThumbnail = imageViewArgumentCaptor.getAllValues();
+        List<FrameLayout.LayoutParams> layoutParamus = layoutParamsArgumentCaptor.getAllValues();
+
+        ImageView thumbnailImageView = (ImageView) imageViewsAddedToThumbnail.get(0);
+        assertImageViewFromBytes(thumbnailImageView, IMAGE_BYTES);
+        assertThat(thumbnailImageView.getScaleType()).isEqualTo(ImageView.ScaleType.FIT_START);
+        FrameLayout.LayoutParams thumbnailLayoutParams = layoutParamus.get(0);
+        assertThat(thumbnailLayoutParams.height).isEqualTo(ViewGroup.LayoutParams.MATCH_PARENT);
+        assertThat(thumbnailLayoutParams.width).isEqualTo(ViewGroup.LayoutParams.MATCH_PARENT);
+
+        ImageView youtubeIcon = (ImageView) imageViewsAddedToThumbnail.get(1);
         assertThat(shadowOf(youtubeIcon).getImageResourceId()).isEqualTo(R.drawable.youtube_squared);
         int overlayDimensionMax = 25;
 
-        FrameLayout.LayoutParams layoutParams = layoutParamsArgumentCaptor.getValue();
+        FrameLayout.LayoutParams layoutParams = layoutParamus.get(1);
         assertThat(layoutParams.gravity).isEqualTo(Gravity.TOP | Gravity.LEFT);
         assertThat(layoutParams.width).isEqualTo(overlayDimensionMax);
         assertThat(layoutParams.height).isEqualTo(overlayDimensionMax);

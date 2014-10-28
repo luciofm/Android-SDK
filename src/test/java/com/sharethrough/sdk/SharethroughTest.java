@@ -92,7 +92,7 @@ public class SharethroughTest {
         verify(this.adView.getDescription()).setText("Description.");
         verify(this.adView.getAdvertiser()).setText("Advertiser");
         ArgumentCaptor<View> thumbnailViewCaptor = ArgumentCaptor.forClass(View.class);
-        verify(this.adView.getThumbnail()).addView(thumbnailViewCaptor.capture());
+        verify(this.adView.getThumbnail(), atLeastOnce()).addView(thumbnailViewCaptor.capture(), any(FrameLayout.LayoutParams.class));
 
         ImageView thumbnailImageView = (ImageView) thumbnailViewCaptor.getValue();
         assertThat(thumbnailImageView.getDrawable()).isInstanceOf(BitmapDrawable.class);
