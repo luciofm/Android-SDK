@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.TestWebSettings;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ImageView;
@@ -17,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowWebView;
 
 import java.util.ArrayList;
@@ -26,7 +28,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Robolectric.shadowOf;
 
-@Config(emulateSdk = 18)
+@Config(emulateSdk = 18, shadows = {YoutubeDialogTest.MyWebViewShadow.class})
 @RunWith(RobolectricTestRunner.class)
 public class YoutubeDialogTest {
     private Creative creative;
@@ -35,6 +37,8 @@ public class YoutubeDialogTest {
 
     @Before
     public void setUp() throws Exception {
+        Robolectric.Reflection.setFinalStaticField(Build.VERSION.class, "SDK_INT", 18);
+
         creative = mock(Creative.class);
         when(creative.getTitle()).thenReturn("Title");
         when(creative.getDescription()).thenReturn("Description");
@@ -65,6 +69,7 @@ public class YoutubeDialogTest {
         assertThat(foundViews).hasSize(1);
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Test
     public void showsVideo() throws Exception {
         Robolectric.pauseMainLooper();
@@ -83,6 +88,7 @@ public class YoutubeDialogTest {
         WebSettings settings = webView.getSettings();
         assertThat(settings.getJavaScriptEnabled()).isTrue();
         assertThat(settings.getPluginState()).isEqualTo(WebSettings.PluginState.ON);
+        assertThat(settings.getMediaPlaybackRequiresUserGesture()).isFalse();
     }
 
     @Test
@@ -103,5 +109,40 @@ public class YoutubeDialogTest {
         sharingIntent.setType("text/plain");
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Title http://share.me/with/friends");
         assertThat(shadowOf(Robolectric.application).getNextStartedActivity()).isEqualTo(Intent.createChooser(sharingIntent, "Share with"));
+    }
+
+    @Implements(WebView.class)
+    public static class MyWebViewShadow extends ShadowWebView {
+        private WebSettings webSettings = new MyTestWebSettings();
+
+        @Override
+        public WebSettings getSettings() {
+            return webSettings;
+        }
+    }
+
+    public static class MyTestWebSettings extends TestWebSettings {
+        private boolean mediaPlaybackRequiresUserGesture = true;
+        private PluginState pluginState = null;
+
+        @Override
+        public void setMediaPlaybackRequiresUserGesture(boolean require) {
+            mediaPlaybackRequiresUserGesture = require;
+        }
+
+        @Override
+        public boolean getMediaPlaybackRequiresUserGesture() {
+            return mediaPlaybackRequiresUserGesture;
+        }
+
+        @Override
+        public synchronized void setPluginState(PluginState state) {
+            pluginState = state;
+        }
+
+        @Override
+        public synchronized PluginState getPluginState() {
+            return pluginState;
+        }
     }
 }

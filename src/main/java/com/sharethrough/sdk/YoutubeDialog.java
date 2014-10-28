@@ -1,5 +1,6 @@
 package com.sharethrough.sdk;
 
+import android.annotation.TargetApi;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -54,6 +55,7 @@ public class YoutubeDialog extends Dialog {
         linearLayout.addView(showVideo(context, creative));
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private WebView showVideo(Context context, Creative creative) {
         final WebView webView = new WebView(context);
 
@@ -71,6 +73,9 @@ public class YoutubeDialog extends Dialog {
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            settings.setMediaPlaybackRequiresUserGesture(false);
+        }
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             settings.setPluginState(WebSettings.PluginState.ON);
         }
