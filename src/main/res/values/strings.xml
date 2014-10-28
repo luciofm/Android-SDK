@@ -3,7 +3,7 @@
     <string name="youtube_html"><![CDATA[
 <!DOCTYPE html>
 <html>
-  <body style=\"margin: 0; background-color: black;\">
+  <body style=\"margin: 0; background-color: black; text-align: center;\">
     <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
     <div id=\"player\"></div>
 
