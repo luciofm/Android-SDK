@@ -33,20 +33,22 @@
       };
       function onPlayerStateChange(event) {
         console.log(\"STATE\t\" + event.data);
+        if (event.data == 1) { setTimeout(resizeHandler, 0); }
       };
       function onError(event) {
         console.log(\"ERROR\t\" + event.data);
       };
-      window.addEventListener(\"resize\", function(event) {
+      window.addEventListener(\"resize\", resizeHandler);
+      function resizeHandler(event) {
         var width = window.innerWidth, height = window.innerHeight;
         if (width < height * 16/9) {
           height = Math.round(width * 9/16);
         } else {
           width = Math.round(height * 16/9);
         }
-        console.log(\"resize window=\" + window.innerWidth + \"x\" + window.innerHeight + \" => \" + width + \"x\" + height);
+        console.log(\"resize window=\" + window.innerWidth + \"x\" + window.innerHeight + \" => \" + width + \"x\" + height + \" EVENT: \" + event);
         player && player.setSize && player.setSize(width, height);
-      });
+      };
     </script>
   </body>
 </html>

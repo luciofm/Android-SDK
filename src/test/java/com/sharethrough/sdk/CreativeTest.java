@@ -1,7 +1,5 @@
 package com.sharethrough.sdk;
 
-import android.annotation.TargetApi;
-import android.os.Build;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +16,6 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowDialog;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.sharethrough.test.util.Misc.assertImageViewFromBytes;
@@ -32,43 +29,8 @@ public class CreativeTest {
 
     private static final byte[] IMAGE_BYTES = new byte[]{1, 2, 3, 4};
 
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Test
-    public void clickingAdView_opensModal() throws Exception {
-        Response.Creative responseCreative = new Response.Creative();
-        responseCreative.creative = new Response.Creative.CreativeInner();
-        responseCreative.creative.title = "title";
-        responseCreative.creative.description = "description";
-        responseCreative.creative.advertiser = "advertiser";
-        responseCreative.creative.mediaUrl = "http://youtu.be/123";
-        Creative subject = new Creative(responseCreative, IMAGE_BYTES);
-
-        AdView adView = mockAdView();
-
-        subject.putIntoAdView(adView);
-
-        ArgumentCaptor<View.OnClickListener> onClickListenerArgumentCaptor = ArgumentCaptor.forClass(View.OnClickListener.class);
-        verify(adView).setOnClickListener(onClickListenerArgumentCaptor.capture());
-
-        onClickListenerArgumentCaptor.getValue().onClick(adView);
-
-        ArrayList<View> viewsFound = new ArrayList<View>();
-
-        YoutubeDialog modal = (YoutubeDialog) ShadowDialog.getLatestDialog();
-        modal.getWindow().getDecorView().findViewsWithText(viewsFound, "title", View.FIND_VIEWS_WITH_TEXT);
-        assertThat(viewsFound).hasSize(1);
-
-        viewsFound.clear();
-        modal.getWindow().getDecorView().findViewsWithText(viewsFound, "description", View.FIND_VIEWS_WITH_TEXT);
-        assertThat(viewsFound).hasSize(1);
-
-        viewsFound.clear();
-        modal.getWindow().getDecorView().findViewsWithText(viewsFound, "advertiser", View.FIND_VIEWS_WITH_TEXT);
-        assertThat(viewsFound).hasSize(1);
-    }
-
-    @Test
-    public void whenAdIsYoutube() throws Exception {
+    public void whenAdIsYoutube_clickingOpensTheYoutubeDialog() throws Exception {
         Response.Creative responseCreative = new Response.Creative();
         responseCreative.creative = new Response.Creative.CreativeInner();
         responseCreative.creative.mediaUrl = "http://youtu.be/123456";

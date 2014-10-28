@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
-import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.TestWebSettings;
 import android.webkit.WebSettings;
@@ -20,8 +19,6 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowWebView;
-
-import java.util.ArrayList;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -50,23 +47,6 @@ public class YoutubeDialogTest {
         when(creative.getMedia()).thenReturn(youtube);
         subject = new YoutubeDialog(Robolectric.application, creative);
         subject.show();
-    }
-
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    @Test
-    public void showsTitleAdvertiserAndDescription() throws Exception {
-        ArrayList<View> foundViews = new ArrayList<View>();
-
-        subject.getWindow().getDecorView().findViewsWithText(foundViews, "Title", View.FIND_VIEWS_WITH_TEXT);
-        assertThat(foundViews).hasSize(1);
-
-        foundViews.clear();
-        subject.getWindow().getDecorView().findViewsWithText(foundViews, "Description", View.FIND_VIEWS_WITH_TEXT);
-        assertThat(foundViews).hasSize(1);
-
-        foundViews.clear();
-        subject.getWindow().getDecorView().findViewsWithText(foundViews, "Advertiser", View.FIND_VIEWS_WITH_TEXT);
-        assertThat(foundViews).hasSize(1);
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
