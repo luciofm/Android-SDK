@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">Android-SDK</string>
     <string name="youtube_html"><![CDATA[
 <!DOCTYPE html>
 <html>
