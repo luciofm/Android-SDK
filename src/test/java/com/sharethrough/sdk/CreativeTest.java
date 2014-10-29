@@ -1,12 +1,12 @@
 package com.sharethrough.sdk;
 
+import android.content.Intent;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.sharethrough.android.sdk.R;
 import com.sharethrough.test.util.AdView;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,7 +14,6 @@ import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowDialog;
 
 import java.util.List;
 
@@ -30,7 +29,7 @@ public class CreativeTest {
     private static final byte[] IMAGE_BYTES = new byte[]{1, 2, 3, 4};
 
     @Test
-    public void whenAdIsYoutube_clickingOpensTheYoutubeDialog() throws Exception {
+    public void whenAdIsYoutube_clickingOpensTheYoutubeActivity() throws Exception {
         Response.Creative responseCreative = new Response.Creative();
         responseCreative.creative = new Response.Creative.CreativeInner();
         responseCreative.creative.mediaUrl = "http://youtu.be/123456";
@@ -45,7 +44,13 @@ public class CreativeTest {
 
         onClickListenerArgumentCaptor.getValue().onClick(adView);
 
-        assertThat(ShadowDialog.getLatestDialog()).isInstanceOf(YoutubeDialog.class);
+        Intent nextStartedActivity = shadowOf(Robolectric.application).getNextStartedActivity();
+        Creative rehydratedCreative = (Creative) nextStartedActivity.getSerializableExtra(YoutubeActivity.CREATIVE);
+        assertThat(rehydratedCreative.getTitle()).isEqualTo(subject.getTitle());
+        assertThat(rehydratedCreative.getDescription()).isEqualTo(subject.getDescription());
+        assertThat(rehydratedCreative.getAdvertiser()).isEqualTo(subject.getAdvertiser());
+        assertThat(rehydratedCreative.getShareUrl()).isEqualTo(subject.getShareUrl());
+        assertThat(rehydratedCreative.getThumbnailImage()).isEqualTo(subject.getThumbnailImage());
     }
 
     @Test

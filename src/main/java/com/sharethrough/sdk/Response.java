@@ -2,13 +2,15 @@ package com.sharethrough.sdk;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
-public class Response {
+public class Response implements Serializable {
     @JsonProperty("creatives")
     public List<Creative> creatives;
 
-    public static class Creative {
+    public static class Creative implements Serializable {
         @JsonProperty("price")
         public Integer price;
         @JsonProperty("signature")
@@ -23,7 +25,7 @@ public class Response {
         public int version;
 
 
-        public static class CreativeInner {
+        public static class CreativeInner implements Serializable {
             @JsonProperty("creative_key")
             public String key;
             @JsonProperty("description")
@@ -46,13 +48,13 @@ public class Response {
             @JsonProperty("action")
             public String action;
 
-            public static class Beacon {
+            public static class Beacon implements Serializable {
                 @JsonProperty("visible")
-                public List<String> visible;
+                public String[] visible;
                 @JsonProperty("click")
-                public List<String> click;
+                public String[] click;
                 @JsonProperty("play")
-                public List<String> play;
+                public String[] play;
             }
         }
     }

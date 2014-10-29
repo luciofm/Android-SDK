@@ -9,7 +9,6 @@ import android.webkit.TestWebSettings;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ShareActionProvider;
-import com.sharethrough.android.sdk.R;
 import com.sharethrough.test.util.Misc;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,17 +23,19 @@ import org.robolectric.shadows.ShadowMenuInflater;
 import org.robolectric.shadows.ShadowWebView;
 import org.robolectric.tester.android.view.TestMenuItem;
 
+import static junit.framework.Assert.fail;
+import static org.fest.assertions.api.ANDROID.assertThat;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.robolectric.Robolectric.shadowOf;
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-@Config(emulateSdk = 18, shadows = {YoutubeDialogTest.MyWebViewShadow.class, YoutubeDialogTest.MyMenuItemShadow.class})
+@Config(emulateSdk = 18, shadows = {YoutubeActivityTest.MyWebViewShadow.class, YoutubeActivityTest.MyMenuItemShadow.class})
 @RunWith(RobolectricTestRunner.class)
-public class YoutubeDialogTest {
+public class YoutubeActivityTest {
     private static ShareActionProvider shareActionProvider;
     private Creative creative;
-    private YoutubeDialog subject;
+    private YoutubeActivity subject;
     private Youtube youtube;
 
     @Before
@@ -42,17 +43,17 @@ public class YoutubeDialogTest {
         Robolectric.Reflection.setFinalStaticField(Build.VERSION.class, "SDK_INT", 18);
         shareActionProvider = mock(ShareActionProvider.class);
 
-        creative = mock(Creative.class);
-        when(creative.getTitle()).thenReturn("Title");
-        when(creative.getDescription()).thenReturn("Description");
-        when(creative.getAdvertiser()).thenReturn("Advertiser");
-        when(creative.getThumbnailImage()).thenReturn(mock(Bitmap.class));
-        when(creative.getShareUrl()).thenReturn("http://share.me/with/friends");
-        youtube = mock(Youtube.class);
-        when(youtube.getId()).thenReturn("ABC");
-        when(creative.getMedia()).thenReturn(youtube);
-        subject = new YoutubeDialog(Robolectric.application, creative);
-        subject.show();
+        Response.Creative responseCreative = new Response.Creative();
+        responseCreative.creative = new Response.Creative.CreativeInner();
+        responseCreative.creative.title = "Title";
+        responseCreative.creative.description = "Description.";
+        responseCreative.creative.advertiser = "Advertiser";
+        responseCreative.creative.shareUrl = "http://share.me/with/friends";
+        responseCreative.creative.mediaUrl = "http://youtu.be/ABC";
+        creative = new Creative(responseCreative, new byte[] {});
+
+        Intent intent = new Intent("").putExtra(YoutubeActivity.CREATIVE, creative);
+        subject = Robolectric.buildActivity(YoutubeActivity.class).withIntent(intent).create().start().visible().resume().get();
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -78,23 +79,24 @@ public class YoutubeDialogTest {
     }
 
     @Test
-    public void cancelingUnloadsTheWebpage_soTheMusicStops() throws Exception {
-        subject.cancel();
+    public void pausingActivity_pausesTheWebView_soTheMusicStops() throws Exception {
+        ShadowWebView shadowWebView = shadowOf(Misc.findViewOfType(WebView.class, (ViewGroup) subject.getWindow().getDecorView()));
+        assertThat(shadowWebView.wasOnPauseCalled()).isFalse();
 
-        WebView webView = Misc.findViewOfType(WebView.class, (ViewGroup) subject.getWindow().getDecorView());
-        assertThat(shadowOf(webView).getLastLoadedUrl()).isEqualTo("about:");
+        subject.onPause();
+        assertThat(shadowWebView.wasOnPauseCalled()).isTrue();
     }
 
     @Test
-    public void upButtonCancelsTheDialog() throws Exception {
+    public void upButtonFinishesTheActivity() throws Exception {
         subject.onMenuItemSelected(-1, new TestMenuItem(android.R.id.home));
-        assertThat(subject.isShowing()).isFalse();
+        assertThat(subject).isFinishing();
     }
 
     @Test
-    public void backButtonWhenWebViewCannotGoBack_cancels() throws Exception {
+    public void backButtonWhenWebViewCannotGoBack_finishesTheActivity() throws Exception {
         subject.onKeyDown(KeyEvent.KEYCODE_BACK, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK));
-        assertThat(subject.isShowing()).isFalse();
+        assertThat(subject).isFinishing();
     }
 
     @Test
@@ -102,7 +104,7 @@ public class YoutubeDialogTest {
         WebView webView = Misc.findViewOfType(WebView.class, (ViewGroup) subject.getWindow().getDecorView());
         shadowOf(webView).setCanGoBack(true);
         subject.onKeyDown(KeyEvent.KEYCODE_BACK, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK));
-        assertThat(subject.isShowing()).isTrue();
+        assertThat(subject).isNotFinishing();
         assertThat(shadowOf(webView).getGoBackInvocations()).isEqualTo(1);
     }
 
@@ -112,9 +114,8 @@ public class YoutubeDialogTest {
 
         ArgumentCaptor<Intent> sharingIntentArgumentCapture = ArgumentCaptor.forClass(Intent.class);
         verify(shareActionProvider).setShareIntent(sharingIntentArgumentCapture.capture());
-        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-        sharingIntent.setType("text/plain");
-        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Title http://share.me/with/friends");
+        Intent sharingIntent = new Intent(Intent.ACTION_SEND)
+            .setType("text/plain").putExtra(Intent.EXTRA_TEXT, "Title http://share.me/with/friends");
         assertThat(sharingIntentArgumentCapture.getValue()).isEqualTo(sharingIntent);
     }
 
