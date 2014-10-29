@@ -4,30 +4,35 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
-import android.view.ViewGroup;
+import android.view.*;
 import android.webkit.TestWebSettings;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.ImageView;
+import android.widget.ShareActionProvider;
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.test.util.Misc;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.shadows.ShadowMenuInflater;
 import org.robolectric.shadows.ShadowWebView;
+import org.robolectric.tester.android.view.TestMenuItem;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.robolectric.Robolectric.shadowOf;
 
-@Config(emulateSdk = 18, shadows = {YoutubeDialogTest.MyWebViewShadow.class})
+@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+@Config(emulateSdk = 18, shadows = {YoutubeDialogTest.MyWebViewShadow.class, YoutubeDialogTest.MyMenuItemShadow.class})
 @RunWith(RobolectricTestRunner.class)
 public class YoutubeDialogTest {
+    private static ShareActionProvider shareActionProvider;
     private Creative creative;
     private YoutubeDialog subject;
     private Youtube youtube;
@@ -35,6 +40,7 @@ public class YoutubeDialogTest {
     @Before
     public void setUp() throws Exception {
         Robolectric.Reflection.setFinalStaticField(Build.VERSION.class, "SDK_INT", 18);
+        shareActionProvider = mock(ShareActionProvider.class);
 
         creative = mock(Creative.class);
         when(creative.getTitle()).thenReturn("Title");
@@ -80,15 +86,53 @@ public class YoutubeDialogTest {
     }
 
     @Test
-    public void sharing() throws Exception {
-        ImageView shareButton = Misc.findViewOfType(ImageView.class, (ViewGroup) subject.getWindow().getDecorView().getRootView());
-        assertThat(shadowOf(shareButton).getImageResourceId()).isEqualTo(android.R.drawable.ic_menu_share);
+    public void upButtonCancelsTheDialog() throws Exception {
+        subject.onMenuItemSelected(-1, new TestMenuItem(android.R.id.home));
+        assertThat(subject.isShowing()).isFalse();
+    }
 
-        shareButton.performClick();
+    @Test
+    public void backButtonWhenWebViewCannotGoBack_cancels() throws Exception {
+        subject.onKeyDown(KeyEvent.KEYCODE_BACK, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK));
+        assertThat(subject.isShowing()).isFalse();
+    }
+
+    @Test
+    public void backButtonWhenWebViewCanGoBack_goesBackInWebView() throws Exception {
+        WebView webView = Misc.findViewOfType(WebView.class, (ViewGroup) subject.getWindow().getDecorView());
+        shadowOf(webView).setCanGoBack(true);
+        subject.onKeyDown(KeyEvent.KEYCODE_BACK, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK));
+        assertThat(subject.isShowing()).isTrue();
+        assertThat(shadowOf(webView).getGoBackInvocations()).isEqualTo(1);
+    }
+
+    @Test
+    public void sharing() throws Exception {
+        assertThat(subject.getWindow().hasFeature(Window.FEATURE_ACTION_BAR)).isTrue();
+
+        ArgumentCaptor<Intent> sharingIntentArgumentCapture = ArgumentCaptor.forClass(Intent.class);
+        verify(shareActionProvider).setShareIntent(sharingIntentArgumentCapture.capture());
         Intent sharingIntent = new Intent(Intent.ACTION_SEND);
         sharingIntent.setType("text/plain");
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Title http://share.me/with/friends");
-        assertThat(shadowOf(Robolectric.application).getNextStartedActivity()).isEqualTo(Intent.createChooser(sharingIntent, "Share with"));
+        assertThat(sharingIntentArgumentCapture.getValue()).isEqualTo(sharingIntent);
+    }
+
+    @Implements(MenuInflater.class)
+    public static class MyMenuItemShadow extends ShadowMenuInflater {
+        @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+        @Implementation
+        @Override
+        public void inflate(int resource, Menu menu) {
+            super.inflate(resource, menu);
+
+            for (int i = 0; i < menu.size(); i++) {
+                MenuItem item = menu.getItem(i);
+                if (item.getItemId() == R.id.menu_item_share) {
+                    item.setActionProvider(shareActionProvider);
+                }
+            }
+        }
     }
 
     @Implements(WebView.class)
