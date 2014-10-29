@@ -1,9 +1,6 @@
 package com.sharethrough.sdk;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Response implements Serializable {
@@ -58,5 +55,4 @@ public class Response implements Serializable {
             }
         }
     }
-
 }

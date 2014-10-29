@@ -11,8 +11,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -42,8 +43,10 @@ public class Sharethrough {
 
         try {
             Bundle bundle = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA).metaData;
-            String adserverApi = bundle.getString("STR_ADSERVER_API");
-            if (adserverApi != null) apiUrlPrefix = adserverApi;
+            if (bundle != null) {
+                String adserverApi = bundle.getString("STR_ADSERVER_API");
+                if (adserverApi != null) apiUrlPrefix = adserverApi;
+            }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
@@ -54,14 +57,17 @@ public class Sharethrough {
                 try {
                     String urlString = apiUrlPrefix + key;
                     final URI uri = URI.create(urlString);
-                    ObjectMapper mapper = new ObjectMapper();
-                    mapper.disable(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+
                     DefaultHttpClient client = new DefaultHttpClient();
                     HttpGet request = new HttpGet(uri);
                     request.addHeader("User-Agent", USER_AGENT);
-                    InputStream content = client.execute(request).getEntity().getContent();
                     // TODO: handle errors
-                    Response response = mapper.readValue(content, Response.class);
+                    InputStream content = client.execute(request).getEntity().getContent();
+                    Response response = getResponse(content);
+//                    ObjectMapper mapper = new ObjectMapper();
+//                    mapper.disable(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES);
+//                    Response response = mapper.readValue(content, Response.class);
 
                     for (final Response.Creative responseCreative : response.creatives) {
                         executorService.execute(new Runnable() {
@@ -104,6 +110,31 @@ public class Sharethrough {
                 }
             }
         });
+    }
+
+    private Response getResponse(InputStream content) throws JSONException {
+        JSONObject jsonResponse = new JSONObject(Misc.convertStreamToString(content));
+        Response response = new Response();
+        JSONArray creatives = jsonResponse.getJSONArray("creatives");
+        response.creatives = new ArrayList<Response.Creative>(creatives.length());
+        for (int i = 0; i < creatives.length(); i++) {
+            JSONObject jsonCreative = creatives.getJSONObject(i);
+            Response.Creative creative = new Response.Creative();
+            creative.price = jsonCreative.getInt("price");
+
+            JSONObject jsonCreativeInner = jsonCreative.getJSONObject("creative");
+
+            creative.creative = new Response.Creative.CreativeInner();
+            creative.creative.mediaUrl = jsonCreativeInner.getString("media_url");
+            creative.creative.shareUrl = jsonCreativeInner.getString("share_url");
+            creative.creative.title = jsonCreativeInner.getString("title");
+            creative.creative.description = jsonCreativeInner.getString("description");
+            creative.creative.advertiser = jsonCreativeInner.getString("advertiser");
+            creative.creative.thumbnailUrl = jsonCreativeInner.getString("thumbnail_url");
+
+            response.creatives.add(creative);
+        }
+        return response;
     }
 
     private byte[] convertInputStreamToByteArray(InputStream inputStream) throws IOException {

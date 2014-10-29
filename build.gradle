@@ -82,8 +82,6 @@ robolectric {
 }
 
 dependencies {
-    compile 'org.codehaus.jackson:jackson-core-asl:1.1.0'
-    compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.0'
     repositories {
         mavenCentral()
     }
