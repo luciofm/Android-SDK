@@ -48,7 +48,6 @@ android {
         androidTest {
             setRoot('src/test')
         }
-//        main { java.srcDirs = ['src/main/java', 'src/test/java'] }
     }
 
     packagingOptions {
@@ -69,11 +68,63 @@ task uploadArchives(type: Copy) {
 uploadArchives.dependsOn test
 uploadArchives.dependsOn assembleDebug
 
+// TODO:
+//android.buildTypes.all{ theBuildType ->
+//    task ("${theBuildType.name}createEclipseZip")<<{
+//        //use debuggable flag
+//        println theBuildType.debuggable
+//    }
+//}
+def eclipseZipFolder = 'build/tmp/EclipseZip'
+task createEclipseZip(type: Zip) {
+    baseName = 'Sharethrough_Android_SDK'
+    from eclipseZipFolder
+    include '**/*'
+    includeEmptyDirs(true)
+}
+task createEclipseZipFolder << {
+    // TODO: replace debug with theBuildType
+    def source = 'build/intermediates/bundles/debug/'
+    copy {
+        from(source)
+        include 'AndroidManifest.xml'
+        into eclipseZipFolder
+    }
+    copy {
+        from(source)
+        include 'res/**/*'
+        into eclipseZipFolder
+    }
+    copy {
+        from(projectDir)
+        include 'project.properties'
+        include '.classpath'
+        include '.project'
+        into eclipseZipFolder
+    }
+    copy {
+        from(source)
+        include 'classes.jar'
+        into "${eclipseZipFolder}/libs/"
+    }
+    copy {
+        from('src/main/java/')
+        include('**/SharethroughStub.java')
+        includeEmptyDirs(false)
+        into "${eclipseZipFolder}/src"
+    }
+}
+createEclipseZip.dependsOn createEclipseZipFolder
+// TODO: test${theBuildType}
+createEclipseZipFolder.dependsOn test
+// TODO: assemble${theBuildType}
+createEclipseZip.dependsOn assembleDebug
+assemble.dependsOn(createEclipseZip)
+
 task copyTestAssets(type: Copy) {
     from('src/test/assets/')
     into 'build/test-classes/assets/'
 }
-
 test.dependsOn copyTestAssets
 
 robolectric {
