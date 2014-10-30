@@ -1,7 +1,6 @@
 package com.sharethrough.sdk;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
@@ -11,10 +10,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import com.sharethrough.android.sdk.R;
 
-import java.io.Serializable;
-
-public class Creative implements Serializable {
+public class Creative {
     private final Response.Creative responseCreative;
     private final byte[] imageBytes;
 
@@ -54,7 +52,7 @@ public class Creative implements Serializable {
                 ((View) adView).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        v.getContext().startActivity(new Intent(v.getContext(), YoutubeActivity.class).putExtra(YoutubeActivity.CREATIVE, Creative.this));
+                        new YoutubeDialog(v.getContext(), Creative.this).show();
                     }
                 });
             }
@@ -85,6 +83,6 @@ public class Creative implements Serializable {
         return responseCreative.creative.shareUrl;
     }
 
-    public interface Media extends Serializable {
+    public interface Media {
     }
 }

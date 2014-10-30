@@ -1,13 +1,12 @@
 package com.sharethrough.sdk;
 
-import java.io.Serializable;
 import java.util.List;
 
-public class Response implements Serializable {
+public class Response {
     @JsonProperty("creatives")
     public List<Creative> creatives;
 
-    public static class Creative implements Serializable {
+    public static class Creative {
         @JsonProperty("price")
         public Integer price;
         @JsonProperty("signature")
@@ -22,7 +21,7 @@ public class Response implements Serializable {
         public int version;
 
 
-        public static class CreativeInner implements Serializable {
+        public static class CreativeInner {
             @JsonProperty("creative_key")
             public String key;
             @JsonProperty("description")
@@ -45,13 +44,13 @@ public class Response implements Serializable {
             @JsonProperty("action")
             public String action;
 
-            public static class Beacon implements Serializable {
+            public static class Beacon {
                 @JsonProperty("visible")
-                public String[] visible;
+                public List<String> visible;
                 @JsonProperty("click")
-                public String[] click;
+                public List<String> click;
                 @JsonProperty("play")
-                public String[] play;
+                public List<String> play;
             }
         }
     }

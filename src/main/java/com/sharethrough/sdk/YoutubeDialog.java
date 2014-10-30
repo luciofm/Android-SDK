@@ -2,44 +2,46 @@ package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
-import android.app.Activity;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.Window;
+import android.view.*;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.ShareActionProvider;
+import com.sharethrough.android.sdk.R;
 
-public class YoutubeActivity extends Activity {
-    public static final String CREATIVE = "CREATIVE";
-    private Creative creative;
+public class YoutubeDialog extends Dialog {
+    private final Creative creative;
     private WebView webView;
+
+    public YoutubeDialog(Context context, final Creative creative) {
+        super(context, android.R.style.Theme_Black);
+        this.creative = creative;
+    }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        creative = (Creative) getIntent().getSerializableExtra(CREATIVE);
-
         requestWindowFeature(Window.FEATURE_ACTION_BAR);
 
-        final LinearLayout linearLayout = new LinearLayout(this);
+        final LinearLayout linearLayout = new LinearLayout(getContext());
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         setContentView(R.layout.youtube);
 
         webView = (WebView) findViewById(R.id.web);
 
         String youtubeId = ((Youtube) creative.getMedia()).getId();
-        String html = getString(R.string.youtube_html).replace("YOUTUBE_ID", youtubeId);
+        String html = getContext().getString(R.string.youtube_html).replace("YOUTUBE_ID", youtubeId);
         webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -58,13 +60,13 @@ public class YoutubeActivity extends Activity {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             settings.setPluginState(WebSettings.PluginState.ON);
         }
-    }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    @Override
-    protected void onPause() {
-        webView.onPause();
-        super.onPause();
+        setOnCancelListener(new OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                webView.loadUrl("about:");
+            }
+        });
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -72,9 +74,9 @@ public class YoutubeActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
+        actionBar.setBackgroundDrawable(new ColorDrawable(getContext().getResources().getColor(android.R.color.transparent)));
 
-        getMenuInflater().inflate(R.menu.share_menu, menu);
+        new MenuInflater(getContext()).inflate(R.menu.share_menu, menu);
 
         // Locate MenuItem with ShareActionProvider
         MenuItem item = menu.findItem(R.id.menu_item_share);
@@ -97,7 +99,7 @@ public class YoutubeActivity extends Activity {
                     if (webView.canGoBack()) {
                         webView.goBack();
                     } else {
-                        finish();
+                        cancel();
                     }
                     return true;
             }
@@ -108,7 +110,7 @@ public class YoutubeActivity extends Activity {
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            finish();
+            cancel();
             return true;
         } else {
             return super.onMenuItemSelected(featureId, item);
