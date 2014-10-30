@@ -2,6 +2,8 @@ package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
+import android.app.Activity;
+import android.app.Application;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -27,7 +29,7 @@ public class YoutubeDialog extends Dialog {
         this.creative = creative;
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +67,13 @@ public class YoutubeDialog extends Dialog {
             @Override
             public void onCancel(DialogInterface dialog) {
                 webView.loadUrl("about:");
+            }
+        });
+
+        ((Application)getContext().getApplicationContext()).registerActivityLifecycleCallbacks(new BaseActivityLifecycleCallbacks() {
+            @Override
+            public void onActivityPaused(Activity activity) {
+                webView.onPause();
             }
         });
     }

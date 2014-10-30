@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.sharethrough.android.sdk.R;
 import com.sharethrough.test.util.AdView;
 import org.junit.Test;
 import org.junit.runner.RunWith;

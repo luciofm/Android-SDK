@@ -1,6 +1,7 @@
 package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -9,6 +10,7 @@ import android.webkit.TestWebSettings;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ShareActionProvider;
+import com.sharethrough.android.sdk.R;
 import com.sharethrough.test.util.Misc;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +24,7 @@ import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowMenuInflater;
 import org.robolectric.shadows.ShadowWebView;
 import org.robolectric.tester.android.view.TestMenuItem;
+import org.robolectric.util.ActivityController;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -34,6 +37,7 @@ public class YoutubeDialogTest {
     private Creative creative;
     private YoutubeDialog subject;
     private Youtube youtube;
+    private ActivityController<Activity> activityController;
 
     @Before
     public void setUp() throws Exception {
@@ -48,7 +52,9 @@ public class YoutubeDialogTest {
         youtube = mock(Youtube.class);
         when(youtube.getId()).thenReturn("ABC");
         when(creative.getMedia()).thenReturn(youtube);
-        subject = new YoutubeDialog(Robolectric.application, creative);
+
+        activityController = Robolectric.buildActivity(Activity.class).create().start().visible().resume();
+        subject = new YoutubeDialog(activityController.get(), creative);
         subject.show();
     }
 
@@ -72,6 +78,17 @@ public class YoutubeDialogTest {
         assertThat(settings.getJavaScriptEnabled()).isTrue();
         assertThat(settings.getPluginState()).isEqualTo(WebSettings.PluginState.ON);
         assertThat(settings.getMediaPlaybackRequiresUserGesture()).isFalse();
+    }
+
+    @Test
+    public void applicationPause_causesWebViewPause_soTheMusicStops() throws Exception {
+        WebView webView = Misc.findViewOfType(WebView.class, (ViewGroup) subject.getWindow().getDecorView());
+        ShadowWebView shadowWebView = shadowOf(webView);
+        assertThat(shadowWebView.wasOnPauseCalled()).isFalse();
+
+        activityController.pause();
+
+        assertThat(shadowWebView.wasOnPauseCalled()).isTrue();
     }
 
     @Test
