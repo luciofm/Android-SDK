@@ -1,5 +1,5 @@
 language: android
-script:   ./gradlew test assembleDebug
+script:   ./gradlew test assembleDebug createEclipseZip
 
 after_success: ./scripts/build-artifacts
 

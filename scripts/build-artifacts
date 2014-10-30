@@ -1,23 +1,27 @@
 #!/bin/sh -ex
 
 TMP=${TMP:-/tmp}
+
+OUTPUT_REPO="https://strdeploy:${GH_TOKEN}@github.com/sharethrough/Android-SDK-Maven.git"
 (
 cd ${TMP}
 rm -rf maven || true
-git clone git@github.com:sharethrough/Android-SDK-Maven.git maven
+git clone ${OUTPUT_REPO} maven
 )
 
 pwd
-cp build/outputs/aar/*.aar ${TMP}/maven/sharethrough-android-sdk-${TRAVIS_BUILD_NUMBER}.aar
-cd ${TMP}/maven
+OUTPUT="${TMP}/maven/sharethrough-android-sdk-${TRAVIS_BUILD_NUMBER}"
+cp build/outputs/aar/*.aar "${OUTPUT}.aar"
+cp build/distributions/*.zip "${OUTPUT}.zip"
+cd "${TMP}/maven"
 
 git config --global user.email "travis-ci@sharethrough.com"
-git config --global user.name "Automated Build"Tra
+git config --global user.name "Automated Build"
 
 git add .
 git commit -m "Travis build ${TRAVIS_BUILD_NUMBER}"
 
 git remote rm origin
-git remote add origin https://strdeploy:${GH_TOKEN}@github.com/sharethrough/Android-SDK-Maven.git
+git remote add origin ${OUTPUT_REPO}
 
 git push origin master
