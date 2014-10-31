@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.*;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -23,6 +24,7 @@ import com.sharethrough.android.sdk.R;
 public class YoutubeDialog extends Dialog {
     private final Creative creative;
     private WebView webView;
+    private BaseActivityLifecycleCallbacks lifecycleCallbacks;
 
     public YoutubeDialog(Context context, final Creative creative) {
         super(context, android.R.style.Theme_Black);
@@ -63,17 +65,27 @@ public class YoutubeDialog extends Dialog {
             settings.setPluginState(WebSettings.PluginState.ON);
         }
 
+        lifecycleCallbacks = new BaseActivityLifecycleCallbacks() {
+            @Override
+            public void onActivityPaused(Activity activity) {
+                Log.d("Sharethrough", "onPause:" + activity);
+                webView.onPause();
+            }
+
+            @Override
+            public void onActivityResumed(Activity activity) {
+                Log.d("Sharethrough", "onResume:" + activity);
+                webView.onResume();
+            }
+        };
+
+        final Application applicationContext = (Application) getContext().getApplicationContext();
+        applicationContext.registerActivityLifecycleCallbacks(lifecycleCallbacks);
         setOnCancelListener(new OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
                 webView.loadUrl("about:");
-            }
-        });
-
-        ((Application)getContext().getApplicationContext()).registerActivityLifecycleCallbacks(new BaseActivityLifecycleCallbacks() {
-            @Override
-            public void onActivityPaused(Activity activity) {
-                webView.onPause();
+                applicationContext.unregisterActivityLifecycleCallbacks(lifecycleCallbacks);
             }
         });
     }

@@ -84,11 +84,26 @@ public class YoutubeDialogTest {
     public void applicationPause_causesWebViewPause_soTheMusicStops() throws Exception {
         WebView webView = Misc.findViewOfType(WebView.class, (ViewGroup) subject.getWindow().getDecorView());
         ShadowWebView shadowWebView = shadowOf(webView);
+
         assertThat(shadowWebView.wasOnPauseCalled()).isFalse();
-
         activityController.pause();
-
         assertThat(shadowWebView.wasOnPauseCalled()).isTrue();
+
+        assertThat(shadowWebView.wasOnResumeCalled()).isFalse();
+        activityController.resume();
+        assertThat(shadowWebView.wasOnResumeCalled()).isTrue();
+    }
+
+    @Test
+    public void cancelingUnregistersFromLifecycleEvents_toAvoidMemoryLeaks() throws Exception {
+        subject.cancel();
+
+        WebView webView = Misc.findViewOfType(WebView.class, (ViewGroup) subject.getWindow().getDecorView());
+        ShadowWebView shadowWebView = shadowOf(webView);
+
+        assertThat(shadowWebView.wasOnPauseCalled()).isFalse();
+        activityController.pause();
+        assertThat(shadowWebView.wasOnPauseCalled()).isFalse();
     }
 
     @Test
