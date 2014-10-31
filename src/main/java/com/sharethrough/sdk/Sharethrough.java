@@ -26,6 +26,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Sharethrough {
+    private final Renderer renderer;
     private String apiUrlPrefix = "http://btlr.sharethrough.com/v3?placement_key=";
     static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(4); // TODO: pick a reasonable number
     public static final String USER_AGENT = System.getProperty("http.agent");
@@ -34,12 +35,13 @@ public class Sharethrough {
     private List<IAdView> waitingAdViews = Collections.synchronizedList(new ArrayList<IAdView>());
 
     public Sharethrough(Context context, String key) {
-        this(context, EXECUTOR_SERVICE, key);
+        this(context, EXECUTOR_SERVICE, key, new Renderer());
     }
 
-    public Sharethrough(Context context, final ExecutorService executorService, final String key) {
+    Sharethrough(Context context, final ExecutorService executorService, final String key, Renderer renderer) {
         if (key == null) throw new KeyRequiredException("placement_key is required");
         this.key = key;
+        this.renderer = renderer;
 
         try {
             Bundle bundle = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA).metaData;
@@ -89,7 +91,7 @@ public class Sharethrough {
                                         synchronized (waitingAdViews) {
                                             if (waitingAdViews.size() > 0) {
                                                 IAdView adView = waitingAdViews.remove(0);
-                                                creative.putIntoAdView(adView);
+                                                Sharethrough.this.renderer.putCreativeIntoAdView(adView, creative);
                                             } else {
                                                 availableCreatives.add(creative);
                                             }
@@ -155,7 +157,7 @@ public class Sharethrough {
     public <V extends View & IAdView> void putCreativeIntoAdView(V adView) {
         synchronized (availableCreatives) {
             if (availableCreatives.size() > 0) {
-                availableCreatives.remove(0).putIntoAdView(adView);
+                renderer.putCreativeIntoAdView(adView, availableCreatives.remove(0));
             } else {
                 waitingAdViews.add(adView);
             }

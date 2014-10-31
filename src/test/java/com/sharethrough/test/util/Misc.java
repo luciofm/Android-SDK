@@ -28,6 +28,10 @@ public class Misc {
 
     public static void assertImageViewFromBytes(ImageView imageView, byte[] imageBytes) {
         Bitmap expected = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+        assertImageViewFromBitmap(imageView, expected);
+    }
+
+    public static void assertImageViewFromBitmap(ImageView imageView, Bitmap expected) {
         Bitmap actual = ((BitmapDrawable) shadowOf(imageView).getDrawable()).getBitmap();
         assertThat(actual).isEqualTo(expected);
     }

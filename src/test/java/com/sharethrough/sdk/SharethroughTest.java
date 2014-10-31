@@ -1,12 +1,9 @@
 package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 import com.sharethrough.test.Fixtures;
 import com.sharethrough.test.util.AdView;
@@ -33,6 +30,7 @@ public class SharethroughTest {
     private Sharethrough subject;
     private ExecutorService executorService;
     private AdView adView;
+    private Renderer renderer;
 
     @Before
     public void setUp() throws Exception {
@@ -40,6 +38,7 @@ public class SharethroughTest {
 
         executorService = mock(ExecutorService.class);
         adView = makeMockAdView();
+        renderer = Mockito.mock(Renderer.class);
     }
 
     private AdView makeMockAdView() {
@@ -62,7 +61,7 @@ public class SharethroughTest {
 
         Robolectric.pauseMainLooper();
 
-        subject = new Sharethrough(Robolectric.application, executorService, key);
+        subject = new Sharethrough(Robolectric.application, executorService, key, renderer);
         subject.putCreativeIntoAdView(adView);
 
         ArgumentCaptor<Runnable> creativeFetcherArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
@@ -88,20 +87,12 @@ public class SharethroughTest {
     }
 
     private void verifyCreativeHasBeenPlacedInAdview(AdView adView) {
-        verify(adView.getTitle()).setText("Title");
-        verify(this.adView.getDescription()).setText("Description.");
-        verify(this.adView.getAdvertiser()).setText("Advertiser");
-        ArgumentCaptor<View> thumbnailViewCaptor = ArgumentCaptor.forClass(View.class);
-        verify(this.adView.getThumbnail(), atLeastOnce()).addView(thumbnailViewCaptor.capture(), any(FrameLayout.LayoutParams.class));
-
-        ImageView thumbnailImageView = (ImageView) thumbnailViewCaptor.getValue();
-        assertThat(thumbnailImageView.getDrawable()).isInstanceOf(BitmapDrawable.class);
-        // TODO: test the actual bitmap?
+        verify(renderer).putCreativeIntoAdView(eq(adView), any(Creative.class));
     }
 
     @Test(expected = KeyRequiredException.class)
     public void notSettingKey_throwsExceptionWhenAdIsRequested() {
-        subject = new Sharethrough(Robolectric.application, executorService, null);
+        subject = new Sharethrough(Robolectric.application, executorService, null, renderer);
     }
 
     @Test
@@ -109,7 +100,7 @@ public class SharethroughTest {
         String key = "abc";
         Robolectric.addHttpResponseRule("GET", "http://btlr.sharethrough.com/v3?placement_key=" + key,
                 new TestHttpResponse(204, "I got nothing for ya"));
-        subject = new Sharethrough(Robolectric.application, executorService, key);
+        subject = new Sharethrough(Robolectric.application, executorService, key, renderer);
 
         Mockito.reset(adView);
 
@@ -123,7 +114,7 @@ public class SharethroughTest {
         String key = "abc";
         Robolectric.addHttpResponseRule("GET", "http://btlr.sharethrough.com/v3?placement_key=" + key, new TestHttpResponse(200, FIXTURE));
 
-        subject = new Sharethrough(Robolectric.application, executorService, key);
+        subject = new Sharethrough(Robolectric.application, executorService, key, renderer);
         AdView adView2 = makeMockAdView();
         subject.putCreativeIntoAdView(adView2);
         subject.putCreativeIntoAdView(adView);
@@ -139,8 +130,9 @@ public class SharethroughTest {
         verify(executorService).execute(imageFetcherArgumentCaptor.capture());
         imageFetcherArgumentCaptor.getValue().run();
 
-        verify(adView2.getTitle()).setText("Title");
+        verifyCreativeHasBeenPlacedInAdview(adView2);
         verifyNoMoreInteractions(adView);
+        verifyNoMoreInteractions(renderer);
     }
 
     @Test
@@ -150,7 +142,7 @@ public class SharethroughTest {
 
         Robolectric.pauseMainLooper();
 
-        subject = new Sharethrough(Robolectric.application, executorService, key);
+        subject = new Sharethrough(Robolectric.application, executorService, key, renderer);
         subject.putCreativeIntoAdView(adView);
 
         ArgumentCaptor<Runnable> creativeFetcherArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
@@ -178,7 +170,7 @@ public class SharethroughTest {
         String key = "abc";
         Robolectric.addHttpResponseRule("GET", "http://btlr.sharethrough.com/v3?placement_key=" + key, new TestHttpResponse(200, FIXTURE));
 
-        subject = new Sharethrough(Robolectric.application, executorService, key);
+        subject = new Sharethrough(Robolectric.application, executorService, key, renderer);
 
         ArgumentCaptor<Runnable> creativeFetcherArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
         verify(executorService).execute(creativeFetcherArgumentCaptor.capture());
@@ -202,7 +194,7 @@ public class SharethroughTest {
         String key = "abc";
         Robolectric.addHttpResponseRule("GET", serverPrefix + key, new TestHttpResponse(200, FIXTURE));
 
-        subject = new Sharethrough(Robolectric.application, executorService, key);
+        subject = new Sharethrough(Robolectric.application, executorService, key, renderer);
 
         ArgumentCaptor<Runnable> creativeFetcherArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
         verify(executorService).execute(creativeFetcherArgumentCaptor.capture());
