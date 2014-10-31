@@ -127,6 +127,7 @@ public class Sharethrough {
             JSONObject jsonCreativeInner = jsonCreative.getJSONObject("creative");
 
             creative.creative = new Response.Creative.CreativeInner();
+            creative.creative.action = jsonCreativeInner.getString("action");
             creative.creative.mediaUrl = jsonCreativeInner.getString("media_url");
             creative.creative.shareUrl = jsonCreativeInner.getString("share_url");
             creative.creative.title = jsonCreativeInner.getString("title");

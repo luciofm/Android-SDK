@@ -1,4 +1,4 @@
-package com.sharethrough.sdk;
+package com.sharethrough.sdk.media;
 
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -7,6 +7,9 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.sharethrough.android.sdk.R;
+import com.sharethrough.sdk.Creative;
+import com.sharethrough.sdk.IAdView;
+import com.sharethrough.sdk.dialogs.YoutubeDialog;
 
 public class Youtube implements Creative.Media {
     private static final String EMBED_PREFIX = "/embed/";

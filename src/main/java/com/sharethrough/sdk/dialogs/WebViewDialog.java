@@ -1,4 +1,4 @@
-package com.sharethrough.sdk;
+package com.sharethrough.sdk.dialogs;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
@@ -17,16 +17,17 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.LinearLayout;
 import android.widget.ShareActionProvider;
 import com.sharethrough.android.sdk.R;
+import com.sharethrough.sdk.BaseActivityLifecycleCallbacks;
+import com.sharethrough.sdk.Creative;
 
-public class YoutubeDialog extends Dialog {
-    private final Creative creative;
-    private WebView webView;
+public class WebViewDialog extends Dialog {
+    protected final Creative creative;
+    protected WebView webView;
     private BaseActivityLifecycleCallbacks lifecycleCallbacks;
 
-    public YoutubeDialog(Context context, final Creative creative) {
+    public WebViewDialog(Context context, Creative creative) {
         super(context, android.R.style.Theme_Black);
         this.creative = creative;
     }
@@ -35,17 +36,10 @@ public class YoutubeDialog extends Dialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         requestWindowFeature(Window.FEATURE_ACTION_BAR);
-
-        final LinearLayout linearLayout = new LinearLayout(getContext());
-        linearLayout.setOrientation(LinearLayout.VERTICAL);
-        setContentView(R.layout.youtube);
+        setContentView(R.layout.dialog);
 
         webView = (WebView) findViewById(R.id.web);
-
-        String youtubeId = ((Youtube) creative.getMedia()).getId();
-        String html = getContext().getString(R.string.youtube_html).replace("YOUTUBE_ID", youtubeId);
         webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -53,8 +47,8 @@ public class YoutubeDialog extends Dialog {
                 return false;
             }
         });
-        String baseUrl = "https://www.youtube.com/str/" + youtubeId;
-        webView.loadDataWithBaseURL(baseUrl, html, "text/html", "UTF8", baseUrl);
+
+        loadPage();
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
@@ -88,6 +82,10 @@ public class YoutubeDialog extends Dialog {
                 applicationContext.unregisterActivityLifecycleCallbacks(lifecycleCallbacks);
             }
         });
+    }
+
+    protected void loadPage() {
+        webView.loadUrl(creative.getMediaUrl());
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)

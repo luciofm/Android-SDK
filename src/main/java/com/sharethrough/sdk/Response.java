@@ -20,7 +20,6 @@ public class Response {
         @JsonProperty("version")
         public int version;
 
-
         public static class CreativeInner {
             @JsonProperty("creative_key")
             public String key;

@@ -3,6 +3,8 @@ package com.sharethrough.sdk;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.View;
+import com.sharethrough.sdk.media.Clickout;
+import com.sharethrough.sdk.media.Youtube;
 
 public class Creative {
     private final Response.Creative responseCreative;
@@ -30,7 +32,15 @@ public class Creative {
     }
 
     public Creative.Media getMedia() {
-        return new Youtube(this);
+        switch (responseCreative.creative.action) {
+            case "video":
+                return new Youtube(this);
+            case "instagram":
+            case "pinterest":
+            case "clickout":
+            default:
+                return new Clickout(this);
+        }
     }
 
     public String getShareUrl() {

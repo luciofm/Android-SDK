@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.sharethrough.sdk.dialogs.WebViewDialogTest;
 import com.sharethrough.test.util.AdView;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,7 +62,7 @@ public class RendererTest {
         verify(adView).setOnClickListener(media.getClickListener());
     }
 
-    @Config(shadows = {YoutubeDialogTest.MyMenuInflatorShadow.class})
+    @Config(shadows = {WebViewDialogTest.MenuInflaterShadow.class})
     @Test
     public void whenAdIsYoutube_clickingOpensTheYoutubeDialog() throws Exception {
         Response.Creative responseCreative = new Response.Creative();

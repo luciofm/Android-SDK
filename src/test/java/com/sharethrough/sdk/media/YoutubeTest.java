@@ -1,10 +1,12 @@
-package com.sharethrough.sdk;
+package com.sharethrough.sdk.media;
 
 import android.graphics.Bitmap;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.sharethrough.android.sdk.R;
+import com.sharethrough.sdk.Creative;
+import com.sharethrough.sdk.RendererTest;
 import com.sharethrough.test.util.AdView;
 import org.junit.Before;
 import org.junit.Test;

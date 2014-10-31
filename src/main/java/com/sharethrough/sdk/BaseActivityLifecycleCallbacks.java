@@ -7,7 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-class BaseActivityLifecycleCallbacks implements Application.ActivityLifecycleCallbacks {
+public class BaseActivityLifecycleCallbacks implements Application.ActivityLifecycleCallbacks {
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
     }
