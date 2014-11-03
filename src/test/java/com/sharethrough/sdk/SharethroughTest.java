@@ -59,8 +59,6 @@ public class SharethroughTest {
         String key = "abc";
         Robolectric.addHttpResponseRule("GET", "http://btlr.sharethrough.com/v3?placement_key=" + key, new TestHttpResponse(200, FIXTURE));
 
-        Robolectric.pauseMainLooper();
-
         subject = new Sharethrough(Robolectric.application, executorService, key, renderer);
         subject.putCreativeIntoAdView(adView);
 
@@ -80,8 +78,6 @@ public class SharethroughTest {
         imageFetcherArgumentCaptor.getValue().run();
 
         verifyNoMoreInteractions(adView);
-
-        Robolectric.unPauseMainLooper();
 
         verifyCreativeHasBeenPlacedInAdview(adView);
     }
@@ -140,8 +136,6 @@ public class SharethroughTest {
         String key = "abc";
         Robolectric.addHttpResponseRule("GET", "http://btlr.sharethrough.com/v3?placement_key=" + key, new TestHttpResponse(200, FIXTURE));
 
-        Robolectric.pauseMainLooper();
-
         subject = new Sharethrough(Robolectric.application, executorService, key, renderer);
         subject.putCreativeIntoAdView(adView);
 
@@ -159,8 +153,6 @@ public class SharethroughTest {
         ArgumentCaptor<Runnable> imageFetcherArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
         verify(executorService).execute(imageFetcherArgumentCaptor.capture());
         imageFetcherArgumentCaptor.getValue().run();
-
-        Robolectric.unPauseMainLooper();
 
         verifyNoMoreInteractions(adView);
     }

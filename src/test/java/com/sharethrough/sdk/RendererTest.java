@@ -23,7 +23,6 @@ import static org.mockito.Mockito.*;
 @RunWith(RobolectricTestRunner.class)
 public class RendererTest {
 
-    private static final byte[] IMAGE_BYTES = new byte[]{1, 2, 3, 4};
     private Renderer subject;
 
     @Before
@@ -32,7 +31,7 @@ public class RendererTest {
     }
 
     @Test
-    public void showsTitleDescriptionAdvertiserAndThumbnailWithOverlay() throws Exception {
+    public void onUIthread_showsTitleDescriptionAdvertiserAndThumbnailWithOverlay() throws Exception {
         Creative creative = mock(Creative.class);
         when(creative.getTitle()).thenReturn("title");
         when(creative.getDescription()).thenReturn("description");
@@ -46,7 +45,13 @@ public class RendererTest {
 
         AdView adView = mockAdView();
 
+        Robolectric.pauseMainLooper();
+
         subject.putCreativeIntoAdView(adView, creative);
+
+        verifyNoMoreInteractions(adView);
+
+        Robolectric.unPauseMainLooper();
 
         verify(adView.getTitle()).setText("title");
         verify(adView.getDescription()).setText("description");
@@ -85,8 +90,9 @@ public class RendererTest {
         when(adView.getTitle()).thenReturn(mock(TextView.class));
         when(adView.getDescription()).thenReturn(mock(TextView.class));
         when(adView.getAdvertiser()).thenReturn(mock(TextView.class));
-        when(adView.getThumbnail()).thenReturn(mock(FrameLayout.class));
-        when(adView.getThumbnail().getContext()).thenReturn(Robolectric.application);
+        FrameLayout thumbnail = mock(FrameLayout.class);
+        when(thumbnail.getContext()).thenReturn(Robolectric.application);
+        when(adView.getThumbnail()).thenReturn(thumbnail);
         when(adView.getContext()).thenReturn(Robolectric.application);
         return adView;
     }

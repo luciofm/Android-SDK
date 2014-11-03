@@ -85,6 +85,7 @@ public class WebViewDialog extends Dialog {
     }
 
     protected void loadPage() {
+        Log.d("Sharethrough", "WebView showing: " + creative.getMediaUrl());
         webView.loadUrl(creative.getMediaUrl());
     }
 
