@@ -90,4 +90,31 @@ public class BeaconService {
             }
         });
     }
+
+    public void adRequested(final Context context, final String placementKey) {
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                Uri.Builder uriBuilder = Uri.parse("http://b.sharethrough.com/butler").buildUpon();
+                Map<String,String> commonParams = commonParams(context);
+                for (Map.Entry<String, String> entry : commonParams.entrySet()) {
+                    uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
+                }
+                uriBuilder.appendQueryParameter("type", "userEvent");
+                uriBuilder.appendQueryParameter("userEvent", "impressionRequest");
+                uriBuilder.appendQueryParameter("pkey", placementKey);
+
+                DefaultHttpClient client = new DefaultHttpClient();
+                String url = uriBuilder.build().toString();
+                Log.i("Sharethrough", "beacon:\t" + url);
+                HttpGet request = new HttpGet(url);
+                request.addHeader("User-Agent", Sharethrough.USER_AGENT);
+                try {
+                    client.execute(request);
+                } catch (IOException e) {
+                    Log.e("Sharethrough", "beacon fire failed for " + url, e);
+                }
+            }
+        });
+    }
 }

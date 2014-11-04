@@ -28,7 +28,7 @@ import static org.mockito.Mockito.verify;
 @RunWith(RobolectricTestRunner.class)
 @Config(emulateSdk = 18)
 public class BeaconServiceTest {
-    private Map<String, String> expected;
+    private Map<String, String> expectedCommonParams;
     private Date now;
     private StrSession session;
     private BeaconService subject;
@@ -41,14 +41,14 @@ public class BeaconServiceTest {
 
         now = new Date(1000000000);
         session = new StrSession();
-        expected = new HashMap();
-        expected.put("umtime", "" + now.getTime());
-        expected.put("ploc", "com.sharethrough.android.sdk");
-        expected.put("bwidth", "480");
-        expected.put("bheight", "800");
-        expected.put("session", session.toString());
-        expected.put("uid", "TODO");
-        expected.put("ua", Sharethrough.USER_AGENT);
+        expectedCommonParams = new HashMap();
+        expectedCommonParams.put("umtime", "" + now.getTime());
+        expectedCommonParams.put("ploc", "com.sharethrough.android.sdk");
+        expectedCommonParams.put("bwidth", "480");
+        expectedCommonParams.put("bheight", "800");
+        expectedCommonParams.put("session", session.toString());
+        expectedCommonParams.put("uid", "TODO");
+        expectedCommonParams.put("ua", Sharethrough.USER_AGENT);
 
         Response.Creative responseCreative = new Response.Creative();
         responseCreative.creative = new Response.Creative.CreativeInner();
@@ -65,26 +65,61 @@ public class BeaconServiceTest {
 
     @Test
     public void commonParams_returnsParamsSentInAllBeacons() throws Exception {
-        assertThat(subject.commonParams(Robolectric.application)).isEqualTo(expected);
+        assertThat(subject.commonParams(Robolectric.application)).isEqualTo(expectedCommonParams);
     }
 
     @Test
     public void commonParamsWithAd_returnsParamsSentInAllBeaconsForAnAd() throws Exception {
-        expected.put("pkey", "placement key");
-        expected.put("vkey", "variant key");
-        expected.put("ckey", "creative key");
-        expected.put("as", "signature");
-        expected.put("at", "price type");
-        expected.put("ap", "1000");
+        expectedCommonParams.put("pkey", "placement key");
+        expectedCommonParams.put("vkey", "variant key");
+        expectedCommonParams.put("ckey", "creative key");
+        expectedCommonParams.put("as", "signature");
+        expectedCommonParams.put("at", "price type");
+        expectedCommonParams.put("ap", "1000");
 
-        assertThat(subject.commonParamsWithCreative(Robolectric.application, creative)).isEqualTo(expected);
+        assertThat(subject.commonParamsWithCreative(Robolectric.application, creative)).isEqualTo(expectedCommonParams);
     }
 
     @Test
     public void fireAdClicked() throws Exception {
+        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(Robolectric.application, creative);
+        expectedBeaconParams.put("type", "userEvent");
+        expectedBeaconParams.put("userEvent", "fake user event");
+        expectedBeaconParams.put("engagement", "true");
+
+        expectedBeaconParams.put("pheight", "0");
+        expectedBeaconParams.put("pwidth", "0");
+
+        assertBeaconFired(expectedBeaconParams, new Runnable() {
+            @Override
+            public void run() {
+                subject.adClicked(Robolectric.application, "fake user event", creative, RendererTest.makeAdView());
+            }
+        });
+    }
+
+    @Test
+    public void fireAdRequested() throws Exception {
+        final String key = "abc";
+        Map<String, String> expectedBeaconParams = subject.commonParams(Robolectric.application);
+        expectedBeaconParams.put("type", "userEvent");
+        expectedBeaconParams.put("userEvent", "impressionRequest");
+        expectedBeaconParams.put("pkey", key);
+
+        assertBeaconFired(expectedBeaconParams, new Runnable() {
+            @Override
+            public void run() {
+                subject.adRequested(Robolectric.application, key);
+            }
+        });
+    }
+
+    private void assertBeaconFired(final Map<String,String> expectedBeaconParams, Runnable fireBeacon) {
+        final boolean[] wasCalled = {false};
         RequestMatcher requestMatcher = new RequestMatcher() {
             @Override
             public boolean matches(HttpRequest httpRequest) {
+                wasCalled[0] = true;
                 RequestLine requestLine = httpRequest.getRequestLine();
                 URI uri = URI.create(requestLine.getUri());
                 List<NameValuePair> parse = URLEncodedUtils.parse(uri, null);
@@ -93,29 +128,23 @@ public class BeaconServiceTest {
                     params.put(nameValuePair.getName(), nameValuePair.getValue());
                 }
 
-                expected = subject.commonParamsWithCreative(Robolectric.application, creative);
-                expected.put("type", "userEvent");
-                expected.put("userEvent", "fake user event");
-                expected.put("engagement", "true");
-
-                expected.put("pheight", "0");
-                expected.put("pwidth", "0");
-
                 assertThat(requestLine.getMethod()).isEqualTo("GET");
                 assertThat(httpRequest.containsHeader("User-Agent")).isTrue();
                 assertThat(uri.getPath()).isEqualTo("/butler");
                 assertThat(uri.getHost()).isEqualTo("b.sharethrough.com");
-                assertThat(params).isEqualTo(expected);
+                assertThat(params).isEqualTo(expectedBeaconParams);
                 return true;
             }
         };
         Robolectric.addHttpResponseRule(requestMatcher, new TestHttpResponse(200, ""));
 
-        subject.adClicked(Robolectric.application, "fake user event", creative, RendererTest.makeAdView());
+        fireBeacon.run();
 
         ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
         verify(executorService).execute(runnableArgumentCaptor.capture());
         runnableArgumentCaptor.getValue().run();
+
+        assertThat(wasCalled[0]).isTrue();
     }
 
     private class DateProvider implements Provider<Date> {

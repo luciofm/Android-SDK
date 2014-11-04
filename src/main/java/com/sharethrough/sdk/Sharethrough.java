@@ -35,10 +35,10 @@ public class Sharethrough {
     private List<IAdView> waitingAdViews = Collections.synchronizedList(new ArrayList<IAdView>());
 
     public Sharethrough(Context context, String key) {
-        this(context, EXECUTOR_SERVICE, key, new Renderer());
+        this(context, EXECUTOR_SERVICE, key, new Renderer(), new BeaconService(new DateProvider(), new StrSession(), EXECUTOR_SERVICE));
     }
 
-    Sharethrough(Context context, final ExecutorService executorService, final String key, Renderer renderer) {
+    Sharethrough(final Context context, final ExecutorService executorService, final String key, Renderer renderer, final BeaconService beaconService) {
         if (key == null) throw new KeyRequiredException("placement_key is required");
         this.key = key;
         this.renderer = renderer;
@@ -56,6 +56,7 @@ public class Sharethrough {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
+                beaconService.adRequested(context, key);
                 try {
                     String urlString = apiUrlPrefix + key;
                     final URI uri = URI.create(urlString);
