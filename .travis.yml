@@ -2,6 +2,7 @@ language: android
 script:   ./gradlew test assembleDebug createEclipseZip
 
 after_success: ./scripts/build-artifacts
+after_failure: find build/test-report/debug -type f | xargs cat
 
 android:
   components:
