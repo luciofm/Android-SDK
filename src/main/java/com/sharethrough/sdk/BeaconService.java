@@ -64,29 +64,14 @@ public class BeaconService {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                Uri.Builder uriBuilder = Uri.parse("http://b.sharethrough.com/butler").buildUpon();
-                Map<String, String> commonParams = commonParamsWithCreative(context, creative);
-                for (Map.Entry<String, String> entry : commonParams.entrySet()) {
-                    uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
-                }
+                Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
+                beaconParams.put("pheight", "" + adView.getHeight());
+                beaconParams.put("pwidth", "" + adView.getWidth());
+                beaconParams.put("type", "userEvent");
+                beaconParams.put("userEvent", userEvent);
+                beaconParams.put("engagement", "true");
 
-                uriBuilder.appendQueryParameter("pheight", "" + adView.getHeight());
-                uriBuilder.appendQueryParameter("pwidth", "" + adView.getWidth());
-
-                uriBuilder.appendQueryParameter("type", "userEvent");
-                uriBuilder.appendQueryParameter("userEvent", userEvent);
-                uriBuilder.appendQueryParameter("engagement", "true");
-
-                DefaultHttpClient client = new DefaultHttpClient();
-                String url = uriBuilder.build().toString();
-                Log.i("Sharethrough", "beacon:\t" + url);
-                HttpGet request = new HttpGet(url);
-                request.addHeader("User-Agent", Sharethrough.USER_AGENT);
-                try {
-                    client.execute(request);
-                } catch (IOException e) {
-                    Log.e("Sharethrough", "beacon fire failed for " + url, e);
-                }
+                fireBeacon(context, beaconParams);
             }
         });
     }
@@ -95,26 +80,31 @@ public class BeaconService {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                Uri.Builder uriBuilder = Uri.parse("http://b.sharethrough.com/butler").buildUpon();
-                Map<String,String> commonParams = commonParams(context);
-                for (Map.Entry<String, String> entry : commonParams.entrySet()) {
-                    uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
-                }
-                uriBuilder.appendQueryParameter("type", "userEvent");
-                uriBuilder.appendQueryParameter("userEvent", "impressionRequest");
-                uriBuilder.appendQueryParameter("pkey", placementKey);
+                Map<String, String> beaconParams = commonParams(context);
+                beaconParams.put("type", "userEvent");
+                beaconParams.put("userEvent", "impressionRequest");
+                beaconParams.put("pkey", placementKey);
 
-                DefaultHttpClient client = new DefaultHttpClient();
-                String url = uriBuilder.build().toString();
-                Log.i("Sharethrough", "beacon:\t" + url);
-                HttpGet request = new HttpGet(url);
-                request.addHeader("User-Agent", Sharethrough.USER_AGENT);
-                try {
-                    client.execute(request);
-                } catch (IOException e) {
-                    Log.e("Sharethrough", "beacon fire failed for " + url, e);
-                }
+                fireBeacon(context, beaconParams);
             }
         });
+    }
+
+    public void fireBeacon(Context context, Map<String,String> beaconParams) {
+        Uri.Builder uriBuilder = Uri.parse("http://b.sharethrough.com/butler").buildUpon();
+        for (Map.Entry<String, String> entry : beaconParams.entrySet()) {
+            uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
+        }
+
+        DefaultHttpClient client = new DefaultHttpClient();
+        String url = uriBuilder.build().toString();
+        Log.i("Sharethrough", "beacon:\t" + url);
+        HttpGet request = new HttpGet(url);
+        request.addHeader("User-Agent", Sharethrough.USER_AGENT);
+        try {
+            client.execute(request);
+        } catch (IOException e) {
+            Log.e("Sharethrough", "beacon fire failed for " + url, e);
+        }
     }
 }

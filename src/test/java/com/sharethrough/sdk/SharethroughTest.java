@@ -88,6 +88,8 @@ public class SharethroughTest {
     @Test
     public void whenRequestingAds_firesABeacon() throws Exception {
         String key = "abc";
+        Robolectric.addHttpResponseRule("GET", "http://btlr.sharethrough.com/v3?placement_key=" + key, new TestHttpResponse(200, FIXTURE));
+
         subject = new Sharethrough(Robolectric.application, executorService, key, renderer, beaconService);
 
         ArgumentCaptor<Runnable> creativeFetcherArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
