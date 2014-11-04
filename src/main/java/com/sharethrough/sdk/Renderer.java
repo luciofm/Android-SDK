@@ -21,7 +21,7 @@ public class Renderer {
                 adView.getAdvertiser().setText(creative.getAdvertiser());
 
                 FrameLayout thumbnail = adView.getThumbnail();
-                Context context = thumbnail.getContext();
+                Context context = adView.getContext();
 
                 ImageView thumbnailImage = new ImageView(context);
                 Bitmap thumbnailBitmap = creative.getThumbnailImage();
@@ -30,9 +30,15 @@ public class Renderer {
                 thumbnail.addView(thumbnailImage,
                         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-                Creative.Media media = creative.getMedia();
+                final Creative.Media media = creative.getMedia();
                 media.overlayThumbnail(adView);
-                ((View) adView).setOnClickListener(media.getClickListener());
+                ((View) adView).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        media.fireAdClickBeacon(creative, adView);
+                        media.getClickListener().onClick(v);
+                    }
+                });
             }
         });
     }

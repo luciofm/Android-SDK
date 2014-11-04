@@ -7,16 +7,19 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.sharethrough.android.sdk.R;
+import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.IAdView;
 import com.sharethrough.sdk.dialogs.YoutubeDialog;
 
 public class Youtube implements Creative.Media {
     private static final String EMBED_PREFIX = "/embed/";
+    private final BeaconService beaconService;
     private Creative creative;
 
-    public Youtube(Creative creative) {
+    public Youtube(Creative creative, BeaconService beaconService) {
         this.creative = creative;
+        this.beaconService = beaconService;
     }
 
     public String getId() {
@@ -35,7 +38,7 @@ public class Youtube implements Creative.Media {
     @Override
     public void overlayThumbnail(IAdView adView) {
         FrameLayout thumbnail = adView.getThumbnail();
-        ImageView youtubeIcon = new ImageView(thumbnail.getContext());
+        ImageView youtubeIcon = new ImageView(adView.getContext());
         youtubeIcon.setImageResource(R.drawable.youtube_squared);
         youtubeIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
         Bitmap thumbnailBitmap = creative.getThumbnailImage();
@@ -51,5 +54,10 @@ public class Youtube implements Creative.Media {
                 new YoutubeDialog(v.getContext(), creative).show();
             }
         };
+    }
+
+    @Override
+    public void fireAdClickBeacon(Creative creative, IAdView adView) {
+        beaconService.adClicked(adView.getContext(), "youtubePlay", creative, adView);
     }
 }

@@ -8,10 +8,13 @@ import com.sharethrough.sdk.media.Youtube;
 
 public class Creative {
     private final Response.Creative responseCreative;
+    private final String placementKey;
     private final Bitmap thumbnailImage;
+    private final StrSession strSession = new StrSession();
 
-    public Creative(Response.Creative responseCreative, byte[] imageBytes) {
+    public Creative(Response.Creative responseCreative, byte[] imageBytes, String placementKey) {
         this.responseCreative = responseCreative;
+        this.placementKey = placementKey;
         thumbnailImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
     }
 
@@ -32,14 +35,15 @@ public class Creative {
     }
 
     public Creative.Media getMedia() {
+        BeaconService beaconService = new BeaconService(new DateProvider(), strSession, Sharethrough.EXECUTOR_SERVICE);
         switch (responseCreative.creative.action) {
             case "video":
-                return new Youtube(this);
+                return new Youtube(this, beaconService);
             case "instagram":
             case "pinterest":
             case "clickout":
             default:
-                return new Clickout(this);
+                return new Clickout(this, beaconService);
         }
     }
 
@@ -51,8 +55,35 @@ public class Creative {
         return responseCreative.creative.mediaUrl;
     }
 
+    public String getPlacementKey() {
+        return placementKey;
+    }
+
+    public String getVariantKey() {
+        return responseCreative.creative.variantKey;
+    }
+
+    public String getCreativeKey() {
+        return responseCreative.creative.key;
+    }
+
+    public String getSignature() {
+        return responseCreative.signature;
+    }
+
+    public String getAuctionType() {
+        return responseCreative.priceType;
+    }
+
+    public String getAuctionPrice() {
+        return String.valueOf(responseCreative.price);
+    }
+
+
     public interface Media {
         void overlayThumbnail(IAdView adView);
         View.OnClickListener getClickListener();
+        void fireAdClickBeacon(Creative creative, IAdView adView);
     }
+
 }

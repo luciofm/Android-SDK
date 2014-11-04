@@ -5,6 +5,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import com.sharethrough.sdk.media.Clickout;
 import com.sharethrough.test.Fixtures;
 import com.sharethrough.test.util.AdView;
 import org.junit.Before;
@@ -83,7 +84,21 @@ public class SharethroughTest {
     }
 
     private void verifyCreativeHasBeenPlacedInAdview(AdView adView) {
-        verify(renderer).putCreativeIntoAdView(eq(adView), any(Creative.class));
+        ArgumentCaptor<Creative> creativeArgumentCaptor = ArgumentCaptor.forClass(Creative.class);
+        verify(renderer).putCreativeIntoAdView(eq(adView), creativeArgumentCaptor.capture());
+        Creative creative = creativeArgumentCaptor.getValue();
+        assertThat(creative.getTitle()).isEqualTo("Title");
+        assertThat(creative.getDescription()).isEqualTo("Description.");
+        assertThat(creative.getAdvertiser()).isEqualTo("Advertiser");
+        assertThat(creative.getCreativeKey()).isEqualTo("ckey");
+        assertThat(creative.getAuctionPrice()).isEqualTo("12567");
+        assertThat(creative.getAuctionType()).isEqualTo("CPE");
+        assertThat(creative.getMediaUrl()).isEqualTo("mediaURL");
+        assertThat(creative.getShareUrl()).isEqualTo("shareURL");
+        assertThat(creative.getVariantKey()).isEqualTo("12345");
+        assertThat(creative.getPlacementKey()).isEqualTo("abc");
+        assertThat(creative.getSignature()).isEqualTo("c19");
+        assertThat(creative.getMedia()).isInstanceOf(Clickout.class);
     }
 
     @Test(expected = KeyRequiredException.class)

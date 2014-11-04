@@ -87,7 +87,7 @@ public class Sharethrough {
                                     if (imageResponse.getStatusLine().getStatusCode() == 200) {
                                         InputStream imageContent = imageResponse.getEntity().getContent();
                                         byte[] imageBytes = convertInputStreamToByteArray(imageContent);
-                                        Creative creative = new Creative(responseCreative, imageBytes);
+                                        Creative creative = new Creative(responseCreative, imageBytes, key);
                                         synchronized (waitingAdViews) {
                                             if (waitingAdViews.size() > 0) {
                                                 IAdView adView = waitingAdViews.remove(0);
@@ -134,6 +134,15 @@ public class Sharethrough {
             creative.creative.description = jsonCreativeInner.getString("description");
             creative.creative.advertiser = jsonCreativeInner.getString("advertiser");
             creative.creative.thumbnailUrl = jsonCreativeInner.getString("thumbnail_url");
+
+            creative.creative.key = jsonCreativeInner.getString("creative_key");
+            creative.creative.variantKey = jsonCreativeInner.getString("variant_key");
+            creative.price = jsonCreative.getInt("price");
+            creative.priceType = jsonCreative.getString("priceType");
+            creative.signature = jsonCreative.getString("signature");
+
+
+            // TODO: more fields
 
             response.creatives.add(creative);
         }

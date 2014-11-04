@@ -22,7 +22,7 @@ public class CreativeTest {
     public void setUp() throws Exception {
         responseCreative = new Response.Creative();
         responseCreative.creative = new Response.Creative.CreativeInner();
-        subject = new Creative(responseCreative, IMAGE_BYTES);
+        subject = new Creative(responseCreative, IMAGE_BYTES, "placement key");
     }
 
     @Test
@@ -40,6 +40,6 @@ public class CreativeTest {
     @Test
     public void getMedia_EverythingElse() throws Exception {
         responseCreative.creative.action = "something else";
-        assertThat(subject.getMedia()).isInstanceOf(Creative.Media.class);
+        assertThat(subject.getMedia()).isInstanceOf(Clickout.class);
     }
 }
