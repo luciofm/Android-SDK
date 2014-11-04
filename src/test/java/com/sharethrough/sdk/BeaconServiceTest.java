@@ -114,6 +114,18 @@ public class BeaconServiceTest {
         });
     }
 
+    @Test
+    public void fireAdReceived() throws Exception {
+        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(Robolectric.application, creative);
+        expectedBeaconParams.put("type", "impression");
+        assertBeaconFired(expectedBeaconParams, new Runnable() {
+            @Override
+            public void run() {
+                subject.adReceived(Robolectric.application, creative);
+            }
+        });
+    }
+
     private void assertBeaconFired(final Map<String,String> expectedBeaconParams, Runnable fireBeacon) {
         final boolean[] wasCalled = {false};
         RequestMatcher requestMatcher = new RequestMatcher() {

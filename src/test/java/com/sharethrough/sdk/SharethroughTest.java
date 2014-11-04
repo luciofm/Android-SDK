@@ -1,6 +1,7 @@
 package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.widget.FrameLayout;
@@ -83,6 +84,7 @@ public class SharethroughTest {
         verifyNoMoreInteractions(adView);
 
         verifyCreativeHasBeenPlacedInAdview(adView);
+        verifyImpressionBeaconFired();
     }
     
     @Test
@@ -99,10 +101,19 @@ public class SharethroughTest {
         verify(beaconService).adRequested(Robolectric.application, key);
     }
 
+    private void verifyImpressionBeaconFired() throws Exception {
+        ArgumentCaptor<Creative> creativeArgumentCaptor = ArgumentCaptor.forClass(Creative.class);
+        verify(beaconService).adReceived(any(Context.class), creativeArgumentCaptor.capture());
+        verifyCreativeData(creativeArgumentCaptor.getValue());
+    }
+
     private void verifyCreativeHasBeenPlacedInAdview(AdView adView) {
         ArgumentCaptor<Creative> creativeArgumentCaptor = ArgumentCaptor.forClass(Creative.class);
         verify(renderer).putCreativeIntoAdView(eq(adView), creativeArgumentCaptor.capture());
-        Creative creative = creativeArgumentCaptor.getValue();
+        verifyCreativeData(creativeArgumentCaptor.getValue());
+    }
+
+    private void verifyCreativeData(Creative creative) {
         assertThat(creative.getTitle()).isEqualTo("Title");
         assertThat(creative.getDescription()).isEqualTo("Description.");
         assertThat(creative.getAdvertiser()).isEqualTo("Advertiser");

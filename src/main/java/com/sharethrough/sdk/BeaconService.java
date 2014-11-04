@@ -90,6 +90,17 @@ public class BeaconService {
         });
     }
 
+    public void adReceived(final Context context, final Creative creative) {
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
+                beaconParams.put("type", "impression");
+                fireBeacon(context, beaconParams);
+            }
+        });
+    }
+
     public void fireBeacon(Context context, Map<String,String> beaconParams) {
         Uri.Builder uriBuilder = Uri.parse("http://b.sharethrough.com/butler").buildUpon();
         for (Map.Entry<String, String> entry : beaconParams.entrySet()) {

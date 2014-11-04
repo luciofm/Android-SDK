@@ -93,6 +93,7 @@ public class Sharethrough {
                                             if (waitingAdViews.size() > 0) {
                                                 IAdView adView = waitingAdViews.remove(0);
                                                 Sharethrough.this.renderer.putCreativeIntoAdView(adView, creative);
+                                                beaconService.adReceived(context, creative);
                                             } else {
                                                 availableCreatives.add(creative);
                                             }
