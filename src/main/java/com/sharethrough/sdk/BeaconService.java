@@ -47,7 +47,7 @@ public class BeaconService {
         result.put("uid", advertisingIdProvider.getAdvertisingId());
         result.put("session", session.toString());
 
-        result.put("ua", Sharethrough.USER_AGENT);
+        result.put("ua", "" + Sharethrough.USER_AGENT);
 
         return result;
     }
