@@ -22,8 +22,13 @@ public class AdViewTimerTask extends TimerTask {
     public void run() {
         Rect rect = new Rect();
         if (!isVisible && adView.isShown() && adView.getGlobalVisibleRect(rect)) {
-            beaconService.adVisible(adView, creative);
-            isVisible = true;
+            int visibleArea = rect.width() * rect.height();
+            int viewArea = adView.getHeight() * adView.getWidth();
+
+            if (visibleArea * 2 >= viewArea) {
+                beaconService.adVisible(adView, creative);
+                isVisible = true;
+            }
         }
     }
 
