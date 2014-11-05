@@ -148,7 +148,7 @@ public class BeaconServiceTest {
                 assertThat(httpRequest.containsHeader("User-Agent")).isTrue();
                 assertThat(uri.getPath()).isEqualTo("/butler");
                 assertThat(uri.getHost()).isEqualTo("b.sharethrough.com");
-                assertThat(params).isEqualTo(expectedBeaconParams);
+                assertThat(params.entrySet()).containsAll(expectedBeaconParams.entrySet());
                 return true;
             }
         };
