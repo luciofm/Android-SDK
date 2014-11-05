@@ -9,12 +9,14 @@ import com.sharethrough.sdk.media.Youtube;
 public class Creative {
     private final Response.Creative responseCreative;
     private final String placementKey;
+    private final BeaconService beaconService;
     private final Bitmap thumbnailImage;
     private final StrSession strSession = new StrSession();
 
-    public Creative(Response.Creative responseCreative, byte[] imageBytes, String placementKey) {
+    public Creative(Response.Creative responseCreative, byte[] imageBytes, String placementKey, BeaconService beaconService) {
         this.responseCreative = responseCreative;
         this.placementKey = placementKey;
+        this.beaconService = beaconService;
         thumbnailImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
     }
 
@@ -35,7 +37,6 @@ public class Creative {
     }
 
     public Creative.Media getMedia() {
-        BeaconService beaconService = new BeaconService(new DateProvider(), strSession, Sharethrough.EXECUTOR_SERVICE);
         switch (responseCreative.creative.action) {
             case "video":
                 return new Youtube(this, beaconService);
@@ -85,5 +86,4 @@ public class Creative {
         View.OnClickListener getClickListener();
         void fireAdClickBeacon(Creative creative, IAdView adView);
     }
-
 }

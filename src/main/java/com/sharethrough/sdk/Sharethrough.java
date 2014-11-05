@@ -22,6 +22,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -35,7 +36,7 @@ public class Sharethrough {
     private List<IAdView> waitingAdViews = Collections.synchronizedList(new ArrayList<IAdView>());
 
     public Sharethrough(Context context, String key) {
-        this(context, EXECUTOR_SERVICE, key, new Renderer(), new BeaconService(new DateProvider(), new StrSession(), EXECUTOR_SERVICE));
+        this(context, EXECUTOR_SERVICE, key, new Renderer(), new BeaconService(new DateProvider(), new StrSession(), EXECUTOR_SERVICE, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString())));
     }
 
     Sharethrough(final Context context, final ExecutorService executorService, final String key, Renderer renderer, final BeaconService beaconService) {
@@ -88,7 +89,7 @@ public class Sharethrough {
                                     if (imageResponse.getStatusLine().getStatusCode() == 200) {
                                         InputStream imageContent = imageResponse.getEntity().getContent();
                                         byte[] imageBytes = convertInputStreamToByteArray(imageContent);
-                                        Creative creative = new Creative(responseCreative, imageBytes, key);
+                                        Creative creative = new Creative(responseCreative, imageBytes, key, beaconService);
                                         synchronized (waitingAdViews) {
                                             if (waitingAdViews.size() > 0) {
                                                 IAdView adView = waitingAdViews.remove(0);

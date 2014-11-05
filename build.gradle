@@ -28,8 +28,7 @@ android {
     }
 
     defaultConfig {
-//        applicationId "com.sharethrough.android.sdk"
-        minSdkVersion 8
+        minSdkVersion 9
         targetSdkVersion 14
         versionCode 1
         versionName "1.0"
@@ -141,6 +140,9 @@ dependencies {
     repositories {
         mavenCentral()
     }
+
+    compile 'com.google.android.gms:play-services:4.0.+'
+
     // Espresso
     androidTestCompile('junit:junit:4.11') {
         exclude module: 'hamcrest-core'
@@ -165,8 +167,11 @@ dependencies {
         exclude module: 'wagon-file'
         exclude module: 'wagon-http-lightweight'
         exclude module: 'wagon-provider-api'
+        exclude group: 'com.android.support', module: 'support-v4'
     }
-    androidTestCompile 'com.squareup:fest-android:1.0.+'
+    androidTestCompile('com.squareup:fest-android:1.0.+') {
+        exclude group: 'com.android.support', module: 'support-v4'
+    }
     androidTestCompile 'org.mockito:mockito-core:1.+'
 }
 

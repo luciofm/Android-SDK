@@ -21,11 +21,13 @@ public class BeaconService {
     private final Provider<Date> dateProvider;
     private final StrSession session;
     private final ExecutorService executorService;
+    private final AdvertisingIdProvider advertisingIdProvider;
 
-    public BeaconService(Provider<Date> dateProvider, StrSession session, ExecutorService executorService) {
+    public BeaconService(Provider<Date> dateProvider, StrSession session, ExecutorService executorService, AdvertisingIdProvider advertisingIdProvider) {
         this.dateProvider = dateProvider;
         this.session = session;
         this.executorService = executorService;
+        this.advertisingIdProvider = advertisingIdProvider;
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -41,7 +43,7 @@ public class BeaconService {
         result.put("bwidth", "" + size.x);
         result.put("bheight", "" + size.y);
 
-        result.put("uid", "TODO");
+        result.put("uid", advertisingIdProvider.getAdvertisingId());
         result.put("session", session.toString());
 
         result.put("ua", Sharethrough.USER_AGENT);

@@ -22,8 +22,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(emulateSdk = 18)
@@ -34,6 +33,8 @@ public class BeaconServiceTest {
     private BeaconService subject;
     private ExecutorService executorService;
     private Creative creative;
+    private AdvertisingIdProvider advertisingIdProvider;
+    private String advertisingId;
 
     @Before
     public void setUp() throws Exception {
@@ -47,7 +48,8 @@ public class BeaconServiceTest {
         expectedCommonParams.put("bwidth", "480");
         expectedCommonParams.put("bheight", "800");
         expectedCommonParams.put("session", session.toString());
-        expectedCommonParams.put("uid", "TODO");
+        advertisingId = "abc";
+        expectedCommonParams.put("uid", advertisingId);
         expectedCommonParams.put("ua", Sharethrough.USER_AGENT);
 
         Response.Creative responseCreative = new Response.Creative();
@@ -57,10 +59,12 @@ public class BeaconServiceTest {
         responseCreative.signature = "signature";
         responseCreative.priceType = "price type";
         responseCreative.price = 1000;
-        creative = new Creative(responseCreative, new byte[0], "placement key");
+        creative = new Creative(responseCreative, new byte[0], "placement key", mock(BeaconService.class));
 
         executorService = mock(ExecutorService.class);
-        subject = new BeaconService(new DateProvider(), session, executorService);
+        advertisingIdProvider = mock(AdvertisingIdProvider.class);
+        when(advertisingIdProvider.getAdvertisingId()).thenReturn(advertisingId);
+        subject = new BeaconService(new DateProvider(), session, executorService, advertisingIdProvider);
     }
 
     @Test
