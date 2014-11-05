@@ -19,27 +19,26 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Sharethrough {
+public class Sharethrough<V extends View & IAdView> {
     private final Renderer renderer;
+    private final BeaconService beaconService;
     private String apiUrlPrefix = "http://btlr.sharethrough.com/v3?placement_key=";
     static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(4); // TODO: pick a reasonable number
     public static final String USER_AGENT = System.getProperty("http.agent");
     private String key;
     private List<Creative> availableCreatives = Collections.synchronizedList(new ArrayList<Creative>());
-    private List<IAdView> waitingAdViews = Collections.synchronizedList(new ArrayList<IAdView>());
+    private List<V> waitingAdViews = Collections.synchronizedList(new ArrayList<V>());
 
     public Sharethrough(Context context, String key) {
-        this(context, EXECUTOR_SERVICE, key, new Renderer(), new BeaconService(new DateProvider(), new StrSession(), EXECUTOR_SERVICE, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString())));
+        this(context, EXECUTOR_SERVICE, key, new Renderer(new Timer("Sharethrough visibility watcher")), new BeaconService(new DateProvider(), new StrSession(), EXECUTOR_SERVICE, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString())));
     }
 
     Sharethrough(final Context context, final ExecutorService executorService, final String key, Renderer renderer, final BeaconService beaconService) {
+        this.beaconService = beaconService;
         if (key == null) throw new KeyRequiredException("placement_key is required");
         this.key = key;
         this.renderer = renderer;
@@ -92,9 +91,8 @@ public class Sharethrough {
                                         Creative creative = new Creative(responseCreative, imageBytes, key, beaconService);
                                         synchronized (waitingAdViews) {
                                             if (waitingAdViews.size() > 0) {
-                                                IAdView adView = waitingAdViews.remove(0);
-                                                Sharethrough.this.renderer.putCreativeIntoAdView(adView, creative);
-                                                beaconService.adReceived(context, creative);
+                                                V adView = waitingAdViews.remove(0);
+                                                Sharethrough.this.renderer.putCreativeIntoAdView(adView, creative, beaconService);
                                             } else {
                                                 availableCreatives.add(creative);
                                             }
@@ -167,10 +165,10 @@ public class Sharethrough {
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-    public <V extends View & IAdView> void putCreativeIntoAdView(V adView) {
+    public void putCreativeIntoAdView(V adView) {
         synchronized (availableCreatives) {
             if (availableCreatives.size() > 0) {
-                renderer.putCreativeIntoAdView(adView, availableCreatives.remove(0));
+                renderer.putCreativeIntoAdView(adView, availableCreatives.remove(0), beaconService);
             } else {
                 waitingAdViews.add(adView);
             }

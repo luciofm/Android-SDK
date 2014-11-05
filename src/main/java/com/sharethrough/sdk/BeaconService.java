@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 import android.view.Display;
+import android.view.View;
 import android.view.WindowManager;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -63,61 +64,61 @@ public class BeaconService {
     }
 
     public void adClicked(final Context context, final String userEvent, final Creative creative, final IAdView adView) {
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
-                beaconParams.put("pheight", "" + adView.getHeight());
-                beaconParams.put("pwidth", "" + adView.getWidth());
-                beaconParams.put("type", "userEvent");
-                beaconParams.put("userEvent", userEvent);
-                beaconParams.put("engagement", "true");
+        Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
+        beaconParams.put("pheight", "" + adView.getHeight());
+        beaconParams.put("pwidth", "" + adView.getWidth());
+        beaconParams.put("type", "userEvent");
+        beaconParams.put("userEvent", userEvent);
+        beaconParams.put("engagement", "true");
 
-                fireBeacon(context, beaconParams);
-            }
-        });
+        fireBeacon(context, beaconParams);
     }
 
     public void adRequested(final Context context, final String placementKey) {
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                Map<String, String> beaconParams = commonParams(context);
-                beaconParams.put("type", "userEvent");
-                beaconParams.put("userEvent", "impressionRequest");
-                beaconParams.put("pkey", placementKey);
+        Map<String, String> beaconParams = commonParams(context);
+        beaconParams.put("type", "impressionRequest");
+        beaconParams.put("pkey", placementKey);
 
-                fireBeacon(context, beaconParams);
-            }
-        });
+        fireBeacon(context, beaconParams);
     }
 
     public void adReceived(final Context context, final Creative creative) {
+        Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
+        beaconParams.put("type", "impression");
+        fireBeacon(context, beaconParams);
+    }
+
+
+    public void adVisible(View adView, Creative creative) {
+        Context context = adView.getContext();
+        Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
+        beaconParams.put("pheight", "" + adView.getHeight());
+        beaconParams.put("pwidth", "" + adView.getWidth());
+        beaconParams.put("type", "visible");
+
+        fireBeacon(context, beaconParams);
+    }
+
+    private void fireBeacon(Context context, final Map<String, String> beaconParams) {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
-                beaconParams.put("type", "impression");
-                fireBeacon(context, beaconParams);
+                Uri.Builder uriBuilder = Uri.parse("http://b.sharethrough.com/butler").buildUpon();
+                for (Map.Entry<String, String> entry : beaconParams.entrySet()) {
+                    uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
+                }
+
+                DefaultHttpClient client = new DefaultHttpClient();
+                String url = uriBuilder.build().toString();
+                Log.i("Sharethrough", "beacon:\t" + url);
+                HttpGet request = new HttpGet(url);
+                request.addHeader("User-Agent", Sharethrough.USER_AGENT);
+                try {
+                    client.execute(request);
+                } catch (IOException e) {
+                    Log.e("Sharethrough", "beacon fire failed for " + url, e);
+                }
             }
         });
-    }
-
-    public void fireBeacon(Context context, Map<String,String> beaconParams) {
-        Uri.Builder uriBuilder = Uri.parse("http://b.sharethrough.com/butler").buildUpon();
-        for (Map.Entry<String, String> entry : beaconParams.entrySet()) {
-            uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
-        }
-
-        DefaultHttpClient client = new DefaultHttpClient();
-        String url = uriBuilder.build().toString();
-        Log.i("Sharethrough", "beacon:\t" + url);
-        HttpGet request = new HttpGet(url);
-        request.addHeader("User-Agent", Sharethrough.USER_AGENT);
-        try {
-            client.execute(request);
-        } catch (IOException e) {
-            Log.e("Sharethrough", "beacon fire failed for " + url, e);
-        }
     }
 }

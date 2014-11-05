@@ -1,7 +1,9 @@
 package com.sharethrough.sdk;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
@@ -9,13 +11,36 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-public class Renderer {
-    public void putCreativeIntoAdView(final IAdView adView, final Creative creative) {
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class Renderer<V extends View & IAdView> {
+
+    private final Timer timer;
+
+    public Renderer(Timer timer) {
+        this.timer = timer;
+    }
+
+    public void putCreativeIntoAdView(final V adView, final Creative creative, final BeaconService beaconService) {
+        beaconService.adReceived(adView.getContext(), creative);
         new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
             @Override
             public void run() {
-                // TODO: check that the AdView is attached to the window & avoid memory leaks
-//              adView.addOnAttachStateChangeListener(null);
+                final TimerTask task = new AdViewTimerTask(adView, creative, beaconService);
+                timer.scheduleAtFixedRate(task, 0, 100);
+                adView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+                    @Override
+                    public void onViewAttachedToWindow(View v) {
+                    }
+
+                    @Override
+                    public void onViewDetachedFromWindow(View v) {
+                        task.cancel();
+                    }
+                });
+
                 adView.getTitle().setText((creative).getTitle());
                 adView.getDescription().setText(creative.getDescription());
                 adView.getAdvertiser().setText(creative.getAdvertiser());
@@ -32,15 +57,16 @@ public class Renderer {
 
                 final Creative.Media media = creative.getMedia();
                 media.overlayThumbnail(adView);
-                ((View) adView).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        media.fireAdClickBeacon(creative, adView);
-                        media.getClickListener().onClick(v);
-                    }
-                });
+                adView.setOnClickListener(new View.OnClickListener() {
+                                              @Override
+                                              public void onClick(View v) {
+                                                  media.fireAdClickBeacon(creative, adView);
+                                                  media.getClickListener().onClick(v);
+                                              }
+                                          }
+
+                );
             }
         });
     }
-
 }

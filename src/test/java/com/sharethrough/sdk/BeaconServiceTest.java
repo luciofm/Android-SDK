@@ -106,8 +106,7 @@ public class BeaconServiceTest {
     public void fireAdRequested() throws Exception {
         final String key = "abc";
         Map<String, String> expectedBeaconParams = subject.commonParams(Robolectric.application);
-        expectedBeaconParams.put("type", "userEvent");
-        expectedBeaconParams.put("userEvent", "impressionRequest");
+        expectedBeaconParams.put("type", "impressionRequest");
         expectedBeaconParams.put("pkey", key);
 
         assertBeaconFired(expectedBeaconParams, new Runnable() {
@@ -126,6 +125,18 @@ public class BeaconServiceTest {
             @Override
             public void run() {
                 subject.adReceived(Robolectric.application, creative);
+            }
+        });
+    }
+
+    @Test
+    public void fireAdVisible() throws Exception {
+        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(Robolectric.application, creative);
+        expectedBeaconParams.put("type", "visible");
+        assertBeaconFired(expectedBeaconParams, new Runnable() {
+            @Override
+            public void run() {
+                subject.adVisible(RendererTest.makeAdView(), creative);
             }
         });
     }

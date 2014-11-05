@@ -1,7 +1,11 @@
 package com.sharethrough.sdk;
 
+import android.annotation.TargetApi;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
+import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -15,18 +19,23 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.Timer;
+
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @Config(emulateSdk = 18)
 @RunWith(RobolectricTestRunner.class)
+@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
 public class RendererTest {
 
     private Renderer subject;
     private Creative creative;
     private Bitmap bitmap;
     private Creative.Media media;
-    private AdView adView;
+    private MyAdView adView;
+    private Timer timer;
+    private BeaconService beaconService;
 
     @Before
     public void setUp() throws Exception {
@@ -41,16 +50,19 @@ public class RendererTest {
         when(media.getClickListener()).thenReturn(mock(View.OnClickListener.class));
         when(creative.getMedia()).thenReturn(media);
 
-        adView = makeAdView();
+        beaconService = mock(BeaconService.class);
 
-        subject = new Renderer();
+        adView = makeAdView();
+        timer = mock(Timer.class);
+
+        subject = new Renderer(timer);
     }
 
     @Test
     public void onUIthread_showsTitleDescriptionAdvertiserAndThumbnailWithOverlay() throws Exception {
         Robolectric.pauseMainLooper();
 
-        subject.putCreativeIntoAdView(adView, creative);
+        subject.putCreativeIntoAdView(adView, creative, beaconService);
 
         verifyNoMoreInteractions(adView.getTitle());
 
@@ -70,8 +82,28 @@ public class RendererTest {
     }
 
     @Test
+    public void firesImpressionBeacon() throws Exception {
+        subject.putCreativeIntoAdView(adView, creative, beaconService);
+        verify(beaconService).adReceived(any(Context.class), eq(creative));
+    }
+
+    @Test
+    public void usesAdViewTimerTask() throws Exception {
+        subject.putCreativeIntoAdView(adView, creative, beaconService);
+
+        ArgumentCaptor<AdViewTimerTask> timerTaskArgumentCaptor = ArgumentCaptor.forClass(AdViewTimerTask.class);
+        verify(timer).scheduleAtFixedRate(timerTaskArgumentCaptor.capture(), anyLong(), anyLong());
+        AdViewTimerTask timerTask = timerTaskArgumentCaptor.getValue();
+        assertThat(timerTask.getAdView()).isSameAs(adView);
+
+        assertThat(timerTask.isCancelled()).isFalse();
+        adView.onAttachStateListener.onViewDetachedFromWindow(adView);
+        assertThat(timerTask.isCancelled()).isTrue();
+    }
+
+    @Test
     public void whenAdIsClicked_firesMediaBeacon_andMediaClickListener() throws Exception {
-        subject.putCreativeIntoAdView(adView, creative);
+        subject.putCreativeIntoAdView(adView, creative, beaconService);
 
         adView.performClick();
 
@@ -79,8 +111,8 @@ public class RendererTest {
         verify(media).fireAdClickBeacon(creative, adView);
     }
 
-    public static AdView makeAdView() {
-        return new AdView(Robolectric.application) {
+    public static MyAdView makeAdView() {
+        return new MyAdView(Robolectric.application) {
             private final FrameLayout thumbnail = mock(FrameLayout.class);
             private final TextView advertiser = mock(TextView.class);
             private final TextView description = mock(TextView.class);
@@ -106,5 +138,27 @@ public class RendererTest {
                 return thumbnail;
             }
         };
+    }
+
+    private abstract static class MyAdView extends AdView {
+        private OnAttachStateChangeListener onAttachStateListener;
+
+        public MyAdView(Context context) {
+            super(context);
+        }
+
+        public MyAdView(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        public MyAdView(Context context, AttributeSet attrs, int defStyleAttr) {
+            super(context, attrs, defStyleAttr);
+        }
+
+        @Override
+        public void addOnAttachStateChangeListener(OnAttachStateChangeListener listener) {
+            onAttachStateListener = listener;
+            super.addOnAttachStateChangeListener(listener);
+        }
     }
 }
