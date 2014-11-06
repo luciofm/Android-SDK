@@ -82,9 +82,11 @@ public class RendererTest {
     }
 
     @Test
-    public void firesImpressionBeacon() throws Exception {
+    public void firesImpressionBeaconOnlyOnce() throws Exception {
         subject.putCreativeIntoAdView(adView, creative, beaconService);
         verify(beaconService).adReceived(any(Context.class), eq(creative));
+        subject.putCreativeIntoAdView(adView, creative, beaconService);
+        verifyNoMoreInteractions(beaconService);
     }
 
     @Test

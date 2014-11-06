@@ -23,7 +23,10 @@ public class Renderer<V extends View & IAdView> {
     }
 
     public void putCreativeIntoAdView(final V adView, final Creative creative, final BeaconService beaconService) {
-        beaconService.adReceived(adView.getContext(), creative);
+        if (!creative.wasRendered) {
+            beaconService.adReceived(adView.getContext(), creative);
+            creative.wasRendered = true;
+        }
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
             @Override

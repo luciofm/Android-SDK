@@ -12,6 +12,7 @@ public class Creative {
     private final BeaconService beaconService;
     private final Bitmap thumbnailImage;
     private final StrSession strSession = new StrSession();
+    public boolean wasRendered;
 
     public Creative(Response.Creative responseCreative, byte[] imageBytes, String placementKey, BeaconService beaconService) {
         this.responseCreative = responseCreative;
