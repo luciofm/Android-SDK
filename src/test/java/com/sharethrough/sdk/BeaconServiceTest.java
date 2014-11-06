@@ -50,7 +50,7 @@ public class BeaconServiceTest {
         expectedCommonParams.put("session", session.toString());
         advertisingId = "abc";
         expectedCommonParams.put("uid", advertisingId);
-        expectedCommonParams.put("ua", Sharethrough.USER_AGENT);
+        expectedCommonParams.put("ua", "" + Sharethrough.USER_AGENT);
 
         Response.Creative responseCreative = new Response.Creative();
         responseCreative.creative = new Response.Creative.CreativeInner();
