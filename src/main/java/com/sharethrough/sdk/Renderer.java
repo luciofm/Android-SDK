@@ -22,18 +22,22 @@ public class Renderer<V extends View & IAdView> {
         this.timer = timer;
     }
 
-    public void putCreativeIntoAdView(final V adView, final Creative creative, final BeaconService beaconService) {
+    public void putCreativeIntoAdView(final V adView, final Creative creative, final BeaconService beaconService, final Sharethrough sharethrough) {
         if (!creative.wasRendered) {
             beaconService.adReceived(adView.getContext(), creative);
             creative.wasRendered = true;
         }
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
+        final Handler handler = new Handler(Looper.getMainLooper());
+
+        final TimerTask task = new AdViewTimerTask(adView, creative, beaconService, new DateProvider(), sharethrough);
+        timer.schedule(task, 0, 100);
+
+        handler.post(new Runnable() {
             @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
             @Override
             public void run() {
-                final TimerTask task = new AdViewTimerTask(adView, creative, beaconService, new DateProvider());
-                timer.scheduleAtFixedRate(task, 0, 100);
                 adView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+
                     @Override
                     public void onViewAttachedToWindow(View v) {
                     }
@@ -41,6 +45,8 @@ public class Renderer<V extends View & IAdView> {
                     @Override
                     public void onViewDetachedFromWindow(View v) {
                         task.cancel();
+                        timer.purge(); // TODO: test
+                        adView.removeOnAttachStateChangeListener(this);
                     }
                 });
 

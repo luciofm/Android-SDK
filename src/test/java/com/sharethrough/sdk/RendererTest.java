@@ -36,6 +36,7 @@ public class RendererTest {
     private MyAdView adView;
     private Timer timer;
     private BeaconService beaconService;
+    private Sharethrough sharethrough;
 
     @Before
     public void setUp() throws Exception {
@@ -54,6 +55,7 @@ public class RendererTest {
 
         adView = makeAdView();
         timer = mock(Timer.class);
+        sharethrough = mock(Sharethrough.class);
 
         subject = new Renderer(timer);
     }
@@ -62,7 +64,7 @@ public class RendererTest {
     public void onUIthread_showsTitleDescriptionAdvertiserAndThumbnailWithOverlay() throws Exception {
         Robolectric.pauseMainLooper();
 
-        subject.putCreativeIntoAdView(adView, creative, beaconService);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough);
 
         verifyNoMoreInteractions(adView.getTitle());
 
@@ -83,18 +85,18 @@ public class RendererTest {
 
     @Test
     public void firesImpressionBeaconOnlyOnce() throws Exception {
-        subject.putCreativeIntoAdView(adView, creative, beaconService);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough);
         verify(beaconService).adReceived(any(Context.class), eq(creative));
-        subject.putCreativeIntoAdView(adView, creative, beaconService);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough);
         verifyNoMoreInteractions(beaconService);
     }
 
     @Test
     public void usesAdViewTimerTask() throws Exception {
-        subject.putCreativeIntoAdView(adView, creative, beaconService);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough);
 
         ArgumentCaptor<AdViewTimerTask> timerTaskArgumentCaptor = ArgumentCaptor.forClass(AdViewTimerTask.class);
-        verify(timer).scheduleAtFixedRate(timerTaskArgumentCaptor.capture(), anyLong(), anyLong());
+        verify(timer).schedule(timerTaskArgumentCaptor.capture(), anyLong(), anyLong());
         AdViewTimerTask timerTask = timerTaskArgumentCaptor.getValue();
         assertThat(timerTask.getAdView()).isSameAs(adView);
 
@@ -105,7 +107,7 @@ public class RendererTest {
 
     @Test
     public void whenAdIsClicked_firesMediaBeacon_andMediaClickListener() throws Exception {
-        subject.putCreativeIntoAdView(adView, creative, beaconService);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough);
 
         adView.performClick();
 

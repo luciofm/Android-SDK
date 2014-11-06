@@ -1,6 +1,7 @@
 package com.sharethrough.sdk;
 
 import android.graphics.Rect;
+import android.os.Handler;
 import com.sharethrough.test.util.AdView;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,6 +12,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Mockito.*;
 
@@ -23,8 +25,11 @@ public class AdViewTimerTaskTest {
     private int visibleWidth;
     private int visibleHeight;
     private Provider<Date> dateProvider;
-    private Date now;
+    private long now;
     private boolean isVisible;
+    private AdViewTimerTask subject;
+    private Sharethrough sharethrough;
+    private Handler handler;
 
     @Before
     public void setUp() throws Exception {
@@ -33,19 +38,23 @@ public class AdViewTimerTaskTest {
         when(adView.getWidth()).thenReturn(300);
         creative = mock(Creative.class);
         beaconService = mock(BeaconService.class);
-        now = new Date();
+        now = 0;
         dateProvider = new Provider<Date>() {
             @Override
             public Date get() {
-                return now;
+                return new Date(now);
             }
         };
+        sharethrough = mock(Sharethrough.class);
+        when(sharethrough.getAdCacheTimeInMilliseconds()).thenReturn((int) TimeUnit.SECONDS.toMillis(20));
+
+        handler = mock(Handler.class);
+
+        subject = new AdViewTimerTask(adView, creative, beaconService, dateProvider, sharethrough);
     }
 
     @Test
     public void firesABeaconJustOnce_whenItFirstBecomesHalfVisibleFor1ContinuousSecond() throws Exception {
-        AdViewTimerTask subject = new AdViewTimerTask(adView, creative, beaconService, dateProvider);
-
         when(adView.isShown()).thenReturn(true);
 
         // invisible
@@ -75,19 +84,19 @@ public class AdViewTimerTaskTest {
 
         // visible but not 50%
         visibleHeight = adView.getHeight() / 2 - 1;
-        now = new Date(now.getTime() + 100);
+        now += 100;
         subject.run();
         verifyNoMoreInteractions(beaconService);
 
         // visible but not for a continuous second yet
         visibleHeight = adView.getHeight() / 2 + 1;
-        now = new Date(now.getTime() + 900);
+        now += 900;
         subject.run();
         verifyNoMoreInteractions(beaconService);
 
         // invisible
         isVisible = false;
-        now = new Date(now.getTime() + 100);
+        now += 100;
         subject.run();
         verifyNoMoreInteractions(beaconService);
 
@@ -98,13 +107,53 @@ public class AdViewTimerTaskTest {
         verifyNoMoreInteractions(beaconService);
 
         // visible for a continuous second yet
-        now = new Date(now.getTime() + 1000);
+        now += 1000;
         subject.run();
         verify(beaconService).adVisible(adView, creative);
 
         // still visible, still over a second, but no need for a duplicate beacon
         subject.run();
         verifyNoMoreInteractions(beaconService);
+    }
+    
+    @Test
+    public void whenAdViewBecomesVisible_andBecomesInvisible_showsNewAdAfterCacheExpires() throws Exception {
+        reset(sharethrough);
 
+        makeAdViewVisible();
+
+        isVisible = false;
+
+        now += TimeUnit.SECONDS.toMillis(18);
+        subject.run();
+        verifyNoMoreInteractions(sharethrough);
+
+        now += TimeUnit.SECONDS.toMillis(1);
+        subject.run();
+        verify(sharethrough).putCreativeIntoAdView(adView);
+
+        now += TimeUnit.SECONDS.toMillis(1);
+        subject.run();
+        verifyNoMoreInteractions(sharethrough);
+    }
+
+    private void makeAdViewVisible() {
+        when(adView.isShown()).thenReturn(true);
+
+        isVisible = true;
+        visibleWidth = adView.getWidth();
+        visibleHeight = adView.getHeight();
+        when(adView.getGlobalVisibleRect(any(Rect.class))).then(new Answer<Boolean>() {
+            @Override
+            public Boolean answer(InvocationOnMock invocationOnMock) throws Throwable {
+                Rect r = (Rect) invocationOnMock.getArguments()[0];
+                r.set(0, 0, visibleWidth, visibleHeight);
+                return isVisible;
+            }
+        });
+        subject.run();
+        now += TimeUnit.SECONDS.toMillis(1);
+        subject.run();
+        verify(beaconService).adVisible(adView, creative);
     }
 }

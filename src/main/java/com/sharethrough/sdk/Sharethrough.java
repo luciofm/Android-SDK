@@ -26,6 +26,7 @@ import java.util.concurrent.Executors;
 public class Sharethrough<V extends View & IAdView> {
     private final Renderer renderer;
     private final BeaconService beaconService;
+    private final int adCacheTimeInMilliseconds;
     private String apiUrlPrefix = "http://btlr.sharethrough.com/v3?placement_key=";
     static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(4); // TODO: pick a reasonable number
     public static final String USER_AGENT = System.getProperty("http.agent");
@@ -33,12 +34,13 @@ public class Sharethrough<V extends View & IAdView> {
     private List<Creative> availableCreatives = Collections.synchronizedList(new ArrayList<Creative>());
     private List<V> waitingAdViews = Collections.synchronizedList(new ArrayList<V>());
 
-    public Sharethrough(Context context, String key) {
-        this(context, EXECUTOR_SERVICE, key, new Renderer(new Timer("Sharethrough visibility watcher")), new BeaconService(new DateProvider(), new StrSession(), EXECUTOR_SERVICE, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString())));
+    public Sharethrough(Context context, String key, int adCacheTimeInMilliseconds) {
+        this(context, EXECUTOR_SERVICE, key, new Renderer(new Timer("Sharethrough visibility watcher")), new BeaconService(new DateProvider(), new StrSession(), EXECUTOR_SERVICE, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString())), adCacheTimeInMilliseconds );
     }
 
-    Sharethrough(final Context context, final ExecutorService executorService, final String key, Renderer renderer, final BeaconService beaconService) {
+    Sharethrough(final Context context, final ExecutorService executorService, final String key, final Renderer renderer, final BeaconService beaconService, int adCacheTimeInMilliseconds) {
         this.beaconService = beaconService;
+        this.adCacheTimeInMilliseconds = adCacheTimeInMilliseconds;
         if (key == null) throw new KeyRequiredException("placement_key is required");
         this.key = key;
         this.renderer = renderer;
@@ -92,7 +94,7 @@ public class Sharethrough<V extends View & IAdView> {
                                         synchronized (waitingAdViews) {
                                             if (waitingAdViews.size() > 0) {
                                                 V adView = waitingAdViews.remove(0);
-                                                Sharethrough.this.renderer.putCreativeIntoAdView(adView, creative, beaconService);
+                                                renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this);
                                             } else {
                                                 availableCreatives.add(creative);
                                             }
@@ -168,10 +170,14 @@ public class Sharethrough<V extends View & IAdView> {
     public void putCreativeIntoAdView(V adView) {
         synchronized (availableCreatives) {
             if (availableCreatives.size() > 0) {
-                renderer.putCreativeIntoAdView(adView, availableCreatives.remove(0), beaconService);
+                renderer.putCreativeIntoAdView(adView, availableCreatives.remove(0), beaconService, this);
             } else {
                 waitingAdViews.add(adView);
             }
         }
+    }
+
+    public int getAdCacheTimeInMilliseconds() {
+        return adCacheTimeInMilliseconds;
     }
 }
