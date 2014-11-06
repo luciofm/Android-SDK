@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.View;
 import com.sharethrough.sdk.media.Clickout;
+import com.sharethrough.sdk.media.Vine.Vine;
 import com.sharethrough.sdk.media.Youtube;
 
 public class Creative {
@@ -41,6 +42,8 @@ public class Creative {
         switch (responseCreative.creative.action) {
             case "video":
                 return new Youtube(this, beaconService);
+            case "vine":
+                return new Vine(this, beaconService);
             case "instagram":
             case "pinterest":
             case "clickout":

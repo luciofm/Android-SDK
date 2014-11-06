@@ -1,24 +1,19 @@
 package com.sharethrough.sdk.media;
 
 import android.graphics.Bitmap;
-import android.view.Gravity;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.RendererTest;
+import com.sharethrough.sdk.media.Vine.ThumbnailOverlayingMedia;
 import com.sharethrough.test.util.AdView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
-import static org.robolectric.Robolectric.shadowOf;
 
 @Config(emulateSdk = 18)
 @RunWith(RobolectricTestRunner.class)
@@ -66,28 +61,8 @@ public class YoutubeTest {
 
     @Test
     public void thumbnailImageOverlaysYoutubeIcon() throws Exception {
-        when(thumbnailBitmap.getWidth()).thenReturn(100);
-        when(thumbnailBitmap.getHeight()).thenReturn(200);
-
         Youtube subject = new Youtube(creative, beaconService);
-
-        AdView adView = RendererTest.makeAdView();
-
-        subject.overlayThumbnail(adView);
-
-        ArgumentCaptor<ImageView> imageViewArgumentCaptor = ArgumentCaptor.forClass(ImageView.class);
-        ArgumentCaptor<FrameLayout.LayoutParams> layoutParamsArgumentCaptor = ArgumentCaptor.forClass(FrameLayout.LayoutParams.class);
-
-        verify(adView.getThumbnail()).addView(imageViewArgumentCaptor.capture(), layoutParamsArgumentCaptor.capture());
-
-        ImageView youtubeIcon = imageViewArgumentCaptor.getValue();
-        assertThat(shadowOf(youtubeIcon).getImageResourceId()).isEqualTo(R.drawable.youtube_squared);
-        int overlayDimensionMax = 25;
-
-        FrameLayout.LayoutParams layoutParams = layoutParamsArgumentCaptor.getValue();
-        assertThat(layoutParams.gravity).isEqualTo(Gravity.TOP | Gravity.LEFT);
-        assertThat(layoutParams.width).isEqualTo(overlayDimensionMax);
-        assertThat(layoutParams.height).isEqualTo(overlayDimensionMax);
+        assertThat(subject).isInstanceOf(ThumbnailOverlayingMedia.class);
     }
 
     @Test

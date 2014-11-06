@@ -1,18 +1,15 @@
 package com.sharethrough.sdk.media;
 
-import android.graphics.Bitmap;
 import android.net.Uri;
-import android.view.Gravity;
 import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.IAdView;
 import com.sharethrough.sdk.dialogs.YoutubeDialog;
+import com.sharethrough.sdk.media.Vine.ThumbnailOverlayingMedia;
 
-public class Youtube implements Creative.Media {
+public class Youtube extends ThumbnailOverlayingMedia {
     private static final String EMBED_PREFIX = "/embed/";
     private final BeaconService beaconService;
     private Creative creative;
@@ -36,14 +33,13 @@ public class Youtube implements Creative.Media {
     }
 
     @Override
-    public void overlayThumbnail(IAdView adView) {
-        FrameLayout thumbnail = adView.getThumbnail();
-        ImageView youtubeIcon = new ImageView(adView.getContext());
-        youtubeIcon.setImageResource(R.drawable.youtube_squared);
-        youtubeIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        Bitmap thumbnailBitmap = creative.getThumbnailImage();
-        int overlayDimensionMax = Math.min(thumbnailBitmap.getWidth(), thumbnailBitmap.getHeight()) / 4;
-        thumbnail.addView(youtubeIcon, new FrameLayout.LayoutParams(overlayDimensionMax, overlayDimensionMax, Gravity.TOP | Gravity.LEFT));
+    protected int getOverlayImageResourceId() {
+        return R.drawable.youtube_squared;
+    }
+
+    @Override
+    protected Creative getCreative() {
+        return creative;
     }
 
     @Override
