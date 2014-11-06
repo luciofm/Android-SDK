@@ -31,7 +31,7 @@ public class Renderer<V extends View & IAdView> {
             @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
             @Override
             public void run() {
-                final TimerTask task = new AdViewTimerTask(adView, creative, beaconService);
+                final TimerTask task = new AdViewTimerTask(adView, creative, beaconService, new DateProvider());
                 timer.scheduleAtFixedRate(task, 0, 100);
                 adView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
                     @Override
