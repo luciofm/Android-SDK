@@ -4,6 +4,7 @@ import android.widget.ImageView;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.RendererTest;
+import com.sharethrough.sdk.dialogs.ShareableDialogTest;
 import com.sharethrough.sdk.dialogs.WebViewDialog;
 import com.sharethrough.sdk.dialogs.WebViewDialogTest;
 import com.sharethrough.test.util.AdView;
@@ -39,7 +40,7 @@ public class ClickoutTest {
         verifyNoMoreInteractions(adView);
     }
 
-    @Config(emulateSdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, WebViewDialogTest.MenuInflaterShadow.class})
+    @Config(emulateSdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
     @Test
     public void clickListener_opensWebViewDialog() throws Exception {
         subject.getClickListener().onClick(new ImageView(Robolectric.application));
