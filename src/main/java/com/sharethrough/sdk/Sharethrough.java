@@ -22,8 +22,10 @@ import java.net.URI;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Sharethrough<V extends View & IAdView> {
+    public static final int DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
     private final Renderer renderer;
     private final BeaconService beaconService;
     private final int adCacheTimeInMilliseconds;
@@ -33,6 +35,10 @@ public class Sharethrough<V extends View & IAdView> {
     private String key;
     private List<Creative> availableCreatives = Collections.synchronizedList(new ArrayList<Creative>());
     private List<V> waitingAdViews = Collections.synchronizedList(new ArrayList<V>());
+
+    public Sharethrough(Context context, String key) {
+        this(context, key, DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS);
+    }
 
     public Sharethrough(Context context, String key, int adCacheTimeInMilliseconds) {
         this(context, EXECUTOR_SERVICE, key, new Renderer(new Timer("Sharethrough visibility watcher")), new BeaconService(new DateProvider(), new StrSession(), EXECUTOR_SERVICE, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString())), adCacheTimeInMilliseconds );
