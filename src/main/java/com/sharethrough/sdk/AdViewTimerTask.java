@@ -16,7 +16,7 @@ public class AdViewTimerTask extends TimerTask {
     private final Provider<Date> dateProvider;
     private final Sharethrough sharethrough;
     private boolean isCancelled;
-    private boolean isVisible;
+    private boolean hasBeenShown;
     private Date visibleStartTime;
     private final int adCacheTimeInMilliseconds;
 
@@ -32,12 +32,12 @@ public class AdViewTimerTask extends TimerTask {
 
     @Override
     public void run() {
-        Log.d("Sharethrough", "AdViewTimer on " + adView + " with " + creative);
+        Log.v("Sharethrough", "AdViewTimer on " + adView + " with " + creative);
         if (isCancelled) return;
 
         Rect rect = new Rect();
-        if (!isVisible) {
-            if (adView.isShown() && adView.getGlobalVisibleRect(rect)) {
+        if (!hasBeenShown) {
+            if (isCurrentlyVisible(rect)) {
                 int visibleArea = rect.width() * rect.height();
                 int viewArea = adView.getHeight() * adView.getWidth();
 
@@ -45,7 +45,7 @@ public class AdViewTimerTask extends TimerTask {
                     if (visibleStartTime != null) {
                         if (dateProvider.get().getTime() - visibleStartTime.getTime() >= VISIBILITY_TIME_THRESHOLD) {
                             beaconService.adVisible(adView, creative);
-                            isVisible = true;
+                            hasBeenShown = true;
                         }
                     } else {
                         visibleStartTime = dateProvider.get();
@@ -58,10 +58,16 @@ public class AdViewTimerTask extends TimerTask {
             }
         } else {
             if ((dateProvider.get().getTime() - (visibleStartTime.getTime())) >= adCacheTimeInMilliseconds) {
-                sharethrough.putCreativeIntoAdView(adView);
-                cancel();
+                if (!isCurrentlyVisible(rect)) {
+                    sharethrough.putCreativeIntoAdView(adView);
+                    cancel();
+                }
             }
         }
+    }
+
+    private boolean isCurrentlyVisible(Rect rect) {
+        return adView.isShown() && adView.getGlobalVisibleRect(rect);
     }
 
     @Override

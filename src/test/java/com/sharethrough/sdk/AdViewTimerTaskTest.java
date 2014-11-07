@@ -137,6 +137,20 @@ public class AdViewTimerTaskTest {
         verifyNoMoreInteractions(sharethrough);
     }
 
+    @Test
+    public void whenCacheExpires_doesShowNewAdUntilCurrentAdBecomesInvisible() throws Exception {
+        reset(sharethrough);
+
+        makeAdViewVisible();
+        now += TimeUnit.SECONDS.toMillis(19);
+        subject.run();
+        verifyNoMoreInteractions(sharethrough);
+
+        isVisible = false;
+        subject.run();
+        verify(sharethrough).putCreativeIntoAdView(adView);
+    }
+
     private void makeAdViewVisible() {
         when(adView.isShown()).thenReturn(true);
 
