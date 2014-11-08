@@ -52,4 +52,50 @@
   </body>
 </html>
     ]]></string>
+  <string name="video_html"><![CDATA[
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <link href=\"http://vjs.zencdn.net/4.10/video-js.css\" rel=\"stylesheet\">
+        <script src=\"http://vjs.zencdn.net/4.10/video.js\"></script>
+      </head>
+      <body style=\"margin: 0; background-color: black; text-align: center;\">
+        <video id=\"player\" class=\"video-js vjs-default-skin\"
+          autoplay loop controls
+          preload=\"none\"
+          width=\"100%\" height=\"auto\"
+          poster=\"thumbnailURL\"
+          >
+          <source src=\"videoURL\" type=\"video/mp4\" />
+        </video>
+<!--
+data-setup=\"{\"autoplay\":true}\"
+
+          videojs(\"player\").ready(function() {
+            console.log(1.1);
+            this.play();
+          });
+          console.log(2);
+-->
+        <script type=\"text/javascript\">
+          var player = document.getElementById(\"player\");
+          console.log(1);
+          window.addEventListener(\"resize\", resizeHandler);
+          console.log(3);
+          function resizeHandler(event) {
+            var width = window.innerWidth, height = window.innerHeight;
+            if (width < height * 16/9) {
+              height = Math.round(width * 9/16);
+            } else {
+              width = Math.round(height * 16/9);
+            }
+            player.style.width = width;
+            player.style.height = height;
+            console.log(\"resize window=\" + window.innerWidth + \"x\" + window.innerHeight + \" => \" + width + \"x\" + height + \" EVENT: \" + event);
+          }
+          console.log(4);
+        </script>
+      </body>
+    </html>
+  ]]></string>
 </resources>
