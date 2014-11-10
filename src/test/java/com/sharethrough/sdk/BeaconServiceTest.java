@@ -141,6 +141,21 @@ public class BeaconServiceTest {
         });
     }
 
+    @Test
+    public void whenFireAdShareCalled_fireRightBeacon() throws Exception {
+        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(Robolectric.application, creative);
+        expectedBeaconParams.put("type", "userEvent");
+        expectedBeaconParams.put("userEvent", "share");
+        expectedBeaconParams.put("share", "shareType");
+        expectedBeaconParams.put("engagement", "true");
+        assertBeaconFired(expectedBeaconParams, new Runnable() {
+            @Override
+            public void run() {
+                subject.adShared(Robolectric.application, creative, "shareType");
+            }
+        });
+    }
+
     private void assertBeaconFired(final Map<String,String> expectedBeaconParams, Runnable fireBeacon) {
         final boolean[] wasCalled = {false};
         RequestMatcher requestMatcher = new RequestMatcher() {

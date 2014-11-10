@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.webkit.TestWebSettings;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.test.util.Misc;
 import org.junit.Before;
@@ -37,6 +38,7 @@ public class WebViewDialogTest {
     private ActivityController<Activity> activityController;
     private WebView webView;
     private ShadowWebView shadowWebView;
+    private BeaconService beaconService;
 
     @Before
     public void setUp() throws Exception {
@@ -47,8 +49,10 @@ public class WebViewDialogTest {
         when(creative.getShareUrl()).thenReturn("http://share.me/with/friends");
         when(creative.getMediaUrl()).thenReturn(URL);
 
+        beaconService = mock(BeaconService.class);
+
         activityController = Robolectric.buildActivity(Activity.class).create().start().visible().resume();
-        subject = new WebViewDialog(activityController.get(), creative);
+        subject = new WebViewDialog(activityController.get(), creative, beaconService);
         subject.show();
 
         webView = Misc.findViewOfType(WebView.class, (ViewGroup) subject.getWindow().getDecorView());

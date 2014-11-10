@@ -26,7 +26,7 @@ public class Vine extends ThumbnailOverlayingMedia {
             @Override
             public void onClick(View v) {
                 final Context context = v.getContext();
-                new WebViewDialog(context, creative) {
+                new WebViewDialog(context, creative, beaconService) {
                     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
                     @Override
                     protected void loadPage() {
