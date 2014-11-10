@@ -24,7 +24,7 @@ public class Clickout implements Creative.Media {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new WebViewDialog(v.getContext(), creative).show();
+                new WebViewDialog(v.getContext(), creative, beaconService).show();
             }
         };
     }

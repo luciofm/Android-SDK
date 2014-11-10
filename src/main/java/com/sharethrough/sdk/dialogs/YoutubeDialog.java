@@ -2,12 +2,13 @@ package com.sharethrough.sdk.dialogs;
 
 import android.content.Context;
 import com.sharethrough.android.sdk.R;
+import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.media.Youtube;
 
 public class YoutubeDialog extends WebViewDialog {
-    public YoutubeDialog(Context context, Creative creative) {
-        super(context, creative);
+    public YoutubeDialog(Context context, Creative creative, BeaconService beaconService) {
+        super(context, creative, beaconService);
     }
 
     @Override

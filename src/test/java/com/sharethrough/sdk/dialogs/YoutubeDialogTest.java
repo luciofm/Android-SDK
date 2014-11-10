@@ -3,6 +3,7 @@ package com.sharethrough.sdk.dialogs;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import com.sharethrough.android.sdk.R;
+import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.media.Youtube;
 import com.sharethrough.test.util.Misc;
@@ -25,6 +26,7 @@ public class YoutubeDialogTest {
     private Creative creative;
     private YoutubeDialog subject;
     private Youtube youtube;
+    private BeaconService beaconService;
 
     @Before
     public void setUp() throws Exception {
@@ -33,7 +35,9 @@ public class YoutubeDialogTest {
         creative = mock(Creative.class);
         when(creative.getMedia()).thenReturn(youtube);
 
-        subject = new YoutubeDialog(Robolectric.application, creative);
+        beaconService = mock(BeaconService.class);
+
+        subject = new YoutubeDialog(Robolectric.application, creative, beaconService);
         subject.show();
     }
 

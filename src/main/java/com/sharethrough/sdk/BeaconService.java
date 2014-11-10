@@ -99,6 +99,15 @@ public class BeaconService {
         fireBeacon(context, beaconParams);
     }
 
+    public void adShared(Context context, Creative creative, String medium) {
+        Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
+        beaconParams.put("type", "userEvent");
+        beaconParams.put("userEvent", "share");
+        beaconParams.put("engagement", "true");
+        beaconParams.put("share", medium);
+        fireBeacon(context, beaconParams);
+    }
+
     private void fireBeacon(Context context, final Map<String, String> beaconParams) {
         executorService.execute(new Runnable() {
             @Override

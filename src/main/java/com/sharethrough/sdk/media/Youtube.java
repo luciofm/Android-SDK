@@ -47,7 +47,7 @@ public class Youtube extends ThumbnailOverlayingMedia {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new YoutubeDialog(v.getContext(), creative).show();
+                new YoutubeDialog(v.getContext(), creative, beaconService).show();
             }
         };
     }

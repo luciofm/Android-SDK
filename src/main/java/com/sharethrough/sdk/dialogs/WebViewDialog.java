@@ -15,6 +15,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BaseActivityLifecycleCallbacks;
+import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 
 public class WebViewDialog extends ShareableDialog {
@@ -22,8 +23,8 @@ public class WebViewDialog extends ShareableDialog {
     protected WebView webView;
     private BaseActivityLifecycleCallbacks lifecycleCallbacks;
 
-    public WebViewDialog(Context context, Creative creative) {
-        super(context, android.R.style.Theme_Black);
+    public WebViewDialog(Context context, Creative creative, BeaconService beaconService) {
+        super(context, android.R.style.Theme_Black, beaconService);
         this.creative = creative;
     }
 

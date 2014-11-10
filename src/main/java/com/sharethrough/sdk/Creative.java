@@ -84,6 +84,10 @@ public class Creative {
         return String.valueOf(responseCreative.price);
     }
 
+    public String getThumbnailUrl() {
+        return responseCreative.creative.thumbnailUrl;
+    }
+
 
     public interface Media {
         void overlayThumbnail(IAdView adView);
