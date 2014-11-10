@@ -19,6 +19,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.tester.org.apache.http.TestHttpResponse;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -41,6 +42,7 @@ public class SharethroughTest {
 
         beaconService = mock(BeaconService.class);
         executorService = mock(ExecutorService.class);
+        Robolectric.Reflection.setFinalStaticField(Sharethrough.class, "EXECUTOR_SERVICE", executorService);
         adView = makeMockAdView();
         renderer = Mockito.mock(Renderer.class);
         adCacheTimeInMilliseconds = 20000;
@@ -229,6 +231,19 @@ public class SharethroughTest {
         creativeFetcherArgumentCaptor.getValue().run();
 
         assertThat(Robolectric.getLatestSentHttpRequest().getRequestLine().getUri()).isEqualTo(serverPrefix + key);
+    }
+
+    @Test
+    @Config(shadows = AdvertisingIdProviderTest.MyGooglePlayServicesUtilShadow.class)
+    public void minimumAdCacheTimeIs_20Seconds() {
+        int requestedCacheMilliseconds = (int) TimeUnit.SECONDS.toMillis(5);
+        subject = new Sharethrough(Robolectric.application, "abc", requestedCacheMilliseconds);
+
+        int adCacheMilliseconds = subject.getAdCacheTimeInMilliseconds();
+
+        int expectedCacheMilliseconds = (int)TimeUnit.SECONDS.toMillis(20);
+
+        assertThat(adCacheMilliseconds).isEqualTo(expectedCacheMilliseconds);
     }
 
     private void runExecutor() {

@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Sharethrough<V extends View & IAdView> {
     public static final int DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
+    private static final int MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
     private final Renderer renderer;
     private final BeaconService beaconService;
     private final int adCacheTimeInMilliseconds;
@@ -46,7 +47,7 @@ public class Sharethrough<V extends View & IAdView> {
 
     Sharethrough(final Context context, final ExecutorService executorService, final String key, final Renderer renderer, final BeaconService beaconService, int adCacheTimeInMilliseconds) {
         this.beaconService = beaconService;
-        this.adCacheTimeInMilliseconds = adCacheTimeInMilliseconds;
+        this.adCacheTimeInMilliseconds = Math.max(adCacheTimeInMilliseconds, MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS);
         if (key == null) throw new KeyRequiredException("placement_key is required");
         this.key = key;
         this.renderer = renderer;
