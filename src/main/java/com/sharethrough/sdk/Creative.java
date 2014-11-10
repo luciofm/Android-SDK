@@ -90,8 +90,8 @@ public class Creative {
 
 
     public interface Media {
-        void overlayThumbnail(IAdView adView);
+        <V extends View & IAdView> void overlayThumbnail(V adView);
         View.OnClickListener getClickListener();
-        void fireAdClickBeacon(Creative creative, IAdView adView);
+        <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView);
     }
 }

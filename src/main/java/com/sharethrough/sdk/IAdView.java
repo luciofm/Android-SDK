@@ -9,8 +9,4 @@ public interface IAdView {
     TextView getDescription();
     TextView getAdvertiser();
     FrameLayout getThumbnail();
-
-    Context getContext();
-    int getHeight();
-    int getWidth();
 }

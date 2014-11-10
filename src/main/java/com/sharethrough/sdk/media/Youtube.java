@@ -53,7 +53,7 @@ public class Youtube extends ThumbnailOverlayingMedia {
     }
 
     @Override
-    public void fireAdClickBeacon(Creative creative, IAdView adView) {
+    public <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView) {
         beaconService.adClicked(adView.getContext(), "youtubePlay", creative, adView);
     }
 }

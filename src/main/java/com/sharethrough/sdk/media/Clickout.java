@@ -16,7 +16,7 @@ public class Clickout implements Creative.Media {
     }
 
     @Override
-    public void overlayThumbnail(IAdView adView) {
+    public  <V extends View & IAdView> void overlayThumbnail(V adView) {
     }
 
     @Override
@@ -29,7 +29,7 @@ public class Clickout implements Creative.Media {
         };
     }
 
-    public void fireAdClickBeacon(Creative creative, IAdView adView) {
+    public <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView) {
         beaconService.adClicked(adView.getContext(), "clickout", creative, adView);
     }
 }

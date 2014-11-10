@@ -59,7 +59,7 @@ public class ThumbnailOverlayingMediaTest {
             }
 
             @Override
-            public void fireAdClickBeacon(Creative creative, IAdView adView) {
+            public <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView) {
             }
         };
 

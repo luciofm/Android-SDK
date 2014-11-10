@@ -2,6 +2,7 @@ package com.sharethrough.sdk.media.Vine;
 
 import android.graphics.Bitmap;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.sharethrough.sdk.Creative;
@@ -9,7 +10,7 @@ import com.sharethrough.sdk.IAdView;
 
 public abstract class ThumbnailOverlayingMedia implements Creative.Media {
     @Override
-    public final void overlayThumbnail(IAdView adView) {
+    public final <V extends View & IAdView> void overlayThumbnail(V adView) {
         FrameLayout thumbnail = adView.getThumbnail();
         ImageView youtubeIcon = new ImageView(adView.getContext());
         youtubeIcon.setImageResource(getOverlayImageResourceId());
