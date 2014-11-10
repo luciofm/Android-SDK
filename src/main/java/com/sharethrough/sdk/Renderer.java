@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -51,7 +52,10 @@ public class Renderer<V extends View & IAdView> {
                 });
 
                 adView.getTitle().setText((creative).getTitle());
-                adView.getDescription().setText(creative.getDescription());
+                TextView description = adView.getDescription();
+                if (description != null) {
+                    description.setText(creative.getDescription());
+                }
                 adView.getAdvertiser().setText(creative.getAdvertiser());
 
                 FrameLayout thumbnail = adView.getThumbnail();

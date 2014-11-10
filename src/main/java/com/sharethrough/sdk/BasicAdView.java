@@ -24,6 +24,10 @@ public class BasicAdView extends FrameLayout implements IAdView {
         super(context, attrs, defStyle);
     }
 
+    public BasicAdView showAd(Sharethrough sharethrough, final Context context, final int layoutResourceId, final int titleViewId, final int advertiserViewId, final int thumbnailViewId) {
+        return showAd(sharethrough, context, layoutResourceId, titleViewId, -1, advertiserViewId, thumbnailViewId);
+    }
+
     public BasicAdView showAd(Sharethrough sharethrough, final Context context, final int layoutResourceId, final int titleViewId, final int descriptionViewId, final int advertiserViewId, final int thumbnailViewId) {
         this.titleViewId = titleViewId;
         this.descriptionViewId = descriptionViewId;

@@ -115,37 +115,24 @@ public class RendererTest {
         verify(media).fireAdClickBeacon(creative, adView);
     }
 
+    @Test
+    public void whenDescriptionIsNull_NothingBadHappens() throws Exception {
+        adView.description = null;
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough);
+    }
+
     public static MyAdView makeAdView() {
         return new MyAdView(Robolectric.application) {
-            private final FrameLayout thumbnail = mock(FrameLayout.class);
-            private final TextView advertiser = mock(TextView.class);
-            private final TextView description = mock(TextView.class);
-            private final TextView title = mock(TextView.class);
-
-            @Override
-            public TextView getTitle() {
-                return title;
-            }
-
-            @Override
-            public TextView getDescription() {
-                return description;
-            }
-
-            @Override
-            public TextView getAdvertiser() {
-                return advertiser;
-            }
-
-            @Override
-            public FrameLayout getThumbnail() {
-                return thumbnail;
-            }
         };
     }
 
     private abstract static class MyAdView extends AdView {
         private OnAttachStateChangeListener onAttachStateListener;
+
+        FrameLayout thumbnail = mock(FrameLayout.class);
+        TextView advertiser = mock(TextView.class);
+        TextView description = mock(TextView.class);
+        TextView title = mock(TextView.class);
 
         public MyAdView(Context context) {
             super(context);
@@ -157,6 +144,26 @@ public class RendererTest {
 
         public MyAdView(Context context, AttributeSet attrs, int defStyleAttr) {
             super(context, attrs, defStyleAttr);
+        }
+
+        @Override
+        public TextView getTitle() {
+            return title;
+        }
+
+        @Override
+        public TextView getDescription() {
+            return description;
+        }
+
+        @Override
+        public TextView getAdvertiser() {
+            return advertiser;
+        }
+
+        @Override
+        public FrameLayout getThumbnail() {
+            return thumbnail;
         }
 
         @Override
