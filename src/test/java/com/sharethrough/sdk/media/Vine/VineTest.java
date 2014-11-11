@@ -3,7 +3,6 @@ package com.sharethrough.sdk.media.Vine;
 import android.graphics.Bitmap;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
-import com.sharethrough.sdk.media.Youtube;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,8 +30,8 @@ public class VineTest {
     }
 
     @Test
-    public void thumbnailImageOverlaysYoutubeIcon() throws Exception {
-        Youtube subject = new Youtube(creative, beaconService);
+    public void thumbnailImageOverlaysVineIcon() throws Exception {
+        Vine subject = new Vine(creative, beaconService);
         assertThat(subject).isInstanceOf(ThumbnailOverlayingMedia.class);
     }
 }
