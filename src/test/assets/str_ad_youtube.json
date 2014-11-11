@@ -15,9 +15,9 @@
         "variant_key": "12345",
         "advertiser": "Advertiser",
         "beacons": {
-          "visible": ["visibleBeacon"],
-          "click": ["clickBeacon"],
-          "play": []
+          "visible": [],
+          "click": ["clickBeaconOne", "clickBeaconTwo"],
+          "play": ["playBeaconOne", "playBeaconTwo"]
         },
         "thumbnail_url": "//th.umb.na/il/URL",
         "title": "Title",

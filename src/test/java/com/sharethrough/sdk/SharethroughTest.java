@@ -18,6 +18,9 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.tester.org.apache.http.TestHttpResponse;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -121,7 +124,12 @@ public class SharethroughTest {
         assertThat(creative.getVariantKey()).isEqualTo("12345");
         assertThat(creative.getPlacementKey()).isEqualTo("abc");
         assertThat(creative.getSignature()).isEqualTo("c19");
+
         assertThat(creative.getMedia()).isInstanceOf(Clickout.class);
+
+        assertThat(creative.getPlayBeacons()).isEqualTo(Arrays.asList("playBeaconOne", "playBeaconTwo"));
+        assertThat(creative.getClickBeacons()).isEqualTo(Arrays.asList("clickBeaconOne", "clickBeaconTwo"));
+        assertThat(creative.getVisibleBeacons()).isEqualTo(new ArrayList<String>());
     }
 
     @Test(expected = KeyRequiredException.class)

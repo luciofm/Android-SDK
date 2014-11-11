@@ -151,12 +151,36 @@ public class Sharethrough<V extends View & IAdView> {
             creative.priceType = jsonCreative.getString("priceType");
             creative.signature = jsonCreative.getString("signature");
 
-
             // TODO: more fields
+            JSONObject beacons = jsonCreativeInner.getJSONObject("beacons");
+            creative.creative.beacon = new Response.Creative.CreativeInner.Beacon();
+            parseBeacons(creative, beacons);
 
             response.creatives.add(creative);
         }
         return response;
+    }
+
+    private void parseBeacons(Response.Creative creative, JSONObject beacons) throws JSONException {
+        JSONArray visibleBeacons = beacons.getJSONArray("visible");
+        creative.creative.beacon.visible = new ArrayList<>();
+        creative.creative.beacon.play = new ArrayList<>();
+        creative.creative.beacon.click = new ArrayList<>();
+
+        for (int k = 0; k < visibleBeacons.length(); k++) {
+            String s = visibleBeacons.getString(k);
+            creative.creative.beacon.visible.add(s);
+        }
+        JSONArray clickBeacons = beacons.getJSONArray("click");
+        for (int k = 0; k < clickBeacons.length(); k++) {
+            String s = clickBeacons.getString(k);
+            creative.creative.beacon.click.add(s);
+        }
+        JSONArray playBeacons = beacons.getJSONArray("play");
+        for (int k = 0; k < playBeacons.length(); k++) {
+            String s = playBeacons.getString(k);
+            creative.creative.beacon.play.add(s);
+        }
     }
 
     private byte[] convertInputStreamToByteArray(InputStream inputStream) throws IOException {

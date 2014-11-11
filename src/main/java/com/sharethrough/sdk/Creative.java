@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import com.sharethrough.sdk.media.*;
 
+import java.util.ArrayList;
+
 public class Creative {
     private final Response.Creative responseCreative;
     private final String placementKey;
@@ -87,5 +89,15 @@ public class Creative {
         return responseCreative.creative.thumbnailUrl;
     }
 
+    public ArrayList<String> getClickBeacons() {
+        return (ArrayList<String>) responseCreative.creative.beacon.click;
+    }
 
+    public ArrayList<String> getPlayBeacons() {
+        return (ArrayList<String>) responseCreative.creative.beacon.play;
+    }
+
+    public ArrayList<String> getVisibleBeacons() {
+        return (ArrayList<String>) responseCreative.creative.beacon.visible;
+    }
 }

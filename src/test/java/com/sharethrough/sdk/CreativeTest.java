@@ -7,6 +7,8 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
+
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -22,6 +24,7 @@ public class CreativeTest {
     public void setUp() throws Exception {
         responseCreative = new Response.Creative();
         responseCreative.creative = new Response.Creative.CreativeInner();
+        responseCreative.creative.beacon = new Response.Creative.CreativeInner.Beacon();
         subject = new Creative(responseCreative, IMAGE_BYTES, "placement key", mock(BeaconService.class));
     }
 
@@ -59,5 +62,35 @@ public class CreativeTest {
     public void getMedia_EverythingElse() throws Exception {
         responseCreative.creative.action = "something else";
         assertThat(subject.getMedia()).isInstanceOf(Clickout.class);
+    }
+
+    @Test
+    public void getPlayBeacon_ReturnsAllPlayBeacons() throws Exception {
+        ArrayList<String> playBeacons = new ArrayList<>();
+        playBeacons.add("BeaconOne");
+        playBeacons.add("BeaconTwo");
+        responseCreative.creative.beacon.play = playBeacons;
+
+        assertThat(subject.getPlayBeacons()).isEqualTo(playBeacons);
+    }
+
+    @Test
+    public void getVisibleBeacon_ReturnsAllVisbleBeacons() throws Exception {
+        ArrayList<String> visibleBeacons = new ArrayList<>();
+        visibleBeacons.add("BeaconOne");
+        visibleBeacons.add("BeaconTwo");
+        responseCreative.creative.beacon.visible = visibleBeacons;
+
+        assertThat(subject.getVisibleBeacons()).isEqualTo(visibleBeacons);
+    }
+
+    @Test
+    public void getClickBeacon_ReturnsAllClickBeacons() throws Exception {
+        ArrayList<String> clickBeacons = new ArrayList<>();
+        clickBeacons.add("BeaconOne");
+        clickBeacons.add("BeaconTwo");
+        responseCreative.creative.beacon.click = clickBeacons;
+
+        assertThat(subject.getClickBeacons()).isEqualTo(clickBeacons);
     }
 }
