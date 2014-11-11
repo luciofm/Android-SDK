@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.sharethrough.sdk.media.Media;
 import com.sharethrough.test.util.AdView;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +33,7 @@ public class RendererTest {
     private Renderer subject;
     private Creative creative;
     private Bitmap bitmap;
-    private Creative.Media media;
+    private Media media;
     private MyAdView adView;
     private Timer timer;
     private BeaconService beaconService;
@@ -47,7 +48,8 @@ public class RendererTest {
         when(creative.getTitle()).thenReturn("title");
         bitmap = mock(Bitmap.class);
         when(creative.getThumbnailImage()).thenReturn(bitmap);
-        media = mock(Creative.Media.class);
+        media = mock(Media.class);
+        when(media.getCreative()).thenReturn(creative);
         when(media.getClickListener()).thenReturn(mock(View.OnClickListener.class));
         when(creative.getMedia()).thenReturn(media);
 
@@ -76,7 +78,7 @@ public class RendererTest {
         ArgumentCaptor<View> thumbnailViewCaptor = ArgumentCaptor.forClass(View.class);
         verify(adView.getThumbnail(), atLeastOnce()).addView(thumbnailViewCaptor.capture(), any(FrameLayout.LayoutParams.class));
 
-        ImageView thumbnailImageView = (ImageView) thumbnailViewCaptor.getValue();
+        ImageView thumbnailImageView = (ImageView) thumbnailViewCaptor.getAllValues().get(0);
         BitmapDrawable bitmapDrawable = (BitmapDrawable) thumbnailImageView.getDrawable();
         assertThat(bitmapDrawable.getBitmap()).isEqualTo(bitmap);
 

@@ -7,9 +7,8 @@ import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.IAdView;
 import com.sharethrough.sdk.dialogs.YoutubeDialog;
-import com.sharethrough.sdk.media.Vine.ThumbnailOverlayingMedia;
 
-public class Youtube extends ThumbnailOverlayingMedia {
+public class Youtube extends Media {
     private static final String EMBED_PREFIX = "/embed/";
     private final BeaconService beaconService;
     private Creative creative;
@@ -33,12 +32,12 @@ public class Youtube extends ThumbnailOverlayingMedia {
     }
 
     @Override
-    protected int getOverlayImageResourceId() {
+    public int getOverlayImageResourceId() {
         return R.drawable.youtube_squared;
     }
 
     @Override
-    protected Creative getCreative() {
+    public Creative getCreative() {
         return creative;
     }
 

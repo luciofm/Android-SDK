@@ -1,8 +1,6 @@
 package com.sharethrough.sdk;
 
-import com.sharethrough.sdk.media.Clickout;
-import com.sharethrough.sdk.media.Vine.Vine;
-import com.sharethrough.sdk.media.Youtube;
+import com.sharethrough.sdk.media.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +35,18 @@ public class CreativeTest {
     public void getMedia_Vine() throws Exception {
         responseCreative.creative.action = "vine";
         assertThat(subject.getMedia()).isInstanceOf(Vine.class);
+    }
+
+    @Test
+    public void getMedia_Instagram() throws Exception {
+        responseCreative.creative.action = "instagram";
+        assertThat(subject.getMedia()).isInstanceOf(Instagram.class);
+    }
+
+    @Test
+    public void getMedia_Pinterest() throws Exception {
+        responseCreative.creative.action = "pinterest";
+        assertThat(subject.getMedia()).isInstanceOf(Pinterest.class);
     }
 
     @Test

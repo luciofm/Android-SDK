@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.sharethrough.sdk.media.Media;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -68,7 +69,7 @@ public class Renderer<V extends View & IAdView> {
                 thumbnail.addView(thumbnailImage,
                         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-                final Creative.Media media = creative.getMedia();
+                final Media media = creative.getMedia();
                 media.overlayThumbnail(adView);
                 adView.setOnClickListener(new View.OnClickListener() {
                     @Override

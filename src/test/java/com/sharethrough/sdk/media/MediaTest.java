@@ -1,4 +1,4 @@
-package com.sharethrough.sdk.media.Vine;
+package com.sharethrough.sdk.media;
 
 import android.graphics.Bitmap;
 import android.view.Gravity;
@@ -24,7 +24,7 @@ import static org.robolectric.Robolectric.shadowOf;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(emulateSdk = 18)
-public class ThumbnailOverlayingMediaTest {
+public class MediaTest {
     private Bitmap thumbnailBitmap;
     private Creative creative;
     private BeaconService beaconService;
@@ -38,18 +38,18 @@ public class ThumbnailOverlayingMediaTest {
     }
 
     @Test
-    public void thumbnailImageOverlaysYoutubeIcon() throws Exception {
+    public void overlaysIcon() throws Exception {
         when(thumbnailBitmap.getWidth()).thenReturn(100);
         when(thumbnailBitmap.getHeight()).thenReturn(200);
 
-        ThumbnailOverlayingMedia subject = new ThumbnailOverlayingMedia() {
+        Media subject = new Media() {
             @Override
-            protected int getOverlayImageResourceId() {
+            public int getOverlayImageResourceId() {
                 return R.drawable.youtube_squared;
             }
 
             @Override
-            protected Creative getCreative() {
+            public Creative getCreative() {
                 return creative;
             }
 
@@ -80,5 +80,35 @@ public class ThumbnailOverlayingMediaTest {
         assertThat(layoutParams.gravity).isEqualTo(Gravity.TOP | Gravity.LEFT);
         assertThat(layoutParams.width).isEqualTo(overlayDimensionMax);
         assertThat(layoutParams.height).isEqualTo(overlayDimensionMax);
+    }
+
+    @Test
+    public void whenIconResourceIsInvalid_NothingHappens() throws Exception {
+        Media subject = new Media() {
+            @Override
+            public int getOverlayImageResourceId() {
+                return -1;
+            }
+
+            @Override
+            public Creative getCreative() {
+                return creative;
+            }
+
+            @Override
+            public View.OnClickListener getClickListener() {
+                return null;
+            }
+
+            @Override
+            public <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView) {
+            }
+        };
+
+        AdView adView = RendererTest.makeAdView();
+
+        subject.overlayThumbnail(adView);
+
+        verifyNoMoreInteractions(adView.getThumbnail());
     }
 }

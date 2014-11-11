@@ -1,4 +1,4 @@
-package com.sharethrough.sdk.media.Vine;
+package com.sharethrough.sdk.media;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -11,7 +11,7 @@ import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.IAdView;
 import com.sharethrough.sdk.dialogs.WebViewDialog;
 
-public class Vine extends ThumbnailOverlayingMedia {
+public class Vine extends Media {
     private final Creative creative;
     private final BeaconService beaconService;
 
@@ -48,12 +48,12 @@ public class Vine extends ThumbnailOverlayingMedia {
     }
 
     @Override
-    protected int getOverlayImageResourceId() {
-        return R.drawable.vine_squared;
+    public int getOverlayImageResourceId() {
+        return R.drawable.vine;
     }
 
     @Override
-    protected Creative getCreative() {
+    public Creative getCreative() {
         return creative;
     }
 }

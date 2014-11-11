@@ -6,9 +6,9 @@ import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.IAdView;
 import com.sharethrough.sdk.dialogs.WebViewDialog;
 
-public class Clickout implements Creative.Media {
-    private final Creative creative;
-    private final BeaconService beaconService;
+public class Clickout extends Media {
+    protected final Creative creative;
+    protected final BeaconService beaconService;
 
     public Clickout(Creative creative, BeaconService beaconService) {
         this.beaconService = beaconService;
@@ -16,7 +16,13 @@ public class Clickout implements Creative.Media {
     }
 
     @Override
-    public  <V extends View & IAdView> void overlayThumbnail(V adView) {
+    public Creative getCreative() {
+        return creative;
+    }
+
+    @Override
+    public int getOverlayImageResourceId() {
+        return -1;
     }
 
     @Override

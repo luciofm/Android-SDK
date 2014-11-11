@@ -1,10 +1,10 @@
 package com.sharethrough.sdk.media;
 
 import android.graphics.Bitmap;
+import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.RendererTest;
-import com.sharethrough.sdk.media.Vine.ThumbnailOverlayingMedia;
 import com.sharethrough.test.util.AdView;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,7 +62,7 @@ public class YoutubeTest {
     @Test
     public void thumbnailImageOverlaysYoutubeIcon() throws Exception {
         Youtube subject = new Youtube(creative, beaconService);
-        assertThat(subject).isInstanceOf(ThumbnailOverlayingMedia.class);
+        assertThat(subject.getOverlayImageResourceId()).isEqualTo(R.drawable.youtube_squared);
     }
 
     @Test

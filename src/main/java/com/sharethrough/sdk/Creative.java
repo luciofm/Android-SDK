@@ -2,10 +2,7 @@ package com.sharethrough.sdk;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.view.View;
-import com.sharethrough.sdk.media.Clickout;
-import com.sharethrough.sdk.media.Vine.Vine;
-import com.sharethrough.sdk.media.Youtube;
+import com.sharethrough.sdk.media.*;
 
 public class Creative {
     private final Response.Creative responseCreative;
@@ -38,14 +35,16 @@ public class Creative {
         return thumbnailImage;
     }
 
-    public Creative.Media getMedia() {
+    public Media getMedia() {
         switch (responseCreative.creative.action) {
             case "video":
                 return new Youtube(this, beaconService);
             case "vine":
                 return new Vine(this, beaconService);
             case "instagram":
+                return new Instagram(this, beaconService);
             case "pinterest":
+                return new Pinterest(this, beaconService);
             case "clickout":
             default:
                 return new Clickout(this, beaconService);
@@ -89,9 +88,4 @@ public class Creative {
     }
 
 
-    public interface Media {
-        <V extends View & IAdView> void overlayThumbnail(V adView);
-        View.OnClickListener getClickListener();
-        <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView);
-    }
 }
