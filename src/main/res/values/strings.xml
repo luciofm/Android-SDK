@@ -29,6 +29,10 @@
 
       function onPlayerReady(event) {
           event.target.playVideo();
+          function updateTime() {
+            window.SharethroughYoutube.timeUpdate(player.getCurrentTime(), player.getDuration());
+          }
+          setInterval(updateTime, 1000);
       };
       function onPlayerStateChange(event) {
         console.log(\"STATE\t\" + event.data);

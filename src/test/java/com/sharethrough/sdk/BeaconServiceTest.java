@@ -156,6 +156,19 @@ public class BeaconServiceTest {
         });
     }
 
+    @Test
+    public void videoPlayed() throws Exception {
+        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(Robolectric.application, creative);
+        expectedBeaconParams.put("type", "completionPercent");
+        expectedBeaconParams.put("value", "123");
+        assertBeaconFired(expectedBeaconParams, new Runnable() {
+            @Override
+            public void run() {
+                subject.videoPlayed(Robolectric.application, creative, 123);
+            }
+        });
+    }
+
     private void assertBeaconFired(final Map<String,String> expectedBeaconParams, Runnable fireBeacon) {
         final boolean[] wasCalled = {false};
         RequestMatcher requestMatcher = new RequestMatcher() {

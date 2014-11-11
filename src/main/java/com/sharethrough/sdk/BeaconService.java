@@ -108,6 +108,14 @@ public class BeaconService {
         fireBeacon(context, beaconParams);
     }
 
+
+    public void videoPlayed(Context context, Creative creative, int percent) {
+        Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
+        beaconParams.put("type", "completionPercent");
+        beaconParams.put("value", String.valueOf(percent));
+        fireBeacon(context, beaconParams);
+    }
+
     private void fireBeacon(Context context, final Map<String, String> beaconParams) {
         executorService.execute(new Runnable() {
             @Override
