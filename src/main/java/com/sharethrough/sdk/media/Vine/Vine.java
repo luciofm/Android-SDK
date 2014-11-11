@@ -44,7 +44,7 @@ public class Vine extends ThumbnailOverlayingMedia {
 
     @Override
     public  <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView) {
-        // TODO
+        beaconService.adClicked(adView.getContext(), "vinePlay", creative, adView);
     }
 
     @Override
