@@ -33,7 +33,7 @@ public class Youtube extends Media {
 
     @Override
     public int getOverlayImageResourceId() {
-        return R.drawable.youtube_squared;
+        return R.drawable.youtube;
     }
 
     @Override

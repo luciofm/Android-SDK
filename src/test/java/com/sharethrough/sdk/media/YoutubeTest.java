@@ -62,7 +62,7 @@ public class YoutubeTest {
     @Test
     public void thumbnailImageOverlaysYoutubeIcon() throws Exception {
         Youtube subject = new Youtube(creative, beaconService);
-        assertThat(subject.getOverlayImageResourceId()).isEqualTo(R.drawable.youtube_squared);
+        assertThat(subject.getOverlayImageResourceId()).isEqualTo(R.drawable.youtube);
     }
 
     @Test

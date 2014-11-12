@@ -45,7 +45,7 @@ public class MediaTest {
         Media subject = new Media() {
             @Override
             public int getOverlayImageResourceId() {
-                return R.drawable.youtube_squared;
+                return R.drawable.youtube;
             }
 
             @Override
@@ -73,7 +73,7 @@ public class MediaTest {
         verify(adView.getThumbnail()).addView(imageViewArgumentCaptor.capture(), layoutParamsArgumentCaptor.capture());
 
         ImageView youtubeIcon = imageViewArgumentCaptor.getValue();
-        assertThat(shadowOf(youtubeIcon).getImageResourceId()).isEqualTo(R.drawable.youtube_squared);
+        assertThat(shadowOf(youtubeIcon).getImageResourceId()).isEqualTo(R.drawable.youtube);
         int overlayDimensionMax = 25;
 
         FrameLayout.LayoutParams layoutParams = layoutParamsArgumentCaptor.getValue();
