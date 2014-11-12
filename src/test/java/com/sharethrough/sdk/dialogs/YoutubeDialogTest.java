@@ -6,6 +6,7 @@ import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.media.Youtube;
+import com.sharethrough.sdk.webview.YoutubeJavascriptInterface;
 import com.sharethrough.test.util.Misc;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +14,8 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.Implementation;
+import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowWebView;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -44,6 +47,12 @@ public class YoutubeDialogTest {
     @Test
     public void instanceOfWebViewDialog_toPiggyBackOnSetupAndSharing() throws Exception {
         assertThat(subject).isInstanceOf(WebViewDialog.class);
+    }
+
+    @Test
+    public void usesJSInterface() throws Exception {
+        WebView webView = Misc.findViewOfType(WebView.class, (ViewGroup) subject.getWindow().getDecorView());
+        assertThat(shadowOf(webView).getJavascriptInterface("SharethroughYoutube")).isInstanceOf(YoutubeJavascriptInterface.class);
     }
 
     @Test

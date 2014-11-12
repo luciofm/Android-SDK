@@ -226,10 +226,23 @@ public class BeaconServiceTest {
 
         List<HttpRequestInfo> info = Robolectric.getFakeHttpLayer().getSentHttpRequestInfos();
         assertThat(info.size()).isEqualTo(5);
-        for (int i = 0; i < info.size()-1; i++) {
+        for (int i = 0; i < info.size() - 1; i++) {
             String expectedUrl = "http:" + initialUrls[i];
             assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
         }
+    }
+
+    @Test
+    public void videoPlayed() throws Exception {
+        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(Robolectric.application, creative);
+        expectedBeaconParams.put("type", "completionPercent");
+        expectedBeaconParams.put("value", "123");
+        assertBeaconFired(expectedBeaconParams, new Runnable() {
+            @Override
+            public void run() {
+                subject.videoPlayed(Robolectric.application, creative, 123);
+            }
+        });
     }
 
     private void assertBeaconFired(final Map<String,String> expectedBeaconParams, Runnable fireBeacon) {

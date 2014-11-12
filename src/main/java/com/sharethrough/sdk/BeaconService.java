@@ -121,6 +121,14 @@ public class BeaconService {
         fireBeacon(beaconParams, Sharethrough.TRACKING_URL);
     }
 
+
+    public void videoPlayed(Context context, Creative creative, int percent) {
+        Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
+        beaconParams.put("type", "completionPercent");
+        beaconParams.put("value", String.valueOf(percent));
+        fireBeacon(beaconParams, Sharethrough.TRACKING_URL);
+    }
+
     private void fireBeacon(final Map<String, String> beaconParams, final String uri) {
         executorService.execute(new Runnable() {
             @Override

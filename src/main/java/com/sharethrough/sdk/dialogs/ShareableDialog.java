@@ -21,14 +21,14 @@ import com.sharethrough.sdk.Creative;
 import java.util.List;
 
 public abstract class ShareableDialog extends Dialog {
-    private final BeaconService mBeaconService;
+    protected final BeaconService beaconService;
 
     public ShareableDialog(Context context, int theme, BeaconService beaconService) {
         super(context, theme);
 
         requestWindowFeature(Window.FEATURE_ACTION_BAR);
 
-        mBeaconService = beaconService;
+        this.beaconService = beaconService;
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -58,17 +58,17 @@ public abstract class ShareableDialog extends Dialog {
                 List<ResolveInfo> resolveInfos = pkgManager.queryIntentActivities(new Intent(Intent.ACTION_SEND).setType("message/rfc822"), 0);
                 for (ResolveInfo resolveInfo : resolveInfos) {
                     if (packageName.equals(resolveInfo.activityInfo.packageName)) {
-                        mBeaconService.adShared(getContext(), getCreative(), "email");
+                        beaconService.adShared(getContext(), getCreative(), "email");
                         return false;
                     }
                 }
 
                 if (packageName.startsWith("com.twitter")) {
-                    mBeaconService.adShared(getContext(), getCreative(), "twitter");
+                    beaconService.adShared(getContext(), getCreative(), "twitter");
                 } else if (packageName.startsWith("com.facebook")) {
-                    mBeaconService.adShared(getContext(), getCreative(), "facebook");
+                    beaconService.adShared(getContext(), getCreative(), "facebook");
                 } else {
-                    mBeaconService.adShared(getContext(), getCreative(), packageName);
+                    beaconService.adShared(getContext(), getCreative(), packageName);
                 }
 
                 return false;
