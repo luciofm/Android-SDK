@@ -43,6 +43,8 @@ public class Creative {
                 return new Youtube(this, beaconService);
             case "vine":
                 return new Vine(this, beaconService);
+            case "hosted-video":
+                return new HostedVideo(this, beaconService);
             case "instagram":
                 return new Instagram(this, beaconService);
             case "pinterest":

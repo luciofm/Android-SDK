@@ -28,6 +28,8 @@ public class MediaTest {
     private Bitmap thumbnailBitmap;
     private Creative creative;
     private BeaconService beaconService;
+    private boolean isThumbnailOverlayCentered;
+    private int overlayImageResourceId;
 
     @Before
     public void setUp() throws Exception {
@@ -35,6 +37,7 @@ public class MediaTest {
         creative = mock(Creative.class);
         beaconService = mock(BeaconService.class);
         when(creative.getThumbnailImage()).thenReturn(thumbnailBitmap);
+        overlayImageResourceId = R.drawable.youtube;
     }
 
     @Test
@@ -42,26 +45,8 @@ public class MediaTest {
         when(thumbnailBitmap.getWidth()).thenReturn(100);
         when(thumbnailBitmap.getHeight()).thenReturn(200);
 
-        Media subject = new Media() {
-            @Override
-            public int getOverlayImageResourceId() {
-                return R.drawable.youtube;
-            }
-
-            @Override
-            public Creative getCreative() {
-                return creative;
-            }
-
-            @Override
-            public View.OnClickListener getClickListener() {
-                return null;
-            }
-
-            @Override
-            public <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView) {
-            }
-        };
+        Media subject = new TestMedia();
+        isThumbnailOverlayCentered = false;
 
         AdView adView = RendererTest.makeAdView();
 
@@ -73,7 +58,7 @@ public class MediaTest {
         verify(adView.getThumbnail()).addView(imageViewArgumentCaptor.capture(), layoutParamsArgumentCaptor.capture());
 
         ImageView youtubeIcon = imageViewArgumentCaptor.getValue();
-        assertThat(shadowOf(youtubeIcon).getImageResourceId()).isEqualTo(R.drawable.youtube);
+        assertThat(shadowOf(youtubeIcon).getImageResourceId()).isEqualTo(overlayImageResourceId);
         int overlayDimensionMax = 25;
 
         FrameLayout.LayoutParams layoutParams = layoutParamsArgumentCaptor.getValue();
@@ -83,32 +68,57 @@ public class MediaTest {
     }
 
     @Test
+    public void overlaysIconWhenCentered() throws Exception {
+        Media subject = new TestMedia();
+        isThumbnailOverlayCentered = true;
+
+        AdView adView = RendererTest.makeAdView();
+
+        subject.overlayThumbnail(adView);
+
+        ArgumentCaptor<ImageView> imageViewArgumentCaptor = ArgumentCaptor.forClass(ImageView.class);
+        ArgumentCaptor<FrameLayout.LayoutParams> layoutParamsArgumentCaptor = ArgumentCaptor.forClass(FrameLayout.LayoutParams.class);
+
+        verify(adView.getThumbnail()).addView(imageViewArgumentCaptor.capture(), layoutParamsArgumentCaptor.capture());
+
+        FrameLayout.LayoutParams layoutParams = layoutParamsArgumentCaptor.getValue();
+        assertThat(layoutParams.gravity).isEqualTo(Gravity.CENTER);
+    }
+
+    @Test
     public void whenIconResourceIsInvalid_NothingHappens() throws Exception {
-        Media subject = new Media() {
-            @Override
-            public int getOverlayImageResourceId() {
-                return -1;
-            }
-
-            @Override
-            public Creative getCreative() {
-                return creative;
-            }
-
-            @Override
-            public View.OnClickListener getClickListener() {
-                return null;
-            }
-
-            @Override
-            public <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView) {
-            }
-        };
+        Media subject = new TestMedia();
+        overlayImageResourceId = -1;
 
         AdView adView = RendererTest.makeAdView();
 
         subject.overlayThumbnail(adView);
 
         verifyNoMoreInteractions(adView.getThumbnail());
+    }
+
+    private class TestMedia extends Media {
+        @Override
+        public int getOverlayImageResourceId() {
+            return overlayImageResourceId;
+        }
+
+        @Override
+        public boolean isThumbnailOverlayCentered() {
+            return isThumbnailOverlayCentered;
+        }
+
+        @Override
+        public Creative getCreative() {
+            return creative;
+        }
+
+        @Override
+        public void wasClicked(View view) {
+        }
+
+        @Override
+        public <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView) {
+        }
     }
 }

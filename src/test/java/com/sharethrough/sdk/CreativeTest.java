@@ -41,6 +41,12 @@ public class CreativeTest {
     }
 
     @Test
+    public void getMedia_HostedVideo() throws Exception {
+        responseCreative.creative.action = "hosted-video";
+        assertThat(subject.getMedia()).isInstanceOf(HostedVideo.class);
+    }
+
+    @Test
     public void getMedia_Instagram() throws Exception {
         responseCreative.creative.action = "instagram";
         assertThat(subject.getMedia()).isInstanceOf(Instagram.class);

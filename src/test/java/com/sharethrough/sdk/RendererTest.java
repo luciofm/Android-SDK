@@ -50,7 +50,6 @@ public class RendererTest {
         when(creative.getThumbnailImage()).thenReturn(bitmap);
         media = mock(Media.class);
         when(media.getCreative()).thenReturn(creative);
-        when(media.getClickListener()).thenReturn(mock(View.OnClickListener.class));
         when(creative.getMedia()).thenReturn(media);
 
         beaconService = mock(BeaconService.class);
@@ -113,7 +112,7 @@ public class RendererTest {
 
         adView.performClick();
 
-        verify(media.getClickListener()).onClick(adView);
+        verify(media).wasClicked(adView);
         verify(media).fireAdClickBeacon(creative, adView);
     }
 

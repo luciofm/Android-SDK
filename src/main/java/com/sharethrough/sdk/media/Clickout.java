@@ -26,13 +26,8 @@ public class Clickout extends Media {
     }
 
     @Override
-    public View.OnClickListener getClickListener() {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new WebViewDialog(v.getContext(), creative, beaconService).show();
-            }
-        };
+    public void wasClicked(View v) {
+        new WebViewDialog(v.getContext(), creative, beaconService).show();
     }
 
     public <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView) {

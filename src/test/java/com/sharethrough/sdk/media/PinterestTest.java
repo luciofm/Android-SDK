@@ -44,7 +44,7 @@ public class PinterestTest {
     @Test
     @Config(emulateSdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
     public void clickingOpensPinterestDialog() throws Exception {
-        subject.getClickListener().onClick(new View(Robolectric.application));
+        subject.wasClicked(new View(Robolectric.application));
         assertThat(ShadowDialog.getLatestDialog()).isInstanceOf(PinterestDialog.class);
     }
 

@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -65,19 +66,19 @@ public class Renderer<V extends View & IAdView> {
                 ImageView thumbnailImage = new ImageView(context);
                 Bitmap thumbnailBitmap = creative.getThumbnailImage();
                 thumbnailImage.setImageBitmap(thumbnailBitmap);
-                thumbnailImage.setScaleType(ImageView.ScaleType.FIT_START);
+                thumbnailImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
                 thumbnail.addView(thumbnailImage,
-                        new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                        new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
 
                 final Media media = creative.getMedia();
                 media.overlayThumbnail(adView);
                 adView.setOnClickListener(new View.OnClickListener() {
-                                              @Override
-                                              public void onClick(View v) {
-                                                  media.fireAdClickBeacon(creative, adView);
-                                                  media.getClickListener().onClick(v);
-                                              }
-                                          }
+                    @Override
+                    public void onClick(View v) {
+                        media.fireAdClickBeacon(creative, adView);
+                        media.wasClicked(v);
+                    }
+                  }
                 );
             }
         });

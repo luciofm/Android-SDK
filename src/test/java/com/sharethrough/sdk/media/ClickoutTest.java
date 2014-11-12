@@ -43,7 +43,7 @@ public class ClickoutTest {
     @Config(emulateSdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
     @Test
     public void clickListener_opensWebViewDialog() throws Exception {
-        subject.getClickListener().onClick(new ImageView(Robolectric.application));
+        subject.wasClicked(new ImageView(Robolectric.application));
         assertThat(ShadowDialog.getLatestDialog()).isInstanceOf(WebViewDialog.class);
     }
 

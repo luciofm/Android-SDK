@@ -17,12 +17,7 @@ public class Pinterest extends Clickout {
     }
 
     @Override
-    public View.OnClickListener getClickListener() {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new PinterestDialog(v.getContext(), Pinterest.this.getCreative(), Pinterest.this.beaconService).show();
-            }
-        };
+    public void wasClicked(View v) {
+        new PinterestDialog(v.getContext(), Pinterest.this.getCreative(), Pinterest.this.beaconService).show();
     }
 }

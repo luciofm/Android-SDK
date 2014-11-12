@@ -42,13 +42,8 @@ public class Youtube extends Media {
     }
 
     @Override
-    public View.OnClickListener getClickListener() {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new YoutubeDialog(v.getContext(), creative, beaconService).show();
-            }
-        };
+    public void wasClicked(View v) {
+        new YoutubeDialog(v.getContext(), creative, beaconService).show();
     }
 
     @Override

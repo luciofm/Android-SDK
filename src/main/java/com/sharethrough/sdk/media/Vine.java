@@ -21,25 +21,20 @@ public class Vine extends Media {
     }
 
     @Override
-    public View.OnClickListener getClickListener() {
-        return new View.OnClickListener() {
+    public void wasClicked(View v) {
+        final Context context = v.getContext();
+        new WebViewDialog(context, creative, beaconService) {
+            @TargetApi(Build.VERSION_CODES.HONEYCOMB)
             @Override
-            public void onClick(View v) {
-                final Context context = v.getContext();
-                new WebViewDialog(context, creative, beaconService) {
-                    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-                    @Override
-                    protected void loadPage() {
-                        String baseUrl = "http://www.sharethrough.com/";
-                        String html = context.getString(R.string.video_html)
-                                .replace("videoURL", creative.getMediaUrl())
-                                .replace("thumbnailURL", creative.getThumbnailUrl());
-                        Log.d("Sharethrough", "Vine HTML:\n" + html);
-                        webView.loadDataWithBaseURL(baseUrl, html, "text/html", "UTF-8", baseUrl);
-                    }
-                }.show();
+            protected void loadPage() {
+                String baseUrl = "http://www.sharethrough.com/";
+                String html = context.getString(R.string.video_html)
+                        .replace("videoURL", creative.getMediaUrl())
+                        .replace("thumbnailURL", creative.getThumbnailUrl());
+                Log.d("Sharethrough", "Vine HTML:\n" + html);
+                webView.loadDataWithBaseURL(baseUrl, html, "text/html", "UTF-8", baseUrl);
             }
-        };
+        }.show();
     }
 
     @Override
