@@ -43,7 +43,7 @@ public class Sharethrough<V extends View & IAdView> {
     }
 
     public Sharethrough(Context context, String key, int adCacheTimeInMilliseconds) {
-        this(context, EXECUTOR_SERVICE, key, new Renderer(new Timer("Sharethrough visibility watcher")), new BeaconService(new DateProvider(), new StrSession(), EXECUTOR_SERVICE, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString())), adCacheTimeInMilliseconds);
+        this(context, EXECUTOR_SERVICE, key, new Renderer(new Timer("Sharethrough visibility watcher")), new BeaconService(new DateProvider(), UUID.randomUUID(), EXECUTOR_SERVICE, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString())), adCacheTimeInMilliseconds);
     }
 
     Sharethrough(final Context context, final ExecutorService executorService, final String key, final Renderer renderer, final BeaconService beaconService, int adCacheTimeInMilliseconds) {

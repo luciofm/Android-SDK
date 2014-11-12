@@ -16,15 +16,16 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 public class BeaconService {
     private final Provider<Date> dateProvider;
-    private final StrSession session;
     private final ExecutorService executorService;
     private final AdvertisingIdProvider advertisingIdProvider;
+    private final UUID session;
 
-    public BeaconService(final Provider<Date> dateProvider, final StrSession session, final ExecutorService executorService, final AdvertisingIdProvider advertisingIdProvider) {
+    public BeaconService(final Provider<Date> dateProvider, final UUID session, final ExecutorService executorService, final AdvertisingIdProvider advertisingIdProvider) {
         this.dateProvider = dateProvider;
         this.session = session;
         this.executorService = executorService;

@@ -27,7 +27,7 @@ import static org.mockito.Mockito.*;
 public class BeaconServiceTest {
     private Map<String, String> expectedCommonParams;
     private Date now;
-    private StrSession session;
+    private UUID session;
     private BeaconService subject;
     private ExecutorService executorService;
     private Creative creative;
@@ -40,7 +40,7 @@ public class BeaconServiceTest {
         System.setProperty("http.agent", "Robolectric");
 
         now = new Date(1000000000);
-        session = new StrSession();
+        session = UUID.randomUUID();
         expectedCommonParams = new HashMap();
         expectedCommonParams.put("umtime", "" + now.getTime());
         expectedCommonParams.put("ploc", "com.sharethrough.android.sdk");
