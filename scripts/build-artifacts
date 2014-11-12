@@ -1,5 +1,10 @@
 #!/bin/sh -ex
 
+if [ "$TRAVIS_BRANCH" != "master" ] || [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+	echo "$0: skipping: not build master branch on travis-ci"
+	exit 0
+fi
+
 TMP=${TMP:-/tmp}
 
 OUTPUT_REPO="https://strdeploy:${GH_TOKEN}@github.com/sharethrough/Android-SDK-Maven.git"
