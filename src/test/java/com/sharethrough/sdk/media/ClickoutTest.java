@@ -51,6 +51,6 @@ public class ClickoutTest {
     public void fireAdClickBeacon() throws Exception {
         AdView adView = RendererTest.makeAdView();
         subject.fireAdClickBeacon(creative, adView);
-        verify(beaconService).adClicked(adView.getContext(), "clickout", creative, adView);
+        verify(beaconService).adClicked("clickout", creative, adView);
     }
 }

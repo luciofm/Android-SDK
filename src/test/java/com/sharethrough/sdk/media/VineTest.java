@@ -9,7 +9,6 @@ import com.sharethrough.test.util.AdView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -44,6 +43,6 @@ public class VineTest {
     public void firesPlayBeacon() throws Exception {
         AdView adView = RendererTest.makeAdView();
         subject.fireAdClickBeacon(creative, adView);
-        verify(beaconService).adClicked(Robolectric.application, "vinePlay", creative, adView);
+        verify(beaconService).adClicked("vinePlay", creative, adView);
     }
 }

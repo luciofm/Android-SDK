@@ -71,6 +71,6 @@ public class YoutubeTest {
 
         AdView adView = RendererTest.makeAdView();
         subject.fireAdClickBeacon(creative, adView);
-        verify(beaconService).adClicked(adView.getContext(), "youtubePlay", creative, adView);
+        verify(beaconService).adClicked("youtubePlay", creative, adView);
     }
 }

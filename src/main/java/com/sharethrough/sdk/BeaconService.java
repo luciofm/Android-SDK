@@ -24,7 +24,7 @@ public class BeaconService {
     private final ExecutorService executorService;
     private final AdvertisingIdProvider advertisingIdProvider;
 
-    public BeaconService(Provider<Date> dateProvider, StrSession session, ExecutorService executorService, AdvertisingIdProvider advertisingIdProvider) {
+    public BeaconService(final Provider<Date> dateProvider, final StrSession session, final ExecutorService executorService, final AdvertisingIdProvider advertisingIdProvider) {
         this.dateProvider = dateProvider;
         this.session = session;
         this.executorService = executorService;
@@ -52,7 +52,7 @@ public class BeaconService {
         return result;
     }
 
-    Map<String, String> commonParamsWithCreative(Context context, Creative creative) {
+    Map<String, String> commonParamsWithCreative(final Context context, final Creative creative) {
         Map<String, String> result = commonParams(context);
         result.put("pkey", creative.getPlacementKey());
         result.put("vkey", creative.getVariantKey());
@@ -63,8 +63,8 @@ public class BeaconService {
         return result;
     }
 
-    public <V extends View & IAdView> void adClicked(final Context context, final String userEvent, final Creative creative, final V adView) {
-        Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
+    public <V extends View & IAdView> void adClicked(final String userEvent, final Creative creative, final V adView) {
+        Map<String, String> beaconParams = commonParamsWithCreative(adView.getContext(), creative);
         beaconParams.put("pheight", "" + adView.getHeight());
         beaconParams.put("pwidth", "" + adView.getWidth());
         beaconParams.put("type", "userEvent");
@@ -79,7 +79,7 @@ public class BeaconService {
             fireBeacon(new HashMap<String, String>(), "http:" + uri);
         }
 
-        fireBeacon(beaconParams, Sharethrough.TRACKING_URL);
+        fireBeacon(beaconParams);
     }
 
     public void adRequested(final Context context, final String placementKey) {
@@ -87,18 +87,18 @@ public class BeaconService {
         beaconParams.put("type", "impressionRequest");
         beaconParams.put("pkey", placementKey);
 
-        fireBeacon(beaconParams, Sharethrough.TRACKING_URL);
+        fireBeacon(beaconParams);
     }
 
     public void adReceived(final Context context, final Creative creative) {
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("type", "impression");
 
-        fireBeacon(beaconParams, Sharethrough.TRACKING_URL);
+        fireBeacon(beaconParams);
     }
 
 
-    public void adVisible(View adView, Creative creative) {
+    public void adVisible(final View adView, final Creative creative) {
         Context context = adView.getContext();
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("pheight", "" + adView.getHeight());
@@ -109,23 +109,27 @@ public class BeaconService {
             fireBeacon(new HashMap<String, String>(), "http:" + uri);
         }
 
-        fireBeacon(beaconParams, Sharethrough.TRACKING_URL);
+        fireBeacon(beaconParams);
     }
 
-    public void adShared(Context context, Creative creative, String medium) {
+    public void adShared(final Context context, final Creative creative, final String medium) {
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("type", "userEvent");
         beaconParams.put("userEvent", "share");
         beaconParams.put("engagement", "true");
         beaconParams.put("share", medium);
-        fireBeacon(beaconParams, Sharethrough.TRACKING_URL);
+        fireBeacon(beaconParams);
     }
 
 
-    public void videoPlayed(Context context, Creative creative, int percent) {
+    public void videoPlayed(final Context context, final Creative creative, final int percent) {
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("type", "completionPercent");
         beaconParams.put("value", String.valueOf(percent));
+        fireBeacon(beaconParams);
+    }
+
+    private void fireBeacon(final Map<String, String> beaconParams) {
         fireBeacon(beaconParams, Sharethrough.TRACKING_URL);
     }
 

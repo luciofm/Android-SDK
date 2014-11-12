@@ -36,6 +36,6 @@ public class Clickout extends Media {
     }
 
     public <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView) {
-        beaconService.adClicked(adView.getContext(), "clickout", creative, adView);
+        beaconService.adClicked("clickout", creative, adView);
     }
 }

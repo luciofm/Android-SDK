@@ -52,6 +52,6 @@ public class PinterestTest {
     public void firesClickoutBeacon() throws Exception {
         AdView adView = RendererTest.makeAdView();
         subject.fireAdClickBeacon(creative, adView);
-        verify(beaconService).adClicked(Robolectric.application, "clickout", creative, adView);
+        verify(beaconService).adClicked("clickout", creative, adView);
     }
 }

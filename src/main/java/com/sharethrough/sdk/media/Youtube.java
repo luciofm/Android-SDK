@@ -53,6 +53,6 @@ public class Youtube extends Media {
 
     @Override
     public <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView) {
-        beaconService.adClicked(adView.getContext(), "youtubePlay", creative, adView);
+        beaconService.adClicked("youtubePlay", creative, adView);
     }
 }
