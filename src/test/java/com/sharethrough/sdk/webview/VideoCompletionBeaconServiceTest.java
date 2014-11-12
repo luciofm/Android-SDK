@@ -14,9 +14,9 @@ import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(emulateSdk = 18)
-public class YoutubeJavascriptInterfaceTest extends TestCase {
+public class VideoCompletionBeaconServiceTest extends TestCase {
     private BeaconService beaconService;
-    private YoutubeJavascriptInterface subject;
+    private VideoCompletionBeaconService subject;
     private Creative creative;
 
     @Before
@@ -24,7 +24,7 @@ public class YoutubeJavascriptInterfaceTest extends TestCase {
         super.setUp();
         beaconService = mock(BeaconService.class);
         creative = mock(Creative.class);
-        subject = new YoutubeJavascriptInterface(Robolectric.application, creative, beaconService);
+        subject = new VideoCompletionBeaconService(Robolectric.application, creative, beaconService);
     }
 
     public void timeUpdate_before25PercentPlayed_firesNoBeacons() throws Exception {

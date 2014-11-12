@@ -6,7 +6,7 @@ import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.media.Youtube;
-import com.sharethrough.sdk.webview.YoutubeJavascriptInterface;
+import com.sharethrough.sdk.webview.VideoCompletionBeaconService;
 import com.sharethrough.test.util.Misc;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +50,7 @@ public class YoutubeDialogTest {
     @Test
     public void usesJSInterface() throws Exception {
         WebView webView = Misc.findViewOfType(WebView.class, (ViewGroup) subject.getWindow().getDecorView());
-        assertThat(shadowOf(webView).getJavascriptInterface("SharethroughYoutube")).isInstanceOf(YoutubeJavascriptInterface.class);
+        assertThat(shadowOf(webView).getJavascriptInterface("SharethroughYoutube")).isInstanceOf(VideoCompletionBeaconService.class);
     }
 
     @Test

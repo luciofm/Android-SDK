@@ -6,12 +6,17 @@ import android.view.ViewGroup;
 import android.widget.VideoView;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
+import com.sharethrough.sdk.webview.VideoCompletionBeaconService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static com.sharethrough.test.util.Misc.findViewOfType;
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -26,13 +31,17 @@ public class VideoDialogTest {
     private Creative creative;
     private String videoUrl;
     private VideoView videoView;
+    private Timer timer;
+    private VideoCompletionBeaconService videoBeacons;
 
     @Before
     public void setUp() throws Exception {
         creative = mock(Creative.class);
         videoUrl = "http://ab.co/video.mp4";
         when(creative.getMediaUrl()).thenReturn(videoUrl);
-        subject = new VideoDialog(Robolectric.application, creative, mock(BeaconService.class), false);
+        timer = mock(Timer.class);
+        videoBeacons = mock(VideoCompletionBeaconService.class);
+        subject = new VideoDialog(Robolectric.application, creative, mock(BeaconService.class), false, timer, videoBeacons);
         subject.show();
         videoView = findViewOfType(VideoView.class, (ViewGroup) subject.getWindow().getDecorView());
     }
@@ -75,11 +84,29 @@ public class VideoDialogTest {
         shadowOf(videoView).getOnPreparedListener().onPrepared(mediaPlayer);
         verify(mediaPlayer).setLooping(false);
 
-        subject = new VideoDialog(Robolectric.application, creative, mock(BeaconService.class), true);
+        subject = new VideoDialog(Robolectric.application, creative, mock(BeaconService.class), true, timer, videoBeacons);
         subject.show();
 
         videoView = findViewOfType(VideoView.class, (ViewGroup) subject.getWindow().getDecorView());
         shadowOf(videoView).getOnPreparedListener().onPrepared(mediaPlayer);
         verify(mediaPlayer).setLooping(true);
+    }
+
+    @Test
+    public void firesVideoCompletionBeacons() throws Exception {
+        MediaPlayer mediaPlayer = mock(MediaPlayer.class);
+        when(mediaPlayer.getCurrentPosition()).thenReturn(100);
+        when(mediaPlayer.getDuration()).thenReturn(200);
+
+        shadowOf(videoView).getOnPreparedListener().onPrepared(mediaPlayer);
+
+        ArgumentCaptor<TimerTask> timerTaskArgumentCaptor = ArgumentCaptor.forClass(TimerTask.class);
+        verify(timer).scheduleAtFixedRate(timerTaskArgumentCaptor.capture(), anyInt(), anyInt());
+        timerTaskArgumentCaptor.getValue().run();
+
+        verify(videoBeacons).timeUpdate(100, 200);
+
+        subject.cancel();
+        verify(timer).cancel();
     }
 }

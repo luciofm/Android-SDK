@@ -6,6 +6,9 @@ import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.IAdView;
 import com.sharethrough.sdk.dialogs.VideoDialog;
+import com.sharethrough.sdk.webview.VideoCompletionBeaconService;
+
+import java.util.Timer;
 
 public class HostedVideo extends Media {
     private final Creative creative;
@@ -18,7 +21,7 @@ public class HostedVideo extends Media {
 
     @Override
     public void wasClicked(View view) {
-        new VideoDialog(view.getContext(), creative, beaconService, false).show();
+        new VideoDialog(view.getContext(), creative, beaconService, false, new Timer(), new VideoCompletionBeaconService(view.getContext(), creative, beaconService)).show();
     }
 
     @Override

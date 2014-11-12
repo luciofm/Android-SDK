@@ -6,7 +6,7 @@ import android.webkit.JavascriptInterface;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 
-public class YoutubeJavascriptInterface {
+public class VideoCompletionBeaconService {
     private final Context context;
     private final Creative creative;
     private final BeaconService beaconService;
@@ -15,7 +15,7 @@ public class YoutubeJavascriptInterface {
     private boolean threeQuartersFired;
     private boolean finishedFired;
 
-    public YoutubeJavascriptInterface(Context context, Creative creative, BeaconService beaconService) {
+    public VideoCompletionBeaconService(Context context, Creative creative, BeaconService beaconService) {
         this.context = context;
         this.creative = creative;
         this.beaconService = beaconService;

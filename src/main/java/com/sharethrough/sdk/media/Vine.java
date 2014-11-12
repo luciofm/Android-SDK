@@ -6,6 +6,9 @@ import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.IAdView;
 import com.sharethrough.sdk.dialogs.VideoDialog;
+import com.sharethrough.sdk.webview.VideoCompletionBeaconService;
+
+import java.util.Timer;
 
 public class Vine extends Media {
     private final Creative creative;
@@ -18,7 +21,7 @@ public class Vine extends Media {
 
     @Override
     public void wasClicked(View v) {
-        new VideoDialog(v.getContext(), creative, beaconService, true).show();
+        new VideoDialog(v.getContext(), creative, beaconService, true, new Timer(), new VideoCompletionBeaconService(v.getContext(), creative, beaconService)).show();
     }
 
     @Override
