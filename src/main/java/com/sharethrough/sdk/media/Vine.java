@@ -1,15 +1,11 @@
 package com.sharethrough.sdk.media;
 
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.os.Build;
-import android.util.Log;
 import android.view.View;
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.IAdView;
-import com.sharethrough.sdk.dialogs.WebViewDialog;
+import com.sharethrough.sdk.dialogs.VideoDialog;
 
 public class Vine extends Media {
     private final Creative creative;
@@ -22,19 +18,7 @@ public class Vine extends Media {
 
     @Override
     public void wasClicked(View v) {
-        final Context context = v.getContext();
-        new WebViewDialog(context, creative, beaconService) {
-            @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-            @Override
-            protected void loadPage() {
-                String baseUrl = "http://www.sharethrough.com/";
-                String html = context.getString(R.string.video_html)
-                        .replace("videoURL", creative.getMediaUrl())
-                        .replace("thumbnailURL", creative.getThumbnailUrl());
-                Log.d("Sharethrough", "Vine HTML:\n" + html);
-                webView.loadDataWithBaseURL(baseUrl, html, "text/html", "UTF-8", baseUrl);
-            }
-        }.show();
+        new VideoDialog(v.getContext(), creative, beaconService, true).show();
     }
 
     @Override
