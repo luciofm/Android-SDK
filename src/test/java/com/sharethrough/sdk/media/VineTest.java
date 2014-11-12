@@ -38,7 +38,7 @@ public class VineTest {
         beaconService = mock(BeaconService.class);
         when(creative.getThumbnailImage()).thenReturn(thumbnailBitmap);
 
-        subject = new Vine(creative, beaconService);
+        subject = new Vine(creative);
     }
 
     @Test
@@ -49,14 +49,14 @@ public class VineTest {
     @Test
     public void firesPlayBeacon() throws Exception {
         AdView adView = RendererTest.makeAdView();
-        subject.fireAdClickBeacon(creative, adView);
+        subject.fireAdClickBeacon(creative, adView, beaconService);
         verify(beaconService).adClicked("vinePlay", creative, adView);
     }
 
     @Config(emulateSdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
     @Test
     public void clickingLoadsVideoDialog() throws Exception {
-        subject.wasClicked(new View(Robolectric.application));
+        subject.wasClicked(new View(Robolectric.application), beaconService);
         assertThat(ShadowDialog.getLatestDialog()).isInstanceOf(VideoDialog.class);
     }
 }

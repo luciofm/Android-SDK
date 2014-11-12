@@ -82,8 +82,8 @@ public class Renderer<V extends View & IAdView> {
                 adView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        media.fireAdClickBeacon(creative, adView);
-                        media.wasClicked(v);
+                        media.fireAdClickBeacon(creative, adView, beaconService);
+                        media.wasClicked(v, beaconService);
                     }
                   }
                 );

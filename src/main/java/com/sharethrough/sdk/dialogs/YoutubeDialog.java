@@ -4,8 +4,8 @@ import android.content.Context;
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
+import com.sharethrough.sdk.beacons.VideoCompletionBeaconService;
 import com.sharethrough.sdk.media.Youtube;
-import com.sharethrough.sdk.webview.VideoCompletionBeaconService;
 
 public class YoutubeDialog extends WebViewDialog {
     public YoutubeDialog(Context context, Creative creative, BeaconService beaconService) {

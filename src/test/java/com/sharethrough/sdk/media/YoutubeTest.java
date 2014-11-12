@@ -34,43 +34,43 @@ public class YoutubeTest {
     @Test
     public void canGetIdFromShortUrl() throws Exception {
         when(creative.getMediaUrl()).thenReturn("http://youtu.be/12345");
-        assertThat(new Youtube(creative, beaconService).getId()).isEqualTo("12345");
+        assertThat(new Youtube(creative).getId()).isEqualTo("12345");
     }
 
     @Test
     public void canGetIdFromRegularHttpUrl() throws Exception {
         when(creative.getMediaUrl()).thenReturn("http://youtube.com/watch?v=12345&autoplay=true");
-        assertThat(new Youtube(creative, beaconService).getId()).isEqualTo("12345");
+        assertThat(new Youtube(creative).getId()).isEqualTo("12345");
         when(creative.getMediaUrl()).thenReturn("http://youtube.com/watch?autoplay=true&v=12345");
-        assertThat(new Youtube(creative, beaconService).getId()).isEqualTo("12345");
+        assertThat(new Youtube(creative).getId()).isEqualTo("12345");
     }
 
     @Test
     public void canGetIdFromRegularHttpsUrl() throws Exception {
         when(creative.getMediaUrl()).thenReturn("https://youtube.com/watch?v=12345&autoplay=true");
-        assertThat(new Youtube(creative, beaconService).getId()).isEqualTo("12345");
+        assertThat(new Youtube(creative).getId()).isEqualTo("12345");
         when(creative.getMediaUrl()).thenReturn("https://youtube.com/watch?autoplay=true&v=12345");
-        assertThat(new Youtube(creative, beaconService).getId()).isEqualTo("12345");
+        assertThat(new Youtube(creative).getId()).isEqualTo("12345");
     }
 
     @Test
     public void canGetIdFromEmbedUrl() throws Exception {
         when(creative.getMediaUrl()).thenReturn("http://www.youtube.com/embed/12345?autoplay=1&vq=small");
-        assertThat(new Youtube(creative, beaconService).getId()).isEqualTo("12345");
+        assertThat(new Youtube(creative).getId()).isEqualTo("12345");
     }
 
     @Test
     public void thumbnailImageOverlaysYoutubeIcon() throws Exception {
-        Youtube subject = new Youtube(creative, beaconService);
+        Youtube subject = new Youtube(creative);
         assertThat(subject.getOverlayImageResourceId()).isEqualTo(R.drawable.youtube);
     }
 
     @Test
     public void fireAdClickedBeacon() throws Exception {
-        Youtube subject = new Youtube(creative, beaconService);
+        Youtube subject = new Youtube(creative);
 
         AdView adView = RendererTest.makeAdView();
-        subject.fireAdClickBeacon(creative, adView);
+        subject.fireAdClickBeacon(creative, adView, beaconService);
         verify(beaconService).adClicked("youtubePlay", creative, adView);
     }
 }

@@ -30,7 +30,7 @@ public class ClickoutTest {
     @Before
     public void setUp() throws Exception {
         creative = mock(Creative.class);
-        subject = new Clickout(creative, beaconService);
+        subject = new Clickout(creative);
     }
 
     @Test
@@ -43,14 +43,14 @@ public class ClickoutTest {
     @Config(emulateSdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
     @Test
     public void clickListener_opensWebViewDialog() throws Exception {
-        subject.wasClicked(new ImageView(Robolectric.application));
+        subject.wasClicked(new ImageView(Robolectric.application), beaconService);
         assertThat(ShadowDialog.getLatestDialog()).isInstanceOf(WebViewDialog.class);
     }
 
     @Test
     public void fireAdClickBeacon() throws Exception {
         AdView adView = RendererTest.makeAdView();
-        subject.fireAdClickBeacon(creative, adView);
+        subject.fireAdClickBeacon(creative, adView, beaconService);
         verify(beaconService).adClicked("clickout", creative, adView);
     }
 }

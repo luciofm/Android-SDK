@@ -43,10 +43,11 @@ public class Sharethrough<V extends View & IAdView> {
     }
 
     public Sharethrough(Context context, String key, int adCacheTimeInMilliseconds) {
-        this(context, EXECUTOR_SERVICE, key, new Renderer(new Timer("Sharethrough visibility watcher")), new BeaconService(new DateProvider(), UUID.randomUUID(), EXECUTOR_SERVICE, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString())), adCacheTimeInMilliseconds);
+        this(context, EXECUTOR_SERVICE, key, new Renderer(new Timer("Sharethrough visibility watcher")), adCacheTimeInMilliseconds,
+                new BeaconService(new DateProvider(), UUID.randomUUID(), EXECUTOR_SERVICE, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString())));
     }
 
-    Sharethrough(final Context context, final ExecutorService executorService, final String key, final Renderer renderer, final BeaconService beaconService, int adCacheTimeInMilliseconds) {
+    Sharethrough(final Context context, final ExecutorService executorService, final String key, final Renderer renderer, int adCacheTimeInMilliseconds, final BeaconService beaconService) {
         this.beaconService = beaconService;
         this.adCacheTimeInMilliseconds = Math.max(adCacheTimeInMilliseconds, MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS);
         if (key == null) throw new KeyRequiredException("placement_key is required");
@@ -98,7 +99,7 @@ public class Sharethrough<V extends View & IAdView> {
                                     if (imageResponse.getStatusLine().getStatusCode() == 200) {
                                         InputStream imageContent = imageResponse.getEntity().getContent();
                                         byte[] imageBytes = convertInputStreamToByteArray(imageContent);
-                                        Creative creative = new Creative(responseCreative, imageBytes, key, beaconService);
+                                        Creative creative = new Creative(responseCreative, imageBytes, key);
                                         synchronized (waitingAdViews) {
                                             if (waitingAdViews.size() > 0) {
                                                 Map.Entry<V, Runnable> waiting = waitingAdViews.entrySet().iterator().next();

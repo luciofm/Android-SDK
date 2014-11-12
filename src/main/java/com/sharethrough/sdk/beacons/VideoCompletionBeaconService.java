@@ -1,4 +1,4 @@
-package com.sharethrough.sdk.webview;
+package com.sharethrough.sdk.beacons;
 
 import android.content.Context;
 import android.util.Log;

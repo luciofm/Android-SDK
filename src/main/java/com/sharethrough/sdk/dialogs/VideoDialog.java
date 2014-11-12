@@ -11,7 +11,7 @@ import android.widget.VideoView;
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
-import com.sharethrough.sdk.webview.VideoCompletionBeaconService;
+import com.sharethrough.sdk.beacons.VideoCompletionBeaconService;
 
 import java.util.Timer;
 import java.util.TimerTask;

@@ -1,4 +1,4 @@
-package com.sharethrough.sdk.webview;
+package com.sharethrough.sdk.beacons;
 
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;

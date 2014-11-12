@@ -27,7 +27,7 @@ public class InstagramTest {
         creative = mock(Creative.class);
         beaconService = mock(BeaconService.class);
 
-        subject = new Instagram(creative, beaconService);
+        subject = new Instagram(creative);
     }
 
     @Test
@@ -38,7 +38,7 @@ public class InstagramTest {
     @Test
     public void firesClickoutBeacon() throws Exception {
         AdView adView = RendererTest.makeAdView();
-        subject.fireAdClickBeacon(creative, adView);
+        subject.fireAdClickBeacon(creative, adView, beaconService);
         verify(beaconService).adClicked("clickout", creative, adView);
     }
 }

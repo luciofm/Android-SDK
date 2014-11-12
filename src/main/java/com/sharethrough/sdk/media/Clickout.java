@@ -8,10 +8,8 @@ import com.sharethrough.sdk.dialogs.WebViewDialog;
 
 public class Clickout extends Media {
     protected final Creative creative;
-    protected final BeaconService beaconService;
 
-    public Clickout(Creative creative, BeaconService beaconService) {
-        this.beaconService = beaconService;
+    public Clickout(Creative creative) {
         this.creative = creative;
     }
 
@@ -26,11 +24,11 @@ public class Clickout extends Media {
     }
 
     @Override
-    public void wasClicked(View v) {
+    public void wasClicked(View v, BeaconService beaconService) {
         new WebViewDialog(v.getContext(), creative, beaconService).show();
     }
 
-    public <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView) {
+    public <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView, BeaconService beaconService) {
         beaconService.adClicked("clickout", creative, adView);
     }
 }

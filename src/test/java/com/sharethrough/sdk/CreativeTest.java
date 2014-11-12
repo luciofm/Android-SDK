@@ -10,7 +10,6 @@ import org.robolectric.annotation.Config;
 import java.util.ArrayList;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(emulateSdk = 18)
@@ -25,7 +24,7 @@ public class CreativeTest {
         responseCreative = new Response.Creative();
         responseCreative.creative = new Response.Creative.CreativeInner();
         responseCreative.creative.beacon = new Response.Creative.CreativeInner.Beacon();
-        subject = new Creative(responseCreative, IMAGE_BYTES, "placement key", mock(BeaconService.class));
+        subject = new Creative(responseCreative, IMAGE_BYTES, "placement key");
     }
 
     @Test

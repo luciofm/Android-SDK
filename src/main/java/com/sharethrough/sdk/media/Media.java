@@ -4,12 +4,14 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.IAdView;
 
 public abstract class Media {
-    public abstract void wasClicked(View view);
-    public abstract < V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView);
+    public abstract void wasClicked(View view, BeaconService beaconService);
+
+    public abstract <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView, BeaconService beaconService);
 
     public final <V extends View & IAdView> void overlayThumbnail(V adView, ImageView thumbnailImage) {
         int overlayImageResourceId = getOverlayImageResourceId();

@@ -7,8 +7,8 @@ import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.dialogs.PinterestDialog;
 
 public class Pinterest extends Clickout {
-    public Pinterest(Creative creative, BeaconService beaconService) {
-        super(creative, beaconService);
+    public Pinterest(Creative creative) {
+        super(creative);
     }
 
     @Override
@@ -17,7 +17,7 @@ public class Pinterest extends Clickout {
     }
 
     @Override
-    public void wasClicked(View v) {
-        new PinterestDialog(v.getContext(), Pinterest.this.getCreative(), Pinterest.this.beaconService).show();
+    public void wasClicked(View v, BeaconService beaconService) {
+        new PinterestDialog(v.getContext(), getCreative(), beaconService).show();
     }
 }

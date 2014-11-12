@@ -6,7 +6,7 @@ import android.view.ViewGroup;
 import android.widget.VideoView;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
-import com.sharethrough.sdk.webview.VideoCompletionBeaconService;
+import com.sharethrough.sdk.beacons.VideoCompletionBeaconService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

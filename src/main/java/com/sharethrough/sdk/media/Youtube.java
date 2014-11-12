@@ -10,12 +10,10 @@ import com.sharethrough.sdk.dialogs.YoutubeDialog;
 
 public class Youtube extends Media {
     private static final String EMBED_PREFIX = "/embed/";
-    private final BeaconService beaconService;
     private Creative creative;
 
-    public Youtube(Creative creative, BeaconService beaconService) {
+    public Youtube(Creative creative) {
         this.creative = creative;
-        this.beaconService = beaconService;
     }
 
     public String getId() {
@@ -42,12 +40,12 @@ public class Youtube extends Media {
     }
 
     @Override
-    public void wasClicked(View v) {
+    public void wasClicked(View v, BeaconService beaconService) {
         new YoutubeDialog(v.getContext(), creative, beaconService).show();
     }
 
     @Override
-    public <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView) {
+    public <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView, BeaconService beaconService) {
         beaconService.adClicked("youtubePlay", creative, adView);
     }
 }

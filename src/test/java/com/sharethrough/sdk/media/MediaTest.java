@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.sharethrough.android.sdk.R;
+import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.IAdView;
 import com.sharethrough.sdk.RendererTest;
@@ -110,11 +111,11 @@ public class MediaTest {
         }
 
         @Override
-        public void wasClicked(View view) {
+        public void wasClicked(View view, BeaconService beaconService) {
         }
 
         @Override
-        public <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView) {
+        public <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView, BeaconService beaconService) {
         }
     }
 }

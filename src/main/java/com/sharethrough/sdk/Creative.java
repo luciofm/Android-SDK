@@ -9,14 +9,12 @@ import java.util.ArrayList;
 public class Creative {
     private final Response.Creative responseCreative;
     private final String placementKey;
-    private final BeaconService beaconService;
     private final Bitmap thumbnailImage;
     public boolean wasRendered;
 
-    public Creative(Response.Creative responseCreative, byte[] imageBytes, String placementKey, BeaconService beaconService) {
+    public Creative(Response.Creative responseCreative, byte[] imageBytes, String placementKey) {
         this.responseCreative = responseCreative;
         this.placementKey = placementKey;
-        this.beaconService = beaconService;
         thumbnailImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
     }
 
@@ -39,18 +37,18 @@ public class Creative {
     public Media getMedia() {
         switch (responseCreative.creative.action) {
             case "video":
-                return new Youtube(this, beaconService);
+                return new Youtube(this);
             case "vine":
-                return new Vine(this, beaconService);
+                return new Vine(this);
             case "hosted-video":
-                return new HostedVideo(this, beaconService);
+                return new HostedVideo(this);
             case "instagram":
-                return new Instagram(this, beaconService);
+                return new Instagram(this);
             case "pinterest":
-                return new Pinterest(this, beaconService);
+                return new Pinterest(this);
             case "clickout":
             default:
-                return new Clickout(this, beaconService);
+                return new Clickout(this);
         }
     }
 
@@ -84,10 +82,6 @@ public class Creative {
 
     public String getAuctionPrice() {
         return String.valueOf(responseCreative.price);
-    }
-
-    public String getThumbnailUrl() {
-        return responseCreative.creative.thumbnailUrl;
     }
 
     public ArrayList<String> getClickBeacons() {

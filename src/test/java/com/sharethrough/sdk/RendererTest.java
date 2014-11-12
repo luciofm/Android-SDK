@@ -122,8 +122,8 @@ public class RendererTest {
 
         adView.performClick();
 
-        verify(media).wasClicked(adView);
-        verify(media).fireAdClickBeacon(creative, adView);
+        verify(media).wasClicked(adView, beaconService);
+        verify(media).fireAdClickBeacon(creative, adView, beaconService);
     }
 
     @Test
