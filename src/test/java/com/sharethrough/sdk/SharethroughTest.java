@@ -69,7 +69,8 @@ public class SharethroughTest {
         Robolectric.addHttpResponseRule("GET", "http://btlr.sharethrough.com/v3?placement_key=" + key, new TestHttpResponse(200, FIXTURE));
 
         subject = new Sharethrough(Robolectric.application, executorService, key, renderer, beaconService, adCacheTimeInMilliseconds);
-        subject.putCreativeIntoAdView(adView);
+        Runnable adReadyCallback = mock(Runnable.class);
+        subject.putCreativeIntoAdView(adView, adReadyCallback);
 
         ArgumentCaptor<Runnable> creativeFetcherArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
         verify(executorService).execute(creativeFetcherArgumentCaptor.capture());
@@ -88,7 +89,7 @@ public class SharethroughTest {
 
         verifyNoMoreInteractions(adView);
 
-        verifyCreativeHasBeenPlacedInAdview(adView);
+        verifyCreativeHasBeenPlacedInAdview(adView, adReadyCallback);
     }
 
     @Test
@@ -105,9 +106,9 @@ public class SharethroughTest {
         verify(beaconService).adRequested(Robolectric.application, key);
     }
 
-    private void verifyCreativeHasBeenPlacedInAdview(AdView adView) {
+    private void verifyCreativeHasBeenPlacedInAdview(AdView adView, Runnable adReadyCallback) {
         ArgumentCaptor<Creative> creativeArgumentCaptor = ArgumentCaptor.forClass(Creative.class);
-        verify(renderer).putCreativeIntoAdView(eq(adView), creativeArgumentCaptor.capture(), eq(beaconService), eq(subject));
+        verify(renderer).putCreativeIntoAdView(eq(adView), creativeArgumentCaptor.capture(), eq(beaconService), eq(subject), eq(adReadyCallback));
         verifyCreativeData(creativeArgumentCaptor.getValue());
     }
 
@@ -157,8 +158,10 @@ public class SharethroughTest {
 
         subject = new Sharethrough(Robolectric.application, executorService, key, renderer, beaconService, adCacheTimeInMilliseconds);
         AdView adView2 = makeMockAdView();
-        subject.putCreativeIntoAdView(adView2);
-        subject.putCreativeIntoAdView(adView);
+        Runnable adReadyCallback2 = mock(Runnable.class);
+        subject.putCreativeIntoAdView(adView2, adReadyCallback2);
+        Runnable adReadyCallback = mock(Runnable.class);
+        subject.putCreativeIntoAdView(adView, adReadyCallback);
 
         ArgumentCaptor<Runnable> creativeFetcherArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
         verify(executorService).execute(creativeFetcherArgumentCaptor.capture());
@@ -171,9 +174,10 @@ public class SharethroughTest {
         verify(executorService).execute(imageFetcherArgumentCaptor.capture());
         imageFetcherArgumentCaptor.getValue().run();
 
-        verifyCreativeHasBeenPlacedInAdview(adView2);
+        verifyCreativeHasBeenPlacedInAdview(adView2, adReadyCallback2);
         verifyNoMoreInteractions(adView);
         verifyNoMoreInteractions(renderer);
+        verifyNoMoreInteractions(adReadyCallback);
     }
 
     @Test
@@ -182,7 +186,8 @@ public class SharethroughTest {
         Robolectric.addHttpResponseRule("GET", "http://btlr.sharethrough.com/v3?placement_key=" + key, new TestHttpResponse(200, FIXTURE));
 
         subject = new Sharethrough(Robolectric.application, executorService, key, renderer, beaconService, adCacheTimeInMilliseconds);
-        subject.putCreativeIntoAdView(adView);
+        Runnable adReadyCallback = mock(Runnable.class);
+        subject.putCreativeIntoAdView(adView, adReadyCallback);
 
         ArgumentCaptor<Runnable> creativeFetcherArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
         verify(executorService).execute(creativeFetcherArgumentCaptor.capture());
@@ -200,6 +205,7 @@ public class SharethroughTest {
         imageFetcherArgumentCaptor.getValue().run();
 
         verifyNoMoreInteractions(adView);
+        verifyNoMoreInteractions(adReadyCallback);
     }
 
     @Test
@@ -220,8 +226,9 @@ public class SharethroughTest {
         verify(executorService).execute(imageFetcherArgumentCaptor.capture());
         imageFetcherArgumentCaptor.getValue().run();
 
-        subject.putCreativeIntoAdView(adView);
-        verifyCreativeHasBeenPlacedInAdview(adView);
+        Runnable adReadyCallback = mock(Runnable.class);
+        subject.putCreativeIntoAdView(adView, adReadyCallback);
+        verifyCreativeHasBeenPlacedInAdview(adView, adReadyCallback);
     }
 
     @Test

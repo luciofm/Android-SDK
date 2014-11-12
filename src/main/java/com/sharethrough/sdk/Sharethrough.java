@@ -36,7 +36,7 @@ public class Sharethrough<V extends View & IAdView> {
     public static final String USER_AGENT = System.getProperty("http.agent");
     private String key;
     private List<Creative> availableCreatives = Collections.synchronizedList(new ArrayList<Creative>());
-    private List<V> waitingAdViews = Collections.synchronizedList(new ArrayList<V>());
+    private Map<V, Runnable> waitingAdViews = Collections.synchronizedMap(new LinkedHashMap<V, Runnable>());
 
     public Sharethrough(Context context, String key) {
         this(context, key, DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS);
@@ -101,8 +101,10 @@ public class Sharethrough<V extends View & IAdView> {
                                         Creative creative = new Creative(responseCreative, imageBytes, key, beaconService);
                                         synchronized (waitingAdViews) {
                                             if (waitingAdViews.size() > 0) {
-                                                V adView = waitingAdViews.remove(0);
-                                                renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this);
+                                                Map.Entry<V, Runnable> waiting = waitingAdViews.entrySet().iterator().next();
+                                                V adView = waiting.getKey();
+                                                waitingAdViews.remove(adView);
+                                                renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this, waiting.getValue());
                                             } else {
                                                 availableCreatives.add(creative);
                                             }
@@ -199,12 +201,12 @@ public class Sharethrough<V extends View & IAdView> {
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-    public void putCreativeIntoAdView(V adView) {
+    public void putCreativeIntoAdView(V adView, Runnable adReadyCallback) {
         synchronized (availableCreatives) {
             if (availableCreatives.size() > 0) {
-                renderer.putCreativeIntoAdView(adView, availableCreatives.remove(0), beaconService, this);
+                renderer.putCreativeIntoAdView(adView, availableCreatives.remove(0), beaconService, this, adReadyCallback);
             } else {
-                waitingAdViews.add(adView);
+                waitingAdViews.put(adView, adReadyCallback);
             }
         }
     }

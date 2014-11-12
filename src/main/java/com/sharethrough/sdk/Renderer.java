@@ -25,7 +25,7 @@ public class Renderer<V extends View & IAdView> {
         this.timer = timer;
     }
 
-    public void putCreativeIntoAdView(final V adView, final Creative creative, final BeaconService beaconService, final Sharethrough sharethrough) {
+    public void putCreativeIntoAdView(final V adView, final Creative creative, final BeaconService beaconService, final Sharethrough sharethrough, final Runnable adReadyCallback) {
         if (!creative.wasRendered) {
             beaconService.adReceived(adView.getContext(), creative);
             creative.wasRendered = true;
@@ -39,6 +39,8 @@ public class Renderer<V extends View & IAdView> {
             @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
             @Override
             public void run() {
+                adReadyCallback.run();
+
                 adView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
 
                     @Override
@@ -53,7 +55,7 @@ public class Renderer<V extends View & IAdView> {
                     }
                 });
 
-                adView.getTitle().setText((creative).getTitle());
+                adView.getTitle().setText(creative.getTitle());
                 TextView description = adView.getDescription();
                 if (description != null) {
                     description.setText(creative.getDescription());
