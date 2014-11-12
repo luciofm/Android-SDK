@@ -24,7 +24,7 @@ public class YoutubeJavascriptInterface {
     @JavascriptInterface
     public void timeUpdate(double time, double duration) {
         Log.v("Sharethrough", creative.getCreativeKey() + " video has played " + time + "s of " + duration + "s");
-        double percent = time/duration;
+        double percent = time / duration;
         if (!quarterFired && percent >= 0.25) {
             quarterFired = true;
             beaconService.videoPlayed(context, creative, 25);

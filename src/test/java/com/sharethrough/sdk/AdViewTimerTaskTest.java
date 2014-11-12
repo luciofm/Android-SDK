@@ -115,7 +115,7 @@ public class AdViewTimerTaskTest {
         subject.run();
         verifyNoMoreInteractions(beaconService);
     }
-    
+
     @Test
     public void whenAdViewBecomesVisible_andBecomesInvisible_showsNewAdAfterCacheExpires() throws Exception {
         reset(sharethrough);

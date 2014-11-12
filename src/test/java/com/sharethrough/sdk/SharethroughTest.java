@@ -20,7 +20,6 @@ import org.robolectric.tester.org.apache.http.TestHttpResponse;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -31,7 +30,7 @@ import static org.mockito.Mockito.*;
 @Config(emulateSdk = 18)
 public class SharethroughTest {
     private static final String FIXTURE = Fixtures.getFile("assets/str_ad_youtube.json");
-    private static final byte[] IMAGE_BYTES = new byte[] {0, 1, 2, 3, 4};
+    private static final byte[] IMAGE_BYTES = new byte[]{0, 1, 2, 3, 4};
     private Sharethrough subject;
     private ExecutorService executorService;
     private AdView adView;
@@ -91,7 +90,7 @@ public class SharethroughTest {
 
         verifyCreativeHasBeenPlacedInAdview(adView);
     }
-    
+
     @Test
     public void whenRequestingAds_firesABeacon() throws Exception {
         String key = "abc";
@@ -249,7 +248,7 @@ public class SharethroughTest {
 
         int adCacheMilliseconds = subject.getAdCacheTimeInMilliseconds();
 
-        int expectedCacheMilliseconds = (int)TimeUnit.SECONDS.toMillis(20);
+        int expectedCacheMilliseconds = (int) TimeUnit.SECONDS.toMillis(20);
 
         assertThat(adCacheMilliseconds).isEqualTo(expectedCacheMilliseconds);
     }

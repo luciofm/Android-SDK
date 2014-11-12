@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class Sharethrough<V extends View & IAdView> {
     public static final int DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
     private static final int MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
-    public static String TRACKING_URL= "http://b.sharethrough.com/butler";
+    public static String TRACKING_URL = "http://b.sharethrough.com/butler";
     private final Renderer renderer;
     private final BeaconService beaconService;
     private final int adCacheTimeInMilliseconds;
@@ -43,7 +43,7 @@ public class Sharethrough<V extends View & IAdView> {
     }
 
     public Sharethrough(Context context, String key, int adCacheTimeInMilliseconds) {
-        this(context, EXECUTOR_SERVICE, key, new Renderer(new Timer("Sharethrough visibility watcher")), new BeaconService(new DateProvider(), new StrSession(), EXECUTOR_SERVICE, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString())), adCacheTimeInMilliseconds );
+        this(context, EXECUTOR_SERVICE, key, new Renderer(new Timer("Sharethrough visibility watcher")), new BeaconService(new DateProvider(), new StrSession(), EXECUTOR_SERVICE, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString())), adCacheTimeInMilliseconds);
     }
 
     Sharethrough(final Context context, final ExecutorService executorService, final String key, final Renderer renderer, final BeaconService beaconService, int adCacheTimeInMilliseconds) {

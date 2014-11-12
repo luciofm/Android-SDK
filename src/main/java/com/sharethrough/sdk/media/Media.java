@@ -10,7 +10,8 @@ import com.sharethrough.sdk.IAdView;
 
 public abstract class Media {
     public abstract View.OnClickListener getClickListener();
-    public abstract < V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView);
+
+    public abstract <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView);
 
     public final <V extends View & IAdView> void overlayThumbnail(V adView) {
         int overlayImageResourceId = getOverlayImageResourceId();

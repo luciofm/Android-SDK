@@ -19,7 +19,7 @@ public class Misc {
 
             if (viewType.isInstance(v)) {
                 return (V) v;
-            } else if (v instanceof ViewGroup && (viewFound = findViewOfType(viewType, (ViewGroup)v)) != null) {
+            } else if (v instanceof ViewGroup && (viewFound = findViewOfType(viewType, (ViewGroup) v)) != null) {
                 return viewFound;
             }
         }

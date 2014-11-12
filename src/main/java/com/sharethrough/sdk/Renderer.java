@@ -72,12 +72,12 @@ public class Renderer<V extends View & IAdView> {
                 final Media media = creative.getMedia();
                 media.overlayThumbnail(adView);
                 adView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        media.fireAdClickBeacon(creative, adView);
-                        media.getClickListener().onClick(v);
-                    }
-                  }
+                                              @Override
+                                              public void onClick(View v) {
+                                                  media.fireAdClickBeacon(creative, adView);
+                                                  media.getClickListener().onClick(v);
+                                              }
+                                          }
                 );
             }
         });

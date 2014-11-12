@@ -190,7 +190,7 @@ public class BeaconServiceTest {
 
         List<HttpRequestInfo> info = Robolectric.getFakeHttpLayer().getSentHttpRequestInfos();
         assertThat(info.size()).isEqualTo(3);
-        for (int i = 0; i < info.size()-1; i++) {
+        for (int i = 0; i < info.size() - 1; i++) {
             String expectedUrl = "http:" + initialUrls[i];
             assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
         }
@@ -245,7 +245,7 @@ public class BeaconServiceTest {
         });
     }
 
-    private void assertBeaconFired(final Map<String,String> expectedBeaconParams, Runnable fireBeacon) {
+    private void assertBeaconFired(final Map<String, String> expectedBeaconParams, Runnable fireBeacon) {
         final boolean[] wasCalled = {false};
         RequestMatcher requestMatcher = new RequestMatcher() {
             @Override
