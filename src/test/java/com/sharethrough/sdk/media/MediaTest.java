@@ -1,12 +1,10 @@
 package com.sharethrough.sdk.media;
 
-import android.graphics.Bitmap;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.sharethrough.android.sdk.R;
-import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.IAdView;
 import com.sharethrough.sdk.RendererTest;
@@ -25,32 +23,30 @@ import static org.robolectric.Robolectric.shadowOf;
 @RunWith(RobolectricTestRunner.class)
 @Config(emulateSdk = 18)
 public class MediaTest {
-    private Bitmap thumbnailBitmap;
     private Creative creative;
-    private BeaconService beaconService;
     private boolean isThumbnailOverlayCentered;
     private int overlayImageResourceId;
+    private ImageView thumbnailImageView;
 
     @Before
     public void setUp() throws Exception {
-        thumbnailBitmap = mock(Bitmap.class);
         creative = mock(Creative.class);
-        beaconService = mock(BeaconService.class);
-        when(creative.getThumbnailImage()).thenReturn(thumbnailBitmap);
         overlayImageResourceId = R.drawable.youtube;
+
+        thumbnailImageView = mock(ImageView.class);
+        when(thumbnailImageView.getWidth()).thenReturn(100);
+        when(thumbnailImageView.getHeight()).thenReturn(200);
     }
 
     @Test
     public void overlaysIcon() throws Exception {
-        when(thumbnailBitmap.getWidth()).thenReturn(100);
-        when(thumbnailBitmap.getHeight()).thenReturn(200);
 
         Media subject = new TestMedia();
         isThumbnailOverlayCentered = false;
 
         AdView adView = RendererTest.makeAdView();
 
-        subject.overlayThumbnail(adView);
+        subject.overlayThumbnail(adView, thumbnailImageView);
 
         ArgumentCaptor<ImageView> imageViewArgumentCaptor = ArgumentCaptor.forClass(ImageView.class);
         ArgumentCaptor<FrameLayout.LayoutParams> layoutParamsArgumentCaptor = ArgumentCaptor.forClass(FrameLayout.LayoutParams.class);
@@ -74,7 +70,7 @@ public class MediaTest {
 
         AdView adView = RendererTest.makeAdView();
 
-        subject.overlayThumbnail(adView);
+        subject.overlayThumbnail(adView, thumbnailImageView);
 
         ArgumentCaptor<ImageView> imageViewArgumentCaptor = ArgumentCaptor.forClass(ImageView.class);
         ArgumentCaptor<FrameLayout.LayoutParams> layoutParamsArgumentCaptor = ArgumentCaptor.forClass(FrameLayout.LayoutParams.class);
@@ -92,7 +88,7 @@ public class MediaTest {
 
         AdView adView = RendererTest.makeAdView();
 
-        subject.overlayThumbnail(adView);
+        subject.overlayThumbnail(adView, thumbnailImageView);
 
         verifyNoMoreInteractions(adView.getThumbnail());
     }

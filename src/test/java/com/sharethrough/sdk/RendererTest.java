@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -19,11 +20,13 @@ import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowLooper;
 
 import java.util.Timer;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import static org.robolectric.Robolectric.shadowOf;
 
 @Config(emulateSdk = 18)
 @RunWith(RobolectricTestRunner.class)
@@ -71,7 +74,8 @@ public class RendererTest {
         verifyNoMoreInteractions(adView.getTitle());
         verifyNoMoreInteractions(adReadyCallback);
 
-        Robolectric.unPauseMainLooper();
+        ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
+        shadowLooper.runOneTask();
 
         verify(adReadyCallback).run();
 
@@ -85,7 +89,9 @@ public class RendererTest {
         BitmapDrawable bitmapDrawable = (BitmapDrawable) thumbnailImageView.getDrawable();
         assertThat(bitmapDrawable.getBitmap()).isEqualTo(bitmap);
 
-        verify(media).overlayThumbnail(adView);
+        verifyNoMoreInteractions(media);
+        shadowLooper.runOneTask();
+        verify(media).overlayThumbnail(adView, thumbnailImageView);
     }
 
     @Test

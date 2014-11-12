@@ -36,7 +36,7 @@ public class ClickoutTest {
     @Test
     public void overlayThumbnail_doesNothing() throws Exception {
         AdView adView = mock(AdView.class);
-        subject.overlayThumbnail(adView);
+        subject.overlayThumbnail(adView, mock(ImageView.class));
         verifyNoMoreInteractions(adView);
     }
 

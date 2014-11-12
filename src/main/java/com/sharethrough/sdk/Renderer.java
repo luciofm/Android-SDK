@@ -65,7 +65,7 @@ public class Renderer<V extends View & IAdView> {
                 FrameLayout thumbnail = adView.getThumbnail();
                 Context context = adView.getContext();
 
-                ImageView thumbnailImage = new ImageView(context);
+                final ImageView thumbnailImage = new ImageView(context);
                 Bitmap thumbnailBitmap = creative.getThumbnailImage();
                 thumbnailImage.setImageBitmap(thumbnailBitmap);
                 thumbnailImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
@@ -73,7 +73,12 @@ public class Renderer<V extends View & IAdView> {
                         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
 
                 final Media media = creative.getMedia();
-                media.overlayThumbnail(adView);
+                handler.post(new Runnable() { // give thumbnailImage a chance to render so we can use its size
+                    @Override
+                    public void run() {
+                        media.overlayThumbnail(adView, thumbnailImage);
+                    }
+                });
                 adView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
