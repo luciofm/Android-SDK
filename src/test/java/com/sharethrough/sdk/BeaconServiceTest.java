@@ -11,14 +11,12 @@ import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.tester.org.apache.http.HttpRequestInfo;
 import org.robolectric.tester.org.apache.http.RequestMatcher;
 import org.robolectric.tester.org.apache.http.TestHttpResponse;
 
 import java.net.URI;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -35,6 +33,7 @@ public class BeaconServiceTest {
     private Creative creative;
     private AdvertisingIdProvider advertisingIdProvider;
     private String advertisingId;
+    private Response.Creative responseCreative;
 
     @Before
     public void setUp() throws Exception {
@@ -52,13 +51,20 @@ public class BeaconServiceTest {
         expectedCommonParams.put("uid", advertisingId);
         expectedCommonParams.put("ua", "" + Sharethrough.USER_AGENT);
 
-        Response.Creative responseCreative = new Response.Creative();
+        responseCreative = new Response.Creative();
         responseCreative.creative = new Response.Creative.CreativeInner();
         responseCreative.creative.variantKey = "variant key";
         responseCreative.creative.key = "creative key";
         responseCreative.signature = "signature";
         responseCreative.priceType = "price type";
         responseCreative.price = 1000;
+
+        Response.Creative.CreativeInner.Beacon beacon = new Response.Creative.CreativeInner.Beacon();
+        beacon.click = new ArrayList<>();
+        beacon.play = new ArrayList<>();
+        beacon.visible = new ArrayList<>();
+
+        responseCreative.creative.beacon = beacon;
         creative = new Creative(responseCreative, new byte[0], "placement key", mock(BeaconService.class));
 
         executorService = mock(ExecutorService.class);
@@ -154,6 +160,76 @@ public class BeaconServiceTest {
                 subject.adShared(Robolectric.application, creative, "shareType");
             }
         });
+    }
+
+    @Test
+    public void whenAdVisibleCalled_fireVisibleThirdPartyBeacons() throws Exception {
+        String[] initialUrls = {"//visibleEndOne", "//visibleEndTwo"};
+
+        ArrayList<String> visibleEndoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
+
+        responseCreative.creative.beacon.visible = visibleEndoints;
+
+        Creative testCreative = new Creative(responseCreative, new byte[0], "placement key", mock(BeaconService.class));
+
+        subject.adVisible(RendererTest.makeAdView(), testCreative);
+
+        Robolectric.addHttpResponseRule(new RequestMatcher() {
+            @Override
+            public boolean matches(HttpRequest request) {
+                return true;
+            }
+        }, new TestHttpResponse(200, ""));
+
+        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(executorService, atLeastOnce()).execute(runnableArgumentCaptor.capture());
+        List<Runnable> allValues = runnableArgumentCaptor.getAllValues();
+        for (Runnable allValue : allValues) {
+            allValue.run();
+        }
+
+        List<HttpRequestInfo> info = Robolectric.getFakeHttpLayer().getSentHttpRequestInfos();
+        assertThat(info.size()).isEqualTo(3);
+        for (int i = 0; i < info.size()-1; i++) {
+            String expectedUrl = "http:" + initialUrls[i];
+            assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
+        }
+    }
+
+    @Test
+    public void whenAdClickCalled_fireClickAndVideoThirdPartyBeacons() throws Exception {
+        String[] initialUrls = {"//clickEndOne", "//clickEndTwo", "//videoEndOne", "//videoEndTwo"};
+
+        ArrayList<String> clickEndoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
+        ArrayList<String> playEndoints = new ArrayList<>(Arrays.asList(initialUrls[2], initialUrls[3]));
+
+        responseCreative.creative.beacon.click = clickEndoints;
+        responseCreative.creative.beacon.play = playEndoints;
+
+        Creative testCreative = new Creative(responseCreative, new byte[0], "placement key", mock(BeaconService.class));
+
+        subject.adClicked(Robolectric.application, "test-creative", testCreative, RendererTest.makeAdView());
+
+        Robolectric.addHttpResponseRule(new RequestMatcher() {
+            @Override
+            public boolean matches(HttpRequest request) {
+                return true;
+            }
+        }, new TestHttpResponse(200, ""));
+
+        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(executorService, atLeastOnce()).execute(runnableArgumentCaptor.capture());
+        List<Runnable> allValues = runnableArgumentCaptor.getAllValues();
+        for (Runnable allValue : allValues) {
+            allValue.run();
+        }
+
+        List<HttpRequestInfo> info = Robolectric.getFakeHttpLayer().getSentHttpRequestInfos();
+        assertThat(info.size()).isEqualTo(5);
+        for (int i = 0; i < info.size()-1; i++) {
+            String expectedUrl = "http:" + initialUrls[i];
+            assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
+        }
     }
 
     private void assertBeaconFired(final Map<String,String> expectedBeaconParams, Runnable fireBeacon) {

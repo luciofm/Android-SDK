@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class Sharethrough<V extends View & IAdView> {
     public static final int DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
     private static final int MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
+    public static String TRACKING_URL= "http://b.sharethrough.com/butler";
     private final Renderer renderer;
     private final BeaconService beaconService;
     private final int adCacheTimeInMilliseconds;

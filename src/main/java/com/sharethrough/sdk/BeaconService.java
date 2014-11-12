@@ -71,7 +71,15 @@ public class BeaconService {
         beaconParams.put("userEvent", userEvent);
         beaconParams.put("engagement", "true");
 
-        fireBeacon(context, beaconParams);
+        for (String uri : creative.getClickBeacons()) {
+            fireBeacon(new HashMap<String, String>(), "http:" + uri);
+        }
+
+        for (String uri : creative.getPlayBeacons()) {
+            fireBeacon(new HashMap<String, String>(), "http:" + uri);
+        }
+
+        fireBeacon(beaconParams, Sharethrough.TRACKING_URL);
     }
 
     public void adRequested(final Context context, final String placementKey) {
@@ -79,13 +87,14 @@ public class BeaconService {
         beaconParams.put("type", "impressionRequest");
         beaconParams.put("pkey", placementKey);
 
-        fireBeacon(context, beaconParams);
+        fireBeacon(beaconParams, Sharethrough.TRACKING_URL);
     }
 
     public void adReceived(final Context context, final Creative creative) {
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("type", "impression");
-        fireBeacon(context, beaconParams);
+
+        fireBeacon(beaconParams, Sharethrough.TRACKING_URL);
     }
 
 
@@ -96,7 +105,11 @@ public class BeaconService {
         beaconParams.put("pwidth", "" + adView.getWidth());
         beaconParams.put("type", "visible");
 
-        fireBeacon(context, beaconParams);
+        for (String uri : creative.getVisibleBeacons()) {
+            fireBeacon(new HashMap<String, String>(), "http:" + uri);
+        }
+
+        fireBeacon(beaconParams, Sharethrough.TRACKING_URL);
     }
 
     public void adShared(Context context, Creative creative, String medium) {
@@ -105,14 +118,14 @@ public class BeaconService {
         beaconParams.put("userEvent", "share");
         beaconParams.put("engagement", "true");
         beaconParams.put("share", medium);
-        fireBeacon(context, beaconParams);
+        fireBeacon(beaconParams, Sharethrough.TRACKING_URL);
     }
 
-    private void fireBeacon(Context context, final Map<String, String> beaconParams) {
+    private void fireBeacon(final Map<String, String> beaconParams, final String uri) {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                Uri.Builder uriBuilder = Uri.parse("http://b.sharethrough.com/butler").buildUpon();
+                Uri.Builder uriBuilder = Uri.parse(uri).buildUpon();
                 for (Map.Entry<String, String> entry : beaconParams.entrySet()) {
                     uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
                 }
