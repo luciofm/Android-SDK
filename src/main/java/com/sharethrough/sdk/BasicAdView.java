@@ -29,16 +29,16 @@ public class BasicAdView extends FrameLayout implements IAdView {
         super(context, attrs, defStyle);
     }
 
-    public BasicAdView showAd(Sharethrough sharethrough, final Context context, final int layoutResourceId, final int titleViewId, final int advertiserViewId, final int thumbnailViewId) {
-        return showAd(sharethrough, context, layoutResourceId, titleViewId, -1, advertiserViewId, thumbnailViewId);
+    public BasicAdView showAd(Sharethrough sharethrough, final int layoutResourceId, final int titleViewId, final int advertiserViewId, final int thumbnailViewId) {
+        return showAd(sharethrough, layoutResourceId, titleViewId, -1, advertiserViewId, thumbnailViewId);
     }
 
-    public BasicAdView showAd(Sharethrough sharethrough, final Context context, final int layoutResourceId, final int titleViewId, final int descriptionViewId, final int advertiserViewId, final int thumbnailViewId) {
+    public BasicAdView showAd(Sharethrough sharethrough, final int layoutResourceId, final int titleViewId, final int descriptionViewId, final int advertiserViewId, final int thumbnailViewId) {
         this.titleViewId = titleViewId;
         this.descriptionViewId = descriptionViewId;
         this.advertiserViewId = advertiserViewId;
         this.thumbnailViewId = thumbnailViewId;
-        view = LayoutInflater.from(context).inflate(layoutResourceId, this, false);
+        view = LayoutInflater.from(getContext()).inflate(layoutResourceId, this, false);
         addView(new ProgressBar(getContext()), new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
         sharethrough.putCreativeIntoAdView(this, new Runnable() {
             @Override

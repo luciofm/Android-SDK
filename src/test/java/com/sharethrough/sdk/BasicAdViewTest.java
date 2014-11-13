@@ -23,7 +23,7 @@ public class BasicAdViewTest {
     public void showAd_tellsSharethroughToShowTheAd() throws Exception {
         BasicAdView subject = new BasicAdView(Robolectric.application);
         Sharethrough sharethrough = mock(Sharethrough.class);
-        subject.showAd(sharethrough, Robolectric.application, R.layout.dialog, 2, 3, 4, 5);
+        subject.showAd(sharethrough, R.layout.dialog, 2, 3, 4, 5);
         verify(sharethrough).putCreativeIntoAdView(eq(subject), any(Runnable.class));
     }
 
@@ -31,7 +31,7 @@ public class BasicAdViewTest {
     public void showsSpinner_untilAdIsReady() throws Exception {
         BasicAdView subject = new BasicAdView(Robolectric.application);
         Sharethrough sharethrough = mock(Sharethrough.class);
-        subject.showAd(sharethrough, Robolectric.application, R.layout.ad, R.id.title, R.id.description, R.id.advertiser, R.id.thumbnail);
+        subject.showAd(sharethrough, R.layout.ad, R.id.title, R.id.description, R.id.advertiser, R.id.thumbnail);
         ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
         verify(sharethrough).putCreativeIntoAdView(eq(subject), runnableArgumentCaptor.capture());
 
