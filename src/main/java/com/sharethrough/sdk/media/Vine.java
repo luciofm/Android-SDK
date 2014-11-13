@@ -23,8 +23,8 @@ public class Vine extends Media {
     }
 
     @Override
-    public <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView, BeaconService beaconService) {
-        beaconService.adClicked("vinePlay", creative, adView);
+    public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService) {
+        beaconService.adClicked("vinePlay", creative, adView.getAdView());
     }
 
     @Override

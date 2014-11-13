@@ -11,13 +11,13 @@ import com.sharethrough.sdk.IAdView;
 public abstract class Media {
     public abstract void wasClicked(View view, BeaconService beaconService);
 
-    public abstract <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView, BeaconService beaconService);
+    public abstract void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService);
 
-    public final <V extends View & IAdView> void overlayThumbnail(V adView, ImageView thumbnailImage) {
+    public final void overlayThumbnail(IAdView adView, ImageView thumbnailImage) {
         int overlayImageResourceId = getOverlayImageResourceId();
         if (overlayImageResourceId < 0) return;
         FrameLayout thumbnail = adView.getThumbnail();
-        ImageView overlayIcon = new ImageView(adView.getContext());
+        ImageView overlayIcon = new ImageView(adView.getAdView().getContext());
         overlayIcon.setImageResource(overlayImageResourceId);
         overlayIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
         int overlayDimensionMax = Math.min(thumbnailImage.getWidth(), thumbnailImage.getHeight()) / 4;

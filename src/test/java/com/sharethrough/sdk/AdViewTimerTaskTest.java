@@ -1,8 +1,7 @@
 package com.sharethrough.sdk;
 
 import android.graphics.Rect;
-import android.os.Handler;
-import com.sharethrough.test.util.AdView;
+import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,7 +20,7 @@ import static org.mockito.Mockito.*;
 public class AdViewTimerTaskTest {
     private BeaconService beaconService;
     private Creative creative;
-    private AdView adView;
+    private TestAdView adView;
     private int visibleWidth;
     private int visibleHeight;
     private Provider<Date> dateProvider;
@@ -29,11 +28,11 @@ public class AdViewTimerTaskTest {
     private boolean isVisible;
     private AdViewTimerTask subject;
     private Sharethrough sharethrough;
-    private Handler handler;
 
     @Before
     public void setUp() throws Exception {
-        adView = mock(AdView.class);
+        adView = mock(TestAdView.class);
+        when(adView.getAdView()).thenReturn(adView);
         when(adView.getHeight()).thenReturn(100);
         when(adView.getWidth()).thenReturn(300);
         creative = mock(Creative.class);
@@ -47,8 +46,6 @@ public class AdViewTimerTaskTest {
         };
         sharethrough = mock(Sharethrough.class);
         when(sharethrough.getAdCacheTimeInMilliseconds()).thenReturn((int) TimeUnit.SECONDS.toMillis(20));
-
-        handler = mock(Handler.class);
 
         subject = new AdViewTimerTask(adView, creative, beaconService, dateProvider, sharethrough);
     }

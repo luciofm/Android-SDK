@@ -12,7 +12,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.sharethrough.sdk.media.Media;
-import com.sharethrough.test.util.AdView;
+import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +37,7 @@ public class RendererTest {
     private Creative creative;
     private Bitmap bitmap;
     private Media media;
-    private MyAdView adView;
+    private MyTestAdView adView;
     private Timer timer;
     private BeaconService beaconService;
     private Sharethrough sharethrough;
@@ -132,12 +132,11 @@ public class RendererTest {
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, mock(Runnable.class));
     }
 
-    public static MyAdView makeAdView() {
-        return new MyAdView(Robolectric.application) {
-        };
+    public static MyTestAdView makeAdView() {
+        return new MyTestAdView(Robolectric.application);
     }
 
-    private abstract static class MyAdView extends AdView {
+    public static class MyTestAdView extends TestAdView {
         private OnAttachStateChangeListener onAttachStateListener;
 
         FrameLayout thumbnail = mock(FrameLayout.class);
@@ -145,15 +144,15 @@ public class RendererTest {
         TextView description = mock(TextView.class);
         TextView title = mock(TextView.class);
 
-        public MyAdView(Context context) {
+        public MyTestAdView(Context context) {
             super(context);
         }
 
-        public MyAdView(Context context, AttributeSet attrs) {
+        public MyTestAdView(Context context, AttributeSet attrs) {
             super(context, attrs);
         }
 
-        public MyAdView(Context context, AttributeSet attrs, int defStyleAttr) {
+        public MyTestAdView(Context context, AttributeSet attrs, int defStyleAttr) {
             super(context, attrs, defStyleAttr);
         }
 

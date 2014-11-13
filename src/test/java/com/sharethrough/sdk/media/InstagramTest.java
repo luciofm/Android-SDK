@@ -4,7 +4,7 @@ import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.RendererTest;
-import com.sharethrough.test.util.AdView;
+import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,8 +37,8 @@ public class InstagramTest {
 
     @Test
     public void firesClickoutBeacon() throws Exception {
-        AdView adView = RendererTest.makeAdView();
+        TestAdView adView = RendererTest.makeAdView();
         subject.fireAdClickBeacon(creative, adView, beaconService);
-        verify(beaconService).adClicked("clickout", creative, adView);
+        verify(beaconService).adClicked("clickout", creative, adView.getAdView());
     }
 }

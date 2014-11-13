@@ -17,7 +17,7 @@ import com.sharethrough.sdk.media.Media;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class Renderer<V extends View & IAdView> {
+public class Renderer {
 
     private final Timer timer;
 
@@ -25,9 +25,10 @@ public class Renderer<V extends View & IAdView> {
         this.timer = timer;
     }
 
-    public void putCreativeIntoAdView(final V adView, final Creative creative, final BeaconService beaconService, final Sharethrough sharethrough, final Runnable adReadyCallback) {
+    public void putCreativeIntoAdView(final IAdView adView, final Creative creative, final BeaconService beaconService, final Sharethrough sharethrough, final Runnable adReadyCallback) {
+        final ViewGroup container = adView.getAdView();
         if (!creative.wasRendered) {
-            beaconService.adReceived(adView.getContext(), creative);
+            beaconService.adReceived(container.getContext(), creative);
             creative.wasRendered = true;
         }
         final Handler handler = new Handler(Looper.getMainLooper());
@@ -41,7 +42,7 @@ public class Renderer<V extends View & IAdView> {
             public void run() {
                 adReadyCallback.run();
 
-                adView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+                container.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
 
                     @Override
                     public void onViewAttachedToWindow(View v) {
@@ -51,7 +52,7 @@ public class Renderer<V extends View & IAdView> {
                     public void onViewDetachedFromWindow(View v) {
                         task.cancel();
                         timer.purge(); // TODO: test
-                        adView.removeOnAttachStateChangeListener(this);
+                        container.removeOnAttachStateChangeListener(this);
                     }
                 });
 
@@ -63,7 +64,7 @@ public class Renderer<V extends View & IAdView> {
                 adView.getAdvertiser().setText(creative.getAdvertiser());
 
                 FrameLayout thumbnail = adView.getThumbnail();
-                Context context = adView.getContext();
+                Context context = container.getContext();
 
                 final ImageView thumbnailImage = new ImageView(context);
                 Bitmap thumbnailBitmap = creative.getThumbnailImage();
@@ -79,7 +80,7 @@ public class Renderer<V extends View & IAdView> {
                         media.overlayThumbnail(adView, thumbnailImage);
                     }
                 });
-                adView.setOnClickListener(new View.OnClickListener() {
+                container.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         media.fireAdClickBeacon(creative, adView, beaconService);

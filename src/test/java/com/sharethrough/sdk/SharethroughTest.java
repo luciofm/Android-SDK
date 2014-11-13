@@ -5,7 +5,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import com.sharethrough.sdk.network.AdFetcher;
 import com.sharethrough.sdk.network.ImageFetcher;
-import com.sharethrough.test.util.AdView;
+import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.*;
 @Config(emulateSdk = 18)
 public class SharethroughTest {
     private Sharethrough subject;
-    private AdView adView;
+    private TestAdView adView;
     @Mock private ExecutorService executorService;
     @Mock private Renderer renderer;
     @Mock private BeaconService beaconService;
@@ -52,11 +52,11 @@ public class SharethroughTest {
 
         doNothing().when(adFetcher).fetchAds(same(imageFetcher), eq(apiPrefix), creativeHandler.capture());
 
-        subject = new Sharethrough<>(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, beaconService, adFetcher, imageFetcher);
+        subject = new Sharethrough(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, beaconService, adFetcher, imageFetcher);
     }
 
-    private AdView makeMockAdView() {
-        AdView result = mock(AdView.class);
+    private TestAdView makeMockAdView() {
+        TestAdView result = mock(TestAdView.class);
         when(result.getContext()).thenReturn(Robolectric.application);
         when(result.getTitle()).thenReturn(mock(TextView.class));
         when(result.getDescription()).thenReturn(mock(TextView.class));
@@ -78,7 +78,7 @@ public class SharethroughTest {
     }
 
 
-    private void verifyCreativeHasBeenPlacedInAdview(AdView adView, Runnable adReadyCallback) {
+    private void verifyCreativeHasBeenPlacedInAdview(TestAdView adView, Runnable adReadyCallback) {
         ArgumentCaptor<Creative> creativeArgumentCaptor = ArgumentCaptor.forClass(Creative.class);
         verify(renderer).putCreativeIntoAdView(eq(adView), creativeArgumentCaptor.capture(), eq(beaconService), eq(subject), eq(adReadyCallback));
         assertThat(creativeArgumentCaptor.getValue()).isSameAs(this.creative);
@@ -86,7 +86,7 @@ public class SharethroughTest {
 
     @Test
     public void whenMoreAdViewsAreWaiting_ThanCreativesThatAreAvailable_keepsWaiting() throws Exception {
-        AdView adView2 = makeMockAdView();
+        TestAdView adView2 = makeMockAdView();
         Runnable adReadyCallback2 = mock(Runnable.class);
         subject.putCreativeIntoAdView(adView2, adReadyCallback2);
         Runnable adReadyCallback = mock(Runnable.class);
@@ -113,7 +113,7 @@ public class SharethroughTest {
     public void whenAndroidManifestHasCustomApiServer_usesThatServer() throws Exception {
         String serverPrefix = "http://dumb-waiter.sharethrough.com/?creative_type=video&placement_key=";
         Robolectric.application.getApplicationInfo().metaData.putString("STR_ADSERVER_API", serverPrefix);
-        subject = new Sharethrough<>(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, beaconService, adFetcher, imageFetcher);
+        subject = new Sharethrough(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, beaconService, adFetcher, imageFetcher);
         verify(adFetcher).fetchAds(same(imageFetcher), eq(serverPrefix), creativeHandler.capture());
     }
 

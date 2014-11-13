@@ -7,7 +7,7 @@ import com.sharethrough.sdk.RendererTest;
 import com.sharethrough.sdk.dialogs.ShareableDialogTest;
 import com.sharethrough.sdk.dialogs.WebViewDialog;
 import com.sharethrough.sdk.dialogs.WebViewDialogTest;
-import com.sharethrough.test.util.AdView;
+import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +35,7 @@ public class ClickoutTest {
 
     @Test
     public void overlayThumbnail_doesNothing() throws Exception {
-        AdView adView = mock(AdView.class);
+        TestAdView adView = mock(TestAdView.class);
         subject.overlayThumbnail(adView, mock(ImageView.class));
         verifyNoMoreInteractions(adView);
     }
@@ -49,8 +49,8 @@ public class ClickoutTest {
 
     @Test
     public void fireAdClickBeacon() throws Exception {
-        AdView adView = RendererTest.makeAdView();
+        TestAdView adView = RendererTest.makeAdView();
         subject.fireAdClickBeacon(creative, adView, beaconService);
-        verify(beaconService).adClicked("clickout", creative, adView);
+        verify(beaconService).adClicked("clickout", creative, adView.getAdView());
     }
 }

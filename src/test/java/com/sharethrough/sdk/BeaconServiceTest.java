@@ -104,7 +104,7 @@ public class BeaconServiceTest {
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
             public void run() {
-                subject.adClicked("fake user event", creative, RendererTest.makeAdView());
+                subject.adClicked("fake user event", creative, RendererTest.makeAdView().getAdView());
             }
         });
     }
@@ -204,7 +204,7 @@ public class BeaconServiceTest {
 
         Creative testCreative = new Creative(responseCreative, new byte[0], "placement key");
 
-        subject.adClicked("test-creative", testCreative, RendererTest.makeAdView());
+        subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView());
 
         Robolectric.addHttpResponseRule(new RequestMatcher() {
             @Override

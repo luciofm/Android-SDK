@@ -68,4 +68,9 @@ public class BasicAdView extends FrameLayout implements IAdView {
     public FrameLayout getThumbnail() {
         return (FrameLayout) this.findViewById(thumbnailViewId);
     }
+
+    @Override
+    public ViewGroup getAdView() {
+        return this;
+    }
 }

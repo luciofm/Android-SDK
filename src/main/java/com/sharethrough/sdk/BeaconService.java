@@ -65,10 +65,10 @@ public class BeaconService {
         return result;
     }
 
-    public <V extends View & IAdView> void adClicked(final String userEvent, final Creative creative, final V adView) {
-        Map<String, String> beaconParams = commonParamsWithCreative(adView.getContext(), creative);
-        beaconParams.put("pheight", "" + adView.getHeight());
-        beaconParams.put("pwidth", "" + adView.getWidth());
+    public void adClicked(final String userEvent, final Creative creative, View view) {
+        Map<String, String> beaconParams = commonParamsWithCreative(view.getContext(), creative);
+        beaconParams.put("pheight", "" + view.getHeight());
+        beaconParams.put("pwidth", "" + view.getWidth());
         beaconParams.put("type", "userEvent");
         beaconParams.put("userEvent", userEvent);
         beaconParams.put("engagement", "true");

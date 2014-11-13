@@ -23,8 +23,8 @@ public class HostedVideo extends Media {
     }
 
     @Override
-    public <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView, BeaconService beaconService) {
-        beaconService.adClicked("videoPlay", creative, adView);
+    public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService) {
+        beaconService.adClicked("videoPlay", creative, adView.getAdView());
     }
 
     @Override

@@ -9,7 +9,7 @@ import com.sharethrough.sdk.RendererTest;
 import com.sharethrough.sdk.dialogs.ShareableDialogTest;
 import com.sharethrough.sdk.dialogs.VideoDialog;
 import com.sharethrough.sdk.dialogs.WebViewDialogTest;
-import com.sharethrough.test.util.AdView;
+import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,9 +48,9 @@ public class VineTest {
 
     @Test
     public void firesPlayBeacon() throws Exception {
-        AdView adView = RendererTest.makeAdView();
+        TestAdView adView = RendererTest.makeAdView();
         subject.fireAdClickBeacon(creative, adView, beaconService);
-        verify(beaconService).adClicked("vinePlay", creative, adView);
+        verify(beaconService).adClicked("vinePlay", creative, adView.getAdView());
     }
 
     @Config(emulateSdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})

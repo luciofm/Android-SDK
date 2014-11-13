@@ -7,7 +7,7 @@ import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.dialogs.ShareableDialogTest;
 import com.sharethrough.sdk.dialogs.VideoDialog;
 import com.sharethrough.sdk.dialogs.WebViewDialogTest;
-import com.sharethrough.test.util.AdView;
+import com.sharethrough.test.util.TestAdView;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
@@ -44,9 +44,9 @@ public class HostedVideoTest {
         HostedVideo subject = new HostedVideo(creative);
 
         BeaconService beaconService = mock(BeaconService.class);
-        AdView adView = mock(AdView.class);
+        TestAdView adView = mock(TestAdView.class);
         subject.fireAdClickBeacon(creative, adView, beaconService);
 
-        verify(beaconService).adClicked("videoPlay", creative, adView);
+        verify(beaconService).adClicked("videoPlay", creative, adView.getAdView());
     }
 }

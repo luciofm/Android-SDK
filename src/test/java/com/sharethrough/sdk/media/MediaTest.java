@@ -9,7 +9,7 @@ import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.IAdView;
 import com.sharethrough.sdk.RendererTest;
-import com.sharethrough.test.util.AdView;
+import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,7 +45,7 @@ public class MediaTest {
         Media subject = new TestMedia();
         isThumbnailOverlayCentered = false;
 
-        AdView adView = RendererTest.makeAdView();
+        TestAdView adView = RendererTest.makeAdView();
 
         subject.overlayThumbnail(adView, thumbnailImageView);
 
@@ -69,7 +69,7 @@ public class MediaTest {
         Media subject = new TestMedia();
         isThumbnailOverlayCentered = true;
 
-        AdView adView = RendererTest.makeAdView();
+        TestAdView adView = RendererTest.makeAdView();
 
         subject.overlayThumbnail(adView, thumbnailImageView);
 
@@ -87,7 +87,7 @@ public class MediaTest {
         Media subject = new TestMedia();
         overlayImageResourceId = -1;
 
-        AdView adView = RendererTest.makeAdView();
+        TestAdView adView = RendererTest.makeAdView();
 
         subject.overlayThumbnail(adView, thumbnailImageView);
 
@@ -115,7 +115,7 @@ public class MediaTest {
         }
 
         @Override
-        public <V extends View & IAdView> void fireAdClickBeacon(Creative creative, V adView, BeaconService beaconService) {
+        public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService) {
         }
     }
 }
