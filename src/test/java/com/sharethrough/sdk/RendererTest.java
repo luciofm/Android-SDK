@@ -114,6 +114,7 @@ public class RendererTest {
         assertThat(timerTask.isCancelled()).isFalse();
         adView.onAttachStateListener.onViewDetachedFromWindow(adView);
         assertThat(timerTask.isCancelled()).isTrue();
+        verify(timer).purge();
     }
 
     @Test

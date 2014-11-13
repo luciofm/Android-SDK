@@ -16,7 +16,7 @@ public class Response {
         public CreativeInner creative;
 
         @JsonProperty("priceType")
-        public String priceType; // TODO: enum?
+        public String priceType;
         @JsonProperty("version")
         public int version;
 

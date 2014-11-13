@@ -51,7 +51,7 @@ public class Renderer {
                     @Override
                     public void onViewDetachedFromWindow(View v) {
                         task.cancel();
-                        timer.purge(); // TODO: test
+                        timer.purge();
                         container.removeOnAttachStateChangeListener(this);
                     }
                 });

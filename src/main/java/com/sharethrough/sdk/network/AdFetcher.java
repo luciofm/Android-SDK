@@ -109,7 +109,6 @@ public class AdFetcher {
             creative.priceType = jsonCreative.getString("priceType");
             creative.signature = jsonCreative.getString("signature");
 
-            // TODO: more fields
             JSONObject beacons = jsonCreativeInner.getJSONObject("beacons");
             creative.creative.beacon = new Response.Creative.CreativeInner.Beacon();
             parseBeacons(creative, beacons);
