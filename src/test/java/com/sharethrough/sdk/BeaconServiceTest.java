@@ -1,6 +1,6 @@
 package com.sharethrough.sdk;
 
-import com.sharethrough.sdk.network.AdFetcher;
+import com.sharethrough.test.util.Misc;
 import org.apache.http.HttpRequest;
 import org.apache.http.NameValuePair;
 import org.apache.http.RequestLine;
@@ -8,7 +8,6 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
@@ -21,7 +20,8 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(emulateSdk = 18)
@@ -50,7 +50,7 @@ public class BeaconServiceTest {
         expectedCommonParams.put("session", session.toString());
         advertisingId = "abc";
         expectedCommonParams.put("uid", advertisingId);
-        expectedCommonParams.put("ua", "" + AdFetcher.USER_AGENT);
+        expectedCommonParams.put("ua", "" + Sharethrough.USER_AGENT);
 
         responseCreative = new Response.Creative();
         responseCreative.creative = new Response.Creative.CreativeInner();
@@ -182,12 +182,7 @@ public class BeaconServiceTest {
             }
         }, new TestHttpResponse(200, ""));
 
-        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(executorService, atLeastOnce()).execute(runnableArgumentCaptor.capture());
-        List<Runnable> allValues = runnableArgumentCaptor.getAllValues();
-        for (Runnable allValue : allValues) {
-            allValue.run();
-        }
+        Misc.runAll(executorService);
 
         List<HttpRequestInfo> info = Robolectric.getFakeHttpLayer().getSentHttpRequestInfos();
         assertThat(info.size()).isEqualTo(3);
@@ -218,12 +213,7 @@ public class BeaconServiceTest {
             }
         }, new TestHttpResponse(200, ""));
 
-        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(executorService, atLeastOnce()).execute(runnableArgumentCaptor.capture());
-        List<Runnable> allValues = runnableArgumentCaptor.getAllValues();
-        for (Runnable allValue : allValues) {
-            allValue.run();
-        }
+        Misc.runAll(executorService);
 
         List<HttpRequestInfo> info = Robolectric.getFakeHttpLayer().getSentHttpRequestInfos();
         assertThat(info.size()).isEqualTo(5);
@@ -272,9 +262,7 @@ public class BeaconServiceTest {
 
         fireBeacon.run();
 
-        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(executorService).execute(runnableArgumentCaptor.capture());
-        runnableArgumentCaptor.getValue().run();
+        Misc.runLast(executorService);
 
         assertThat(wasCalled[0]).isTrue();
     }

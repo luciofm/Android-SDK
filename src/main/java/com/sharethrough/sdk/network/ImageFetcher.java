@@ -4,6 +4,7 @@ import android.util.Log;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.Function;
 import com.sharethrough.sdk.Response;
+import com.sharethrough.sdk.Sharethrough;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIUtils;
@@ -24,18 +25,17 @@ public class ImageFetcher {
         this.key = key;
     }
 
-    public void fetchImage(final Response.Creative responseCreative, final Function<Creative, Void> creativeHandler, final URI apiUri) {
+    public void fetchImage(final URI apiURI, final Response.Creative responseCreative, final Function<Creative, Void> creativeHandler) {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
                 try {
                     DefaultHttpClient client = new DefaultHttpClient();
 
-                    URI imageURI = URIUtils.resolve(apiUri, responseCreative.creative.thumbnailUrl);
-
+                    URI imageURI = URIUtils.resolve(apiURI, responseCreative.creative.thumbnailUrl);
                     HttpGet imageRequest = new HttpGet(imageURI);
                     Log.d("Sharethrough", "fetching image:\t" + imageURI.toString());
-                    imageRequest.addHeader("User-Agent", AdFetcher.USER_AGENT);
+                    imageRequest.addHeader("User-Agent", Sharethrough.USER_AGENT);
                     HttpResponse imageResponse = client.execute(imageRequest);
                     if (imageResponse.getStatusLine().getStatusCode() == 200) {
                         InputStream imageContent = imageResponse.getEntity().getContent();

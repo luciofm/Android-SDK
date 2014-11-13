@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
-import com.sharethrough.sdk.network.AdFetcher;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
@@ -21,6 +20,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 public class BeaconService {
+    public static String TRACKING_URL = "http://b.sharethrough.com/butler";
     private final Provider<Date> dateProvider;
     private final ExecutorService executorService;
     private final AdvertisingIdProvider advertisingIdProvider;
@@ -49,7 +49,7 @@ public class BeaconService {
         result.put("uid", advertisingIdProvider.getAdvertisingId());
         result.put("session", session.toString());
 
-        result.put("ua", "" + AdFetcher.USER_AGENT);
+        result.put("ua", "" + Sharethrough.USER_AGENT);
 
         return result;
     }
@@ -132,7 +132,7 @@ public class BeaconService {
     }
 
     private void fireBeacon(final Map<String, String> beaconParams) {
-        fireBeacon(beaconParams, Sharethrough.TRACKING_URL);
+        fireBeacon(beaconParams, TRACKING_URL);
     }
 
     private void fireBeacon(final Map<String, String> beaconParams, final String uri) {
@@ -148,7 +148,7 @@ public class BeaconService {
                 String url = uriBuilder.build().toString();
                 Log.i("Sharethrough", "beacon:\t" + url);
                 HttpGet request = new HttpGet(url);
-                request.addHeader("User-Agent", AdFetcher.USER_AGENT);
+                request.addHeader("User-Agent", Sharethrough.USER_AGENT);
                 try {
                     client.execute(request);
                 } catch (IOException e) {

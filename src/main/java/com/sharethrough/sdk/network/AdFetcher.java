@@ -15,24 +15,19 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 
 public class AdFetcher {
-    public static final String USER_AGENT = System.getProperty("http.agent");
-    private final String apiUrlPrefix;
     private final ExecutorService executorService;
-    private final Function<Creative, Void> creativeHandler;
     private final BeaconService beaconService;
     private final Context context;
     private final String key;
 
-    public AdFetcher(Context context, String key, String apiUrlPrefix, ExecutorService executorService, Function<Creative, Void> creativeHandler, BeaconService beaconService) {
+    public AdFetcher(Context context, String key, ExecutorService executorService, BeaconService beaconService) {
         this.context = context;
         this.key = key;
-        this.apiUrlPrefix = apiUrlPrefix;
         this.executorService = executorService;
-        this.creativeHandler = creativeHandler;
         this.beaconService = beaconService;
     }
 
-    public void fetch() {
+    public void fetchAds(final ImageFetcher imageFetcher, final String apiUrlPrefix, final Function<Creative, Void> creativeHandler) {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
@@ -43,7 +38,7 @@ public class AdFetcher {
 
                     DefaultHttpClient client = new DefaultHttpClient();
                     HttpGet request = new HttpGet(uri);
-                    request.addHeader("User-Agent", USER_AGENT);
+                    request.addHeader("User-Agent", Sharethrough.USER_AGENT);
                     // TODO: handle errors
                     InputStream content = client.execute(request).getEntity().getContent();
                     Response response = getResponse(content);
@@ -52,7 +47,7 @@ public class AdFetcher {
 //                    Response response = mapper.readValue(content, Response.class);
 
                     for (final Response.Creative responseCreative : response.creatives) {
-                        new ImageFetcher(executorService, key).fetchImage(responseCreative, creativeHandler, uri);
+                        imageFetcher.fetchImage(uri, responseCreative, creativeHandler);
                     }
                 } catch (Exception e) {
                     // TODO: log more thoroughly
@@ -88,7 +83,7 @@ public class AdFetcher {
         JSONObject jsonResponse = new JSONObject(Misc.convertStreamToString(content));
         Response response = new Response();
         JSONArray creatives = jsonResponse.getJSONArray("creatives");
-        response.creatives = new ArrayList<Response.Creative>(creatives.length());
+        response.creatives = new ArrayList<>(creatives.length());
         for (int i = 0; i < creatives.length(); i++) {
             JSONObject jsonCreative = creatives.getJSONObject(i);
             Response.Creative creative = new Response.Creative();

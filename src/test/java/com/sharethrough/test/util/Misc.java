@@ -6,8 +6,14 @@ import android.graphics.drawable.BitmapDrawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import org.mockito.ArgumentCaptor;
+
+import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
 import static org.robolectric.Robolectric.shadowOf;
 
 public class Misc {
@@ -34,5 +40,20 @@ public class Misc {
     public static void assertImageViewFromBitmap(ImageView imageView, Bitmap expected) {
         Bitmap actual = ((BitmapDrawable) shadowOf(imageView).getDrawable()).getBitmap();
         assertThat(actual).isEqualTo(expected);
+    }
+
+    public static void runLast(ExecutorService executorService) {
+        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(executorService).execute(runnableArgumentCaptor.capture());
+        runnableArgumentCaptor.getValue().run();
+    }
+
+    public static void runAll(ExecutorService executorService1) {
+        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(executorService1, atLeastOnce()).execute(runnableArgumentCaptor.capture());
+        List<Runnable> allExecutions = runnableArgumentCaptor.getAllValues();
+        for (Runnable runnable : allExecutions) {
+            runnable.run();
+        }
     }
 }

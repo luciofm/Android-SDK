@@ -5,10 +5,38 @@
   },
   "creatives": [
     {
+      "price": 125167,
+      "signature": "c19",
+      "creative": {
+        "creative_key": "ckey1",
+        "description": "Description.",
+        "media_url": "mediaURL",
+        "share_url": "shareURL",
+        "variant_key": "12345",
+        "advertiser": "Advertiser",
+        "beacons": {
+          "visible": [],
+          "click": [
+            "clickBeaconOne",
+            "clickBeaconTwo"
+          ],
+          "play": [
+            "playBeaconOne",
+            "playBeaconTwo"
+          ]
+        },
+        "thumbnail_url": "//th.umb.na/il/URL1",
+        "title": "Title",
+        "action": "clickout"
+      },
+      "priceType": "CPE",
+      "version": 1
+    },
+    {
       "price": 12567,
       "signature": "c19",
       "creative": {
-        "creative_key": "ckey",
+        "creative_key": "ckey2",
         "description": "Description.",
         "media_url": "mediaURL",
         "share_url": "shareURL",
@@ -19,7 +47,7 @@
           "click": ["clickBeaconOne", "clickBeaconTwo"],
           "play": ["playBeaconOne", "playBeaconTwo"]
         },
-        "thumbnail_url": "//th.umb.na/il/URL",
+        "thumbnail_url": "//th.umb.na/il/URL2",
         "title": "Title",
         "action": "clickout"
       },

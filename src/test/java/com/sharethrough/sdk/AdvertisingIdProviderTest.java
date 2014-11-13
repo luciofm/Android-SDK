@@ -68,9 +68,7 @@ public class AdvertisingIdProviderTest {
         MyAdvertisingIdClientShadow.IS_LIMITED_AD_TRACKING_ENABLED = true;
         AdvertisingIdProvider subject = new AdvertisingIdProvider(Robolectric.application, executorService, defaultId);
 
-        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(executorService).execute(runnableArgumentCaptor.capture());
-        runnableArgumentCaptor.getValue().run();
+        com.sharethrough.test.util.Misc.runLast(executorService);
 
         assertThat(subject.getAdvertisingId()).isEqualTo(defaultId);
     }
