@@ -43,11 +43,10 @@ public class ImageFetcher {
                         Creative creative = new Creative(responseCreative, imageBytes, key);
                         creativeHandler.apply(creative);
                     } else {
-                        Log.wtf("Sharethrough", "failed to load image from url: " + imageURI + " ; server said: " + imageResponse.getStatusLine().getStatusCode() + "\t" + imageResponse.getStatusLine().getReasonPhrase());
+                        Log.e("Sharethrough", "failed to load image from url: " + imageURI + " ; server said: " + imageResponse.getStatusLine().getStatusCode() + "\t" + imageResponse.getStatusLine().getReasonPhrase());
                     }
                 } catch (IOException e) {
-                    Log.wtf("Sharethrough", "failed to load image from url: " + responseCreative.creative.thumbnailUrl, e);
-                    e.printStackTrace();
+                    Log.e("Sharethrough", "failed to load image from url: " + responseCreative.creative.thumbnailUrl, e);
                 }
             }
         });

@@ -32,16 +32,16 @@ public class AdFetcher {
             @Override
             public void run() {
                 beaconService.adRequested(context, key);
+                final URI uri = URI.create(apiUrlPrefix + key);
+                String json = null;
                 try {
-                    String urlString = apiUrlPrefix + key;
-                    final URI uri = URI.create(urlString);
 
                     DefaultHttpClient client = new DefaultHttpClient();
                     HttpGet request = new HttpGet(uri);
                     request.addHeader("User-Agent", Sharethrough.USER_AGENT);
-                    // TODO: handle errors
                     InputStream content = client.execute(request).getEntity().getContent();
-                    Response response = getResponse(content);
+                    json = Misc.convertStreamToString(content);
+                    Response response = getResponse(json);
 //                    ObjectMapper mapper = new ObjectMapper();
 //                    mapper.disable(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES);
 //                    Response response = mapper.readValue(content, Response.class);
@@ -50,8 +50,11 @@ public class AdFetcher {
                         imageFetcher.fetchImage(uri, responseCreative, creativeHandler);
                     }
                 } catch (Exception e) {
-                    // TODO: log more thoroughly
-                    Log.wtf("Sharethrough", "failed to get ads for key " + key, e);
+                    String msg = "failed to get ads for key " + key + ": " + uri;
+                    if (json != null) {
+                        msg += ": " + json;
+                    }
+                    Log.e("Sharethrough", msg, e);
                 }
             }
         });
@@ -79,8 +82,8 @@ public class AdFetcher {
         }
     }
 
-    private Response getResponse(InputStream content) throws JSONException {
-        JSONObject jsonResponse = new JSONObject(Misc.convertStreamToString(content));
+    private Response getResponse(String json) throws JSONException {
+        JSONObject jsonResponse = new JSONObject(json);
         Response response = new Response();
         JSONArray creatives = jsonResponse.getJSONArray("creatives");
         response.creatives = new ArrayList<>(creatives.length());

@@ -17,11 +17,14 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowLog;
 import org.robolectric.tester.org.apache.http.TestHttpResponse;
 
 import java.net.URI;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricTestRunner.class)
@@ -60,6 +63,42 @@ public class AdFetcherTest {
 
         verifyFetchedImage(imageFetcher, "//th.umb.na/il/URL1", apiUri, creativeHandler);
         verifyFetchedImage(imageFetcher, "//th.umb.na/il/URL2", apiUri, creativeHandler);
+    }
+
+    @Test
+    public void fetchAds_whenServerRequestFails_doesNothing() throws Exception {
+        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(500, "Bad server"));
+
+        subject.fetchAds(imageFetcher, apiUriPrefix, creativeHandler);
+
+        Misc.runLast(executorService);
+
+        verifyNoMoreInteractions(imageFetcher);
+    }
+
+    @Test
+    public void fetchAds_whenExceptionOccursBeforeGettingHttpResponse_logsSomeStuff() throws Exception {
+        Robolectric.addHttpResponseRule("GET", apiUri, null);
+
+        subject.fetchAds(imageFetcher, apiUriPrefix, creativeHandler);
+
+        Misc.runLast(executorService);
+
+        List<ShadowLog.LogItem> logsForTag = ShadowLog.getLogsForTag("Sharethrough");
+        assertThat(logsForTag.get(0).msg).isEqualTo("failed to get ads for key " + key + ": " + apiUri);
+    }
+
+    @Test
+    public void fetchAds_whenExceptionOccursAfterGettingHttpResponse_logsSomeStuffAndStuffAboutResponse() throws Exception {
+        String responseBody = "{234789wdfjkl ";
+        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, responseBody));
+
+        subject.fetchAds(imageFetcher, apiUriPrefix, creativeHandler);
+
+        Misc.runLast(executorService);
+
+        List<ShadowLog.LogItem> logsForTag = ShadowLog.getLogsForTag("Sharethrough");
+        assertThat(logsForTag.get(0).msg).isEqualTo("failed to get ads for key " + key + ": " + apiUri + ": " + responseBody);
     }
 
     @Test
