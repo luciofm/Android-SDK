@@ -1,5 +1,5 @@
 language: android
-script:   ./gradlew test assembleDebug createEclipseZip
+script:   ./gradlew test assembleRelease createEclipseZip
 
 after_success: ./scripts/build-artifacts
 after_failure: find build/test-report/debug -type f | xargs cat
