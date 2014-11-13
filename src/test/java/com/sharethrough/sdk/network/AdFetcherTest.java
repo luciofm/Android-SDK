@@ -35,13 +35,15 @@ public class AdFetcherTest {
     private AdFetcher subject;
     private String apiUri;
     private String apiUriPrefix;
+    private String key;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        subject = new AdFetcher(Robolectric.application, "key", executorService, beaconService);
+        key = "key";
+        subject = new AdFetcher(Robolectric.application, key, executorService, beaconService);
         apiUriPrefix = "http://api?key=";
-        apiUri = apiUriPrefix + "key";
+        apiUri = apiUriPrefix + key;
     }
 
     @Test
@@ -54,7 +56,7 @@ public class AdFetcherTest {
 
         Misc.runLast(executorService);
 
-        verify(beaconService).adRequested(Robolectric.application, "key");
+        verify(beaconService).adRequested(Robolectric.application, key);
 
         verifyFetchedImage(imageFetcher, "//th.umb.na/il/URL1", apiUri, creativeHandler);
         verifyFetchedImage(imageFetcher, "//th.umb.na/il/URL2", apiUri, creativeHandler);
@@ -71,7 +73,7 @@ public class AdFetcherTest {
         verifyNoMoreInteractions(imageFetcher);
     }
 
-    private void verifyFetchedImage(ImageFetcher imageFetcher, final String imageUrl, String apiUri, Function creativeHandler) {
+    private void verifyFetchedImage(ImageFetcher imageFetcher, final String imageUrl, String apiUri, Function<Creative, Void> creativeHandler) {
         verify(imageFetcher).fetchImage(eq(URI.create(apiUri)), Matchers.argThat(new BaseMatcher<Response.Creative>() {
             @Override
             public boolean matches(Object o) {
