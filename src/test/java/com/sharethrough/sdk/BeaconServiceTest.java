@@ -1,5 +1,6 @@
 package com.sharethrough.sdk;
 
+import com.sharethrough.sdk.network.AdFetcher;
 import org.apache.http.HttpRequest;
 import org.apache.http.NameValuePair;
 import org.apache.http.RequestLine;
@@ -49,7 +50,7 @@ public class BeaconServiceTest {
         expectedCommonParams.put("session", session.toString());
         advertisingId = "abc";
         expectedCommonParams.put("uid", advertisingId);
-        expectedCommonParams.put("ua", "" + Sharethrough.USER_AGENT);
+        expectedCommonParams.put("ua", "" + AdFetcher.USER_AGENT);
 
         responseCreative = new Response.Creative();
         responseCreative.creative = new Response.Creative.CreativeInner();

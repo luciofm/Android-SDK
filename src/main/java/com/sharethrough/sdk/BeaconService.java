@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
+import com.sharethrough.sdk.network.AdFetcher;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
@@ -48,7 +49,7 @@ public class BeaconService {
         result.put("uid", advertisingIdProvider.getAdvertisingId());
         result.put("session", session.toString());
 
-        result.put("ua", "" + Sharethrough.USER_AGENT);
+        result.put("ua", "" + AdFetcher.USER_AGENT);
 
         return result;
     }
@@ -147,7 +148,7 @@ public class BeaconService {
                 String url = uriBuilder.build().toString();
                 Log.i("Sharethrough", "beacon:\t" + url);
                 HttpGet request = new HttpGet(url);
-                request.addHeader("User-Agent", Sharethrough.USER_AGENT);
+                request.addHeader("User-Agent", AdFetcher.USER_AGENT);
                 try {
                     client.execute(request);
                 } catch (IOException e) {
