@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
-import com.sharethrough.android.sdk.R;
 
 public class SharethroughListAdapter extends BaseAdapter {
 
@@ -15,14 +14,22 @@ public class SharethroughListAdapter extends BaseAdapter {
     private final Context mContext;
     private final Sharethrough mSharethrough;
 
-    private final int adLayout;
+    private final int adLayoutResourceId;
+    private final int titleViewId;
+    private final int descriptionViewId;
+    private final int advertiserViewId;
+    private final int thumbnailViewId;
 
     private static final int AD_INDEX = 3;
 
-    public SharethroughListAdapter(Context context, ListAdapter adapter, Sharethrough sharethrough, int adLayout) {
+    public SharethroughListAdapter(Context context, ListAdapter adapter, Sharethrough sharethrough, int adLayoutResourceId, int titleViewId, int descriptionViewId, int advertiserViewId, int thumbnailViewId) {
         mContext = context;
         mAdapter = adapter;
         mSharethrough = sharethrough;
+        this.titleViewId = titleViewId;
+        this.descriptionViewId = descriptionViewId;
+        this.advertiserViewId = advertiserViewId;
+        this.thumbnailViewId = thumbnailViewId;
 
         mAdapter.registerDataSetObserver(new DataSetObserver() {
             @Override
@@ -36,7 +43,7 @@ public class SharethroughListAdapter extends BaseAdapter {
             }
         });
 
-        this.adLayout = adLayout;
+        this.adLayoutResourceId = adLayoutResourceId;
     }
 
     @Override
@@ -80,7 +87,7 @@ public class SharethroughListAdapter extends BaseAdapter {
     private View getAd() {
         BasicAdView adView = new BasicAdView(mContext);
 
-        adView.showAd(mSharethrough, adLayout, R.id.title, R.id.description, R.id.advertiser, R.id.thumbnail);
+        adView.showAd(mSharethrough, adLayoutResourceId, titleViewId, descriptionViewId, advertiserViewId, thumbnailViewId);
 
         return adView;
     }
