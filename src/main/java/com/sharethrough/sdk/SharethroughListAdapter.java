@@ -1,6 +1,7 @@
 package com.sharethrough.sdk;
 
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
@@ -26,6 +27,19 @@ public class SharethroughListAdapter extends BaseAdapter {
         mContext = context;
         mAdapter = adapter;
         mSharethrough = sharethrough;
+
+        mAdapter.registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                notifyDataSetChanged();
+            }
+
+            @Override
+            public void onInvalidated() {
+                notifyDataSetInvalidated();
+            }
+        });
+
         this.adLayout = adLayout;
     }
 
@@ -37,42 +51,29 @@ public class SharethroughListAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int position) {
-        if (position < AD_INDEX) {
-            return mAdapter.getItem(position);
-        } else if (position == AD_INDEX) {
-            return mSharethrough;
+        if (isAd(position)) {
+            return null;
         } else {
-            return mAdapter.getItem(position - 1);
+            return mAdapter.getItemViewType(adjustedPosition(position));
         }
     }
 
     @Override
     public long getItemId(int position) {
-        if (position < AD_INDEX) {
-            return mAdapter.getItemId(position);
-        } else if (position == AD_INDEX) {
+        if (isAd(position)) {
             return -1;
         }
 
-        return mAdapter.getItemId(position);
-
+        return mAdapter.getItemId(adjustedPosition(position));
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        if (position == AD_INDEX) {
+        if (isAd(position)) {
             return getAd();
         } else {
-            if (position < AD_INDEX) {
-                if (convertView != null) {
-                }
-                return mAdapter.getView(position, convertView, parent);
-            } else {
-                if (convertView != null) {
-                }
-                return mAdapter.getView(position - 1, convertView, parent);
-            }
+            return mAdapter.getView(adjustedPosition(position), convertView, parent);
         }
     }
 
@@ -87,10 +88,10 @@ public class SharethroughListAdapter extends BaseAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        if (position == AD_INDEX) {
-            return 1; // TODO: figure out correct return types
+        if (isAd(position)) {
+            return mAdapter.getViewTypeCount();
         } else {
-            return 0;
+            return mAdapter.getItemViewType(adjustedPosition(position));
         }
     }
 
@@ -99,4 +100,15 @@ public class SharethroughListAdapter extends BaseAdapter {
         return 1 + mAdapter.getViewTypeCount();
     }
 
+    private int adjustedPosition(int position) {
+        if (position < AD_INDEX) {
+            return position;
+        } else {
+            return position - 1;
+        }
+    }
+
+    private boolean isAd(int position) {
+        return position == AD_INDEX;
+    }
 }

@@ -1,14 +1,15 @@
 package com.sharethrough.sdk;
 
+import android.database.DataSetObserver;
 import android.view.View;
 import android.widget.ListAdapter;
 import com.sharethrough.android.sdk.R;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import static org.fest.assertions.api.ANDROID.assertThat;
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -16,9 +17,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.*;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(emulateSdk = 18)
-public class SharethroughListAdapterTest {
+public class SharethroughListAdapterTest extends TestBase {
 
     private ListAdapter adapter;
     private SharethroughListAdapter subject;
@@ -33,6 +32,7 @@ public class SharethroughListAdapterTest {
         sharethrough = mock(Sharethrough.class);
 
         subject = new SharethroughListAdapter(Robolectric.application, adapter, sharethrough, R.layout.ad);
+        verify(adapter).registerDataSetObserver(any(DataSetObserver.class));
     }
 
     @Test
@@ -45,18 +45,76 @@ public class SharethroughListAdapterTest {
         subject.getView(0, null, null);
 
         verify(adapter).getView(0, null, null);
-//        verify(adapter).getItemViewType(0);
 
         subject.getView(3, null, null);
         verifyNoMoreInteractions(adapter);
+    }
+
+    @Test
+    public void inflatesProperLayoutForAd() throws Exception {
+        View v = subject.getView(3, null, null);
+
+        assertThat(v).isInstanceOf(IAdView.class);
+
         verify(sharethrough).putCreativeIntoAdView(any(IAdView.class), any(Runnable.class));
     }
 
     @Test
-    public void inflatesProperLayout() throws Exception {
-        View v = subject.getView(3, null, null);
+    public void delegatesGetViewToWrappedAdapterForNonAd() throws Exception {
+        View item = mock(View.class);
+        when(adapter.getView(2, null, null)).thenReturn(item);
 
-        assertThat(v).isInstanceOf(IAdView.class);
+        View v = subject.getView(2, null, null);
+
+        assertThat(v).isSameAs(item);
     }
 
+    @Test
+    public void getItemViewType_forAd_returnsDelegatedGetViewTypeCount() throws Exception {
+        when(adapter.getViewTypeCount()).thenReturn(8);
+        assertThat(subject.getItemViewType(3)).isEqualTo(8);
+        when(adapter.getViewTypeCount()).thenReturn(80);
+        assertThat(subject.getItemViewType(3)).isEqualTo(80);
+    }
+
+    @Test
+    public void getItemViewType_forNonAd_returnsDelegatedGetItemViewType() throws Exception {
+        when(adapter.getItemViewType(anyInt())).then(new Answer<Integer>() {
+            @Override
+            public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
+                return (Integer) invocationOnMock.getArguments()[0];
+            }
+        });
+        assertThat(subject.getItemViewType(0)).isEqualTo(0);
+        assertThat(subject.getItemViewType(1)).isEqualTo(1);
+        assertThat(subject.getItemViewType(2)).isEqualTo(2);
+        assertThat(subject.getItemViewType(4)).isEqualTo(3);
+    }
+
+    @Test
+    public void notifiesObserverWhenDelegatedAdapterChanges() throws Exception {
+        final boolean[] wasChanged = new boolean[1];
+        final boolean[] wasInvalidated = new boolean[1];
+        subject.registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                wasChanged[0] = true;
+            }
+
+            @Override
+            public void onInvalidated() {
+                wasInvalidated[0] = true;
+            }
+        });
+
+        ArgumentCaptor<DataSetObserver> dataSetObserverArgumentCaptor = ArgumentCaptor.forClass(DataSetObserver.class);
+        verify(adapter).registerDataSetObserver(dataSetObserverArgumentCaptor.capture());
+        DataSetObserver dataSetObserver = dataSetObserverArgumentCaptor.getValue();
+
+        dataSetObserver.onChanged();
+        assertThat(wasChanged[0]).isTrue();
+
+        dataSetObserver.onInvalidated();
+        assertThat(wasInvalidated[0]).isTrue();
+    }
 }
