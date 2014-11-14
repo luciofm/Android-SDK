@@ -3,11 +3,8 @@ package com.sharethrough.sdk;
 import android.widget.ProgressBar;
 import com.sharethrough.android.sdk.R;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import static com.sharethrough.test.util.Misc.findViewOfType;
 import static org.fest.assertions.api.ANDROID.assertThat;
@@ -16,9 +13,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(emulateSdk = 18)
-public class BasicAdViewTest {
+public class BasicAdViewTest extends TestBase {
     @Test
     public void showAd_tellsSharethroughToShowTheAd() throws Exception {
         BasicAdView subject = new BasicAdView(Robolectric.application);

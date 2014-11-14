@@ -15,12 +15,11 @@ import android.widget.ShareActionProvider;
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
+import com.sharethrough.sdk.TestBase;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -33,9 +32,8 @@ import static org.fest.assertions.api.ANDROID.assertThat;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(emulateSdk = 18, shadows = ShareableDialogTest.MenuInflaterShadow.class)
-public class ShareableDialogTest {
+@Config(shadows = ShareableDialogTest.MenuInflaterShadow.class)
+public class ShareableDialogTest extends TestBase {
 
     private ShareableDialog subject;
     private Creative creative;

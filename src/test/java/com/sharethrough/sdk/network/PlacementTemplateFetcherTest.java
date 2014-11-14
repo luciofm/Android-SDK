@@ -2,16 +2,14 @@ package com.sharethrough.sdk.network;
 
 import com.sharethrough.sdk.Callback;
 import com.sharethrough.sdk.Placement;
+import com.sharethrough.sdk.TestBase;
 import com.sharethrough.test.Fixtures;
 import com.sharethrough.test.util.Misc;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 import org.robolectric.tester.org.apache.http.TestHttpResponse;
 
 import java.util.concurrent.ExecutorService;
@@ -19,9 +17,7 @@ import java.util.concurrent.ExecutorService;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(emulateSdk = 18)
-public class PlacementTemplateFetcherTest {
+public class PlacementTemplateFetcherTest extends TestBase {
     private static final String FIXTURE = Fixtures.getFile("assets/str_template.json");
     private static final String key = "abc";
 

@@ -5,25 +5,17 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.sharethrough.android.sdk.R;
-import com.sharethrough.sdk.BeaconService;
-import com.sharethrough.sdk.Creative;
-import com.sharethrough.sdk.IAdView;
-import com.sharethrough.sdk.RendererTest;
+import com.sharethrough.sdk.*;
 import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.robolectric.Robolectric.shadowOf;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(emulateSdk = 18)
-public class MediaTest {
+public class MediaTest extends TestBase {
     private Creative creative;
     private boolean isThumbnailOverlayCentered;
     private int overlayImageResourceId;

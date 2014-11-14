@@ -8,10 +8,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -23,14 +21,13 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(emulateSdk = 18, shadows = {
+@Config(shadows = {
         AdvertisingIdProviderTest.MySettingsSecureShadow.class,
         AdvertisingIdProviderTest.MyAdvertisingIdClientShadow.class,
         AdvertisingIdProviderTest.MyGooglePlayServicesUtilShadow.class,
         AdvertisingIdProviderTest.MyAdIdClientInfoShadow.class,
 })
-public class AdvertisingIdProviderTest {
+public class AdvertisingIdProviderTest extends TestBase {
 
     private ExecutorService executorService;
     private final String defaultId = "L00MB@";

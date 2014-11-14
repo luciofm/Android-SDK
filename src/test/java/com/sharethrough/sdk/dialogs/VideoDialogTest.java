@@ -6,13 +6,12 @@ import android.view.ViewGroup;
 import android.widget.VideoView;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
+import com.sharethrough.sdk.TestBase;
 import com.sharethrough.sdk.beacons.VideoCompletionBeaconService;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.Timer;
@@ -23,9 +22,8 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.robolectric.Robolectric.shadowOf;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(emulateSdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
-public class VideoDialogTest {
+@Config(shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
+public class VideoDialogTest extends TestBase {
 
     private VideoDialog subject;
     private Creative creative;

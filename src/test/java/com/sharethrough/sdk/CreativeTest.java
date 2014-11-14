@@ -3,17 +3,12 @@ package com.sharethrough.sdk;
 import com.sharethrough.sdk.media.*;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(emulateSdk = 18)
-public class CreativeTest {
+public class CreativeTest extends TestBase {
 
     private static final byte[] IMAGE_BYTES = new byte[0];
     private Creative subject;

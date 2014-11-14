@@ -12,14 +12,13 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.sharethrough.sdk.media.Media;
+import com.sharethrough.sdk.test.SharethroughTestRunner;
 import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLooper;
 
 import java.util.Timer;
@@ -28,9 +27,8 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.robolectric.Robolectric.shadowOf;
 
-@Config(emulateSdk = 18)
-@RunWith(RobolectricTestRunner.class)
 @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+@RunWith(SharethroughTestRunner.class)
 public class RendererTest {
 
     private Renderer subject;

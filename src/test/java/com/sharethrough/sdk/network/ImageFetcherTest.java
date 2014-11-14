@@ -3,16 +3,14 @@ package com.sharethrough.sdk.network;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.Function;
 import com.sharethrough.sdk.Response;
+import com.sharethrough.sdk.TestBase;
 import com.sharethrough.test.util.Misc;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 import org.robolectric.tester.org.apache.http.TestHttpResponse;
 
 import java.net.URI;
@@ -23,9 +21,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.robolectric.Robolectric.shadowOf;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(emulateSdk = 18)
-public class ImageFetcherTest {
+public class ImageFetcherTest extends TestBase {
     private static final String apiPrefix = "http://ur.i";
     private ImageFetcher subject;
     private URI apiUri;

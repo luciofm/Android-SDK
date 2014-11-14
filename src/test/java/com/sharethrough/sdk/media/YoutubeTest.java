@@ -5,19 +5,15 @@ import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.RendererTest;
+import com.sharethrough.sdk.TestBase;
 import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@Config(emulateSdk = 18)
-@RunWith(RobolectricTestRunner.class)
-public class YoutubeTest {
+public class YoutubeTest extends TestBase {
 
     private Bitmap thumbnailBitmap;
     private Creative creative;

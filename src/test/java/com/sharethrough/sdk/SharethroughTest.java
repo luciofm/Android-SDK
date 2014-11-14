@@ -8,13 +8,10 @@ import com.sharethrough.sdk.network.ImageFetcher;
 import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.concurrent.ExecutorService;
@@ -23,9 +20,7 @@ import java.util.concurrent.TimeUnit;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(emulateSdk = 18)
-public class SharethroughTest {
+public class SharethroughTest extends TestBase {
     private Sharethrough subject;
     private TestAdView adView;
     @Mock private ExecutorService executorService;
@@ -41,8 +36,6 @@ public class SharethroughTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         Robolectric.application.getApplicationInfo().metaData = new Bundle();
 
         Robolectric.Reflection.setFinalStaticField(Sharethrough.class, "EXECUTOR_SERVICE", executorService);

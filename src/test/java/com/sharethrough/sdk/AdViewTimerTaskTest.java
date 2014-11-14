@@ -4,20 +4,15 @@ import android.graphics.Rect;
 import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Mockito.*;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(emulateSdk = 18)
-public class AdViewTimerTaskTest {
+public class AdViewTimerTaskTest extends TestBase {
     private BeaconService beaconService;
     private Creative creative;
     private TestAdView adView;

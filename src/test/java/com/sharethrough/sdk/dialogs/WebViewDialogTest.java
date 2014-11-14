@@ -10,12 +10,11 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
+import com.sharethrough.sdk.TestBase;
 import com.sharethrough.test.util.Misc;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowWebView;
@@ -28,9 +27,8 @@ import static org.mockito.Mockito.when;
 import static org.robolectric.Robolectric.shadowOf;
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-@RunWith(RobolectricTestRunner.class)
-@Config(emulateSdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
-public class WebViewDialogTest {
+@Config(shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
+public class WebViewDialogTest extends TestBase {
 
     private Creative creative;
     private WebViewDialog subject;

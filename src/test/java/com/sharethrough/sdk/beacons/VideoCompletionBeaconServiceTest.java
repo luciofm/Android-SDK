@@ -2,26 +2,20 @@ package com.sharethrough.sdk.beacons;
 
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
-import junit.framework.TestCase;
+import com.sharethrough.sdk.TestBase;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import static org.mockito.Mockito.*;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(emulateSdk = 18)
-public class VideoCompletionBeaconServiceTest extends TestCase {
+public class VideoCompletionBeaconServiceTest extends TestBase {
     private BeaconService beaconService;
     private VideoCompletionBeaconService subject;
     private Creative creative;
 
     @Before
     public void setUp() throws Exception {
-        super.setUp();
         beaconService = mock(BeaconService.class);
         creative = mock(Creative.class);
         subject = new VideoCompletionBeaconService(Robolectric.application, creative, beaconService);

@@ -1,22 +1,16 @@
 package com.sharethrough.sdk.network;
 
-import com.sharethrough.sdk.BeaconService;
-import com.sharethrough.sdk.Creative;
-import com.sharethrough.sdk.Function;
-import com.sharethrough.sdk.Response;
+import com.sharethrough.sdk.*;
 import com.sharethrough.test.Fixtures;
 import com.sharethrough.test.util.Misc;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLog;
 import org.robolectric.tester.org.apache.http.TestHttpResponse;
 
@@ -27,9 +21,7 @@ import java.util.concurrent.ExecutorService;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(emulateSdk = 18)
-public class AdFetcherTest {
+public class AdFetcherTest extends TestBase {
     private static final String FIXTURE = Fixtures.getFile("assets/str_ad_youtube.json");
     @Mock private ExecutorService executorService;
     @Mock private BeaconService beaconService;
