@@ -8,9 +8,6 @@ import android.widget.Adapter;
 import android.widget.BaseAdapter;
 import com.sharethrough.android.sdk.R;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class SharethroughListAdapter extends BaseAdapter {
 
     private final Adapter mAdapter;
@@ -20,8 +17,6 @@ public class SharethroughListAdapter extends BaseAdapter {
     private final int adLayout;
 
     private static final int AD_INDEX = 3;
-
-    private List<Creative> mCreatives = new ArrayList<>();
 
     public SharethroughListAdapter(Context context, Adapter adapter, Sharethrough sharethrough, int adLayout) {
         mContext = context;
