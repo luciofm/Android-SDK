@@ -49,7 +49,11 @@ public class VideoDialog extends ShareableDialog {
                 timer.scheduleAtFixedRate(new TimerTask() {
                     @Override
                     public void run() {
-                        videoBeacons.timeUpdate(mediaPlayer.getCurrentPosition(), mediaPlayer.getDuration());
+                        try {
+                            videoBeacons.timeUpdate(videoView.getCurrentPosition(), videoView.getDuration());
+                        } catch (Throwable tx) {
+                            Log.e("Sharethrough", "video beacons error", tx);
+                        }
                     }
                 }, 1000, 1000);
                 setOnCancelListener(new OnCancelListener() {

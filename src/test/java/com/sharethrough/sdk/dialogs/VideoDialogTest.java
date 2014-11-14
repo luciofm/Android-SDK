@@ -92,17 +92,13 @@ public class VideoDialogTest extends TestBase {
 
     @Test
     public void firesVideoCompletionBeacons() throws Exception {
-        MediaPlayer mediaPlayer = mock(MediaPlayer.class);
-        when(mediaPlayer.getCurrentPosition()).thenReturn(100);
-        when(mediaPlayer.getDuration()).thenReturn(200);
-
-        shadowOf(videoView).getOnPreparedListener().onPrepared(mediaPlayer);
+        shadowOf(videoView).getOnPreparedListener().onPrepared(mock(MediaPlayer.class));
 
         ArgumentCaptor<TimerTask> timerTaskArgumentCaptor = ArgumentCaptor.forClass(TimerTask.class);
         verify(timer).scheduleAtFixedRate(timerTaskArgumentCaptor.capture(), anyInt(), anyInt());
         timerTaskArgumentCaptor.getValue().run();
 
-        verify(videoBeacons).timeUpdate(100, 200);
+        verify(videoBeacons).timeUpdate(videoView.getCurrentPosition(), videoView.getDuration());
 
         subject.cancel();
         verify(timer).cancel();
