@@ -125,4 +125,18 @@ public class SharethroughListAdapterTest extends TestBase {
         when(adapter.hasStableIds()).thenReturn(false);
         assertThat(subject.hasStableIds()).isFalse();
     }
+
+    @Test
+    public void isEnabled_forNonAd_returnsDelegated() throws Exception {
+        when(adapter.isEnabled(0)).thenReturn(true);
+        when(adapter.isEnabled(3)).thenReturn(false);
+
+        assertThat(subject.isEnabled(0)).isTrue();
+        assertThat(subject.isEnabled(4)).isFalse();
+    }
+
+    @Test
+    public void isEnabled_forAd_returnsTrue() throws Exception {
+        assertThat(subject.isEnabled(3)).isTrue();
+    }
 }

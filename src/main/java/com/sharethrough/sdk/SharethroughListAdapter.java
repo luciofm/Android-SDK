@@ -4,13 +4,13 @@ import android.content.Context;
 import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.BaseAdapter;
+import android.widget.ListAdapter;
 import com.sharethrough.android.sdk.R;
 
 public class SharethroughListAdapter extends BaseAdapter {
 
-    private final Adapter mAdapter;
+    private final ListAdapter mAdapter;
     private final Context mContext;
     private final Sharethrough mSharethrough;
 
@@ -18,7 +18,7 @@ public class SharethroughListAdapter extends BaseAdapter {
 
     private static final int AD_INDEX = 3;
 
-    public SharethroughListAdapter(Context context, Adapter adapter, Sharethrough sharethrough, int adLayout) {
+    public SharethroughListAdapter(Context context, ListAdapter adapter, Sharethrough sharethrough, int adLayout) {
         mContext = context;
         mAdapter = adapter;
         mSharethrough = sharethrough;
@@ -39,9 +39,13 @@ public class SharethroughListAdapter extends BaseAdapter {
     }
 
     @Override
+    public boolean isEnabled(int position) {
+        return isAd(position) || mAdapter.isEnabled(adjustedPosition(position));
+    }
+
+    @Override
     public int getCount() {
-        int count = mAdapter.getCount();
-        return 1 + count;
+        return numberOfAds() + mAdapter.getCount();
     }
 
     @Override
@@ -73,7 +77,6 @@ public class SharethroughListAdapter extends BaseAdapter {
     }
 
     private View getAd() {
-
         BasicAdView adView = new BasicAdView(mContext);
 
         adView.showAd(mSharethrough, adLayout, R.id.title, R.id.description, R.id.advertiser, R.id.thumbnail);
@@ -110,5 +113,9 @@ public class SharethroughListAdapter extends BaseAdapter {
 
     private boolean isAd(int position) {
         return position == AD_INDEX;
+    }
+
+    private int numberOfAds() {
+        return 1;
     }
 }
