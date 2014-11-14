@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import com.sharethrough.sdk.network.AdFetcher;
 import com.sharethrough.sdk.network.ImageFetcher;
 
@@ -28,6 +27,7 @@ public class Sharethrough {
     private final Function<Creative, Void> creativeHandler;
     private AdFetcher adFetcher;
     private ImageFetcher imageFetcher;
+    private AdFetcher.Callback adFetcherCallback;
 
     public Sharethrough(Context context, String key) {
         this(context, key, DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS);
@@ -46,7 +46,7 @@ public class Sharethrough {
         );
     }
 
-    Sharethrough(final Context context, final String key, int adCacheTimeInMilliseconds, final Renderer renderer, final BeaconService beaconService, AdFetcher adFetcher, ImageFetcher imageFetcher, CreativesQueue availableCreatives) {
+    Sharethrough(final Context context, final String key, int adCacheTimeInMilliseconds, final Renderer renderer, final BeaconService beaconService, AdFetcher adFetcher, ImageFetcher imageFetcher, final CreativesQueue availableCreatives) {
         this.renderer = renderer;
         this.beaconService = beaconService;
         this.adCacheTimeInMilliseconds = Math.max(adCacheTimeInMilliseconds, MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS);
@@ -67,7 +67,6 @@ public class Sharethrough {
             @Override
             public Void apply(Creative creative) {
                 synchronized (waitingAdViews) {
-                    Log.i("DEBUG", "Got creative (waitingAdViews = " + waitingAdViews.size() + ")");
                     if (waitingAdViews.size() > 0) {
                         Map.Entry<IAdView, Runnable> waiting = waitingAdViews.entrySet().iterator().next();
                         IAdView adView = waiting.getKey();
@@ -81,10 +80,21 @@ public class Sharethrough {
                 return null;
             }
         };
+        adFetcherCallback = new AdFetcher.Callback() {
+            @Override
+            public void finishedLoading() {
+                if (availableCreatives.readyForMore()) {
+                    fetchAds();
+                }
+            }
+        };
         this.adFetcher = adFetcher;
         this.imageFetcher = imageFetcher;
-        Log.i("DEBUG", "Requested more ads (ctor)");
-        this.adFetcher.fetchAds(this.imageFetcher, apiUrlPrefix, creativeHandler);
+        fetchAds();
+    }
+
+    private void fetchAds() {
+        this.adFetcher.fetchAds(this.imageFetcher, apiUrlPrefix, creativeHandler, adFetcherCallback);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
@@ -92,14 +102,12 @@ public class Sharethrough {
         synchronized (availableCreatives) {
             Creative next = availableCreatives.getNext();
             if (next != null) {
-                Log.i("DEBUG", "Served creative from queue");
                 renderer.putCreativeIntoAdView(adView, next, beaconService, this, adReadyCallback);
             } else {
                 waitingAdViews.put(adView, adReadyCallback);
             }
             if (availableCreatives.readyForMore()) {
-                Log.i("DEBUG", "Requested more ads (putCreativeInAdView)");
-                adFetcher.fetchAds(imageFetcher, apiUrlPrefix, creativeHandler);
+                fetchAds();
             }
         }
     }

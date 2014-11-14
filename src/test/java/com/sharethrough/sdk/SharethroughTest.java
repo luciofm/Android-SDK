@@ -34,6 +34,7 @@ public class SharethroughTest extends TestBase {
     private int adCacheTimeInMilliseconds;
     private String apiPrefix;
     @Captor private ArgumentCaptor<Function<Creative, Void>> creativeHandler;
+    @Captor private ArgumentCaptor<AdFetcher.Callback> adFetcherCallback;
     private String key = "abc";
 
     @Before
@@ -45,7 +46,7 @@ public class SharethroughTest extends TestBase {
         adCacheTimeInMilliseconds = 20000;
         apiPrefix = "http://btlr.sharethrough.com/v3?placement_key=";
 
-        doNothing().when(adFetcher).fetchAds(same(imageFetcher), eq(apiPrefix), creativeHandler.capture());
+        doNothing().when(adFetcher).fetchAds(same(imageFetcher), eq(apiPrefix), creativeHandler.capture(), adFetcherCallback.capture());
 
         createSubject(key);
     }
@@ -68,7 +69,7 @@ public class SharethroughTest extends TestBase {
 
     @Test
     public void settingKey_loadsAdsFromServer() throws Exception {
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiPrefix), creativeHandler.capture());
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiPrefix), creativeHandler.capture(), adFetcherCallback.capture());
     }
 
     @Test(expected = KeyRequiredException.class)
@@ -110,7 +111,7 @@ public class SharethroughTest extends TestBase {
 
         subject.putCreativeIntoAdView(adView, adReadyCallback);
 
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiPrefix), creativeHandler.capture());
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiPrefix), creativeHandler.capture(), adFetcherCallback.capture());
     }
 
     @Test
@@ -126,7 +127,27 @@ public class SharethroughTest extends TestBase {
         String serverPrefix = "http://dumb-waiter.sharethrough.com/?creative_type=video&placement_key=";
         Robolectric.application.getApplicationInfo().metaData.putString("STR_ADSERVER_API", serverPrefix);
         createSubject(key);
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(serverPrefix), creativeHandler.capture());
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(serverPrefix), creativeHandler.capture(), adFetcherCallback.capture());
+    }
+
+    @Test
+    public void whenRequestFinsihesAndImagesFinishDownloading_whenQueueWantsMore_fetchesMoreAds() throws Exception {
+        when(creativesQueue.readyForMore()).thenReturn(true);
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiPrefix), creativeHandler.capture(), adFetcherCallback.capture());
+        reset(adFetcher);
+        adFetcherCallback.getValue().finishedLoading();
+
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiPrefix), creativeHandler.capture(), adFetcherCallback.capture());
+    }
+
+    @Test
+    public void whenRequestFinsihesAndImagesFinishDownloading_whenQueueDoesNotWantsMore_doesNotFetchMoreAds() throws Exception {
+        when(creativesQueue.readyForMore()).thenReturn(false);
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiPrefix), creativeHandler.capture(), adFetcherCallback.capture());
+        reset(adFetcher);
+        adFetcherCallback.getValue().finishedLoading();
+
+        verifyNoMoreInteractions(adFetcher);
     }
 
     @Test

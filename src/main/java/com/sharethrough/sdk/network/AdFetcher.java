@@ -20,7 +20,7 @@ public class AdFetcher {
     private final Context context;
     private final String key;
     private boolean isRunning;
-    private int remainingCreatives;
+    private int remainingImageRequests;
 
     public AdFetcher(Context context, String key, ExecutorService executorService, BeaconService beaconService) {
         this.context = context;
@@ -29,13 +29,9 @@ public class AdFetcher {
         this.beaconService = beaconService;
     }
 
-    public synchronized void fetchAds(final ImageFetcher imageFetcher, final String apiUrlPrefix, final Function<Creative, Void> creativeHandler) {
-        if (isRunning) {
-            Log.i("DEBUG", "AdFetcher skipped");
-            return;
-        }
+    public synchronized void fetchAds(final ImageFetcher imageFetcher, final String apiUrlPrefix, final Function<Creative, Void> creativeHandler, final Callback adFetcherCallback) {
+        if (isRunning) return;
         isRunning = true;
-        Log.i("DEBUG", "AdFetcher started.  isRunning = true");
         executorService.execute(new Runnable() {
             @Override
             public void run() {
@@ -50,12 +46,8 @@ public class AdFetcher {
                     InputStream content = client.execute(request).getEntity().getContent();
                     json = Misc.convertStreamToString(content);
                     Response response = getResponse(json);
-//                    ObjectMapper mapper = new ObjectMapper();
-//                    mapper.disable(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES);
-//                    Response response = mapper.readValue(content, Response.class);
-                    remainingCreatives += response.creatives.size();
-                    Log.i("DEBUG", "AdFetcher now waiting for " + remainingCreatives + " images (" + response.creatives.size() + " new)");
 
+                    remainingImageRequests += response.creatives.size();
                     for (final Response.Creative responseCreative : response.creatives) {
                         imageFetcher.fetchImage(uri, responseCreative, new ImageFetcher.Callback() {
                             @Override
@@ -71,11 +63,10 @@ public class AdFetcher {
 
                             private void decCount() {
                                 synchronized (AdFetcher.this) {
-                                    remainingCreatives -= 1;
-                                    Log.i("DEBUG", "AdFetcher got image.  Waiting for " + remainingCreatives + " more");
-                                    if (remainingCreatives == 0) {
+                                    remainingImageRequests -= 1;
+                                    if (remainingImageRequests == 0) {
                                         isRunning = false;
-                                        Log.i("DEBUG", "AdFetcher got all images.  isRunning = false");
+                                        adFetcherCallback.finishedLoading();
                                     }
                                 }
                             }
@@ -148,5 +139,9 @@ public class AdFetcher {
             response.creatives.add(creative);
         }
         return response;
+    }
+
+    public interface Callback {
+        public void finishedLoading();
     }
 }
