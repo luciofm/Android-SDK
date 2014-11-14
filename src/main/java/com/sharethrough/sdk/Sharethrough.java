@@ -83,6 +83,7 @@ public class Sharethrough {
         };
         this.adFetcher = adFetcher;
         this.imageFetcher = imageFetcher;
+        Log.i("DEBUG", "Requested more ads (ctor)");
         this.adFetcher.fetchAds(this.imageFetcher, apiUrlPrefix, creativeHandler);
     }
 
@@ -91,9 +92,13 @@ public class Sharethrough {
         synchronized (availableCreatives) {
             Creative next = availableCreatives.getNext();
             if (next != null) {
+                Log.i("DEBUG", "Served creative from queue");
                 renderer.putCreativeIntoAdView(adView, next, beaconService, this, adReadyCallback);
             } else {
                 waitingAdViews.put(adView, adReadyCallback);
+            }
+            if (availableCreatives.readyForMore()) {
+                Log.i("DEBUG", "Requested more ads (putCreativeInAdView)");
                 adFetcher.fetchAds(imageFetcher, apiUrlPrefix, creativeHandler);
             }
         }

@@ -8,9 +8,9 @@ import org.hamcrest.Description;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.shadows.ShadowLog;
 import org.robolectric.tester.org.apache.http.TestHttpResponse;
@@ -28,14 +28,15 @@ public class AdFetcherTest extends TestBase {
     @Mock private BeaconService beaconService;
     @Mock private ImageFetcher imageFetcher;
     @Mock private Function<Creative, Void> creativeHandler;
+    @Mock private Creative creative;
     private AdFetcher subject;
     private String apiUri;
     private String apiUriPrefix;
     private String key;
+    @Captor private ArgumentCaptor<ImageFetcher.Callback> imageFetcherCallback;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         key = "key";
         subject = new AdFetcher(Robolectric.application, key, executorService, beaconService);
         apiUriPrefix = "http://api?key=";
@@ -107,13 +108,69 @@ public class AdFetcherTest extends TestBase {
     }
 
     @Test
-    public void fetchAds_whenPreviousRequestHasFinished_startsNewRequest() throws Exception {
+    public void fetchAds_whenPreviousRequestHasFinished_butImagesHaveNot_doesNotStartNewRequest() throws Exception {
         Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, FIXTURE));
 
         subject.fetchAds(imageFetcher, apiUriPrefix, creativeHandler);
 
         Misc.runLast(executorService);
         reset(executorService);
+
+        subject.fetchAds(imageFetcher, apiUriPrefix, creativeHandler);
+
+        verifyNoMoreInteractions(executorService);
+    }
+
+    @Test
+    public void fetchAds_whenPreviousRequestAndNotAllImagesHaveFinished_doesNotStartNewRequest() throws Exception {
+        // make first request
+        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, FIXTURE));
+        subject.fetchAds(imageFetcher, apiUriPrefix, creativeHandler);
+        Misc.runLast(executorService);
+        reset(executorService);
+
+        // finish loading only one image
+        verify(imageFetcher, atLeastOnce()).fetchImage(any(URI.class), any(Response.Creative.class), imageFetcherCallback.capture());
+        assertThat(imageFetcherCallback.getAllValues().size()).isGreaterThan(1);
+        imageFetcherCallback.getAllValues().get(0).success(creative);
+
+        subject.fetchAds(imageFetcher, apiUriPrefix, creativeHandler);
+
+        verifyNoMoreInteractions(executorService);
+    }
+
+    @Test
+    public void fetchAds_whenPreviousRequestAndAllImagesHaveFinished_startsNewRequest() throws Exception {
+        // make first request
+        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, FIXTURE));
+        subject.fetchAds(imageFetcher, apiUriPrefix, creativeHandler);
+        Misc.runLast(executorService);
+        reset(executorService);
+
+        // finish loading all images
+        verify(imageFetcher, atLeastOnce()).fetchImage(any(URI.class), any(Response.Creative.class), imageFetcherCallback.capture());
+        for (ImageFetcher.Callback callback : imageFetcherCallback.getAllValues()) {
+            callback.success(creative);
+        }
+
+        subject.fetchAds(imageFetcher, apiUriPrefix, creativeHandler);
+
+        verify(executorService).execute(any(Runnable.class));
+    }
+
+    @Test
+    public void fetchAds_whenPreviousRequestAndAllImagesHaveFinishedWithFailure_startsNewRequest() throws Exception {
+        // make first request
+        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, FIXTURE));
+        subject.fetchAds(imageFetcher, apiUriPrefix, creativeHandler);
+        Misc.runLast(executorService);
+        reset(executorService);
+
+        // finish loading all images
+        verify(imageFetcher, atLeastOnce()).fetchImage(any(URI.class), any(Response.Creative.class), imageFetcherCallback.capture());
+        for (ImageFetcher.Callback callback : imageFetcherCallback.getAllValues()) {
+            callback.failure();
+        }
 
         subject.fetchAds(imageFetcher, apiUriPrefix, creativeHandler);
 

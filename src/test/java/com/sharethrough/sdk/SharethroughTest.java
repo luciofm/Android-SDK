@@ -104,8 +104,8 @@ public class SharethroughTest extends TestBase {
     }
 
     @Test
-    public void putCreativeIntoAdView_whenQueueIsEmpty_fetchesMoreAds() throws Exception {
-        when(creativesQueue.getNext()).thenReturn(null);
+    public void putCreativeIntoAdView_whenQueueWantsMore_fetchesMoreAds() throws Exception {
+        when(creativesQueue.readyForMore()).thenReturn(true);
         reset(adFetcher);
 
         subject.putCreativeIntoAdView(adView, adReadyCallback);

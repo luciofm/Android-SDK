@@ -20,6 +20,7 @@ public class AdFetcher {
     private final Context context;
     private final String key;
     private boolean isRunning;
+    private int remainingCreatives;
 
     public AdFetcher(Context context, String key, ExecutorService executorService, BeaconService beaconService) {
         this.context = context;
@@ -29,8 +30,12 @@ public class AdFetcher {
     }
 
     public synchronized void fetchAds(final ImageFetcher imageFetcher, final String apiUrlPrefix, final Function<Creative, Void> creativeHandler) {
-        if (isRunning) return;
+        if (isRunning) {
+            Log.i("DEBUG", "AdFetcher skipped");
+            return;
+        }
         isRunning = true;
+        Log.i("DEBUG", "AdFetcher started.  isRunning = true");
         executorService.execute(new Runnable() {
             @Override
             public void run() {
@@ -48,21 +53,34 @@ public class AdFetcher {
 //                    ObjectMapper mapper = new ObjectMapper();
 //                    mapper.disable(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES);
 //                    Response response = mapper.readValue(content, Response.class);
+                    remainingCreatives += response.creatives.size();
+                    Log.i("DEBUG", "AdFetcher now waiting for " + remainingCreatives + " images (" + response.creatives.size() + " new)");
 
                     for (final Response.Creative responseCreative : response.creatives) {
                         imageFetcher.fetchImage(uri, responseCreative, new ImageFetcher.Callback() {
                             @Override
                             public void success(Creative value) {
                                 creativeHandler.apply(value);
+                                decCount();
                             }
 
                             @Override
                             public void failure() {
-                                // TODO
+                                decCount();
+                            }
+
+                            private void decCount() {
+                                synchronized (AdFetcher.this) {
+                                    remainingCreatives -= 1;
+                                    Log.i("DEBUG", "AdFetcher got image.  Waiting for " + remainingCreatives + " more");
+                                    if (remainingCreatives == 0) {
+                                        isRunning = false;
+                                        Log.i("DEBUG", "AdFetcher got all images.  isRunning = false");
+                                    }
+                                }
                             }
                         });
                     }
-                    isRunning = false;
                 } catch (Exception e) {
                     String msg = "failed to get ads for key " + key + ": " + uri;
                     if (json != null) {
