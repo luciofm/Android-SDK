@@ -2,7 +2,6 @@ package com.sharethrough.sdk.network;
 
 import android.util.Log;
 import com.sharethrough.sdk.Creative;
-import com.sharethrough.sdk.Function;
 import com.sharethrough.sdk.Response;
 import com.sharethrough.sdk.Sharethrough;
 import org.apache.http.HttpResponse;
@@ -25,7 +24,7 @@ public class ImageFetcher {
         this.key = key;
     }
 
-    public void fetchImage(final URI apiURI, final Response.Creative responseCreative, final Function<Creative, Void> creativeHandler) {
+    public void fetchImage(final URI apiURI, final Response.Creative responseCreative, final Callback creativeHandler) {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
@@ -41,12 +40,14 @@ public class ImageFetcher {
                         InputStream imageContent = imageResponse.getEntity().getContent();
                         byte[] imageBytes = convertInputStreamToByteArray(imageContent);
                         Creative creative = new Creative(responseCreative, imageBytes, key);
-                        creativeHandler.apply(creative);
+                        creativeHandler.success(creative);
                     } else {
                         Log.e("Sharethrough", "failed to load image from url: " + imageURI + " ; server said: " + imageResponse.getStatusLine().getStatusCode() + "\t" + imageResponse.getStatusLine().getReasonPhrase());
+                        creativeHandler.failure();
                     }
                 } catch (IOException e) {
                     Log.e("Sharethrough", "failed to load image from url: " + responseCreative.creative.thumbnailUrl, e);
+                    creativeHandler.failure();
                 }
             }
         });
@@ -64,5 +65,11 @@ public class ImageFetcher {
 
         buffer.flush();
         return buffer.toByteArray();
+    }
+
+    public interface Callback {
+        public void success(Creative value);
+
+        public void failure();
     }
 }

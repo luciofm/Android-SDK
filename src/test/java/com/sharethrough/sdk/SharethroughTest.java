@@ -29,6 +29,8 @@ public class SharethroughTest extends TestBase {
     @Mock private ImageFetcher imageFetcher;
     @Mock private AdFetcher adFetcher;
     @Mock private Creative creative;
+    @Mock private CreativesQueue creativesQueue;
+    @Mock private Runnable adReadyCallback;
     private int adCacheTimeInMilliseconds;
     private String apiPrefix;
     @Captor private ArgumentCaptor<Function<Creative, Void>> creativeHandler;
@@ -45,7 +47,11 @@ public class SharethroughTest extends TestBase {
 
         doNothing().when(adFetcher).fetchAds(same(imageFetcher), eq(apiPrefix), creativeHandler.capture());
 
-        subject = new Sharethrough(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, beaconService, adFetcher, imageFetcher);
+        createSubject(key);
+    }
+
+    private void createSubject(String key) {
+        subject = new Sharethrough(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, beaconService, adFetcher, imageFetcher, creativesQueue);
     }
 
     private TestAdView makeMockAdView() {
@@ -67,7 +73,7 @@ public class SharethroughTest extends TestBase {
 
     @Test(expected = KeyRequiredException.class)
     public void notSettingKey_throwsExceptionWhenAdIsRequested() {
-        new Sharethrough(Robolectric.application, null, adCacheTimeInMilliseconds, renderer, beaconService, adFetcher, imageFetcher);
+        createSubject(null);
     }
 
 
@@ -78,26 +84,39 @@ public class SharethroughTest extends TestBase {
     }
 
     @Test
-    public void whenMoreAdViewsAreWaiting_ThanCreativesThatAreAvailable_keepsWaiting() throws Exception {
+    public void whenACreativeIsReady_whenMoreAdViewIsWaiting_putsCreativeInFirstAdView() throws Exception {
+        // make two ad views wait
         TestAdView adView2 = makeMockAdView();
         Runnable adReadyCallback2 = mock(Runnable.class);
-        subject.putCreativeIntoAdView(adView2, adReadyCallback2);
-        Runnable adReadyCallback = mock(Runnable.class);
         subject.putCreativeIntoAdView(adView, adReadyCallback);
+        subject.putCreativeIntoAdView(adView2, adReadyCallback2);
 
+        // get back one creative
         creativeHandler.getValue().apply(creative);
 
-        verifyCreativeHasBeenPlacedInAdview(adView2, adReadyCallback2);
-        verifyNoMoreInteractions(adView);
-        verifyNoMoreInteractions(renderer);
-        verifyNoMoreInteractions(adReadyCallback);
+        verifyCreativeHasBeenPlacedInAdview(adView, adReadyCallback);
     }
 
     @Test
-    public void whenThereAreCreativesCached_usesCachedCreative() {
+    public void whenACreativeIsReady_whenNoMoreAdViewsAreWaiting_addCreativeToQueue() throws Exception {
         creativeHandler.getValue().apply(creative);
+        verify(creativesQueue).add(creative);
+    }
 
-        Runnable adReadyCallback = mock(Runnable.class);
+    @Test
+    public void putCreativeIntoAdView_whenQueueIsEmpty_fetchesMoreAds() throws Exception {
+        when(creativesQueue.getNext()).thenReturn(null);
+        reset(adFetcher);
+
+        subject.putCreativeIntoAdView(adView, adReadyCallback);
+
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiPrefix), creativeHandler.capture());
+    }
+
+    @Test
+    public void putCreativeIntoAdView_whenQueueHasCreatives_usesNextCreative() {
+        when(creativesQueue.getNext()).thenReturn(creative).thenThrow(new RuntimeException("Too many calls to getNext"));
+
         subject.putCreativeIntoAdView(adView, adReadyCallback);
         verifyCreativeHasBeenPlacedInAdview(adView, adReadyCallback);
     }
@@ -106,7 +125,7 @@ public class SharethroughTest extends TestBase {
     public void whenAndroidManifestHasCustomApiServer_usesThatServer() throws Exception {
         String serverPrefix = "http://dumb-waiter.sharethrough.com/?creative_type=video&placement_key=";
         Robolectric.application.getApplicationInfo().metaData.putString("STR_ADSERVER_API", serverPrefix);
-        subject = new Sharethrough(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, beaconService, adFetcher, imageFetcher);
+        createSubject(key);
         verify(adFetcher).fetchAds(same(imageFetcher), eq(serverPrefix), creativeHandler.capture());
     }
 

@@ -1,7 +1,6 @@
 package com.sharethrough.sdk.network;
 
 import com.sharethrough.sdk.Creative;
-import com.sharethrough.sdk.Function;
 import com.sharethrough.sdk.Response;
 import com.sharethrough.sdk.TestBase;
 import com.sharethrough.test.util.Misc;
@@ -18,14 +17,13 @@ import java.util.concurrent.ExecutorService;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.robolectric.Robolectric.shadowOf;
 
 public class ImageFetcherTest extends TestBase {
     private static final String apiPrefix = "http://ur.i";
     private ImageFetcher subject;
     private URI apiUri;
-    @Mock private Function creativeHandler;
+    @Mock private ImageFetcher.Callback creativeHandler;
     @Mock private ExecutorService executorService;
     private Response.Creative responseCreative;
 
@@ -52,7 +50,7 @@ public class ImageFetcherTest extends TestBase {
         Misc.runLast(executorService);
 
         ArgumentCaptor<Creative> creativeArgumentCaptor = ArgumentCaptor.forClass(Creative.class);
-        verify(creativeHandler).apply(creativeArgumentCaptor.capture());
+        verify(creativeHandler).success(creativeArgumentCaptor.capture());
         Creative creative = creativeArgumentCaptor.getValue();
         assertThat(creative.getMediaUrl()).isSameAs(responseCreative.creative.mediaUrl);
         assertThat(creative.getPlacementKey()).isEqualTo("key");
@@ -60,11 +58,20 @@ public class ImageFetcherTest extends TestBase {
     }
 
     @Test
-    public void fetchImage_whenImageCantBeDownloaded_doesNotUseAd() throws Exception {
+    public void fetchImage_whenImageCantBeDownloadedBcServerRefuses_reportsFailure() throws Exception {
         Robolectric.addHttpResponseRule("GET", "http:" + responseCreative.creative.thumbnailUrl, new TestHttpResponse(404, "NOT FOUND"));
         subject.fetchImage(apiUri, responseCreative, creativeHandler);
         Misc.runLast(executorService);
 
-        verifyNoMoreInteractions(creativeHandler);
+        verify(creativeHandler).failure();
+    }
+
+    @Test
+    public void fetchImage_whenImageCantBeDownloadedBcOfIOerror_reportsFailure() throws Exception {
+        Robolectric.addHttpResponseRule("GET", "http:" + responseCreative.creative.thumbnailUrl, new IOExceptionHttpResponse());
+        subject.fetchImage(apiUri, responseCreative, creativeHandler);
+        Misc.runLast(executorService);
+
+        verify(creativeHandler).failure();
     }
 }

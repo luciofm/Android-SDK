@@ -119,6 +119,6 @@ public class AdFetcherTest extends TestBase {
             public void describeTo(Description description) {
 
             }
-        }), same(creativeHandler));
+        }), any(ImageFetcher.Callback.class));
     }
 }

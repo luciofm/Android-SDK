@@ -47,7 +47,17 @@ public class AdFetcher {
 //                    Response response = mapper.readValue(content, Response.class);
 
                     for (final Response.Creative responseCreative : response.creatives) {
-                        imageFetcher.fetchImage(uri, responseCreative, creativeHandler);
+                        imageFetcher.fetchImage(uri, responseCreative, new ImageFetcher.Callback() {
+                            @Override
+                            public void success(Creative value) {
+                                creativeHandler.apply(value);
+                            }
+
+                            @Override
+                            public void failure() {
+                                // TODO
+                            }
+                        });
                     }
                 } catch (Exception e) {
                     String msg = "failed to get ads for key " + key + ": " + uri;

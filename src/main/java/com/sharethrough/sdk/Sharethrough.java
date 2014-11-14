@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import com.sharethrough.sdk.network.AdFetcher;
 import com.sharethrough.sdk.network.ImageFetcher;
 
@@ -22,8 +23,11 @@ public class Sharethrough {
     private final int adCacheTimeInMilliseconds;
     private String apiUrlPrefix = "http://btlr.sharethrough.com/v3?placement_key=";
     static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(4); // TODO: pick a reasonable number
-    private final List<Creative> availableCreatives = Collections.synchronizedList(new ArrayList<Creative>());
+    private final CreativesQueue availableCreatives;
     private final Map<IAdView, Runnable> waitingAdViews = Collections.synchronizedMap(new LinkedHashMap<IAdView, Runnable>());
+    private final Function<Creative, Void> creativeHandler;
+    private AdFetcher adFetcher;
+    private ImageFetcher imageFetcher;
 
     public Sharethrough(Context context, String key) {
         this(context, key, DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS);
@@ -34,14 +38,19 @@ public class Sharethrough {
     }
 
     Sharethrough(Context context, String key, int adCacheTimeInMilliseconds, AdvertisingIdProvider advertisingIdProvider) {
-        this(context, key, adCacheTimeInMilliseconds, new Renderer(new Timer("Sharethrough visibility watcher")), new BeaconService(new DateProvider(), UUID.randomUUID(), EXECUTOR_SERVICE, advertisingIdProvider), new AdFetcher(context, key, EXECUTOR_SERVICE, new BeaconService(new DateProvider(), UUID.randomUUID(), EXECUTOR_SERVICE, advertisingIdProvider)), new ImageFetcher(EXECUTOR_SERVICE, key)
+        this(context, key, adCacheTimeInMilliseconds, new Renderer(new Timer("Sharethrough visibility watcher")),
+                new BeaconService(new DateProvider(), UUID.randomUUID(), EXECUTOR_SERVICE, advertisingIdProvider),
+                new AdFetcher(context, key, EXECUTOR_SERVICE, new BeaconService(new DateProvider(), UUID.randomUUID(),
+                        EXECUTOR_SERVICE, advertisingIdProvider)), new ImageFetcher(EXECUTOR_SERVICE, key),
+                new CreativesQueue()
         );
     }
 
-    Sharethrough(final Context context, final String key, int adCacheTimeInMilliseconds, final Renderer renderer, final BeaconService beaconService, AdFetcher adFetcher, ImageFetcher imageFetcher) {
+    Sharethrough(final Context context, final String key, int adCacheTimeInMilliseconds, final Renderer renderer, final BeaconService beaconService, AdFetcher adFetcher, ImageFetcher imageFetcher, CreativesQueue availableCreatives) {
         this.renderer = renderer;
         this.beaconService = beaconService;
         this.adCacheTimeInMilliseconds = Math.max(adCacheTimeInMilliseconds, MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS);
+        this.availableCreatives = availableCreatives;
         if (key == null) throw new KeyRequiredException("placement_key is required");
 
         try {
@@ -54,32 +63,38 @@ public class Sharethrough {
             e.printStackTrace();
         }
 
-        adFetcher.fetchAds(imageFetcher, apiUrlPrefix, new Function<Creative, Void>() {
+        creativeHandler = new Function<Creative, Void>() {
             @Override
             public Void apply(Creative creative) {
                 synchronized (waitingAdViews) {
+                    Log.i("DEBUG", "Got creative (waitingAdViews = " + waitingAdViews.size() + ")");
                     if (waitingAdViews.size() > 0) {
                         Map.Entry<IAdView, Runnable> waiting = waitingAdViews.entrySet().iterator().next();
                         IAdView adView = waiting.getKey();
                         waitingAdViews.remove(adView);
                         renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this, waiting.getValue());
                     } else {
-                        availableCreatives.add(creative);
+                        Sharethrough.this.availableCreatives.add(creative);
                     }
                 }
 
                 return null;
             }
-        });
+        };
+        this.adFetcher = adFetcher;
+        this.imageFetcher = imageFetcher;
+        this.adFetcher.fetchAds(this.imageFetcher, apiUrlPrefix, creativeHandler);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public void putCreativeIntoAdView(IAdView adView, Runnable adReadyCallback) {
         synchronized (availableCreatives) {
-            if (availableCreatives.size() > 0) {
-                renderer.putCreativeIntoAdView(adView, availableCreatives.remove(0), beaconService, this, adReadyCallback);
+            Creative next = availableCreatives.getNext();
+            if (next != null) {
+                renderer.putCreativeIntoAdView(adView, next, beaconService, this, adReadyCallback);
             } else {
                 waitingAdViews.put(adView, adReadyCallback);
+                adFetcher.fetchAds(imageFetcher, apiUrlPrefix, creativeHandler);
             }
         }
     }
