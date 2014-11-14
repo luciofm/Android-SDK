@@ -19,6 +19,7 @@ public class AdFetcher {
     private final BeaconService beaconService;
     private final Context context;
     private final String key;
+    private boolean isRunning;
 
     public AdFetcher(Context context, String key, ExecutorService executorService, BeaconService beaconService) {
         this.context = context;
@@ -27,7 +28,9 @@ public class AdFetcher {
         this.beaconService = beaconService;
     }
 
-    public void fetchAds(final ImageFetcher imageFetcher, final String apiUrlPrefix, final Function<Creative, Void> creativeHandler) {
+    public synchronized void fetchAds(final ImageFetcher imageFetcher, final String apiUrlPrefix, final Function<Creative, Void> creativeHandler) {
+        if (isRunning) return;
+        isRunning = true;
         executorService.execute(new Runnable() {
             @Override
             public void run() {
@@ -59,6 +62,7 @@ public class AdFetcher {
                             }
                         });
                     }
+                    isRunning = false;
                 } catch (Exception e) {
                     String msg = "failed to get ads for key " + key + ": " + uri;
                     if (json != null) {

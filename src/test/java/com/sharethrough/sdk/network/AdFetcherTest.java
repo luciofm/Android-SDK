@@ -7,6 +7,7 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -91,6 +92,32 @@ public class AdFetcherTest extends TestBase {
 
         List<ShadowLog.LogItem> logsForTag = ShadowLog.getLogsForTag("Sharethrough");
         assertThat(logsForTag.get(0).msg).isEqualTo("failed to get ads for key " + key + ": " + apiUri + ": " + responseBody);
+    }
+
+    @Test
+    public void fetchAds_whenRequestIsInProgress_doesNotStartNewRequest() throws Exception {
+        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, FIXTURE));
+
+        subject.fetchAds(imageFetcher, apiUriPrefix, creativeHandler);
+        subject.fetchAds(imageFetcher, apiUriPrefix, creativeHandler);
+
+        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(executorService).execute(runnableArgumentCaptor.capture());
+        assertThat(runnableArgumentCaptor.getAllValues()).hasSize(1);
+    }
+
+    @Test
+    public void fetchAds_whenPreviousRequestHasFinished_startsNewRequest() throws Exception {
+        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, FIXTURE));
+
+        subject.fetchAds(imageFetcher, apiUriPrefix, creativeHandler);
+
+        Misc.runLast(executorService);
+        reset(executorService);
+
+        subject.fetchAds(imageFetcher, apiUriPrefix, creativeHandler);
+
+        verify(executorService).execute(any(Runnable.class));
     }
 
     @Test
