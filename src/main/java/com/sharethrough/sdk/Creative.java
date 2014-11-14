@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import com.sharethrough.sdk.media.*;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class Creative {
     private final Response.Creative responseCreative;
@@ -84,15 +84,15 @@ public class Creative {
         return String.valueOf(responseCreative.price);
     }
 
-    public ArrayList<String> getClickBeacons() {
-        return (ArrayList<String>) responseCreative.creative.beacon.click;
+    public List<String> getClickBeacons() {
+        return responseCreative.creative.beacon.click;
     }
 
-    public ArrayList<String> getPlayBeacons() {
-        return (ArrayList<String>) responseCreative.creative.beacon.play;
+    public List<String> getPlayBeacons() {
+        return responseCreative.creative.beacon.play;
     }
 
-    public ArrayList<String> getVisibleBeacons() {
-        return (ArrayList<String>) responseCreative.creative.beacon.visible;
+    public List<String> getVisibleBeacons() {
+        return responseCreative.creative.beacon.visible;
     }
 }

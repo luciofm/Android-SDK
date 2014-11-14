@@ -12,7 +12,6 @@ import android.view.WindowManager;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -146,12 +145,13 @@ public class BeaconService {
 
                 DefaultHttpClient client = new DefaultHttpClient();
                 String url = uriBuilder.build().toString();
+                url = url.replace("[", "%5B").replace("]", "%5D");
                 Log.i("Sharethrough", "beacon:\t" + url);
-                HttpGet request = new HttpGet(url);
-                request.addHeader("User-Agent", Sharethrough.USER_AGENT);
                 try {
+                    HttpGet request = new HttpGet(url);
+                    request.addHeader("User-Agent", Sharethrough.USER_AGENT);
                     client.execute(request);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     Log.e("Sharethrough", "beacon fire failed for " + url, e);
                 }
             }

@@ -8,6 +8,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.robolectric.Robolectric;
+import org.robolectric.shadows.ShadowLog;
 import org.robolectric.tester.org.apache.http.HttpRequestInfo;
 import org.robolectric.tester.org.apache.http.RequestMatcher;
 import org.robolectric.tester.org.apache.http.TestHttpResponse;
@@ -189,7 +190,7 @@ public class BeaconServiceTest extends TestBase {
 
     @Test
     public void whenAdClickCalled_fireClickAndVideoThirdPartyBeacons() throws Exception {
-        String[] initialUrls = {"//clickEndOne", "//clickEndTwo", "//videoEndOne", "//videoEndTwo"};
+        String[] initialUrls = {"//click/EndOne", "//click/End[Two]", "//video/EndOne", "//video/EndTwo"};
 
         ArrayList<String> clickEndoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
         ArrayList<String> playEndoints = new ArrayList<>(Arrays.asList(initialUrls[2], initialUrls[3]));
@@ -213,9 +214,34 @@ public class BeaconServiceTest extends TestBase {
         List<HttpRequestInfo> info = Robolectric.getFakeHttpLayer().getSentHttpRequestInfos();
         assertThat(info.size()).isEqualTo(5);
         for (int i = 0; i < info.size() - 1; i++) {
-            String expectedUrl = "http:" + initialUrls[i];
+            String expectedUrl = "http:" + initialUrls[i].replace("[", "%5B").replace("]", "%5D");
             assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
         }
+    }
+
+    @Test
+    public void whenAThirdPartyBeaconIsInvalid_logsWithoutCrashing() throws Exception {
+        String badUrl = "//%%%invalid%url%%%";
+        List<String> clickEndoints = Arrays.asList(badUrl);
+
+        responseCreative.creative.beacon.click = clickEndoints;
+
+        Creative testCreative = new Creative(responseCreative, new byte[0], "placement key");
+
+        subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView());
+
+        Robolectric.addHttpResponseRule(new RequestMatcher() {
+            @Override
+            public boolean matches(HttpRequest request) {
+                return true;
+            }
+        }, new TestHttpResponse(200, ""));
+
+        Misc.runAll(executorService);
+
+        List<HttpRequestInfo> info = Robolectric.getFakeHttpLayer().getSentHttpRequestInfos();
+        assertThat(info.size()).isEqualTo(1);
+        assertThat(ShadowLog.getLogs().get(0).msg).contains(badUrl);
     }
 
     @Test
