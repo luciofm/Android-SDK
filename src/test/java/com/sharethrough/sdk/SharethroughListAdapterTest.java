@@ -117,4 +117,12 @@ public class SharethroughListAdapterTest extends TestBase {
         dataSetObserver.onInvalidated();
         assertThat(wasInvalidated[0]).isTrue();
     }
+
+    @Test
+    public void hasStableIds_returnsDelegated() throws Exception {
+        when(adapter.hasStableIds()).thenReturn(true);
+        assertThat(subject.hasStableIds()).isTrue();
+        when(adapter.hasStableIds()).thenReturn(false);
+        assertThat(subject.hasStableIds()).isFalse();
+    }
 }

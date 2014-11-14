@@ -95,6 +95,11 @@ public class SharethroughListAdapter extends BaseAdapter {
         return 1 + mAdapter.getViewTypeCount();
     }
 
+    @Override
+    public boolean hasStableIds() {
+        return mAdapter.hasStableIds();
+    }
+
     private int adjustedPosition(int position) {
         if (position < AD_INDEX) {
             return position;
