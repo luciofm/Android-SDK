@@ -139,4 +139,12 @@ public class SharethroughListAdapterTest extends TestBase {
     public void isEnabled_forAd_returnsTrue() throws Exception {
         assertThat(subject.isEnabled(3)).isTrue();
     }
+
+    @Test
+    public void areAllItemsEnabled_returnsDelegated() throws Exception {
+        when(adapter.areAllItemsEnabled()).thenReturn(false);
+        assertThat(subject.areAllItemsEnabled()).isFalse();
+        when(adapter.areAllItemsEnabled()).thenReturn(true);
+        assertThat(subject.areAllItemsEnabled()).isTrue();
+    }
 }

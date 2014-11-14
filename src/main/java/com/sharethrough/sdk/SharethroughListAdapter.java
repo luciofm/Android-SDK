@@ -103,6 +103,11 @@ public class SharethroughListAdapter extends BaseAdapter {
         return mAdapter.hasStableIds();
     }
 
+    @Override
+    public boolean areAllItemsEnabled() {
+        return mAdapter.areAllItemsEnabled();
+    }
+
     private int adjustedPosition(int position) {
         if (position < AD_INDEX) {
             return position;
