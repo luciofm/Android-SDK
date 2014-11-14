@@ -32,7 +32,7 @@ public class SharethroughListAdapterTest extends TestBase {
 
         sharethrough = mock(Sharethrough.class);
 
-        subject = new SharethroughListAdapter(Robolectric.application, adapter, sharethrough, R.layout.ad);
+        subject = new SharethroughListAdapter(Robolectric.application, adapter, sharethrough, R.layout.ad, R.id.title, R.id.description, R.id.advertiser, R.id.thumbnail);
         verify(adapter).registerDataSetObserver(any(DataSetObserver.class));
     }
 
