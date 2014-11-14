@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import com.sharethrough.android.sdk.R;
@@ -122,5 +123,46 @@ public class SharethroughListAdapter extends BaseAdapter {
 
     private int numberOfAds() {
         return 1;
+    }
+
+    public AdapterView.OnItemLongClickListener createOnItemLongClickListener(final AdapterView.OnItemLongClickListener onItemLongClickListener) {
+        return new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                if (isAd(position)) {
+                    return view.performLongClick();
+                }
+                return onItemLongClickListener.onItemLongClick(parent, view, adjustedPosition(position), id);
+            }
+        };
+    }
+
+    public AdapterView.OnItemClickListener createOnItemClickListener(final AdapterView.OnItemClickListener onItemClickListener) {
+        return new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (isAd(position)) {
+                    view.performClick();
+                } else {
+                    onItemClickListener.onItemClick(parent, view, adjustedPosition(position), id);
+                }
+            }
+        };
+    }
+
+    public AdapterView.OnItemSelectedListener createOnItemSelectListener(final AdapterView.OnItemSelectedListener onItemSelectedListener) {
+        return new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (!isAd(position)) {
+                    onItemSelectedListener.onItemSelected(parent, view, adjustedPosition(position), id);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                onItemSelectedListener.onNothingSelected(parent);
+            }
+        };
     }
 }

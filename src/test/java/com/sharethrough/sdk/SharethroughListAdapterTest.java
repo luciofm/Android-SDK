@@ -2,6 +2,7 @@ package com.sharethrough.sdk;
 
 import android.database.DataSetObserver;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import com.sharethrough.android.sdk.R;
 import org.junit.Before;
@@ -146,5 +147,77 @@ public class SharethroughListAdapterTest extends TestBase {
         assertThat(subject.areAllItemsEnabled()).isFalse();
         when(adapter.areAllItemsEnabled()).thenReturn(true);
         assertThat(subject.areAllItemsEnabled()).isTrue();
+    }
+
+    @Test
+    public void createsOnItemClickListener_thatReturnsDelegateOnNonAd() throws Exception {
+        final int[] wasClick = new int[1];
+
+        AdapterView.OnItemClickListener listener = new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                wasClick[0] = position;
+            }
+        };
+
+        AdapterView.OnItemClickListener subjectListener = subject.createOnItemClickListener(listener);
+        subjectListener.onItemClick(null, null, 8, 0);
+        assertThat(wasClick[0]).isEqualTo(7);
+
+        View adView = mock(View.class);
+        subjectListener.onItemClick(null, adView, 3, 0);
+        verify(adView).performClick();
+        assertThat(wasClick[0]).isEqualTo(7);
+    }
+
+    @Test
+    public void createsOnLongItemClickListener_thatReturnsDelegateOnNonAd() throws Exception {
+        final int[] wasLongClick = new int[1];
+
+        AdapterView.OnItemLongClickListener listener = new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                wasLongClick[0] = position;
+                return false;
+            }
+        };
+
+        AdapterView.OnItemLongClickListener subjectListener = subject.createOnItemLongClickListener(listener);
+        subjectListener.onItemLongClick(null, null, 8, 0);
+
+        assertThat(wasLongClick[0]).isEqualTo(7);
+
+        View adView = mock(View.class);
+        subjectListener.onItemLongClick(null, adView, 3, 0);
+        verify(adView).performLongClick();
+    }
+
+    @Test
+    public void createsOnItemSelectListener_thatReturnsDelegateOnNonAd() throws Exception {
+        final int[] wasSelect = new int[1];
+        final boolean[] wasNothing = new boolean[1];
+
+        AdapterView.OnItemSelectedListener listener = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                wasSelect[0] = position;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                wasNothing[0] = true;
+            }
+        };
+
+        AdapterView.OnItemSelectedListener subjectListener = subject.createOnItemSelectListener(listener);
+        subjectListener.onItemSelected(null, null, 8, 0);
+        assertThat(wasSelect[0]).isEqualTo(7);
+
+        View adView = mock(View.class);
+        subjectListener.onItemSelected(null, adView, 3, 0);
+        assertThat(wasSelect[0]).isEqualTo(7);
+
+        subjectListener.onNothingSelected(null);
+        assertThat(wasNothing[0]).isTrue();
     }
 }
