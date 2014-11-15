@@ -48,6 +48,9 @@ public class AdFetcher {
                     Response response = getResponse(json);
 
                     remainingImageRequests += response.creatives.size();
+                    if (remainingImageRequests == 0) {
+                        adFetcherCallback.finishedLoadingWithNoAds();
+                    }
                     for (final Response.Creative responseCreative : response.creatives) {
                         imageFetcher.fetchImage(uri, responseCreative, new ImageFetcher.Callback() {
                             @Override
@@ -73,6 +76,7 @@ public class AdFetcher {
                         });
                     }
                 } catch (Exception e) {
+                    adFetcherCallback.finishedLoadingWithNoAds();
                     String msg = "failed to get ads for key " + key + ": " + uri;
                     if (json != null) {
                         msg += ": " + json;
@@ -142,6 +146,8 @@ public class AdFetcher {
     }
 
     public interface Callback {
-        public void finishedLoading();
+        void finishedLoading();
+
+        void finishedLoadingWithNoAds();
     }
 }

@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import com.sharethrough.sdk.network.AdFetcher;
 import com.sharethrough.sdk.network.ImageFetcher;
 
@@ -28,6 +30,18 @@ public class Sharethrough {
     private AdFetcher adFetcher;
     private ImageFetcher imageFetcher;
     private AdFetcher.Callback adFetcherCallback;
+    private OnStatusChangeListener onStatusChangeListener = new OnStatusChangeListener() {
+        @Override
+        public void newAdsToShow() {
+
+        }
+
+        @Override
+        public void noAdsToShow() {
+
+        }
+    };
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     public Sharethrough(Context context, String key) {
         this(context, key, DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS);
@@ -74,6 +88,7 @@ public class Sharethrough {
                         renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this, waiting.getValue());
                     } else {
                         Sharethrough.this.availableCreatives.add(creative);
+                        fireNewAdsToShow();
                     }
                 }
 
@@ -87,10 +102,33 @@ public class Sharethrough {
                     fetchAds();
                 }
             }
+
+            @Override
+            public void finishedLoadingWithNoAds() {
+                fireNoAdsToShow();
+            }
         };
         this.adFetcher = adFetcher;
         this.imageFetcher = imageFetcher;
         fetchAds();
+    }
+
+    private void fireNoAdsToShow() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                onStatusChangeListener.noAdsToShow();
+            }
+        });
+    }
+
+    private void fireNewAdsToShow() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                onStatusChangeListener.newAdsToShow();
+            }
+        });
     }
 
     private void fetchAds() {
@@ -114,5 +152,19 @@ public class Sharethrough {
 
     public int getAdCacheTimeInMilliseconds() {
         return adCacheTimeInMilliseconds;
+    }
+
+    public void setOnStatusChangeListener(OnStatusChangeListener onStatusChangeListener) {
+        this.onStatusChangeListener = onStatusChangeListener;
+    }
+
+    public OnStatusChangeListener getOnStatusChangeListener() {
+        return onStatusChangeListener;
+    }
+
+    public interface OnStatusChangeListener {
+        void newAdsToShow();
+
+        void noAdsToShow();
     }
 }

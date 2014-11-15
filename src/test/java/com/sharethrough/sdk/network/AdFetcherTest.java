@@ -24,6 +24,7 @@ import static org.mockito.Mockito.*;
 
 public class AdFetcherTest extends TestBase {
     private static final String FIXTURE = Fixtures.getFile("assets/str_ad_youtube.json");
+    private static final String NO_ADS_FIXTURE = Fixtures.getFile("assets/str_no_creatives.json");
     @Mock private ExecutorService executorService;
     @Mock private BeaconService beaconService;
     @Mock private ImageFetcher imageFetcher;
@@ -94,6 +95,16 @@ public class AdFetcherTest extends TestBase {
 
         List<ShadowLog.LogItem> logsForTag = ShadowLog.getLogsForTag("Sharethrough");
         assertThat(logsForTag.get(0).msg).isEqualTo("failed to get ads for key " + key + ": " + apiUri + ": " + responseBody);
+
+        verify(adFetcherCallback).finishedLoadingWithNoAds();
+    }
+
+    @Test
+    public void fetchAds_whenRequestReturnsZeroCreatives_callsFinshedLoadingWithNoAds() throws Exception {
+        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, NO_ADS_FIXTURE));
+        subject.fetchAds(imageFetcher, apiUriPrefix, creativeHandler, adFetcherCallback);
+        Misc.runLast(executorService);
+        verify(adFetcherCallback).finishedLoadingWithNoAds();
     }
 
     @Test

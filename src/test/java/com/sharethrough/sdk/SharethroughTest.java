@@ -31,6 +31,7 @@ public class SharethroughTest extends TestBase {
     @Mock private Creative creative;
     @Mock private CreativesQueue creativesQueue;
     @Mock private Runnable adReadyCallback;
+    @Mock private Sharethrough.OnStatusChangeListener onStatusChangeListener;
     private int adCacheTimeInMilliseconds;
     private String apiPrefix;
     @Captor private ArgumentCaptor<Function<Creative, Void>> creativeHandler;
@@ -53,6 +54,7 @@ public class SharethroughTest extends TestBase {
 
     private void createSubject(String key) {
         subject = new Sharethrough(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, beaconService, adFetcher, imageFetcher, creativesQueue);
+        subject.setOnStatusChangeListener(onStatusChangeListener);
     }
 
     private TestAdView makeMockAdView() {
@@ -148,6 +150,30 @@ public class SharethroughTest extends TestBase {
         adFetcherCallback.getValue().finishedLoading();
 
         verifyNoMoreInteractions(adFetcher);
+    }
+
+    @Test
+    public void whenFirstCreativeIsPrefetches_notifiesOnStatusChangeListenerOnMainThread() throws Exception {
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiPrefix), creativeHandler.capture(), adFetcherCallback.capture());
+
+        Robolectric.pauseMainLooper();
+        creativeHandler.getValue().apply(creative);
+        verifyNoMoreInteractions(onStatusChangeListener);
+        Robolectric.unPauseMainLooper();
+
+        verify(onStatusChangeListener).newAdsToShow();
+    }
+
+    @Test
+    public void whenFirstCreativeIsNotAvailable_notifiesOnStatusChangeListenerOnMainThread() throws Exception {
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiPrefix), creativeHandler.capture(), adFetcherCallback.capture());
+
+        Robolectric.pauseMainLooper();
+        adFetcherCallback.getValue().finishedLoadingWithNoAds();
+        verifyNoMoreInteractions(onStatusChangeListener);
+        Robolectric.unPauseMainLooper();
+
+        verify(onStatusChangeListener).noAdsToShow();
     }
 
     @Test
