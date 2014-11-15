@@ -5,6 +5,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import com.sharethrough.sdk.network.AdFetcher;
 import com.sharethrough.sdk.network.ImageFetcher;
+import com.sharethrough.sdk.network.PlacementFetcher;
 import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +32,7 @@ public class SharethroughTest extends TestBase {
     @Mock private Creative creative;
     @Mock private CreativesQueue creativesQueue;
     @Mock private Runnable adReadyCallback;
+    @Mock private PlacementFetcher placementFetcher;
     @Mock private Sharethrough.OnStatusChangeListener onStatusChangeListener;
     private int adCacheTimeInMilliseconds;
     private String apiPrefix;
@@ -53,7 +55,7 @@ public class SharethroughTest extends TestBase {
     }
 
     private void createSubject(String key) {
-        subject = new Sharethrough(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, beaconService, adFetcher, imageFetcher, creativesQueue);
+        subject = new Sharethrough(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, beaconService, adFetcher, imageFetcher, creativesQueue, placementFetcher);
         subject.setOnStatusChangeListener(onStatusChangeListener);
     }
 
@@ -187,5 +189,12 @@ public class SharethroughTest extends TestBase {
         int expectedCacheMilliseconds = (int) TimeUnit.SECONDS.toMillis(20);
 
         assertThat(adCacheMilliseconds).isEqualTo(expectedCacheMilliseconds);
+    }
+
+    @Test
+    public void getPlacement_callsFetcher() throws Exception {
+        Callback placementCallback = mock(Callback.class);
+        subject.getPlacement(placementCallback);
+        verify(placementFetcher).fetch(placementCallback);
     }
 }

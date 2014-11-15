@@ -14,12 +14,12 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 
-public class PlacementTemplateFetcher {
+public class PlacementFetcher {
     private final static String API_FORMAT_STRING = "http://native.sharethrough.com/placements/PLACEMENT_KEY/template.json";
     private final String placementKey;
     private final ExecutorService executorService;
 
-    public PlacementTemplateFetcher(String placementKey, ExecutorService executorService) {
+    public PlacementFetcher(String placementKey, ExecutorService executorService) {
         this.placementKey = placementKey;
         this.executorService = executorService;
     }

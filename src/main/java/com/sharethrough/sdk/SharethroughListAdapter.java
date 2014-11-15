@@ -13,14 +13,13 @@ public class SharethroughListAdapter extends BaseAdapter {
     private final ListAdapter mAdapter;
     private final Context mContext;
     private final Sharethrough mSharethrough;
+    private Placement placement;
 
     private final int adLayoutResourceId;
     private final int titleViewId;
     private final int descriptionViewId;
     private final int advertiserViewId;
     private final int thumbnailViewId;
-
-    private static final int AD_INDEX = 3;
 
     public SharethroughListAdapter(Context context, ListAdapter adapter, Sharethrough sharethrough, int adLayoutResourceId, int titleViewId, int descriptionViewId, int advertiserViewId, int thumbnailViewId) {
         mContext = context;
@@ -44,6 +43,15 @@ public class SharethroughListAdapter extends BaseAdapter {
         });
 
         this.adLayoutResourceId = adLayoutResourceId;
+
+        placement = new Placement(Integer.MAX_VALUE, Integer.MAX_VALUE);
+        sharethrough.getPlacement(new Callback<Placement>() {
+            @Override
+            public void call(Placement result) {
+                placement = result;
+                notifyDataSetChanged();
+            }
+        });
     }
 
     @Override
@@ -53,7 +61,8 @@ public class SharethroughListAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return numberOfAds() + mAdapter.getCount();
+        int count = mAdapter.getCount();
+        return numberOfAds(count) + count;
     }
 
     @Override
@@ -117,19 +126,26 @@ public class SharethroughListAdapter extends BaseAdapter {
     }
 
     private int adjustedPosition(int position) {
-        if (position < AD_INDEX) {
+        if (position < placement.getArticlesBeforeFirstAd()) {
             return position;
         } else {
-            return position - 1;
+            int numberOfAdsShown = 1 + (position - placement.getArticlesBeforeFirstAd()) / (placement.getArticlesBetweenAds() + 1);
+            return position - numberOfAdsShown;
         }
     }
 
     private boolean isAd(int position) {
-        return position == AD_INDEX;
+        int articlesBeforeFirstAd = placement.getArticlesBeforeFirstAd();
+        return position == articlesBeforeFirstAd ||
+                position >= articlesBeforeFirstAd &&
+                        0 == (position - articlesBeforeFirstAd) % (placement.getArticlesBetweenAds() + 1);
     }
 
-    private int numberOfAds() {
-        return 1;
+    private int numberOfAds(int count) {
+        if (count < placement.getArticlesBeforeFirstAd()) {
+            return 0;
+        }
+        return 1 + (count - placement.getArticlesBeforeFirstAd()) / placement.getArticlesBetweenAds();
     }
 
     public AdapterView.OnItemLongClickListener createOnItemLongClickListener(final AdapterView.OnItemLongClickListener onItemLongClickListener) {

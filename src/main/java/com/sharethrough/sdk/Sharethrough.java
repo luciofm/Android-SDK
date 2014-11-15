@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.Looper;
 import com.sharethrough.sdk.network.AdFetcher;
 import com.sharethrough.sdk.network.ImageFetcher;
+import com.sharethrough.sdk.network.PlacementFetcher;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -21,6 +22,7 @@ public class Sharethrough {
     public static final String USER_AGENT = System.getProperty("http.agent");
     private final Renderer renderer;
     private final BeaconService beaconService;
+    private final PlacementFetcher placementFetcher;
     private final int adCacheTimeInMilliseconds;
     private String apiUrlPrefix = "http://btlr.sharethrough.com/v3?placement_key=";
     static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(4); // TODO: pick a reasonable number
@@ -56,13 +58,14 @@ public class Sharethrough {
                 new BeaconService(new DateProvider(), UUID.randomUUID(), EXECUTOR_SERVICE, advertisingIdProvider),
                 new AdFetcher(context, key, EXECUTOR_SERVICE, new BeaconService(new DateProvider(), UUID.randomUUID(),
                         EXECUTOR_SERVICE, advertisingIdProvider)), new ImageFetcher(EXECUTOR_SERVICE, key),
-                new CreativesQueue()
-        );
+                new CreativesQueue(),
+                new PlacementFetcher(key, EXECUTOR_SERVICE));
     }
 
-    Sharethrough(final Context context, final String key, int adCacheTimeInMilliseconds, final Renderer renderer, final BeaconService beaconService, AdFetcher adFetcher, ImageFetcher imageFetcher, final CreativesQueue availableCreatives) {
+    Sharethrough(final Context context, final String key, int adCacheTimeInMilliseconds, final Renderer renderer, final BeaconService beaconService, AdFetcher adFetcher, ImageFetcher imageFetcher, final CreativesQueue availableCreatives, PlacementFetcher placementFetcher) {
         this.renderer = renderer;
         this.beaconService = beaconService;
+        this.placementFetcher = placementFetcher;
         this.adCacheTimeInMilliseconds = Math.max(adCacheTimeInMilliseconds, MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS);
         this.availableCreatives = availableCreatives;
         if (key == null) throw new KeyRequiredException("placement_key is required");
@@ -152,6 +155,10 @@ public class Sharethrough {
 
     public int getAdCacheTimeInMilliseconds() {
         return adCacheTimeInMilliseconds;
+    }
+
+    public void getPlacement(Callback<Placement> placementCallback) {
+        placementFetcher.fetch(placementCallback);
     }
 
     public void setOnStatusChangeListener(OnStatusChangeListener onStatusChangeListener) {

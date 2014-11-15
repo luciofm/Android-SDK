@@ -2,6 +2,7 @@ package com.sharethrough.sdk;
 
 import android.database.DataSetObserver;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import com.sharethrough.android.sdk.R;
@@ -23,6 +24,7 @@ public class SharethroughListAdapterTest extends TestBase {
     private ListAdapter adapter;
     private SharethroughListAdapter subject;
     private Sharethrough sharethrough;
+    private ArgumentCaptor<Callback> placementCallbackArgumentCaptor;
 
     @Before
     public void setUp() throws Exception {
@@ -34,6 +36,10 @@ public class SharethroughListAdapterTest extends TestBase {
 
         subject = new SharethroughListAdapter(Robolectric.application, adapter, sharethrough, R.layout.ad, R.id.title, R.id.description, R.id.advertiser, R.id.thumbnail);
         verify(adapter).registerDataSetObserver(any(DataSetObserver.class));
+
+        placementCallbackArgumentCaptor = ArgumentCaptor.forClass(Callback.class);
+        verify(sharethrough).getPlacement(placementCallbackArgumentCaptor.capture());
+        placementCallbackArgumentCaptor.getValue().call(new Placement(3, Integer.MAX_VALUE));
     }
 
     @Test
@@ -219,5 +225,72 @@ public class SharethroughListAdapterTest extends TestBase {
 
         subjectListener.onNothingSelected(null);
         assertThat(wasNothing[0]).isTrue();
+    }
+
+    @Test
+    public void whenPlacementBecomesAvailable_notifiesOfDatasetChange() throws Exception {
+        final boolean[] wasChanged = new boolean[1];
+        subject.registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                wasChanged[0] = true;
+            }
+        });
+
+        ArgumentCaptor<Callback> callbackArgumentCaptor = ArgumentCaptor.forClass(Callback.class);
+        verify(sharethrough).getPlacement(callbackArgumentCaptor.capture());
+        callbackArgumentCaptor.getValue().call(new Placement(1, 2));
+
+        assertThat(wasChanged[0]).isTrue();
+    }
+
+    @Test
+    public void whenPlacementBecomesAvailable_placesAdsAppropriately() throws Exception {
+        final View[] views = new View[100];
+        for (int i = 0; i < views.length; i++) {
+            views[i] = mock(View.class, "view_" + i);
+        }
+
+        when(adapter.getCount()).thenReturn(views.length);
+        when(adapter.getView(anyInt(), any(View.class), any(ViewGroup.class))).thenAnswer(new Answer<View>() {
+            @Override
+            public View answer(InvocationOnMock invocationOnMock) throws Throwable {
+                int position = (Integer) invocationOnMock.getArguments()[0];
+                return views[position];
+            }
+        });
+
+        placementCallbackArgumentCaptor.getValue().call(new Placement(2, 1));
+        assertThat(subject.getCount()).isEqualTo(199);
+        assertThat(subject.getView(0, null, mock(ViewGroup.class))).isSameAs(views[0]);
+        assertThat(subject.getView(1, null, mock(ViewGroup.class))).isSameAs(views[1]);
+        assertThat(subject.getView(2, null, mock(ViewGroup.class))).isInstanceOf(IAdView.class);
+        assertThat(subject.getView(3, null, mock(ViewGroup.class))).isSameAs(views[2]);
+        assertThat(subject.getView(4, null, mock(ViewGroup.class))).isInstanceOf(IAdView.class);
+        for (int i = 5; i < views.length; i++) {
+            assertThat(subject.getView(i * 2 - 1, null, mock(ViewGroup.class))).isSameAs(views[i]);
+            assertThat(subject.getView(i * 2, null, mock(ViewGroup.class))).isInstanceOf(IAdView.class);
+        }
+    }
+
+    @Test
+    public void beforePlacementBecomesAvailable_showsNoAds_butWorksOK() throws Exception {
+        final View[] views = {mock(View.class), mock(View.class), mock(View.class), mock(View.class), mock(View.class)};
+
+        when(adapter.getCount()).thenReturn(views.length);
+        when(adapter.getView(anyInt(), any(View.class), any(ViewGroup.class))).thenAnswer(new Answer<View>() {
+            @Override
+            public View answer(InvocationOnMock invocationOnMock) throws Throwable {
+                int position = (Integer) invocationOnMock.getArguments()[0];
+                return views[position];
+            }
+        });
+
+        subject = new SharethroughListAdapter(Robolectric.application, adapter, sharethrough, R.layout.ad, R.id.title, R.id.description, R.id.advertiser, R.id.thumbnail);
+
+        assertThat(subject.getCount()).isEqualTo(views.length);
+        for (int i = 0; i < views.length; i++) {
+            assertThat(subject.getView(i, null, mock(ViewGroup.class))).isSameAs(views[i]);
+        }
     }
 }

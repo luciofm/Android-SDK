@@ -17,11 +17,11 @@ import java.util.concurrent.ExecutorService;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
-public class PlacementTemplateFetcherTest extends TestBase {
+public class PlacementFetcherTest extends TestBase {
     private static final String FIXTURE = Fixtures.getFile("assets/str_template.json");
     private static final String key = "abc";
 
-    private PlacementTemplateFetcher subject;
+    private PlacementFetcher subject;
     private ExecutorService executorService;
     @Mock private Callback<Placement> callback;
 
@@ -29,7 +29,7 @@ public class PlacementTemplateFetcherTest extends TestBase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         executorService = mock(ExecutorService.class);
-        subject = new PlacementTemplateFetcher(key, executorService);
+        subject = new PlacementFetcher(key, executorService);
     }
 
     @Test
