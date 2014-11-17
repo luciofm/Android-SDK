@@ -2,6 +2,8 @@ package com.sharethrough.sdk;
 
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -51,9 +53,14 @@ public class SharethroughListAdapter extends BaseAdapter {
         placement = new Placement(Integer.MAX_VALUE, Integer.MAX_VALUE);
         sharethrough.getPlacement(new Callback<Placement>() {
             @Override
-            public void call(Placement result) {
-                placement = result;
-                notifyDataSetChanged();
+            public void call(final Placement result) {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        placement = result;
+                        notifyDataSetChanged();
+                    }
+                });
             }
         });
     }

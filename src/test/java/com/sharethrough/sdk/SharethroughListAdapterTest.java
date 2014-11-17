@@ -230,7 +230,7 @@ public class SharethroughListAdapterTest extends TestBase {
     }
 
     @Test
-    public void whenPlacementBecomesAvailable_notifiesOfDatasetChange() throws Exception {
+    public void whenPlacementBecomesAvailable_notifiesOfDatasetChange_onMainThread() throws Exception {
         final boolean[] wasChanged = new boolean[1];
         subject.registerDataSetObserver(new DataSetObserver() {
             @Override
@@ -239,10 +239,14 @@ public class SharethroughListAdapterTest extends TestBase {
             }
         });
 
+        Robolectric.pauseMainLooper();
+
         ArgumentCaptor<Callback> callbackArgumentCaptor = ArgumentCaptor.forClass(Callback.class);
         verify(sharethrough).getPlacement(callbackArgumentCaptor.capture());
         callbackArgumentCaptor.getValue().call(new Placement(1, 2));
 
+        assertThat(wasChanged[0]).isFalse();
+        Robolectric.unPauseMainLooper();
         assertThat(wasChanged[0]).isTrue();
     }
 
