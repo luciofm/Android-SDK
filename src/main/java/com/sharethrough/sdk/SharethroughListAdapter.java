@@ -21,6 +21,10 @@ public class SharethroughListAdapter extends BaseAdapter {
     private final int advertiserViewId;
     private final int thumbnailViewId;
 
+    public SharethroughListAdapter(Context context, ListAdapter adapter, Sharethrough sharethrough, int adLayoutResourceId, int titleViewId, int advertiserViewId, int thumbnailViewId) {
+        this(context, adapter, sharethrough, adLayoutResourceId, titleViewId, -1, advertiserViewId, thumbnailViewId);
+    }
+
     public SharethroughListAdapter(Context context, ListAdapter adapter, Sharethrough sharethrough, int adLayoutResourceId, int titleViewId, int descriptionViewId, int advertiserViewId, int thumbnailViewId) {
         mContext = context;
         mAdapter = adapter;
