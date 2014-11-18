@@ -98,18 +98,14 @@ public class SharethroughListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
 
         if (isAd(position)) {
-            return getAd();
+            return getAd(position);
         } else {
             return mAdapter.getView(adjustedPosition(position), convertView, parent);
         }
     }
 
-    private View getAd() {
-        BasicAdView adView = new BasicAdView(mContext);
-
-        adView.showAd(mSharethrough, adLayoutResourceId, titleViewId, descriptionViewId, advertiserViewId, thumbnailViewId);
-
-        return adView;
+    private View getAd(int slotNumber) {
+        return mSharethrough.getAdView(mContext, slotNumber, adLayoutResourceId, titleViewId, descriptionViewId, advertiserViewId, thumbnailViewId);
     }
 
     @Override

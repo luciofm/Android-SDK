@@ -1,5 +1,6 @@
 package com.sharethrough.sdk;
 
+import android.content.Context;
 import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import com.sharethrough.android.sdk.R;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
@@ -25,6 +27,8 @@ public class SharethroughListAdapterTest extends TestBase {
     private SharethroughListAdapter subject;
     private Sharethrough sharethrough;
     private ArgumentCaptor<Callback> placementCallbackArgumentCaptor;
+    @Mock
+    private com.sharethrough.sdk.BasicAdView mockAdView;
 
     @Before
     public void setUp() throws Exception {
@@ -33,6 +37,8 @@ public class SharethroughListAdapterTest extends TestBase {
         when(adapter.getItem(anyInt())).thenReturn(new String("feedItem"));
 
         sharethrough = mock(Sharethrough.class);
+
+        when(sharethrough.getAdView(any(Context.class), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt())).thenReturn(mockAdView);
 
         subject = new SharethroughListAdapter(Robolectric.application, adapter, sharethrough, R.layout.ad, R.id.title, R.id.advertiser, R.id.thumbnail);
         verify(adapter).registerDataSetObserver(any(DataSetObserver.class));
@@ -60,12 +66,7 @@ public class SharethroughListAdapterTest extends TestBase {
     @Test
     public void inflatesProperLayoutForAd() throws Exception {
         View v = subject.getView(3, null, null);
-
-        assertThat(v).isInstanceOf(IAdView.class);
-        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(sharethrough).putCreativeIntoAdView((IAdView) eq(v), runnableArgumentCaptor.capture());
-        runnableArgumentCaptor.getValue().run();
-        assertThat(v.findViewById(R.id.ad_layout)).isNotNull();
+        assertThat(v).isSameAs(mockAdView);
     }
 
     @Test

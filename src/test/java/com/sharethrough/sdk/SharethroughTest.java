@@ -197,4 +197,25 @@ public class SharethroughTest extends TestBase {
         subject.getPlacement(placementCallback);
         verify(placementFetcher).fetch(placementCallback);
     }
+
+    @Test
+    public void getAdview_whenAdViewsBySlotContainsAdviewForPosition_returnsStoredAdview() {
+        adCacheTimeInMilliseconds = 5;
+        createSubject("abc");
+        int adSlot = 2;
+        BasicAdView generatedAdView = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 0, 0, 0, 0);
+        assertThat(generatedAdView).isNotNull();
+        BasicAdView generatedAdView2 = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 0, 0, 0, 0);
+        assertThat(generatedAdView).isSameAs(generatedAdView2);
+    }
+
+    @Test
+    public void getAdView_whenAdViewsBySlotDoesNotContainAdviewForPosition_returnsNewAdview() {
+        adCacheTimeInMilliseconds = 5;
+        createSubject("abc");
+        BasicAdView generatedAdView = subject.getAdView(Robolectric.application, 2, android.R.layout.simple_list_item_1, 0, 0, 0, 0);
+        assertThat(generatedAdView).isNotNull();
+        BasicAdView generatedAdView2 = subject.getAdView(Robolectric.application, 12, android.R.layout.simple_list_item_1, 0, 0, 0, 0);
+        assertThat(generatedAdView).isNotSameAs(generatedAdView2);
+    }
 }

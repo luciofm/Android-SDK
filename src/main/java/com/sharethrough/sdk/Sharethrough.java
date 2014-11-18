@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.LruCache;
 import com.sharethrough.sdk.network.AdFetcher;
 import com.sharethrough.sdk.network.ImageFetcher;
 import com.sharethrough.sdk.network.PlacementFetcher;
@@ -44,6 +45,7 @@ public class Sharethrough {
         }
     };
     private Handler handler = new Handler(Looper.getMainLooper());
+    private LruCache<Integer, BasicAdView> adViewsByAdSlot;
 
     public Sharethrough(Context context, String key) {
         this(context, key, DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS);
@@ -62,12 +64,16 @@ public class Sharethrough {
                 new PlacementFetcher(key, EXECUTOR_SERVICE));
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     Sharethrough(final Context context, final String key, int adCacheTimeInMilliseconds, final Renderer renderer, final BeaconService beaconService, AdFetcher adFetcher, ImageFetcher imageFetcher, final CreativesQueue availableCreatives, PlacementFetcher placementFetcher) {
         this.renderer = renderer;
         this.beaconService = beaconService;
         this.placementFetcher = placementFetcher;
         this.adCacheTimeInMilliseconds = Math.max(adCacheTimeInMilliseconds, MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS);
         this.availableCreatives = availableCreatives;
+
+        adViewsByAdSlot = new LruCache<>(20);
+
         if (key == null) throw new KeyRequiredException("placement_key is required");
 
         try {
@@ -141,9 +147,9 @@ public class Sharethrough {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public void putCreativeIntoAdView(IAdView adView, Runnable adReadyCallback) {
         synchronized (availableCreatives) {
-            Creative next = availableCreatives.getNext();
-            if (next != null) {
-                renderer.putCreativeIntoAdView(adView, next, beaconService, this, adReadyCallback);
+            Creative nextCreative = availableCreatives.getNext();
+            if (nextCreative != null) {
+                renderer.putCreativeIntoAdView(adView, nextCreative, beaconService, this, adReadyCallback);
             } else {
                 waitingAdViews.put(adView, adReadyCallback);
             }
@@ -167,6 +173,18 @@ public class Sharethrough {
 
     public OnStatusChangeListener getOnStatusChangeListener() {
         return onStatusChangeListener;
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+    public BasicAdView getAdView(Context context, int position, int adLayoutResourceId, int title, int description, int advertiser, int thumbnail) {
+        BasicAdView cachedView = adViewsByAdSlot.get(position);
+        if (cachedView != null) {
+            return cachedView;
+        } else {
+            BasicAdView basicAdView = new BasicAdView(context);
+            adViewsByAdSlot.put(position, basicAdView);
+            return basicAdView.showAd(this, adLayoutResourceId, title, description, advertiser, thumbnail);
+        }
     }
 
     public interface OnStatusChangeListener {
