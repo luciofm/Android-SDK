@@ -3,7 +3,9 @@ package com.sharethrough.sdk.dialogs;
 import android.media.MediaPlayer;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.VideoView;
+import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.TestBase;
@@ -102,5 +104,21 @@ public class VideoDialogTest extends TestBase {
 
         subject.cancel();
         verify(timer).cancel();
+    }
+
+    @Test
+    public void bringsVideoViewAndPlayButtonToFrontWhenVideoIsPrepared_butNotImmediately_toAllowVideoToStartPlayingFirst() {
+        Robolectric.pauseMainLooper();
+        shadowOf(videoView).getOnPreparedListener().onPrepared(mock(MediaPlayer.class));
+
+        FrameLayout container = (FrameLayout) subject.findViewById(R.id.container);
+        assertThat(container.getChildAt(0).getId()).isEqualTo(R.id.video);
+        assertThat(container.getChildAt(1).getId()).isEqualTo(R.id.progress_spinner);
+
+        Robolectric.unPauseMainLooper();
+
+        assertThat(container.getChildAt(0).getId()).isEqualTo(R.id.progress_spinner);
+        assertThat(container.getChildAt(1).getId()).isEqualTo(R.id.video);
+        assertThat(container.getChildAt(2).getId()).isEqualTo(R.id.play_button);
     }
 }

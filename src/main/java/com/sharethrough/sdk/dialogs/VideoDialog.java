@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.VideoView;
@@ -36,6 +38,9 @@ public class VideoDialog extends ShareableDialog {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.video_dialog);
+
+        final View playButton = findViewById(R.id.play_button);
+
         videoView = (VideoView) findViewById(R.id.video);
         final String mediaUrl = creative.getMediaUrl();
         Log.d("Sharethrough", "loading video from: " + mediaUrl);
@@ -43,9 +48,15 @@ public class VideoDialog extends ShareableDialog {
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(final MediaPlayer mediaPlayer) {
-                findViewById(R.id.progress_spinner).setVisibility(View.GONE);
                 videoView.start();
                 mediaPlayer.setLooping(isLooping);
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        videoView.bringToFront();
+                        playButton.bringToFront();
+                    }
+                });
                 timer.scheduleAtFixedRate(new TimerTask() {
                     @Override
                     public void run() {
@@ -67,7 +78,6 @@ public class VideoDialog extends ShareableDialog {
         ((View) videoView.getParent()).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                View playButton = findViewById(R.id.play_button);
                 if (videoView.isPlaying()) {
                     videoView.pause();
                     playButton.setVisibility(View.VISIBLE);
