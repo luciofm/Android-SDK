@@ -59,7 +59,7 @@ public class RendererTest {
         timer = mock(Timer.class);
         sharethrough = mock(Sharethrough.class);
 
-        subject = new Renderer(timer);
+        subject = new Renderer();
     }
 
     @Test
@@ -67,7 +67,7 @@ public class RendererTest {
         Robolectric.pauseMainLooper();
 
         Runnable adReadyCallback = mock(Runnable.class);
-        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, adReadyCallback);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, adReadyCallback, timer);
 
         verifyNoMoreInteractions(adView.getTitle());
         verifyNoMoreInteractions(adReadyCallback);
@@ -94,15 +94,15 @@ public class RendererTest {
 
     @Test
     public void firesImpressionBeaconOnlyOnce() throws Exception {
-        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, NoOp.INSTANCE);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, NoOp.INSTANCE, timer);
         verify(beaconService).adReceived(any(Context.class), eq(creative));
-        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, NoOp.INSTANCE);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, NoOp.INSTANCE, timer);
         verifyNoMoreInteractions(beaconService);
     }
 
     @Test
     public void usesAdViewTimerTask() throws Exception {
-        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, NoOp.INSTANCE);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, NoOp.INSTANCE, timer);
 
         ArgumentCaptor<AdViewTimerTask> timerTaskArgumentCaptor = ArgumentCaptor.forClass(AdViewTimerTask.class);
         verify(timer).schedule(timerTaskArgumentCaptor.capture(), anyLong(), anyLong());
@@ -112,12 +112,13 @@ public class RendererTest {
         assertThat(timerTask.isCancelled()).isFalse();
         adView.onAttachStateListener.onViewDetachedFromWindow(adView);
         assertThat(timerTask.isCancelled()).isTrue();
+        verify(timer).cancel();
         verify(timer).purge();
     }
 
     @Test
     public void whenAdIsClicked_firesMediaBeacon_andMediaClickListener() throws Exception {
-        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, mock(Runnable.class));
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, mock(Runnable.class), timer);
 
         adView.performClick();
 
@@ -128,7 +129,7 @@ public class RendererTest {
     @Test
     public void whenDescriptionIsNull_NothingBadHappens() throws Exception {
         adView.description = null;
-        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, mock(Runnable.class));
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, mock(Runnable.class), timer);
     }
 
     public static MyTestAdView makeAdView() {

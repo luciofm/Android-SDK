@@ -56,35 +56,25 @@ public class Sharethrough {
     private final Context context; //TODO decide whether this is needed
     private String dfpPath;
 
+    //TODO make the constructors cleaner
     public Sharethrough(Context context, String placementKey) {
         this(context, placementKey, DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS);
     }
 
     public Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds) {
-        this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString()), null);
+        this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString()));
     }
 
-
-    //TODO make the constructors cleaner
-    public Sharethrough(Context context, String placementKey, boolean isDfpMode) {
-        this(context, placementKey, DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS, isDfpMode);
-    }
-
-    public Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds, boolean isDfpMode) {
-        this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString()), isDfpMode ? new DFPNetworking() : null);
-    }
-
-    Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds, AdvertisingIdProvider advertisingIdProvider, DFPNetworking dfpNetworking) {
-        this(context, placementKey, adCacheTimeInMilliseconds, new Renderer(new Timer("Sharethrough visibility watcher")),
+    Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds, AdvertisingIdProvider advertisingIdProvider) {
+        this(context, placementKey, adCacheTimeInMilliseconds, new Renderer(), new CreativesQueue(),
                 new BeaconService(new DateProvider(), UUID.randomUUID(), EXECUTOR_SERVICE, advertisingIdProvider),
                 new AdFetcher(context, placementKey, EXECUTOR_SERVICE, new BeaconService(new DateProvider(), UUID.randomUUID(),
                         EXECUTOR_SERVICE, advertisingIdProvider)), new ImageFetcher(EXECUTOR_SERVICE, placementKey),
-                new CreativesQueue(),
-                new PlacementFetcher(placementKey, EXECUTOR_SERVICE), dfpNetworking);
+                new PlacementFetcher(placementKey, EXECUTOR_SERVICE), null);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-    Sharethrough(final Context context, final String placementKey, int adCacheTimeInMilliseconds, final Renderer renderer, final BeaconService beaconService, AdFetcher adFetcher, ImageFetcher imageFetcher, final CreativesQueue availableCreatives, PlacementFetcher placementFetcher, DFPNetworking dfpNetworking) {
+    Sharethrough(final Context context, final String placementKey, int adCacheTimeInMilliseconds, final Renderer renderer, final CreativesQueue availableCreatives, final BeaconService beaconService, AdFetcher adFetcher, ImageFetcher imageFetcher, PlacementFetcher placementFetcher, DFPNetworking dfpNetworking) {
         this.renderer = renderer;
         this.beaconService = beaconService;
         this.placementFetcher = placementFetcher;
@@ -112,7 +102,7 @@ public class Sharethrough {
                         Map.Entry<IAdView, Runnable> waiting = waitingAdViews.entrySet().iterator().next();
                         IAdView adView = waiting.getKey();
                         waitingAdViews.remove(adView);
-                        renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this, waiting.getValue());
+                        renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this, waiting.getValue(), new Timer("AdView timer for " + creative));
                     } else {
                         Sharethrough.this.availableCreatives.add(creative);
                         fireNewAdsToShow();
@@ -217,7 +207,7 @@ public class Sharethrough {
         synchronized (availableCreatives) {
             Creative nextCreative = availableCreatives.getNext();
             if (nextCreative != null) {
-                renderer.putCreativeIntoAdView(adView, nextCreative, beaconService, this, adReadyCallback);
+                renderer.putCreativeIntoAdView(adView, nextCreative, beaconService, this, adReadyCallback, new Timer("AdView timer for " + nextCreative));
             } else {
                 waitingAdViews.put(adView, adReadyCallback);
             }

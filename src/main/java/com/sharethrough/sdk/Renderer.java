@@ -18,14 +18,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class Renderer {
-
-    private final Timer timer;
-
-    public Renderer(Timer timer) {
-        this.timer = timer;
-    }
-
-    public void putCreativeIntoAdView(final IAdView adView, final Creative creative, final BeaconService beaconService, final Sharethrough sharethrough, final Runnable adReadyCallback) {
+    public void putCreativeIntoAdView(final IAdView adView, final Creative creative, final BeaconService beaconService, final Sharethrough sharethrough, final Runnable adReadyCallback, final Timer timer) {
         final ViewGroup container = adView.getAdView();
         if (!creative.wasRendered) {
             beaconService.adReceived(container.getContext(), creative);
@@ -51,6 +44,7 @@ public class Renderer {
                     @Override
                     public void onViewDetachedFromWindow(View v) {
                         task.cancel();
+                        timer.cancel();
                         timer.purge();
                         container.removeOnAttachStateChangeListener(this);
                     }
