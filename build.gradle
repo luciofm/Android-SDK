@@ -19,6 +19,19 @@ apply plugin: 'com.android.library'
 apply plugin: 'robolectric'
 
 android {
+
+    tasks.whenTaskAdded { theTask ->
+        def taskName = theTask.name.toString()
+        if ("testDebug".toString().equals(taskName)) {
+            /**
+             * Listen for when robolectric adds the 'testDebug' task and when it does, add the -noverify
+             * option to that task's jvmArgs.  This allows us to turn off byte code verification when
+             * running our unit tests.
+             */
+            theTask.jvmArgs('-noverify')
+        }
+    }
+
     compileSdkVersion 19
     buildToolsVersion '19.1.0'
 
@@ -131,7 +144,7 @@ dependencies {
         mavenCentral()
     }
 
-    compile 'com.google.android.gms:play-services:4.0.+'
+    compile 'com.google.android.gms:play-services:6.+'
 
     // Espresso
     androidTestCompile('junit:junit:4.11') {
