@@ -7,8 +7,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.util.LruCache;
 import com.sharethrough.sdk.network.AdFetcher;
+import com.sharethrough.sdk.network.DFPNetworking;
 import com.sharethrough.sdk.network.ImageFetcher;
 import com.sharethrough.sdk.network.PlacementFetcher;
 
@@ -25,6 +27,8 @@ public class Sharethrough {
     private final BeaconService beaconService;
     private final PlacementFetcher placementFetcher;
     private final int adCacheTimeInMilliseconds;
+    private final String placementKey;
+    private String apiUrl;
     private String apiUrlPrefix = "http://btlr.sharethrough.com/v3?placement_key=";
     static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(4); // TODO: pick a reasonable number
     private final CreativesQueue availableCreatives;
@@ -47,34 +51,35 @@ public class Sharethrough {
     private Handler handler = new Handler(Looper.getMainLooper());
     private LruCache<Integer, BasicAdView> adViewsByAdSlot;
 
-    public Sharethrough(Context context, String key) {
-        this(context, key, DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS);
+    public Sharethrough(Context context, String placementKey) {
+        this(context, placementKey, DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS);
     }
 
-    public Sharethrough(Context context, String key, int adCacheTimeInMilliseconds) {
-        this(context, key, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString()));
+    public Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds) {
+        this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString()));
     }
 
-    Sharethrough(Context context, String key, int adCacheTimeInMilliseconds, AdvertisingIdProvider advertisingIdProvider) {
-        this(context, key, adCacheTimeInMilliseconds, new Renderer(new Timer("Sharethrough visibility watcher")),
+    Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds, AdvertisingIdProvider advertisingIdProvider) {
+        this(context, placementKey, adCacheTimeInMilliseconds, new Renderer(new Timer("Sharethrough visibility watcher")),
                 new BeaconService(new DateProvider(), UUID.randomUUID(), EXECUTOR_SERVICE, advertisingIdProvider),
-                new AdFetcher(context, key, EXECUTOR_SERVICE, new BeaconService(new DateProvider(), UUID.randomUUID(),
-                        EXECUTOR_SERVICE, advertisingIdProvider)), new ImageFetcher(EXECUTOR_SERVICE, key),
+                new AdFetcher(context, placementKey, EXECUTOR_SERVICE, new BeaconService(new DateProvider(), UUID.randomUUID(),
+                        EXECUTOR_SERVICE, advertisingIdProvider)), new ImageFetcher(EXECUTOR_SERVICE, placementKey),
                 new CreativesQueue(),
-                new PlacementFetcher(key, EXECUTOR_SERVICE));
+                new PlacementFetcher(placementKey, EXECUTOR_SERVICE), false);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-    Sharethrough(final Context context, final String key, int adCacheTimeInMilliseconds, final Renderer renderer, final BeaconService beaconService, AdFetcher adFetcher, ImageFetcher imageFetcher, final CreativesQueue availableCreatives, PlacementFetcher placementFetcher) {
+    Sharethrough(final Context context, final String placementKey, int adCacheTimeInMilliseconds, final Renderer renderer, final BeaconService beaconService, AdFetcher adFetcher, ImageFetcher imageFetcher, final CreativesQueue availableCreatives, PlacementFetcher placementFetcher, boolean dfpMode) {
         this.renderer = renderer;
         this.beaconService = beaconService;
         this.placementFetcher = placementFetcher;
         this.adCacheTimeInMilliseconds = Math.max(adCacheTimeInMilliseconds, MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS);
         this.availableCreatives = availableCreatives;
+        this.placementKey = placementKey;
 
         adViewsByAdSlot = new LruCache<>(20);
 
-        if (key == null) throw new KeyRequiredException("placement_key is required");
+        if (placementKey == null) throw new KeyRequiredException("placement_key is required");
 
         try {
             Bundle bundle = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA).metaData;
@@ -119,7 +124,30 @@ public class Sharethrough {
         };
         this.adFetcher = adFetcher;
         this.imageFetcher = imageFetcher;
-        fetchAds();
+
+        if (dfpMode) {
+            fetchDFPUrl(placementKey);
+        } else {
+            apiUrl = apiUrlPrefix + placementKey;
+            fetchAds();
+        }
+    }
+
+    //No tests around this
+    private void fetchDFPUrl(String key) {
+        DFPNetworking.FetchDFPEndpoint(EXECUTOR_SERVICE, key, new DFPNetworking.DFPFetcherCallback() {
+            @Override
+            public void receivedURL(String url) {
+                Log.d("DFP", "received DFP url: " + url);
+                apiUrl = url;
+                fetchAds();
+            }
+
+            @Override
+            public void DFPError(String errorMessage) {
+                Log.e("DFP", "error getting DFP url: " + errorMessage);
+            }
+        });
     }
 
     private void fireNoAdsToShow() {
@@ -141,7 +169,7 @@ public class Sharethrough {
     }
 
     private void fetchAds() {
-        this.adFetcher.fetchAds(this.imageFetcher, apiUrlPrefix, creativeHandler, adFetcherCallback);
+        this.adFetcher.fetchAds(this.imageFetcher, apiUrl, creativeHandler, adFetcherCallback);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)

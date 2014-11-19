@@ -18,25 +18,25 @@ public class AdFetcher {
     private final ExecutorService executorService;
     private final BeaconService beaconService;
     private final Context context;
-    private final String key;
+    private final String placementKey;
     private boolean isRunning;
     private int remainingImageRequests;
 
-    public AdFetcher(Context context, String key, ExecutorService executorService, BeaconService beaconService) {
+    public AdFetcher(Context context, String placementKey, ExecutorService executorService, BeaconService beaconService) {
         this.context = context;
-        this.key = key;
+        this.placementKey = placementKey;
         this.executorService = executorService;
         this.beaconService = beaconService;
     }
 
-    public synchronized void fetchAds(final ImageFetcher imageFetcher, final String apiUrlPrefix, final Function<Creative, Void> creativeHandler, final Callback adFetcherCallback) {
+    public synchronized void fetchAds(final ImageFetcher imageFetcher, final String apiUrl, final Function<Creative, Void> creativeHandler, final Callback adFetcherCallback) {
         if (isRunning) return;
         isRunning = true;
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                beaconService.adRequested(context, key);
-                final URI uri = URI.create(apiUrlPrefix + key);
+                beaconService.adRequested(context, placementKey);
+                final URI uri = URI.create(apiUrl);
                 String json = null;
                 try {
 
@@ -77,7 +77,7 @@ public class AdFetcher {
                     }
                 } catch (Exception e) {
                     adFetcherCallback.finishedLoadingWithNoAds();
-                    String msg = "failed to get ads for key " + key + ": " + uri;
+                    String msg = "failed to get ads for key " + placementKey + ": " + uri;
                     if (json != null) {
                         msg += ": " + json;
                     }
