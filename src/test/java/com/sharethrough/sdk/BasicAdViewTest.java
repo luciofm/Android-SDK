@@ -3,6 +3,7 @@ package com.sharethrough.sdk;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import com.sharethrough.android.sdk.R;
 import org.junit.Before;
@@ -41,8 +42,7 @@ public class BasicAdViewTest extends TestBase {
         verify(sharethrough).putCreativeIntoAdView(same(subject), runnableArgumentCaptor.capture());
 
         ProgressBar spinner = findViewOfType(ProgressBar.class, subject);
-        assertThat(spinner).isNotNull();
-        assertThat(spinner.getParent()).isNotSameAs(subject);
+        assertThat(spinner.getParent()).isSameAs(subject);
 
         assertThat(subject.getTitle()).isNull();
         runnableArgumentCaptor.getValue().run();
@@ -52,8 +52,19 @@ public class BasicAdViewTest extends TestBase {
     }
 
     @Test
-    public void hasOptoutButton_thatLinksToPrivacyInformation() throws Exception {
+    public void onceAdIsReady_showsProportionalOptoutButton_thatLinksToPrivacyInformation() throws Exception {
+        subject.layout(0, 0, 1000, 100);
+
+        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(sharethrough).putCreativeIntoAdView(same(subject), runnableArgumentCaptor.capture());
+        runnableArgumentCaptor.getValue().run();
+
         View optout = subject.findViewWithTag("SHARETHROUGH PRIVACY INFORMATION");
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) optout.getLayoutParams();
+        assertThat(layoutParams.height).isEqualTo(subject.getHeight()/6);
+        assertThat(layoutParams.width).isEqualTo(subject.getHeight()/6);
+        assertThat(layoutParams.rightMargin).isEqualTo(subject.getHeight() / 18);
+        assertThat(layoutParams.bottomMargin).isEqualTo(subject.getHeight() / 18);
         assertThat(optout.getParent()).isSameAs(subject);
         optout.performClick();
         assertThat(shadowOf(Robolectric.application).getNextStartedActivity()).isEqualTo(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.sharethrough.com/privacy-policy/")));

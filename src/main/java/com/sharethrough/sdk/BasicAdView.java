@@ -3,6 +3,7 @@ package com.sharethrough.sdk;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -20,7 +21,6 @@ public class BasicAdView extends FrameLayout implements IAdView {
     private int advertiserViewId;
     private int thumbnailViewId;
     private View view;
-    private FrameLayout adHolder;
 
     public BasicAdView(Context context) {
         super(context);
@@ -39,15 +39,24 @@ public class BasicAdView extends FrameLayout implements IAdView {
     }
 
     public BasicAdView showAd(Sharethrough sharethrough, final int layoutResourceId, final int titleViewId, final int descriptionViewId, final int advertiserViewId, final int thumbnailViewId) {
-        adHolder = new FrameLayout(getContext());
-        addView(adHolder);
-
         this.titleViewId = titleViewId;
         this.descriptionViewId = descriptionViewId;
         this.advertiserViewId = advertiserViewId;
         this.thumbnailViewId = thumbnailViewId;
         view = LayoutInflater.from(getContext()).inflate(layoutResourceId, this, false);
-        adHolder.addView(new ProgressBar(getContext()), new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+        this.addView(new ProgressBar(getContext()), new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+
+        sharethrough.putCreativeIntoAdView(this, new Runnable() {
+            @Override
+            public void run() {
+                addView(view);
+                placeOptoutIcon();
+            }
+        });
+        return this;
+    }
+
+    private void placeOptoutIcon() {
         final ImageView optout = new ImageView(getContext());
         optout.setImageResource(R.drawable.optout);
         optout.setTag("SHARETHROUGH PRIVACY INFORMATION");
@@ -58,17 +67,15 @@ public class BasicAdView extends FrameLayout implements IAdView {
                 v.getContext().startActivity(privacyIntent);
             }
         });
-        LayoutParams layoutParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM | Gravity.RIGHT);
-        layoutParams.setMargins(0, 0, 10, 10);
-        addView(optout, layoutParams);
-
-        sharethrough.putCreativeIntoAdView(this, new Runnable() {
+        new Handler().post(new Runnable() {
             @Override
             public void run() {
-                adHolder.addView(view);
+                int size = Math.min(getHeight(), getWidth()) / 6;
+                LayoutParams layoutParams = new LayoutParams(size, size, Gravity.BOTTOM | Gravity.RIGHT);
+                layoutParams.setMargins(0, 0, size / 3, size / 3);
+                addView(optout, layoutParams);
             }
         });
-        return this;
     }
 
     @Override
