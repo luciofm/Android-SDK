@@ -8,14 +8,14 @@ import java.util.List;
 
 public class Creative {
     private final Response.Creative responseCreative;
+    private final byte[] imageBytes;
     private final String placementKey;
-    private final Bitmap thumbnailImage;
     public boolean wasRendered;
 
     public Creative(Response.Creative responseCreative, byte[] imageBytes, String placementKey) {
         this.responseCreative = responseCreative;
+        this.imageBytes = imageBytes;
         this.placementKey = placementKey;
-        thumbnailImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
     }
 
     public String getTitle() {
@@ -30,8 +30,8 @@ public class Creative {
         return responseCreative.creative.description;
     }
 
-    public Bitmap getThumbnailImage() {
-        return thumbnailImage;
+    public Bitmap makeThumbnailImage() {
+        return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
     }
 
     public Media getMedia() {

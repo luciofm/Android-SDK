@@ -67,7 +67,7 @@ public class Renderer {
                 Context context = container.getContext();
 
                 final ImageView thumbnailImage = new ImageView(context);
-                Bitmap thumbnailBitmap = creative.getThumbnailImage();
+                Bitmap thumbnailBitmap = creative.makeThumbnailImage();
                 thumbnailImage.setImageBitmap(thumbnailBitmap);
                 thumbnailImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
                 thumbnail.addView(thumbnailImage,

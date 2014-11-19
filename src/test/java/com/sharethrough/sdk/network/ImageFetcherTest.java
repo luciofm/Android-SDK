@@ -54,7 +54,7 @@ public class ImageFetcherTest extends TestBase {
         Creative creative = creativeArgumentCaptor.getValue();
         assertThat(creative.getMediaUrl()).isSameAs(responseCreative.creative.mediaUrl);
         assertThat(creative.getPlacementKey()).isEqualTo("key");
-        assertThat(shadowOf(creative.getThumbnailImage()).getCreatedFromBytes()).isEqualTo(imageBytes);
+        assertThat(shadowOf(creative.makeThumbnailImage()).getCreatedFromBytes()).isEqualTo(imageBytes);
     }
 
     @Test

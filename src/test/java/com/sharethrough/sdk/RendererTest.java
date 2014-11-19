@@ -48,7 +48,7 @@ public class RendererTest {
         when(creative.getAdvertiser()).thenReturn("advertiser");
         when(creative.getTitle()).thenReturn("title");
         bitmap = mock(Bitmap.class);
-        when(creative.getThumbnailImage()).thenReturn(bitmap);
+        when(creative.makeThumbnailImage()).thenReturn(bitmap);
         media = mock(Media.class);
         when(media.getCreative()).thenReturn(creative);
         when(creative.getMedia()).thenReturn(media);

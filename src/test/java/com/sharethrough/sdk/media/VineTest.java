@@ -33,7 +33,7 @@ public class VineTest extends TestBase {
         creative = mock(Creative.class);
         when(creative.getMediaUrl()).thenReturn("test_url");
         beaconService = mock(BeaconService.class);
-        when(creative.getThumbnailImage()).thenReturn(thumbnailBitmap);
+        when(creative.makeThumbnailImage()).thenReturn(thumbnailBitmap);
 
         subject = new Vine(creative);
     }
