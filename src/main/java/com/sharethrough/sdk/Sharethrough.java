@@ -50,7 +50,7 @@ public class Sharethrough {
         }
     };
     private Handler handler = new Handler(Looper.getMainLooper());
-    private LruCache<Integer, BasicAdView> adViewsByAdSlot;
+    private LruCache<Integer, BasicAdView> adViewsByAdSlot = new LruCache<>(1);
 
     private static final Map<String, String> dfpCreativeIds = new HashMap<>();
     private final Context context; //TODO decide whether this is needed
@@ -91,8 +91,6 @@ public class Sharethrough {
         this.adCacheTimeInMilliseconds = Math.max(adCacheTimeInMilliseconds, MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS);
         this.availableCreatives = availableCreatives;
         this.placementKey = placementKey;
-
-        adViewsByAdSlot = new LruCache<>(20);
 
         if (placementKey == null) throw new KeyRequiredException("placement_key is required");
 
