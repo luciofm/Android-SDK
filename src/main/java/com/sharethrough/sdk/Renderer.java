@@ -19,7 +19,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class Renderer {
-    public void putCreativeIntoAdView(final IAdView adView, final Creative creative, final BeaconService beaconService, final Sharethrough sharethrough, final Runnable adReadyCallback, final Timer timer) {
+    public void putCreativeIntoAdView(final IAdView adView, final Creative creative, final BeaconService beaconService,
+                                      final Sharethrough sharethrough, final Runnable adReadyCallback, final Timer timer) {
         final ViewGroup container = adView.getAdView();
         if (!creative.wasRendered) {
             beaconService.adReceived(container.getContext(), creative);
@@ -36,23 +37,22 @@ public class Renderer {
                 adReadyCallback.run();
 
                 Log.d("MEMORY", adView.hashCode() + "/" + creative + " 000");
-                final View.OnAttachStateChangeListener onAttachStateChangeListener = new View.OnAttachStateChangeListener() {
+                final View.OnAttachStateChangeListener onAttachStateChangeListener1 = new View.OnAttachStateChangeListener() {
                     @Override
                     public void onViewAttachedToWindow(View v) {
-                        Log.d("MEMORY", adView.hashCode() + "/" + creative + " attached");
+                        Log.d("MEMORY", adView.hashCode() + "/" + creative + " child attached");
                         timer.schedule(task, 0, 100);
                     }
 
                     @Override
                     public void onViewDetachedFromWindow(View v) {
-                        Log.d("MEMORY", adView.hashCode() + "/" + creative + " detached");
+                        Log.d("MEMORY", adView.hashCode() + "/" + creative + " child detached");
                         task.cancel();
                         timer.cancel();
                         timer.purge();
                         v.removeOnAttachStateChangeListener(this);
                     }
                 };
-//                container.addOnAttachStateChangeListener(onAttachStateChangeListener);
 
                 adView.getTitle().setText(creative.getTitle());
                 TextView description = adView.getDescription();
@@ -61,16 +61,16 @@ public class Renderer {
                 }
                 adView.getAdvertiser().setText(creative.getAdvertiser());
 
-                FrameLayout thumbnail = adView.getThumbnail();
-                thumbnail.removeAllViews();
+                FrameLayout thumbnailContainer = adView.getThumbnail();
+                thumbnailContainer.removeAllViews();
                 Context context = container.getContext();
 
                 final ImageView thumbnailImage = new ImageView(context);
                 Bitmap thumbnailBitmap = creative.makeThumbnailImage();
                 thumbnailImage.setImageBitmap(thumbnailBitmap);
                 thumbnailImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                thumbnailImage.addOnAttachStateChangeListener(onAttachStateChangeListener);
-                thumbnail.addView(thumbnailImage,
+                thumbnailImage.addOnAttachStateChangeListener(onAttachStateChangeListener1);
+                thumbnailContainer.addView(thumbnailImage,
                         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
 
                 final Media media = creative.getMedia();
