@@ -237,6 +237,7 @@ public class Sharethrough {
     public BasicAdView getAdView(Context context, int position, int adLayoutResourceId, int title, int description, int advertiser, int thumbnail) {
         BasicAdView cachedView = adViewsByAdSlot.get(position);
         if (cachedView != null) {
+            Log.d("MEMORY", cachedView.hashCode()  + "// recycled");
             return cachedView;
         } else {
             BasicAdView basicAdView = new BasicAdView(context);
