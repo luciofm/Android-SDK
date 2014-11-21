@@ -16,7 +16,6 @@ import com.sharethrough.sdk.network.PlacementFetcher;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class Sharethrough {
@@ -31,7 +30,7 @@ public class Sharethrough {
     private String placementKey;
     private String apiUrlPrefix = "http://btlr.sharethrough.com/v3?placement_key=";
     private String dfpApiUrlPrefix = "&creative_key=";
-    static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(4); // TODO: pick a reasonable number
+    static final ExecutorService EXECUTOR_SERVICE = DefaultSharethroughExecutorServiceProivder.create();
     private final CreativesQueue availableCreatives;
     private final Map<IAdView, Integer> waitingAdViews = Collections.synchronizedMap(new LinkedHashMap<IAdView, Integer>());
     private final Function<Creative, Void> creativeHandler;
