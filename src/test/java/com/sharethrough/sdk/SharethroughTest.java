@@ -33,7 +33,6 @@ public class SharethroughTest extends TestBase {
     @Mock private AdFetcher adFetcher;
     @Mock private Creative creative;
     @Mock private CreativesQueue availableCreatives;
-    @Mock private Runnable adReadyCallback;
     @Mock private PlacementFetcher placementFetcher;
     @Mock private Sharethrough.OnStatusChangeListener onStatusChangeListener;
     @Mock
@@ -55,7 +54,6 @@ public class SharethroughTest extends TestBase {
 
         Robolectric.Reflection.setFinalStaticField(Sharethrough.class, "EXECUTOR_SERVICE", executorService);
         adView = makeMockAdView();
-        adCacheTimeInMilliseconds = 20000;
         apiUri = "http://btlr.sharethrough.com/v3?placement_key=" + key;
 
         doNothing().when(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture());
@@ -92,9 +90,9 @@ public class SharethroughTest extends TestBase {
     }
 
 
-    private void verifyCreativeHasBeenPlacedInAdview(TestAdView adView, Runnable adReadyCallback) {
+    private void verifyCreativeHasBeenPlacedInAdview(TestAdView adView) {
         ArgumentCaptor<Creative> creativeArgumentCaptor = ArgumentCaptor.forClass(Creative.class);
-        verify(renderer).putCreativeIntoAdView(eq(adView), creativeArgumentCaptor.capture(), eq(beaconService), eq(subject), eq(adReadyCallback), any(Timer.class));
+        verify(renderer).putCreativeIntoAdView(eq(adView), creativeArgumentCaptor.capture(), eq(beaconService), eq(subject), any(Timer.class));
         assertThat(creativeArgumentCaptor.getValue()).isSameAs(this.creative);
     }
 
@@ -102,14 +100,13 @@ public class SharethroughTest extends TestBase {
     public void whenACreativeIsReady_whenMoreAdViewIsWaiting_putsCreativeInFirstAdView() throws Exception {
         // make two ad views wait
         TestAdView adView2 = makeMockAdView();
-        Runnable adReadyCallback2 = mock(Runnable.class);
-        subject.putCreativeIntoAdView(adView, adReadyCallback);
-        subject.putCreativeIntoAdView(adView2, adReadyCallback2);
+        subject.putCreativeIntoAdView(adView);
+        subject.putCreativeIntoAdView(adView2);
 
         // get back one creative
         creativeHandler.getValue().apply(creative);
 
-        verifyCreativeHasBeenPlacedInAdview(adView, adReadyCallback);
+        verifyCreativeHasBeenPlacedInAdview(adView);
     }
 
     @Test
@@ -123,7 +120,7 @@ public class SharethroughTest extends TestBase {
         when(availableCreatives.readyForMore()).thenReturn(true);
         reset(adFetcher);
 
-        subject.putCreativeIntoAdView(adView, adReadyCallback);
+        subject.putCreativeIntoAdView(adView);
 
         verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture());
     }
@@ -132,8 +129,8 @@ public class SharethroughTest extends TestBase {
     public void putCreativeIntoAdView_whenQueueHasCreatives_usesNextCreative() {
         when(availableCreatives.getNext()).thenReturn(creative).thenThrow(new RuntimeException("Too many calls to getNext"));
 
-        subject.putCreativeIntoAdView(adView, adReadyCallback);
-        verifyCreativeHasBeenPlacedInAdview(adView, adReadyCallback);
+        subject.putCreativeIntoAdView(adView);
+        verifyCreativeHasBeenPlacedInAdview(adView);
     }
 
     @Test
@@ -209,23 +206,46 @@ public class SharethroughTest extends TestBase {
     }
 
     @Test
-    public void getAdview_whenAdViewsBySlotContainsAdviewForPosition_returnsStoredAdview() {
-        adCacheTimeInMilliseconds = 5;
-        createSubject("abc");
+    public void getAdView_whenAdViewsBySlotContainsAdviewForPosition_returnsStoredAdview() {
         int adSlot = 2;
-        BasicAdView generatedAdView = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 0, 0, 0, 0);
-        assertThat(generatedAdView).isNotNull();
-        BasicAdView generatedAdView2 = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 0, 0, 0, 0);
+        when(availableCreatives.getNext()).thenReturn(creative);
+        IAdView generatedAdView = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 0, 0, 0, 0, null);
+        IAdView generatedAdView2 = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 0, 0, 0, 0, null);
+
+        verify(renderer).putCreativeIntoAdView(same(generatedAdView), same(creative), same(beaconService), same(subject), any(Timer.class));
+        verify(renderer).putCreativeIntoAdView(same(generatedAdView2), same(creative), same(beaconService), same(subject), any(Timer.class));
+    }
+
+    @Test
+    public void getAdView_whenRecyclingViews_withSameFeedPosition_returnsRecycledView_withSameCreative() throws Exception {
+        int adSlot = 2;
+        when(availableCreatives.getNext()).thenReturn(creative);
+        IAdView generatedAdView = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 0, 0, 0, 0, null);
+        IAdView generatedAdView2 = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 0, 0, 0, 0, generatedAdView);
+
         assertThat(generatedAdView).isSameAs(generatedAdView2);
+
+        verify(renderer, times(2)).putCreativeIntoAdView(same(generatedAdView), same(creative), same(beaconService), same(subject), any(Timer.class));
+    }
+
+    @Test
+    public void getAdView_whenRecyclingViews_withDiffFeedPosition_returnsRecycledView_withNewCreative() throws Exception {
+        Creative creative2 = mock(Creative.class);
+        when(availableCreatives.getNext()).thenReturn(creative).thenReturn(creative2).thenThrow(new RuntimeException("Too many calls"));
+        IAdView generatedAdView = subject.getAdView(Robolectric.application, 1, android.R.layout.simple_list_item_1, 0, 0, 0, 0, null);
+        IAdView generatedAdView2 = subject.getAdView(Robolectric.application, 2, android.R.layout.simple_list_item_1, 0, 0, 0, 0, generatedAdView);
+
+        assertThat(generatedAdView).isSameAs(generatedAdView2);
+        verify(renderer).putCreativeIntoAdView(same(generatedAdView), same(creative), same(beaconService), same(subject), any(Timer.class));
+        verify(renderer).putCreativeIntoAdView(same(generatedAdView2), same(creative2), same(beaconService), same(subject), any(Timer.class));
     }
 
     @Test
     public void getAdView_whenAdViewsBySlotDoesNotContainAdviewForPosition_returnsNewAdview() {
-        adCacheTimeInMilliseconds = 5;
         createSubject("abc");
-        BasicAdView generatedAdView = subject.getAdView(Robolectric.application, 2, android.R.layout.simple_list_item_1, 0, 0, 0, 0);
+        IAdView generatedAdView = subject.getAdView(Robolectric.application, 2, android.R.layout.simple_list_item_1, 0, 0, 0, 0, null);
         assertThat(generatedAdView).isNotNull();
-        BasicAdView generatedAdView2 = subject.getAdView(Robolectric.application, 12, android.R.layout.simple_list_item_1, 0, 0, 0, 0);
+        IAdView generatedAdView2 = subject.getAdView(Robolectric.application, 12, android.R.layout.simple_list_item_1, 0, 0, 0, 0, null);
         assertThat(generatedAdView).isNotSameAs(generatedAdView2);
     }
 

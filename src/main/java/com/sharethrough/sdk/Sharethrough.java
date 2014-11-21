@@ -27,13 +27,13 @@ public class Sharethrough {
     private final BeaconService beaconService;
     private final PlacementFetcher placementFetcher;
     private final int adCacheTimeInMilliseconds;
-    private final String placementKey;
     private final DFPNetworking dfpNetworking;
+    private String placementKey;
     private String apiUrlPrefix = "http://btlr.sharethrough.com/v3?placement_key=";
     private String dfpApiUrlPrefix = "&creative_key=";
     static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(4); // TODO: pick a reasonable number
     private final CreativesQueue availableCreatives;
-    private final Map<IAdView, Runnable> waitingAdViews = Collections.synchronizedMap(new LinkedHashMap<IAdView, Runnable>());
+    private final Map<IAdView, Integer> waitingAdViews = Collections.synchronizedMap(new LinkedHashMap<IAdView, Integer>());
     private final Function<Creative, Void> creativeHandler;
     private AdFetcher adFetcher;
     private ImageFetcher imageFetcher;
@@ -50,7 +50,7 @@ public class Sharethrough {
         }
     };
     private Handler handler = new Handler(Looper.getMainLooper());
-    private LruCache<Integer, BasicAdView> adViewsByAdSlot = new LruCache<>(1);
+    private LruCache<Integer, Creative> creativesBySlot = new LruCache<>(10);
 
     private static final Map<String, String> dfpCreativeIds = new HashMap<>();
     private final Context context; //TODO decide whether this is needed
@@ -75,12 +75,12 @@ public class Sharethrough {
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     Sharethrough(final Context context, final String placementKey, int adCacheTimeInMilliseconds, final Renderer renderer, final CreativesQueue availableCreatives, final BeaconService beaconService, AdFetcher adFetcher, ImageFetcher imageFetcher, PlacementFetcher placementFetcher, DFPNetworking dfpNetworking) {
+        this.placementKey = placementKey;
         this.renderer = renderer;
         this.beaconService = beaconService;
         this.placementFetcher = placementFetcher;
         this.adCacheTimeInMilliseconds = Math.max(adCacheTimeInMilliseconds, MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS);
         this.availableCreatives = availableCreatives;
-        this.placementKey = placementKey;
 
         if (placementKey == null) throw new KeyRequiredException("placement_key is required");
 
@@ -99,10 +99,10 @@ public class Sharethrough {
             public Void apply(Creative creative) {
                 synchronized (waitingAdViews) {
                     if (waitingAdViews.size() > 0) {
-                        Map.Entry<IAdView, Runnable> waiting = waitingAdViews.entrySet().iterator().next();
+                        Map.Entry<IAdView, Integer> waiting = waitingAdViews.entrySet().iterator().next();
                         IAdView adView = waiting.getKey();
                         waitingAdViews.remove(adView);
-                        renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this, waiting.getValue(), new Timer("AdView timer for " + creative));
+                        renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this, new Timer("AdView timer for " + creative));
                     } else {
                         Sharethrough.this.availableCreatives.add(creative);
                         fireNewAdsToShow();
@@ -202,18 +202,26 @@ public class Sharethrough {
         dfpNetworking.fetchDFPPath(EXECUTOR_SERVICE, placementKey, pathFetcherCallback);
     }
 
+    public void putCreativeIntoAdView(IAdView adView) {
+        putCreativeIntoAdView(adView, 0);
+    }
+
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-    public void putCreativeIntoAdView(IAdView adView, Runnable adReadyCallback) {
-        synchronized (availableCreatives) {
-            Creative nextCreative = availableCreatives.getNext();
-            if (nextCreative != null) {
-                renderer.putCreativeIntoAdView(adView, nextCreative, beaconService, this, adReadyCallback, new Timer("AdView timer for " + nextCreative));
-            } else {
-                waitingAdViews.put(adView, adReadyCallback);
+    public void putCreativeIntoAdView(IAdView adView, int feedPosition) {
+        Creative creative = creativesBySlot.get(feedPosition);
+        if (creative == null) {
+            synchronized (availableCreatives) {
+                creative = availableCreatives.getNext();
+                if (availableCreatives.readyForMore()) {
+                    fetchAds();
+                }
             }
-            if (availableCreatives.readyForMore()) {
-                fetchAds();
-            }
+        }
+        if (creative != null) {
+            creativesBySlot.put(feedPosition, creative);
+            renderer.putCreativeIntoAdView(adView, creative, beaconService, this, new Timer("AdView timer for " + creative));
+        } else {
+            waitingAdViews.put(adView, feedPosition);
         }
     }
 
@@ -234,16 +242,16 @@ public class Sharethrough {
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-    public BasicAdView getAdView(Context context, int position, int adLayoutResourceId, int title, int description, int advertiser, int thumbnail) {
-        BasicAdView cachedView = adViewsByAdSlot.get(position);
-        if (cachedView != null) {
-            Log.d("MEMORY", cachedView.hashCode()  + "// recycled");
-            return cachedView;
-        } else {
-            BasicAdView basicAdView = new BasicAdView(context);
-            adViewsByAdSlot.put(position, basicAdView);
-            return basicAdView.showAd(this, adLayoutResourceId, title, description, advertiser, thumbnail);
+    public IAdView getAdView(Context context, int feedPosition, int adLayoutResourceId, int title, int description,
+                             int advertiser, int thumbnail, IAdView convertView) {
+        IAdView view = convertView;
+        if (view == null) {
+            BasicAdView v = new BasicAdView(context);
+            v.prepareWithResourceIds(adLayoutResourceId, title, description, advertiser, thumbnail);
+            view = v;
         }
+        putCreativeIntoAdView(view, feedPosition);
+        return view;
     }
 
     public interface OnStatusChangeListener {

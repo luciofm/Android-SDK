@@ -23,37 +23,36 @@ public class BasicAdView extends FrameLayout implements IAdView {
     private View view;
 
     public BasicAdView(Context context) {
-        super(context);
+        this(context, null, 0);
     }
 
     public BasicAdView(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
     }
 
     public BasicAdView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 
-    public BasicAdView showAd(Sharethrough sharethrough, final int layoutResourceId, final int titleViewId, final int advertiserViewId, final int thumbnailViewId) {
-        return showAd(sharethrough, layoutResourceId, titleViewId, -1, advertiserViewId, thumbnailViewId);
+    public void prepareWithResourceIds(final int layoutResourceId, final int titleViewId, final int advertiserViewId, final int thumbnailViewId) {
+        prepareWithResourceIds(layoutResourceId, titleViewId, -1, advertiserViewId, thumbnailViewId);
     }
 
-    public BasicAdView showAd(Sharethrough sharethrough, final int layoutResourceId, final int titleViewId, final int descriptionViewId, final int advertiserViewId, final int thumbnailViewId) {
+    public void prepareWithResourceIds(final int layoutResourceId, final int titleViewId, final int descriptionViewId, final int advertiserViewId, final int thumbnailViewId) {
         this.titleViewId = titleViewId;
         this.descriptionViewId = descriptionViewId;
         this.advertiserViewId = advertiserViewId;
         this.thumbnailViewId = thumbnailViewId;
-        view = LayoutInflater.from(getContext()).inflate(layoutResourceId, this, false);
-        this.addView(new ProgressBar(getContext()), new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+        createChildren(layoutResourceId);
+    }
 
-        sharethrough.putCreativeIntoAdView(this, new Runnable() {
-            @Override
-            public void run() {
-                addView(view);
-                placeOptoutIcon();
-            }
-        });
-        return this;
+    private void createChildren(int layoutResourceId) {
+        addView(new ProgressBar(getContext()), new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+
+        view = LayoutInflater.from(getContext()).inflate(layoutResourceId, this, false);
+        addView(view);
+        view.setVisibility(GONE);
+        placeOptoutIcon();
     }
 
     private void placeOptoutIcon() {
@@ -76,6 +75,11 @@ public class BasicAdView extends FrameLayout implements IAdView {
                 addView(optout, layoutParams);
             }
         });
+    }
+
+    @Override
+    public void adReady() {
+        view.setVisibility(VISIBLE);
     }
 
     @Override

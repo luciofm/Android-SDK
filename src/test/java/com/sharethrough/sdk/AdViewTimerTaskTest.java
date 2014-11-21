@@ -122,7 +122,7 @@ public class AdViewTimerTaskTest extends TestBase {
 
         now += TimeUnit.SECONDS.toMillis(1);
         subject.run();
-        verify(sharethrough).putCreativeIntoAdView(adView, NoOp.INSTANCE);
+        verify(sharethrough).putCreativeIntoAdView(adView);
 
         now += TimeUnit.SECONDS.toMillis(1);
         subject.run();
@@ -140,7 +140,7 @@ public class AdViewTimerTaskTest extends TestBase {
 
         isVisible = false;
         subject.run();
-        verify(sharethrough).putCreativeIntoAdView(adView, NoOp.INSTANCE);
+        verify(sharethrough).putCreativeIntoAdView(adView);
     }
 
     private void makeAdViewVisible() {

@@ -66,7 +66,7 @@ public class AdViewTimerTask extends TimerTask {
         } else {
             if ((dateProvider.get().getTime() - (visibleStartTime.getTime())) >= adCacheTimeInMilliseconds) {
                 if (!isCurrentlyVisible(adView, rect)) {
-                    sharethrough.putCreativeIntoAdView(adView, NoOp.INSTANCE);
+                    sharethrough.putCreativeIntoAdView(adView);
                     cancel();
                 }
             }

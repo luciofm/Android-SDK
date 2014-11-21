@@ -14,13 +14,22 @@ import android.widget.TextView;
 import com.sharethrough.sdk.media.Media;
 import com.sharethrough.sdk.test.SharethroughTestRunner;
 import com.sharethrough.test.util.TestAdView;
+import org.fest.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
+import org.robolectric.annotation.Config;
+import org.robolectric.annotation.Implementation;
+import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowLooper;
+import org.robolectric.shadows.ShadowView;
 
+import java.util.List;
 import java.util.Timer;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -66,16 +75,15 @@ public class RendererTest {
     public void onUIthread_callsCallback_andShowsTitleDescriptionAdvertiserAndThumbnailWithOverlay() throws Exception {
         Robolectric.pauseMainLooper();
 
-        Runnable adReadyCallback = mock(Runnable.class);
-        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, adReadyCallback, timer);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
 
         verifyNoMoreInteractions(adView.getTitle());
-        verifyNoMoreInteractions(adReadyCallback);
+        assertThat(adView.adReady_wasCalled).isFalse();
 
         ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
         shadowLooper.runOneTask();
 
-        verify(adReadyCallback).run();
+        assertThat(adView.adReady_wasCalled).isTrue();
 
         verify(adView.getTitle()).setText("title");
         verify(adView.getDescription()).setText("description");
@@ -94,15 +102,35 @@ public class RendererTest {
 
     @Test
     public void firesImpressionBeaconOnlyOnce() throws Exception {
-        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, NoOp.INSTANCE, timer);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
         verify(beaconService).adReceived(any(Context.class), eq(creative));
-        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, NoOp.INSTANCE, timer);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
         verifyNoMoreInteractions(beaconService);
     }
 
     @Test
+    @Config(shadows = {MyImageViewShadow.class, MyViewShadow.class})
     public void usesAdViewTimerTask() throws Exception {
-        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, NoOp.INSTANCE, timer);
+        final List<View> addedChildren = Lists.newArrayList();
+
+        final FrameLayout mockThumbnail = adView.getThumbnail();
+        Mockito.doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
+                View viewBeingAdded = (View) invocationOnMock.getArguments()[0];
+                addedChildren.add(viewBeingAdded);
+
+                if (viewBeingAdded instanceof ImageView) {
+                    MyImageViewShadow myImageViewShadow = (MyImageViewShadow) shadowOf(viewBeingAdded);
+                    if (myImageViewShadow.onAttachStateListener != null) {
+                        myImageViewShadow.onAttachStateListener.onViewAttachedToWindow(viewBeingAdded);
+                    }
+                }
+                return null;
+            }
+        }).when(mockThumbnail).addView(any(View.class), any(FrameLayout.LayoutParams.class));
+
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
 
         ArgumentCaptor<AdViewTimerTask> timerTaskArgumentCaptor = ArgumentCaptor.forClass(AdViewTimerTask.class);
         verify(timer).schedule(timerTaskArgumentCaptor.capture(), anyLong(), anyLong());
@@ -110,15 +138,29 @@ public class RendererTest {
         assertThat(timerTask.getAdView()).isSameAs(adView);
 
         assertThat(timerTask.isCancelled()).isFalse();
-        adView.onAttachStateListener.onViewDetachedFromWindow(adView);
+        for (View addedChild : addedChildren) {
+            if (addedChild instanceof ImageView) {
+                MyImageViewShadow myImageViewShadow = (MyImageViewShadow) shadowOf(addedChild);
+                if (myImageViewShadow.onAttachStateListener != null) {
+                    myImageViewShadow.onAttachStateListener.onViewDetachedFromWindow(addedChild);
+                    addedChild.removeOnAttachStateChangeListener(myImageViewShadow.onAttachStateListener);
+                }
+            }
+        }
         assertThat(timerTask.isCancelled()).isTrue();
         verify(timer).cancel();
         verify(timer).purge();
+        for (View addedChild : addedChildren) {
+            if (addedChild instanceof ImageView) {
+                MyImageViewShadow myImageViewShadow = (MyImageViewShadow) shadowOf(addedChild);
+                assertThat(myImageViewShadow.onAttachStateListener).isNull();
+            }
+        }
     }
 
     @Test
     public void whenAdIsClicked_firesMediaBeacon_andMediaClickListener() throws Exception {
-        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, mock(Runnable.class), timer);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
 
         adView.performClick();
 
@@ -129,7 +171,7 @@ public class RendererTest {
     @Test
     public void whenDescriptionIsNull_NothingBadHappens() throws Exception {
         adView.description = null;
-        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, mock(Runnable.class), timer);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
     }
 
     public static MyTestAdView makeAdView() {
@@ -137,12 +179,11 @@ public class RendererTest {
     }
 
     public static class MyTestAdView extends TestAdView {
-        private OnAttachStateChangeListener onAttachStateListener;
-
         FrameLayout thumbnail = mock(FrameLayout.class);
         TextView advertiser = mock(TextView.class);
         TextView description = mock(TextView.class);
         TextView title = mock(TextView.class);
+        public boolean adReady_wasCalled;
 
         public MyTestAdView(Context context) {
             super(context);
@@ -154,6 +195,11 @@ public class RendererTest {
 
         public MyTestAdView(Context context, AttributeSet attrs, int defStyleAttr) {
             super(context, attrs, defStyleAttr);
+        }
+
+        @Override
+        public void adReady() {
+            adReady_wasCalled = true;
         }
 
         @Override
@@ -175,11 +221,25 @@ public class RendererTest {
         public FrameLayout getThumbnail() {
             return thumbnail;
         }
+    }
 
-        @Override
-        public void addOnAttachStateChangeListener(OnAttachStateChangeListener listener) {
+    @Implements(View.class)
+    public static class MyViewShadow extends ShadowView {
+        public View.OnAttachStateChangeListener onAttachStateListener;
+
+        @Implementation
+        public void addOnAttachStateChangeListener(View.OnAttachStateChangeListener listener) {
             onAttachStateListener = listener;
-            super.addOnAttachStateChangeListener(listener);
         }
+
+        @Implementation
+        public void removeOnAttachStateChangeListener(View.OnAttachStateChangeListener listener) {
+            if (listener == onAttachStateListener) onAttachStateListener = null;
+        }
+    }
+
+    @Implements(ImageView.class)
+    public static class MyImageViewShadow extends MyViewShadow {
+
     }
 }

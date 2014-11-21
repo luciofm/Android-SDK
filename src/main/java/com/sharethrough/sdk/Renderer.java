@@ -20,7 +20,7 @@ import java.util.TimerTask;
 
 public class Renderer {
     public void putCreativeIntoAdView(final IAdView adView, final Creative creative, final BeaconService beaconService,
-                                      final Sharethrough sharethrough, final Runnable adReadyCallback, final Timer timer) {
+                                      final Sharethrough sharethrough, final Timer timer) {
         final ViewGroup container = adView.getAdView();
         if (!creative.wasRendered) {
             beaconService.adReceived(container.getContext(), creative);
@@ -34,7 +34,7 @@ public class Renderer {
             @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
             @Override
             public void run() {
-                adReadyCallback.run();
+                adView.adReady();
 
                 Log.d("MEMORY", adView.hashCode() + "/" + creative + " 000");
                 final View.OnAttachStateChangeListener onAttachStateChangeListener1 = new View.OnAttachStateChangeListener() {

@@ -5,6 +5,8 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 public interface IAdView {
+    void adReady();
+
     /**
      * @return The <code>TextView</code> into which the title text should be rendered. May not be null.
      */
