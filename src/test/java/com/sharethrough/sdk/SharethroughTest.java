@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import com.sharethrough.sdk.network.AdFetcher;
+import com.sharethrough.sdk.network.DFPNetworking;
 import com.sharethrough.sdk.network.ImageFetcher;
 import com.sharethrough.sdk.network.PlacementFetcher;
 import com.sharethrough.test.util.TestAdView;
@@ -34,11 +35,18 @@ public class SharethroughTest extends TestBase {
     @Mock private Runnable adReadyCallback;
     @Mock private PlacementFetcher placementFetcher;
     @Mock private Sharethrough.OnStatusChangeListener onStatusChangeListener;
+    @Mock
+    private DFPNetworking dfpNetworking;
     private int adCacheTimeInMilliseconds;
     private String apiUri;
     @Captor private ArgumentCaptor<Function<Creative, Void>> creativeHandler;
     @Captor private ArgumentCaptor<AdFetcher.Callback> adFetcherCallback;
+    @Captor
+    private ArgumentCaptor<DFPNetworking.DFPPathFetcherCallback> dfpPathFetcherCallback;
+    @Captor
+    private ArgumentCaptor<DFPNetworking.DFPCreativeKeyCallback> dfpCreativeKeyCallback;
     private String key = "abc";
+
 
     @Before
     public void setUp() throws Exception {
@@ -55,7 +63,7 @@ public class SharethroughTest extends TestBase {
     }
 
     private void createSubject(String key) {
-        subject = new Sharethrough(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, beaconService, adFetcher, imageFetcher, creativesQueue, placementFetcher, false);
+        subject = new Sharethrough(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, beaconService, adFetcher, imageFetcher, creativesQueue, placementFetcher, null);
         subject.setOnStatusChangeListener(onStatusChangeListener);
     }
 
@@ -217,5 +225,35 @@ public class SharethroughTest extends TestBase {
         assertThat(generatedAdView).isNotNull();
         BasicAdView generatedAdView2 = subject.getAdView(Robolectric.application, 12, android.R.layout.simple_list_item_1, 0, 0, 0, 0);
         assertThat(generatedAdView).isNotSameAs(generatedAdView2);
+    }
+
+    private void createDfpSubject(String key) {
+        subject = new Sharethrough(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, beaconService, adFetcher, imageFetcher, creativesQueue, placementFetcher, dfpNetworking);
+        subject.setOnStatusChangeListener(onStatusChangeListener);
+    }
+
+    @Test
+    public void whenDfpModeIsTrue_usesDfpNetworking() {
+        createDfpSubject(key);
+        verify(dfpNetworking).fetchDFPPath(eq(executorService), eq(key), dfpPathFetcherCallback.capture());
+
+        dfpPathFetcherCallback.getValue().receivedURL("dfpPath");
+        verify(dfpNetworking).fetchCreativeKey(eq(Robolectric.application), eq("dfpPath"), dfpCreativeKeyCallback.capture());
+
+        Sharethrough.addCreativeKey("dfpPath", "creativeKey");
+
+        dfpCreativeKeyCallback.getValue().receivedCreativeKey();
+
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri + "&creative_key=creativeKey"), creativeHandler.capture(), adFetcherCallback.capture());
+    }
+
+    @Test
+    public void addCreativeKey_putsKeyIntoMap() {
+        assertThat(subject.popCreativeKey("key")).isNull();
+
+        subject.addCreativeKey("key", "test-key");
+
+        assertThat(subject.popCreativeKey("key")).isEqualTo("test-key");
+        assertThat(subject.popCreativeKey("key")).isNull();
     }
 }
