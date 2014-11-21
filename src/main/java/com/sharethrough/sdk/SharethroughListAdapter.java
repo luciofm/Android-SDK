@@ -23,10 +23,31 @@ public class SharethroughListAdapter extends BaseAdapter {
     private final int advertiserViewId;
     private final int thumbnailViewId;
 
+    /**
+     *
+     * @param context The Android context.
+     * @param adapter Your adapter.
+     * @param sharethrough An instance of your configured Sharethrough object.
+     * @param adLayoutResourceId The custom layout for Sharethrough's native ad unit.
+     * @param titleViewId The view which will display the ad's title.
+     * @param advertiserViewId The view which will display the ad's advertiser.
+     * @param thumbnailViewId The view which will display the ad's thumbnail image.
+     */
     public SharethroughListAdapter(Context context, ListAdapter adapter, Sharethrough sharethrough, int adLayoutResourceId, int titleViewId, int advertiserViewId, int thumbnailViewId) {
         this(context, adapter, sharethrough, adLayoutResourceId, titleViewId, -1, advertiserViewId, thumbnailViewId);
     }
 
+    /**
+     *
+     * @param context The Android context.
+     * @param adapter Your adapter.
+     * @param sharethrough An instance of your configured Sharethrough object.
+     * @param adLayoutResourceId The custom layout for Sharethrough's native ad unit.
+     * @param titleViewId The view which will display the ad's title.
+     * @param descriptionViewId The view which will display the ad's description.
+     * @param advertiserViewId The view which will display the ad's advertiser.
+     * @param thumbnailViewId The view which will display the ad's thumbnail image.
+     */
     public SharethroughListAdapter(Context context, ListAdapter adapter, Sharethrough sharethrough, int adLayoutResourceId, int titleViewId, int descriptionViewId, int advertiserViewId, int thumbnailViewId) {
         mContext = context;
         mAdapter = adapter;
@@ -155,6 +176,11 @@ public class SharethroughListAdapter extends BaseAdapter {
         return 1 + (count - placement.getArticlesBeforeFirstAd()) / placement.getArticlesBetweenAds();
     }
 
+    /**
+     *
+     * @param onItemLongClickListener The original listener callback.
+     * @return A new long click listener that forwards requests to the original listener.
+     */
     public AdapterView.OnItemLongClickListener createOnItemLongClickListener(final AdapterView.OnItemLongClickListener onItemLongClickListener) {
         return new AdapterView.OnItemLongClickListener() {
             @Override
@@ -167,6 +193,11 @@ public class SharethroughListAdapter extends BaseAdapter {
         };
     }
 
+    /**
+     *
+     * @param onItemClickListener The original listener callback.
+     * @return A new click listener that forwards requests to the original listener.
+     */
     public AdapterView.OnItemClickListener createOnItemClickListener(final AdapterView.OnItemClickListener onItemClickListener) {
         return new AdapterView.OnItemClickListener() {
             @Override
@@ -180,6 +211,11 @@ public class SharethroughListAdapter extends BaseAdapter {
         };
     }
 
+    /**
+     *
+     * @param onItemSelectedListener The original listener callback.
+     * @return A new selected listener that forwards requests to the original listener.
+     */
     public AdapterView.OnItemSelectedListener createOnItemSelectListener(final AdapterView.OnItemSelectedListener onItemSelectedListener) {
         return new AdapterView.OnItemSelectedListener() {
             @Override

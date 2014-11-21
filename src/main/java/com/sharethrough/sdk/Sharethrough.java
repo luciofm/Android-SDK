@@ -56,10 +56,24 @@ public class Sharethrough {
     private String dfpPath;
 
     //TODO make the constructors cleaner
+
+    /**
+     * Returns an instance of the Sharethrough object which is used to fetch and display native ads within your mobile app.
+     * <p>
+     * A default ad cache time of 20 seconds will be used.
+     * @param context The Android context.
+     * @param placementKey Your Sharethrough placement key that you will receive from Sharethrough.
+     */
     public Sharethrough(Context context, String placementKey) {
         this(context, placementKey, DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS);
     }
 
+    /**
+     *
+     * @param context The Android context.
+     * @param placementKey Your Sharethrough placement key that you will receive from Sharethrough.
+     * @param adCacheTimeInMilliseconds The ad cache time in milliseconds. e.g. a value of 100,000 will result in ads being refreshed every 100 seconds.
+     */
     public Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds) {
         this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString()), false);
     }
@@ -240,10 +254,18 @@ public class Sharethrough {
         placementFetcher.fetch(placementCallback);
     }
 
+    /**
+     * Register a callback to be invoked when the status of having or not having ads to show changes.
+     * @param onStatusChangeListener
+     */
     public void setOnStatusChangeListener(OnStatusChangeListener onStatusChangeListener) {
         this.onStatusChangeListener = onStatusChangeListener;
     }
 
+    /**
+     * Returns status change callback registered when the status of having or not having ads to show changes.
+     * @return
+     */
     public OnStatusChangeListener getOnStatusChangeListener() {
         return onStatusChangeListener;
     }
@@ -261,6 +283,9 @@ public class Sharethrough {
         return view;
     }
 
+    /**
+     * Interface definition for a callback to be invoked when the status of having or not having ads to show changes.
+     */
     public interface OnStatusChangeListener {
         void newAdsToShow();
 
