@@ -69,7 +69,6 @@ public class BasicAdView extends FrameLayout implements IAdView {
         view = LayoutInflater.from(getContext()).inflate(layoutResourceId, this, false);
         addView(view);
         view.setVisibility(GONE);
-        placeOptoutIcon();
     }
 
     private void placeOptoutIcon() {
@@ -98,6 +97,7 @@ public class BasicAdView extends FrameLayout implements IAdView {
     public void adReady() {
         spinner.setVisibility(GONE);
         view.setVisibility(VISIBLE);
+        placeOptoutIcon();
     }
 
     @Override

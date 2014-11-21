@@ -43,6 +43,7 @@ public class BasicAdViewTest extends TestBase {
 
     @Test
     public void onceAdIsReady_showsProportionalOptoutButton_thatLinksToPrivacyInformation() throws Exception {
+        assertThat(subject.findViewWithTag("SHARETHROUGH PRIVACY INFORMATION")).isNull();
         subject.adReady();
 
         View optout = subject.findViewWithTag("SHARETHROUGH PRIVACY INFORMATION");
