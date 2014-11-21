@@ -54,6 +54,7 @@ public class Sharethrough {
     private static final Map<String, String> dfpCreativeIds = new HashMap<>();
     private final Context context; //TODO decide whether this is needed
     private String dfpPath;
+    private boolean firedNewAdsToShow;
 
     //TODO make the constructors cleaner
 
@@ -155,6 +156,7 @@ public class Sharethrough {
     }
 
     private void fireNoAdsToShow() {
+        firedNewAdsToShow = false;
         handler.post(new Runnable() {
             @Override
             public void run() {
@@ -164,6 +166,8 @@ public class Sharethrough {
     }
 
     private void fireNewAdsToShow() {
+        if (firedNewAdsToShow) return;
+        firedNewAdsToShow = true;
         handler.post(new Runnable() {
             @Override
             public void run() {

@@ -190,6 +190,22 @@ public class SharethroughTest extends TestBase {
     }
 
     @Test
+    public void whenCreativeIsPrefetched_whenNewAdsToShowHasAlreadyBeenCalled_doesNotCallItAgain() throws Exception {
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture());
+
+        Robolectric.pauseMainLooper();
+        creativeHandler.getValue().apply(creative);
+        verifyNoMoreInteractions(onStatusChangeListener);
+        Robolectric.unPauseMainLooper();
+
+        verify(onStatusChangeListener).newAdsToShow();
+        reset(onStatusChangeListener);
+
+        creativeHandler.getValue().apply(creative);
+        verifyNoMoreInteractions(onStatusChangeListener);
+    }
+
+    @Test
     public void whenFirstCreativeIsNotAvailable_notifiesOnStatusChangeListenerOnMainThread() throws Exception {
         verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture());
 
@@ -199,6 +215,34 @@ public class SharethroughTest extends TestBase {
         Robolectric.unPauseMainLooper();
 
         verify(onStatusChangeListener).noAdsToShow();
+    }
+
+    @Test
+    public void whenCreativeIsPrefetched_whenNewAdsToShowHasBeenCalledButNoAdsToShowHasSinceBeenCalled_callsItAgain() throws Exception {
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture());
+
+        // cause newAdsToShow
+        Robolectric.pauseMainLooper();
+        creativeHandler.getValue().apply(creative);
+        verifyNoMoreInteractions(onStatusChangeListener);
+        Robolectric.unPauseMainLooper();
+        verify(onStatusChangeListener).newAdsToShow();
+        reset(onStatusChangeListener);
+
+        // cause noAdsToShow
+        Robolectric.pauseMainLooper();
+        adFetcherCallback.getValue().finishedLoadingWithNoAds();
+        verifyNoMoreInteractions(onStatusChangeListener);
+        Robolectric.unPauseMainLooper();
+        verify(onStatusChangeListener).noAdsToShow();
+        reset(onStatusChangeListener);
+
+        // test that newAdsToShow will be called again
+        Robolectric.pauseMainLooper();
+        creativeHandler.getValue().apply(creative);
+        verifyNoMoreInteractions(onStatusChangeListener);
+        Robolectric.unPauseMainLooper();
+        verify(onStatusChangeListener).newAdsToShow();
     }
 
     @Test
