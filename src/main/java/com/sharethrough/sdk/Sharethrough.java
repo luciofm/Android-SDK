@@ -62,15 +62,23 @@ public class Sharethrough {
     }
 
     public Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds) {
-        this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString()));
+        this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString()), false);
     }
 
-    Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds, AdvertisingIdProvider advertisingIdProvider) {
+    public Sharethrough(Context context, String placementKey, boolean dfpEnabled) {
+        this(context, placementKey, DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS, dfpEnabled);
+    }
+
+    public Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds, boolean dfpEnabled) {
+        this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString()), dfpEnabled);
+    }
+
+    Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds, AdvertisingIdProvider advertisingIdProvider, boolean dfpEnabled) {
         this(context, placementKey, adCacheTimeInMilliseconds, new Renderer(), new CreativesQueue(),
                 new BeaconService(new DateProvider(), UUID.randomUUID(), EXECUTOR_SERVICE, advertisingIdProvider),
                 new AdFetcher(context, placementKey, EXECUTOR_SERVICE, new BeaconService(new DateProvider(), UUID.randomUUID(),
                         EXECUTOR_SERVICE, advertisingIdProvider)), new ImageFetcher(EXECUTOR_SERVICE, placementKey),
-                new PlacementFetcher(placementKey, EXECUTOR_SERVICE), null);
+                new PlacementFetcher(placementKey, EXECUTOR_SERVICE), dfpEnabled ? new DFPNetworking() : null);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
