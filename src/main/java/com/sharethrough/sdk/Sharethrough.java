@@ -32,7 +32,7 @@ public class Sharethrough {
     private String dfpApiUrlPrefix = "&creative_key=";
     static final ExecutorService EXECUTOR_SERVICE = DefaultSharethroughExecutorServiceProivder.create();
     private final CreativesQueue availableCreatives;
-    private final Map<IAdView, Integer> waitingAdViews = Collections.synchronizedMap(new LinkedHashMap<IAdView, Integer>());
+    private final WeakHashMap<IAdView, Integer> waitingAdViews = new WeakHashMap<>();
     private final Function<Creative, Void> creativeHandler;
     private AdFetcher adFetcher;
     private ImageFetcher imageFetcher;

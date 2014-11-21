@@ -110,6 +110,22 @@ public class SharethroughTest extends TestBase {
     }
 
     @Test
+    public void whenCreativeIsReady_andWaitingAdViewHasBeenGCd_ignoresWaitingAdView() throws Exception {
+        TestAdView myAdView = makeMockAdView();
+
+        subject.putCreativeIntoAdView(myAdView);
+
+        myAdView = null;
+        // hope WeakReferences are collected here
+        System.gc();
+        Thread.sleep(100);
+
+        creativeHandler.getValue().apply(creative);
+
+        verify(availableCreatives).add(creative);
+    }
+
+    @Test
     public void whenACreativeIsReady_whenNoMoreAdViewsAreWaiting_addCreativeToQueue() throws Exception {
         creativeHandler.getValue().apply(creative);
         verify(availableCreatives).add(creative);
