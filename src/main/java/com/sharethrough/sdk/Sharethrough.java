@@ -2,6 +2,7 @@ package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,7 +33,7 @@ public class Sharethrough {
     private String dfpApiUrlPrefix = "&creative_key=";
     static final ExecutorService EXECUTOR_SERVICE = DefaultSharethroughExecutorServiceProivder.create();
     private final CreativesQueue availableCreatives;
-    private final WeakHashMap<IAdView, Integer> waitingAdViews = new WeakHashMap<>();
+    private final Map<IAdView, Integer> waitingAdViews = Collections.synchronizedMap(new WeakHashMap<IAdView, Integer>());
     private final Function<Creative, Void> creativeHandler;
     private AdFetcher adFetcher;
     private ImageFetcher imageFetcher;
