@@ -209,21 +209,20 @@ public class Sharethrough {
 
             @Override
             public void DFPKeyError(String errorMessage) {
-                Log.d("DFP", "received Error message: " + errorMessage);
+                Log.e("DFP", "received Error message: " + errorMessage);
             }
         };
 
         final DFPNetworking.DFPPathFetcherCallback pathFetcherCallback = new DFPNetworking.DFPPathFetcherCallback() {
             @Override
             public void receivedURL(final String receivedDFPPath) {
-                Log.d("DFP", "received URL " + receivedDFPPath);
                 dfpPath = receivedDFPPath;
                 dfpNetworking.fetchCreativeKey(context, dfpPath, creativeKeyCallback);
             }
 
             @Override
             public void DFPError(String errorMessage) {
-                Log.d("DFP", "Error fetching DFP path: " + errorMessage);
+                Log.e("DFP", "Error fetching DFP path: " + errorMessage);
             }
         };
 

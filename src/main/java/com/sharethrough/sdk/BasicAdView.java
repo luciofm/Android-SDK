@@ -21,6 +21,7 @@ public class BasicAdView extends FrameLayout implements IAdView {
     private int advertiserViewId;
     private int thumbnailViewId;
     private View view;
+    private ProgressBar spinner;
 
     public BasicAdView(Context context) {
         this(context, null, 0);
@@ -62,7 +63,8 @@ public class BasicAdView extends FrameLayout implements IAdView {
     }
 
     private void createChildren(int layoutResourceId) {
-        addView(new ProgressBar(getContext()), new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+        spinner = new ProgressBar(getContext());
+        addView(spinner, new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
 
         view = LayoutInflater.from(getContext()).inflate(layoutResourceId, this, false);
         addView(view);
@@ -94,6 +96,7 @@ public class BasicAdView extends FrameLayout implements IAdView {
 
     @Override
     public void adReady() {
+        spinner.setVisibility(GONE);
         view.setVisibility(VISIBLE);
     }
 
