@@ -72,6 +72,11 @@ public class BasicAdView extends FrameLayout implements IAdView {
     }
 
     private void placeOptoutIcon() {
+        View oldIcon = findViewWithTag("SHARETHROUGH PRIVACY INFORMATION");
+        if (oldIcon != null) {
+            removeView(oldIcon);
+        }
+
         final ImageView optout = new ImageView(getContext());
         optout.setImageResource(R.drawable.optout);
         optout.setTag("SHARETHROUGH PRIVACY INFORMATION");

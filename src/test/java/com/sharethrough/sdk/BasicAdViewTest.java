@@ -55,5 +55,8 @@ public class BasicAdViewTest extends TestBase {
         assertThat(optout.getParent()).isSameAs(subject);
         optout.performClick();
         assertThat(shadowOf(Robolectric.application).getNextStartedActivity()).isEqualTo(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.sharethrough.com/privacy-policy/")));
+
+        subject.adReady();
+        assertThat(optout.getParent()).isNull();
     }
 }
