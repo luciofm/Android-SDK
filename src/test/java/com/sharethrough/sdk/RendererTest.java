@@ -174,6 +174,23 @@ public class RendererTest {
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
     }
 
+    @Test
+    public void whenHandlerPosts_ifOriginalAdViewHasBeenRecycled_doesNothing() throws Exception {
+        Robolectric.pauseMainLooper();
+
+        Creative creative1 = mock(Creative.class);
+        subject.putCreativeIntoAdView(adView, creative1, beaconService, sharethrough, timer);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
+
+        verifyNoMoreInteractions(creative1);
+        verifyNoMoreInteractions(creative);
+
+        Robolectric.unPauseMainLooper();
+
+        verifyNoMoreInteractions(creative1);
+        verify(creative).getTitle();
+    }
+
     public static MyTestAdView makeAdView() {
         return new MyTestAdView(Robolectric.application);
     }

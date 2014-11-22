@@ -30,10 +30,13 @@ public class Renderer {
 
         final TimerTask task = new AdViewTimerTask(adView, creative, beaconService, new DateProvider(), sharethrough);
 
+        container.setTag(creative);
+
         handler.post(new Runnable() {
             @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
             @Override
             public void run() {
+                if (container.getTag() != creative) return; // container has been recycled
                 adView.adReady();
 
                 Log.d("MEMORY", adView.hashCode() + "/" + creative + " 000");
