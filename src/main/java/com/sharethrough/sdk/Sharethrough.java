@@ -14,10 +14,7 @@ import com.sharethrough.sdk.network.DFPNetworking;
 import com.sharethrough.sdk.network.ImageFetcher;
 import com.sharethrough.sdk.network.PlacementFetcher;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
