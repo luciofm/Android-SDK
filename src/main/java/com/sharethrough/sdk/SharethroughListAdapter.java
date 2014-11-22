@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.DataSetObserver;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -125,6 +126,7 @@ public class SharethroughListAdapter extends BaseAdapter {
     }
 
     private View getAd(int slotNumber, IAdView convertView) {
+        Log.d("LISTVIEW", "convert view is " + convertView + " slotNumber " + slotNumber);
         return mSharethrough.getAdView(mContext, slotNumber, adLayoutResourceId, titleViewId, descriptionViewId,
                 advertiserViewId, thumbnailViewId, convertView).getAdView();
     }

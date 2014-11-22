@@ -11,6 +11,7 @@ public class Creative {
     private final byte[] imageBytes;
     private final String placementKey;
     public boolean wasRendered;
+    public long renderedTime = Long.MAX_VALUE;
 
     public Creative(Response.Creative responseCreative, byte[] imageBytes, String placementKey) {
         this.responseCreative = responseCreative;

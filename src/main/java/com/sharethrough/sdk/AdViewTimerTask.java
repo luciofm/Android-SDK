@@ -53,6 +53,7 @@ public class AdViewTimerTask extends TimerTask {
                         if (dateProvider.get().getTime() - visibleStartTime.getTime() >= VISIBILITY_TIME_THRESHOLD) {
                             beaconService.adVisible(adView.getAdView(), creative);
                             hasBeenShown = true;
+                            creative.renderedTime = visibleStartTime.getTime();
                         }
                     } else {
                         visibleStartTime = dateProvider.get();

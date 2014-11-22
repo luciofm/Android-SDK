@@ -10,6 +10,7 @@ import org.mockito.stubbing.Answer;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 public class AdViewTimerTaskTest extends TestBase {
@@ -31,6 +32,7 @@ public class AdViewTimerTaskTest extends TestBase {
         when(adView.getHeight()).thenReturn(100);
         when(adView.getWidth()).thenReturn(300);
         creative = mock(Creative.class);
+        creative.renderedTime = Long.MAX_VALUE;
         beaconService = mock(BeaconService.class);
         now = 0;
         dateProvider = new Provider<Date>() {
@@ -106,6 +108,9 @@ public class AdViewTimerTaskTest extends TestBase {
         // still visible, still over a second, but no need for a duplicate beacon
         subject.run();
         verifyNoMoreInteractions(beaconService);
+
+        assertThat(creative.renderedTime).isLessThan(Long.MAX_VALUE);
+
     }
 
     @Test

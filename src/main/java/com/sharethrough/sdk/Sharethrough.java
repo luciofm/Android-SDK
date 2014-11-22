@@ -236,6 +236,12 @@ public class Sharethrough {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public void putCreativeIntoAdView(IAdView adView, int feedPosition) {
         Creative creative = creativesBySlot.get(feedPosition);
+
+        long currentTime = new Date().getTime();
+        if (creative != null && currentTime - creative.renderedTime >= adCacheTimeInMilliseconds) { //TODO make logic better
+            creativesBySlot.remove(feedPosition);
+            creative = null;
+        }
         if (creative == null) {
             synchronized (availableCreatives) {
                 creative = availableCreatives.getNext();
