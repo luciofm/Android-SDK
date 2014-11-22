@@ -14,8 +14,10 @@ import com.sharethrough.sdk.network.DFPNetworking;
 import com.sharethrough.sdk.network.ImageFetcher;
 import com.sharethrough.sdk.network.PlacementFetcher;
 
-import java.lang.ref.WeakReference;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -33,7 +35,7 @@ public class Sharethrough {
     private String dfpApiUrlPrefix = "&creative_key=";
     static final ExecutorService EXECUTOR_SERVICE = DefaultSharethroughExecutorServiceProivder.create();
     private final CreativesQueue availableCreatives;
-    private final List<WeakReference<IAdView>> waitingAdViews = Collections.synchronizedList(new LinkedList<WeakReference<IAdView>>());
+    private final SynchronizedWeakOrderedSet<IAdView> waitingAdViews = new SynchronizedWeakOrderedSet<>();
     private final Function<Creative, Void> creativeHandler;
     private AdFetcher adFetcher;
     private ImageFetcher imageFetcher;
@@ -61,9 +63,10 @@ public class Sharethrough {
 
     /**
      * Returns an instance of the Sharethrough object which is used to fetch and display native ads within your mobile app.
-     * <p>
+     * <p/>
      * A default ad cache time of 20 seconds will be used.
-     * @param context The Android context.
+     *
+     * @param context      The Android context.
      * @param placementKey Your Sharethrough placement key that you will receive from Sharethrough.
      */
     public Sharethrough(Context context, String placementKey) {
@@ -71,9 +74,8 @@ public class Sharethrough {
     }
 
     /**
-     *
-     * @param context The Android context.
-     * @param placementKey Your Sharethrough placement key that you will receive from Sharethrough.
+     * @param context                   The Android context.
+     * @param placementKey              Your Sharethrough placement key that you will receive from Sharethrough.
      * @param adCacheTimeInMilliseconds The ad cache time in milliseconds. e.g. a value of 100,000 will result in ads being refreshed every 100 seconds.
      */
     public Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds) {
@@ -121,11 +123,7 @@ public class Sharethrough {
             @Override
             public Void apply(Creative creative) {
                 synchronized (waitingAdViews) {
-                    IAdView adView = null;
-                    while (waitingAdViews.size() > 0) {
-                        adView = waitingAdViews.remove(0).get();
-                        if (adView != null) break;
-                    }
+                    IAdView adView = waitingAdViews.popNext();
                     if (adView != null) {
                         renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this, new Timer("AdView timer for " + creative));
                     } else {
@@ -254,7 +252,7 @@ public class Sharethrough {
             creativesBySlot.put(feedPosition, creative);
             renderer.putCreativeIntoAdView(adView, creative, beaconService, this, new Timer("AdView timer for " + creative));
         } else {
-            waitingAdViews.add(new WeakReference<>(adView));
+            waitingAdViews.put(adView);
         }
     }
 
@@ -268,6 +266,7 @@ public class Sharethrough {
 
     /**
      * Register a callback to be invoked when the status of having or not having ads to show changes.
+     *
      * @param onStatusChangeListener
      */
     public void setOnStatusChangeListener(OnStatusChangeListener onStatusChangeListener) {
@@ -276,6 +275,7 @@ public class Sharethrough {
 
     /**
      * Returns status change callback registered when the status of having or not having ads to show changes.
+     *
      * @return
      */
     public OnStatusChangeListener getOnStatusChangeListener() {
