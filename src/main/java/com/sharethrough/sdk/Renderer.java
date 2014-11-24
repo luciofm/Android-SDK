@@ -2,17 +2,19 @@ package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.media.Media;
 
 import java.util.Timer;
@@ -39,17 +41,14 @@ public class Renderer {
                 if (container.getTag() != creative) return; // container has been recycled
                 adView.adReady();
 
-                Log.d("MEMORY", adView.hashCode() + "/" + creative + " 000");
                 final View.OnAttachStateChangeListener onAttachStateChangeListener1 = new View.OnAttachStateChangeListener() {
                     @Override
                     public void onViewAttachedToWindow(View v) {
-                        Log.d("MEMORY", adView.hashCode() + "/" + creative + " child attached");
                         timer.schedule(task, 0, 100);
                     }
 
                     @Override
                     public void onViewDetachedFromWindow(View v) {
-                        Log.d("MEMORY", adView.hashCode() + "/" + creative + " child detached");
                         task.cancel();
                         timer.cancel();
                         timer.purge();
@@ -65,11 +64,21 @@ public class Renderer {
                 adView.getAdvertiser().setText(creative.getAdvertiser());
 
                 FrameLayout thumbnailContainer = adView.getThumbnail();
+
+                int height = thumbnailContainer.getHeight();
+                int width = thumbnailContainer.getWidth();
+
+                Bitmap thumbnailBitmap;
+                if (height > 0 && width > 0) {
+                    thumbnailBitmap = creative.makeThumbnailImage(height, width);
+                } else {
+                    thumbnailBitmap = creative.makeThumbnailImage();
+                }
+
                 thumbnailContainer.removeAllViews();
                 Context context = container.getContext();
 
                 final ImageView thumbnailImage = new ImageView(context);
-                Bitmap thumbnailBitmap = creative.makeThumbnailImage();
                 thumbnailImage.setImageBitmap(thumbnailBitmap);
                 thumbnailImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
                 thumbnailImage.addOnAttachStateChangeListener(onAttachStateChangeListener1);
@@ -91,6 +100,35 @@ public class Renderer {
                     }
                   }
                 );
+
+                placeOptoutIcon(container);
+            }
+        });
+    }
+
+    private void placeOptoutIcon(final ViewGroup container) {
+        View oldIcon = container.findViewWithTag("SHARETHROUGH PRIVACY INFORMATION");
+        if (oldIcon != null) {
+            container.removeView(oldIcon);
+        }
+
+        final ImageView optout = new ImageView(container.getContext());
+        optout.setImageResource(R.drawable.optout);
+        optout.setTag("SHARETHROUGH PRIVACY INFORMATION");
+        optout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent privacyIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.sharethrough.com/privacy-policy/"));
+                v.getContext().startActivity(privacyIntent);
+            }
+        });
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                int size = Math.min(container.getHeight(), container.getWidth()) / 6;
+                FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(size, size, Gravity.BOTTOM | Gravity.RIGHT);
+                optout.setPadding(0, 0, size / 3, size / 3);
+                container.addView(optout, layoutParams);
             }
         });
     }

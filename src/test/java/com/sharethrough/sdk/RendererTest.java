@@ -2,8 +2,10 @@ package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Looper;
 import android.util.AttributeSet;
@@ -14,6 +16,7 @@ import android.widget.TextView;
 import com.sharethrough.sdk.media.Media;
 import com.sharethrough.sdk.test.SharethroughTestRunner;
 import com.sharethrough.test.util.TestAdView;
+import org.fest.assertions.api.ANDROID;
 import org.fest.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,6 +61,7 @@ public class RendererTest {
         when(creative.getTitle()).thenReturn("title");
         bitmap = mock(Bitmap.class);
         when(creative.makeThumbnailImage()).thenReturn(bitmap);
+        when(creative.makeThumbnailImage(anyInt(), anyInt())).thenReturn(bitmap);
         media = mock(Media.class);
         when(media.getCreative()).thenReturn(creative);
         when(creative.getMedia()).thenReturn(media);
@@ -189,6 +193,39 @@ public class RendererTest {
 
         verifyNoMoreInteractions(creative1);
         verify(creative).getTitle();
+    }
+
+
+    @Test
+    public void onceAdIsReady_showsProportionalOptoutButton_thatLinksToPrivacyInformation() throws Exception {
+        ANDROID.assertThat(adView.findViewWithTag("SHARETHROUGH PRIVACY INFORMATION")).isNull();
+
+        int height = 50;
+        int width = 100;
+        int min = Math.min(height, width);
+
+        adView.setBottom(height);
+        adView.setRight(width);
+        adView.setTop(0);
+        adView.setLeft(0);
+
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
+
+        ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
+        shadowLooper.runOneTask();
+        shadowLooper.runOneTask();
+
+        View optout = adView.findViewWithTag("SHARETHROUGH PRIVACY INFORMATION");
+        assertThat(optout).isNotNull();
+
+        assertThat(optout.getPaddingRight()).isEqualTo(min / 18);
+        assertThat(optout.getPaddingBottom()).isEqualTo(min / 18);
+
+        assertThat(optout.getParent()).isSameAs(adView);
+        optout.performClick();
+        ANDROID.assertThat(shadowOf(Robolectric.application).getNextStartedActivity()).isEqualTo(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.sharethrough.com/privacy-policy/")));
+
+        assertThat(optout.getParent()).isNotNull();
     }
 
     public static MyTestAdView makeAdView() {

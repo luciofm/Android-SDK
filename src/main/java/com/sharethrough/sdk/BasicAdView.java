@@ -1,19 +1,14 @@
 package com.sharethrough.sdk;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import com.sharethrough.android.sdk.R;
 
 public class BasicAdView extends FrameLayout implements IAdView {
     private int titleViewId;
@@ -71,38 +66,10 @@ public class BasicAdView extends FrameLayout implements IAdView {
         view.setVisibility(GONE);
     }
 
-    private void placeOptoutIcon() {
-        View oldIcon = findViewWithTag("SHARETHROUGH PRIVACY INFORMATION");
-        if (oldIcon != null) {
-            removeView(oldIcon);
-        }
-
-        final ImageView optout = new ImageView(getContext());
-        optout.setImageResource(R.drawable.optout);
-        optout.setTag("SHARETHROUGH PRIVACY INFORMATION");
-        optout.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent privacyIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.sharethrough.com/privacy-policy/"));
-                v.getContext().startActivity(privacyIntent);
-            }
-        });
-        new Handler().post(new Runnable() {
-            @Override
-            public void run() {
-                int size = Math.min(getHeight(), getWidth()) / 6;
-                LayoutParams layoutParams = new LayoutParams(size, size, Gravity.BOTTOM | Gravity.RIGHT);
-                layoutParams.setMargins(0, 0, size / 3, size / 3);
-                addView(optout, layoutParams);
-            }
-        });
-    }
-
     @Override
     public void adReady() {
         spinner.setVisibility(GONE);
         view.setVisibility(VISIBLE);
-        placeOptoutIcon();
     }
 
     @Override

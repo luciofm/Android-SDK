@@ -35,6 +35,13 @@ public class Creative {
         return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
     }
 
+    public Bitmap makeThumbnailImage(int height, int width) {
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.outHeight = height;
+        opts.outWidth = width;
+        return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, opts);
+    }
+
     public Media getMedia() {
         switch (responseCreative.creative.action) {
             case "video":
