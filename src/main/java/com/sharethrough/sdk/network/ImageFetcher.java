@@ -59,8 +59,15 @@ public class ImageFetcher {
             return null;
         }
         try {
+            StringBuilder brandLogoUrlBuilder = new StringBuilder();
+            if (!url.contains("http")) {
+                brandLogoUrlBuilder.append("http:");
+            }
+            brandLogoUrlBuilder.append(url);
+            final String brandLogoUrl = brandLogoUrlBuilder.toString();
+
             DefaultHttpClient client = new DefaultHttpClient();
-            HttpGet imageRequest = new HttpGet(url);
+            HttpGet imageRequest = new HttpGet(brandLogoUrl);
             imageRequest.addHeader("User-Agent", Sharethrough.USER_AGENT);
             HttpResponse imageResponse = client.execute(imageRequest);
             if (imageResponse.getStatusLine().getStatusCode() == 200) {
@@ -68,9 +75,9 @@ public class ImageFetcher {
                 byte[] imageBytes = convertInputStreamToByteArray(imageContent);
                 return imageBytes;
             } else {
-                Log.e("Sharethrough", "failed to load brand image from url: " + url + " ; server said: " + imageResponse.getStatusLine().getStatusCode() + "\t" + imageResponse.getStatusLine().getReasonPhrase());
+                Log.e("Sharethrough", "failed to load brand image from url: " + brandLogoUrl + " ; server said: " + imageResponse.getStatusLine().getStatusCode() + "\t" + imageResponse.getStatusLine().getReasonPhrase());
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.e("Sharethrough", "failed to load brand image from url: " + url, e);
         }
         return null;

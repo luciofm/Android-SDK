@@ -134,5 +134,6 @@ public class Renderer {
         optout.setMinimumHeight(20);
         optout.setMinimumWidth(20);
         optout.setVisibility(View.VISIBLE);
+        optout.bringToFront();
     }
 }

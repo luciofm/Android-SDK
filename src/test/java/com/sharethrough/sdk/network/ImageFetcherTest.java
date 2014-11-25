@@ -37,6 +37,8 @@ public class ImageFetcherTest extends TestBase {
         responseCreative.creative.thumbnailUrl = "//th.um/bn.ail";
         responseCreative.creative.mediaUrl = "unique";
 
+        responseCreative.creative.brandLogoUrl = "//br.and/logo";
+
         subject = new ImageFetcher(executorService, "key");
     }
 
@@ -45,6 +47,7 @@ public class ImageFetcherTest extends TestBase {
         byte[] imageBytes = {1, 2, 3, 4};
         Robolectric.addHttpResponseRule("GET", "http:" + responseCreative.creative.thumbnailUrl, new TestHttpResponse(200, imageBytes));
 
+        Robolectric.addHttpResponseRule("GET", "http:" + responseCreative.creative.thumbnailUrl, new TestHttpResponse(200, imageBytes));
         subject.fetchCreativeImages(apiUri, responseCreative, creativeHandler);
 
         Misc.runLast(executorService);
@@ -73,5 +76,23 @@ public class ImageFetcherTest extends TestBase {
         Misc.runLast(executorService);
 
         verify(creativeHandler).failure();
+    }
+
+    @Test
+    public void fetchImage_downloadsBrandLogo_IfAvailable() {
+        byte[] imageBytes = {1, 2, 3, 4};
+        byte[] brandLogoimageBytes = {1, 2, 3, 4, 5};
+        Robolectric.addHttpResponseRule("GET", "http:" + responseCreative.creative.thumbnailUrl, new TestHttpResponse(200, imageBytes));
+        Robolectric.addHttpResponseRule("GET", "http:" + responseCreative.creative.brandLogoUrl, new TestHttpResponse(200, brandLogoimageBytes));
+
+        subject.fetchCreativeImages(apiUri, responseCreative, creativeHandler);
+
+        Misc.runAll(executorService);
+
+        ArgumentCaptor<Creative> creativeArgumentCaptor = ArgumentCaptor.forClass(Creative.class);
+        verify(creativeHandler).success(creativeArgumentCaptor.capture());
+        Creative creative = creativeArgumentCaptor.getValue();
+
+        assertThat(shadowOf(creative.makeBrandLogo()).getCreatedFromBytes()).isEqualTo(brandLogoimageBytes);
     }
 }
