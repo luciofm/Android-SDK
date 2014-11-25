@@ -81,8 +81,6 @@ public class AdViewTimerTask extends TimerTask {
     @Override
     public boolean cancel() {
         isCancelled = true;
-        Log.d("Sharethrough", "canceling AdViewTimer for " + creative);
-        Log.d("MEMORY", adViewHashCode + "/" + creative + " cancelled");
         return super.cancel();
     }
 

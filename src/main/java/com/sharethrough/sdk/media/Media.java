@@ -2,7 +2,6 @@ package com.sharethrough.sdk.media;
 
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.sharethrough.sdk.BeaconService;
@@ -22,9 +21,12 @@ public abstract class Media {
         FrameLayout thumbnail = adView.getThumbnail();
         OverlayImage overlayIcon = new OverlayImage(adView.getAdView().getContext());
         overlayIcon.setImageResource(overlayImageResourceId);
+
+        int overlayMax = Math.min(thumbnailImage.getWidth(), thumbnailImage.getHeight()) / 4;
+
         overlayIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
         int gravity = isThumbnailOverlayCentered() ? Gravity.CENTER : Gravity.TOP | Gravity.LEFT;
-        thumbnail.addView(overlayIcon, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, gravity));
+        thumbnail.addView(overlayIcon, new FrameLayout.LayoutParams(overlayMax, overlayMax, gravity));
 
         thumbnailImage.setTag(THUMBNAIL);
     }
