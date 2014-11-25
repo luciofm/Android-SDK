@@ -101,20 +101,14 @@ public class Renderer {
                   }
                 );
 
-                placeOptoutIcon(container);
+                placeOptoutIcon(adView);
             }
         });
     }
 
-    private void placeOptoutIcon(final ViewGroup container) {
-        View oldIcon = container.findViewWithTag("SHARETHROUGH PRIVACY INFORMATION");
-        if (oldIcon != null) {
-            container.removeView(oldIcon);
-        }
-
-        final ImageView optout = new ImageView(container.getContext());
+    private void placeOptoutIcon(final IAdView adView) {
+        final ImageView optout = adView.getOptout();
         optout.setImageResource(R.drawable.optout);
-        optout.setTag("SHARETHROUGH PRIVACY INFORMATION");
         optout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -122,14 +116,9 @@ public class Renderer {
                 v.getContext().startActivity(privacyIntent);
             }
         });
-        new Handler().post(new Runnable() {
-            @Override
-            public void run() {
-                int size = Math.min(container.getHeight(), container.getWidth()) / 6;
-                FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(size, size, Gravity.BOTTOM | Gravity.RIGHT);
-                optout.setPadding(0, 0, size / 3, size / 3);
-                container.addView(optout, layoutParams);
-            }
-        });
+
+        optout.setMinimumHeight(20);
+        optout.setMinimumWidth(20);
+        optout.setVisibility(View.VISIBLE);
     }
 }

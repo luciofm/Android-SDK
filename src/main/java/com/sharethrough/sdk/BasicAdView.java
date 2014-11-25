@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -15,6 +16,7 @@ public class BasicAdView extends FrameLayout implements IAdView {
     private int descriptionViewId;
     private int advertiserViewId;
     private int thumbnailViewId;
+    private int optoutViewId;
     private View view;
     private ProgressBar spinner;
 
@@ -37,8 +39,8 @@ public class BasicAdView extends FrameLayout implements IAdView {
      * @param advertiserViewId The view which will display the ad's advertiser.
      * @param thumbnailViewId The view which will display the ad's thumbnail image.
      */
-    public void prepareWithResourceIds(final int layoutResourceId, final int titleViewId, final int advertiserViewId, final int thumbnailViewId) {
-        prepareWithResourceIds(layoutResourceId, titleViewId, -1, advertiserViewId, thumbnailViewId);
+    public void prepareWithResourceIds(final int layoutResourceId, final int titleViewId, final int advertiserViewId, final int thumbnailViewId, final int optoutViewId) {
+        prepareWithResourceIds(layoutResourceId, titleViewId, -1, advertiserViewId, thumbnailViewId, optoutViewId);
     }
 
     /**
@@ -49,12 +51,21 @@ public class BasicAdView extends FrameLayout implements IAdView {
      * @param advertiserViewId The view which will display the ad's advertiser.
      * @param thumbnailViewId The view which will display the ad's thumbnail image.
      */
-    public void prepareWithResourceIds(final int layoutResourceId, final int titleViewId, final int descriptionViewId, final int advertiserViewId, final int thumbnailViewId) {
+    public void prepareWithResourceIds(final int layoutResourceId, final int titleViewId, final int descriptionViewId, final int advertiserViewId, final int thumbnailViewId, final int optoutViewId) {
         this.titleViewId = titleViewId;
         this.descriptionViewId = descriptionViewId;
         this.advertiserViewId = advertiserViewId;
         this.thumbnailViewId = thumbnailViewId;
+        this.optoutViewId = optoutViewId;
+        checkResources();
         createChildren(layoutResourceId);
+    }
+
+    private void checkResources() {
+        assert (titleViewId > 0);
+        assert (optoutViewId > 0);
+        assert (advertiserViewId > 0);
+        assert (thumbnailViewId > 0);
     }
 
     private void createChildren(int layoutResourceId) {
@@ -95,5 +106,10 @@ public class BasicAdView extends FrameLayout implements IAdView {
     @Override
     public ViewGroup getAdView() {
         return this;
+    }
+
+    @Override
+    public ImageView getOptout() {
+        return (ImageView) this.findViewById(optoutViewId);
     }
 }

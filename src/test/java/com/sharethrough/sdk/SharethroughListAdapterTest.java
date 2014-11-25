@@ -39,9 +39,9 @@ public class SharethroughListAdapterTest extends TestBase {
 
         sharethrough = mock(Sharethrough.class);
 
-        when(sharethrough.getAdView(any(Context.class), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), any(IAdView.class))).thenReturn(mockAdView);
+        when(sharethrough.getAdView(any(Context.class), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), any(IAdView.class))).thenReturn(mockAdView);
 
-        subject = new SharethroughListAdapter(Robolectric.application, adapter, sharethrough, R.layout.ad, R.id.title, R.id.advertiser, R.id.thumbnail);
+        subject = new SharethroughListAdapter(Robolectric.application, adapter, sharethrough, R.layout.ad, R.id.title, R.id.advertiser, R.id.thumbnail, R.id.optout);
         verify(adapter).registerDataSetObserver(any(DataSetObserver.class));
 
         placementCallbackArgumentCaptor = ArgumentCaptor.forClass(Callback.class);
@@ -57,7 +57,6 @@ public class SharethroughListAdapterTest extends TestBase {
     @Test
     public void getView_returnsTheProperViewFromTheOriginalAdapter() throws Exception {
         subject.getView(0, null, null);
-
         verify(adapter).getView(0, null, null);
 
         subject.getView(3, null, null);

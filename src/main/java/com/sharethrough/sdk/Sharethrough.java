@@ -281,11 +281,11 @@ public class Sharethrough {
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public IAdView getAdView(Context context, int feedPosition, int adLayoutResourceId, int title, int description,
-                             int advertiser, int thumbnail, IAdView convertView) {
+                             int advertiser, int thumbnail, int optoutId, IAdView convertView) {
         IAdView view = convertView;
         if (view == null) {
             BasicAdView v = new BasicAdView(context);
-            v.prepareWithResourceIds(adLayoutResourceId, title, description, advertiser, thumbnail);
+            v.prepareWithResourceIds(adLayoutResourceId, title, description, advertiser, thumbnail, optoutId);
             view = v;
         }
         putCreativeIntoAdView(view, feedPosition);

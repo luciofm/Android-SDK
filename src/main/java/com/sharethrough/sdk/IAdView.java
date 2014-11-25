@@ -2,6 +2,7 @@ package com.sharethrough.sdk;
 
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public interface IAdView {
@@ -26,6 +27,12 @@ public interface IAdView {
      * @return The <code>FrameLayout</code> into which the image should be rendered. May not be null.
      */
     FrameLayout getThumbnail();
+
+
+    /**
+     * @return The <code>ImageView</code> into which the optout icon should be rendered. May not be null.
+     */
+    ImageView getOptout();
 
     /**
      * @return The <code>View</code> containing the contents of the ad.  Normally your <code>IAdView</code>

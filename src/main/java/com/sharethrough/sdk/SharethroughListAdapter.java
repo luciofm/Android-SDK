@@ -22,6 +22,7 @@ public class SharethroughListAdapter extends BaseAdapter {
     private final int descriptionViewId;
     private final int advertiserViewId;
     private final int thumbnailViewId;
+    private final int optoutId;
 
     /**
      *
@@ -33,8 +34,8 @@ public class SharethroughListAdapter extends BaseAdapter {
      * @param advertiserViewId The view which will display the ad's advertiser.
      * @param thumbnailViewId The view which will display the ad's thumbnail image.
      */
-    public SharethroughListAdapter(Context context, ListAdapter adapter, Sharethrough sharethrough, int adLayoutResourceId, int titleViewId, int advertiserViewId, int thumbnailViewId) {
-        this(context, adapter, sharethrough, adLayoutResourceId, titleViewId, -1, advertiserViewId, thumbnailViewId);
+    public SharethroughListAdapter(Context context, ListAdapter adapter, Sharethrough sharethrough, int adLayoutResourceId, int titleViewId, int advertiserViewId, int thumbnailViewId, int optoutId) {
+        this(context, adapter, sharethrough, adLayoutResourceId, titleViewId, -1, advertiserViewId, thumbnailViewId, optoutId);
     }
 
     /**
@@ -48,7 +49,7 @@ public class SharethroughListAdapter extends BaseAdapter {
      * @param advertiserViewId The view which will display the ad's advertiser.
      * @param thumbnailViewId The view which will display the ad's thumbnail image.
      */
-    public SharethroughListAdapter(Context context, ListAdapter adapter, Sharethrough sharethrough, int adLayoutResourceId, int titleViewId, int descriptionViewId, int advertiserViewId, int thumbnailViewId) {
+    public SharethroughListAdapter(Context context, ListAdapter adapter, Sharethrough sharethrough, int adLayoutResourceId, int titleViewId, int descriptionViewId, int advertiserViewId, int thumbnailViewId, int optoutId) {
         mContext = context;
         mAdapter = adapter;
         mSharethrough = sharethrough;
@@ -56,6 +57,7 @@ public class SharethroughListAdapter extends BaseAdapter {
         this.descriptionViewId = descriptionViewId;
         this.advertiserViewId = advertiserViewId;
         this.thumbnailViewId = thumbnailViewId;
+        this.optoutId = optoutId;
 
         mAdapter.registerDataSetObserver(new DataSetObserver() {
             @Override
@@ -126,7 +128,7 @@ public class SharethroughListAdapter extends BaseAdapter {
 
     private View getAd(int slotNumber, IAdView convertView) {
         return mSharethrough.getAdView(mContext, slotNumber, adLayoutResourceId, titleViewId, descriptionViewId,
-                advertiserViewId, thumbnailViewId, convertView).getAdView();
+                advertiserViewId, thumbnailViewId, optoutId, convertView).getAdView();
     }
 
     @Override

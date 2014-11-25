@@ -196,36 +196,21 @@ public class RendererTest {
     }
 
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Test
     public void onceAdIsReady_showsProportionalOptoutButton_thatLinksToPrivacyInformation() throws Exception {
-        ANDROID.assertThat(adView.findViewWithTag("SHARETHROUGH PRIVACY INFORMATION")).isNull();
-
-        int height = 50;
-        int width = 100;
-        int min = Math.min(height, width);
-
-        adView.setBottom(height);
-        adView.setRight(width);
-        adView.setTop(0);
-        adView.setLeft(0);
-
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
 
         ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
         shadowLooper.runOneTask();
         shadowLooper.runOneTask();
 
-        View optout = adView.findViewWithTag("SHARETHROUGH PRIVACY INFORMATION");
-        assertThat(optout).isNotNull();
-
-        assertThat(optout.getPaddingRight()).isEqualTo(min / 18);
-        assertThat(optout.getPaddingBottom()).isEqualTo(min / 18);
-
-        assertThat(optout.getParent()).isSameAs(adView);
+        View optout = adView.getOptout();
+        assertThat(optout.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(optout.getMinimumHeight()).isEqualTo(20);
+        assertThat(optout.getMinimumWidth()).isEqualTo(20);
         optout.performClick();
         ANDROID.assertThat(shadowOf(Robolectric.application).getNextStartedActivity()).isEqualTo(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.sharethrough.com/privacy-policy/")));
-
-        assertThat(optout.getParent()).isNotNull();
     }
 
     public static MyTestAdView makeAdView() {
@@ -237,6 +222,7 @@ public class RendererTest {
         TextView advertiser = mock(TextView.class);
         TextView description = mock(TextView.class);
         TextView title = mock(TextView.class);
+        ImageView optout = new ImageView(Robolectric.application);
         public boolean adReady_wasCalled;
 
         public MyTestAdView(Context context) {
@@ -274,6 +260,11 @@ public class RendererTest {
         @Override
         public FrameLayout getThumbnail() {
             return thumbnail;
+        }
+
+        @Override
+        public ImageView getOptout() {
+            return optout;
         }
     }
 
