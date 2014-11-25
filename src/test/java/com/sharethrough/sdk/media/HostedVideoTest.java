@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 public class HostedVideoTest extends TestBase {
     @Test
     public void overlaysImage() throws Exception {
-        assertThat(new HostedVideo(mock(Creative.class)).getOverlayImageResourceId()).isEqualTo(R.drawable.hosted_video);
+        assertThat(new HostedVideo(mock(Creative.class)).getOverlayImageResourceId()).isEqualTo(R.drawable.non_yt_play);
     }
 
     @Config(emulateSdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})

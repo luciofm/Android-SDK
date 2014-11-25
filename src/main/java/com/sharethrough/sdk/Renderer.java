@@ -80,7 +80,7 @@ public class Renderer {
                 int height = thumbnailContainer.getHeight();
                 int width = thumbnailContainer.getWidth();
 
-                Bitmap thumbnailBitmap;
+                final Bitmap thumbnailBitmap;
                 if (height > 0 && width > 0) {
                     thumbnailBitmap = creative.makeThumbnailImage(height, width);
                 } else {
@@ -112,6 +112,8 @@ public class Renderer {
                     }
                   }
                 );
+
+
 
                 placeOptoutIcon(adView);
             }

@@ -34,11 +34,6 @@ public class HostedVideo extends Media {
 
     @Override
     public int getOverlayImageResourceId() {
-        return R.drawable.hosted_video;
-    }
-
-    @Override
-    public boolean isThumbnailOverlayCentered() {
-        return true;
+        return R.drawable.non_yt_play;
     }
 }
