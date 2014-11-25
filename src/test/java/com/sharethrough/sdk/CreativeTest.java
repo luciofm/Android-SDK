@@ -11,6 +11,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 public class CreativeTest extends TestBase {
 
     private static final byte[] IMAGE_BYTES = new byte[0];
+    private static final byte[] LOGO_BYTES = new byte[0];
     private Creative subject;
     private Response.Creative responseCreative;
 
@@ -19,7 +20,7 @@ public class CreativeTest extends TestBase {
         responseCreative = new Response.Creative();
         responseCreative.creative = new Response.Creative.CreativeInner();
         responseCreative.creative.beacon = new Response.Creative.CreativeInner.Beacon();
-        subject = new Creative(responseCreative, IMAGE_BYTES, "placement key");
+        subject = new Creative(responseCreative, IMAGE_BYTES, LOGO_BYTES, "placement key");
     }
 
     @Test

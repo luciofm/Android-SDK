@@ -109,6 +109,6 @@
     <orderEntry type="library" exported="" scope="TEST" name="maven-ant-tasks-2.1.3" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="sqlite4java-0.282" level="project" />
     <orderEntry type="library" exported="" name="play-services-6.1.71" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="mockito-core-1.10.12" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="mockito-core-1.10.13" level="project" />
   </component>
 </module>

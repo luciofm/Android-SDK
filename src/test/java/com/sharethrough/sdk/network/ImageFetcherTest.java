@@ -45,7 +45,7 @@ public class ImageFetcherTest extends TestBase {
         byte[] imageBytes = {1, 2, 3, 4};
         Robolectric.addHttpResponseRule("GET", "http:" + responseCreative.creative.thumbnailUrl, new TestHttpResponse(200, imageBytes));
 
-        subject.fetchImage(apiUri, responseCreative, creativeHandler);
+        subject.fetchCreativeImages(apiUri, responseCreative, creativeHandler);
 
         Misc.runLast(executorService);
 
@@ -60,7 +60,7 @@ public class ImageFetcherTest extends TestBase {
     @Test
     public void fetchImage_whenImageCantBeDownloadedBcServerRefuses_reportsFailure() throws Exception {
         Robolectric.addHttpResponseRule("GET", "http:" + responseCreative.creative.thumbnailUrl, new TestHttpResponse(404, "NOT FOUND"));
-        subject.fetchImage(apiUri, responseCreative, creativeHandler);
+        subject.fetchCreativeImages(apiUri, responseCreative, creativeHandler);
         Misc.runLast(executorService);
 
         verify(creativeHandler).failure();
@@ -69,7 +69,7 @@ public class ImageFetcherTest extends TestBase {
     @Test
     public void fetchImage_whenImageCantBeDownloadedBcOfIOerror_reportsFailure() throws Exception {
         Robolectric.addHttpResponseRule("GET", "http:" + responseCreative.creative.thumbnailUrl, new IOExceptionHttpResponse());
-        subject.fetchImage(apiUri, responseCreative, creativeHandler);
+        subject.fetchCreativeImages(apiUri, responseCreative, creativeHandler);
         Misc.runLast(executorService);
 
         verify(creativeHandler).failure();

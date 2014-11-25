@@ -28,6 +28,10 @@ public interface IAdView {
      */
     FrameLayout getThumbnail();
 
+    /**
+     * @return The <code>ImageView</code> into which the brand logo should be rendered. May be null.
+     */
+    ImageView getBrandLogo();
 
     /**
      * @return The <code>ImageView</code> into which the optout icon should be rendered. May not be null.

@@ -10,12 +10,14 @@ public class Creative {
     private final Response.Creative responseCreative;
     private final byte[] imageBytes;
     private final String placementKey;
+    private final byte[] logoBytes;
     public boolean wasRendered;
     public long renderedTime = Long.MAX_VALUE;
 
-    public Creative(Response.Creative responseCreative, byte[] imageBytes, String placementKey) {
+    public Creative(Response.Creative responseCreative, byte[] imageBytes, byte[] logoBytes, String placementKey) {
         this.responseCreative = responseCreative;
         this.imageBytes = imageBytes;
+        this.logoBytes = logoBytes;
         this.placementKey = placementKey;
     }
 
@@ -40,6 +42,13 @@ public class Creative {
         opts.outHeight = height;
         opts.outWidth = width;
         return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, opts);
+    }
+
+    public Bitmap makeBrandLogo() {
+        if (logoBytes != null && logoBytes.length > 0) {
+            return BitmapFactory.decodeByteArray(logoBytes, 0, logoBytes.length);
+        }
+        return null;
     }
 
     public Media getMedia() {

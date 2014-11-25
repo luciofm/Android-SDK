@@ -62,7 +62,7 @@ public class BeaconServiceTest extends TestBase {
         beacon.visible = new ArrayList<>();
 
         responseCreative.creative.beacon = beacon;
-        creative = new Creative(responseCreative, new byte[0], "placement key");
+        creative = new Creative(responseCreative, new byte[0], new byte[0], "placement key");
 
         executorService = mock(ExecutorService.class);
         advertisingIdProvider = mock(AdvertisingIdProvider.class);
@@ -167,7 +167,7 @@ public class BeaconServiceTest extends TestBase {
 
         responseCreative.creative.beacon.visible = visibleEndoints;
 
-        Creative testCreative = new Creative(responseCreative, new byte[0], "placement key");
+        Creative testCreative = new Creative(responseCreative, new byte[0], new byte[0], "placement key");
 
         subject.adVisible(RendererTest.makeAdView(), testCreative);
 
@@ -198,7 +198,7 @@ public class BeaconServiceTest extends TestBase {
         responseCreative.creative.beacon.click = clickEndoints;
         responseCreative.creative.beacon.play = playEndoints;
 
-        Creative testCreative = new Creative(responseCreative, new byte[0], "placement key");
+        Creative testCreative = new Creative(responseCreative, new byte[0], new byte[0], "placement key");
 
         subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView());
 
@@ -226,7 +226,7 @@ public class BeaconServiceTest extends TestBase {
 
         responseCreative.creative.beacon.click = clickEndoints;
 
-        Creative testCreative = new Creative(responseCreative, new byte[0], "placement key");
+        Creative testCreative = new Creative(responseCreative, new byte[0], new byte[0], "placement key");
 
         subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView());
 

@@ -141,7 +141,7 @@ public class AdFetcherTest extends TestBase {
         reset(executorService);
 
         // finish loading only one image
-        verify(imageFetcher, atLeastOnce()).fetchImage(any(URI.class), any(Response.Creative.class), imageFetcherCallback.capture());
+        verify(imageFetcher, atLeastOnce()).fetchCreativeImages(any(URI.class), any(Response.Creative.class), imageFetcherCallback.capture());
         assertThat(imageFetcherCallback.getAllValues().size()).isGreaterThan(1);
         imageFetcherCallback.getAllValues().get(0).success(creative);
 
@@ -159,7 +159,7 @@ public class AdFetcherTest extends TestBase {
         reset(executorService);
 
         // finish loading all images
-        verify(imageFetcher, atLeastOnce()).fetchImage(any(URI.class), any(Response.Creative.class), imageFetcherCallback.capture());
+        verify(imageFetcher, atLeastOnce()).fetchCreativeImages(any(URI.class), any(Response.Creative.class), imageFetcherCallback.capture());
         for (ImageFetcher.Callback callback : imageFetcherCallback.getAllValues()) {
             callback.success(creative);
         }
@@ -178,7 +178,7 @@ public class AdFetcherTest extends TestBase {
         reset(executorService);
 
         // finish loading all images
-        verify(imageFetcher, atLeastOnce()).fetchImage(any(URI.class), any(Response.Creative.class), imageFetcherCallback.capture());
+        verify(imageFetcher, atLeastOnce()).fetchCreativeImages(any(URI.class), any(Response.Creative.class), imageFetcherCallback.capture());
         for (ImageFetcher.Callback callback : imageFetcherCallback.getAllValues()) {
             callback.success(creative);
         }
@@ -195,7 +195,7 @@ public class AdFetcherTest extends TestBase {
         reset(executorService);
 
         // finish loading all images
-        verify(imageFetcher, atLeastOnce()).fetchImage(any(URI.class), any(Response.Creative.class), imageFetcherCallback.capture());
+        verify(imageFetcher, atLeastOnce()).fetchCreativeImages(any(URI.class), any(Response.Creative.class), imageFetcherCallback.capture());
         for (ImageFetcher.Callback callback : imageFetcherCallback.getAllValues()) {
             callback.failure();
         }
@@ -217,7 +217,7 @@ public class AdFetcherTest extends TestBase {
     }
 
     private void verifyFetchedImage(ImageFetcher imageFetcher, final String imageUrl, String apiUri, Function<Creative, Void> creativeHandler) {
-        verify(imageFetcher).fetchImage(eq(URI.create(apiUri)), Matchers.argThat(new BaseMatcher<Response.Creative>() {
+        verify(imageFetcher).fetchCreativeImages(eq(URI.create(apiUri)), Matchers.argThat(new BaseMatcher<Response.Creative>() {
             @Override
             public boolean matches(Object o) {
                 if (o instanceof Response.Creative) {

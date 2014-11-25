@@ -24,7 +24,7 @@ public class ImageFetcher {
         this.key = key;
     }
 
-    public void fetchImage(final URI apiURI, final Response.Creative responseCreative, final Callback creativeHandler) {
+    public void fetchCreativeImages(final URI apiURI, final Response.Creative responseCreative, final Callback creativeHandler) {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
@@ -39,7 +39,8 @@ public class ImageFetcher {
                     if (imageResponse.getStatusLine().getStatusCode() == 200) {
                         InputStream imageContent = imageResponse.getEntity().getContent();
                         byte[] imageBytes = convertInputStreamToByteArray(imageContent);
-                        Creative creative = new Creative(responseCreative, imageBytes, key);
+                        byte[] logoBytes = downloadBrandLogo(responseCreative.creative.brandLogoUrl);
+                        Creative creative = new Creative(responseCreative, imageBytes, logoBytes, key);
                         creativeHandler.success(creative);
                     } else {
                         Log.e("Sharethrough", "failed to load image from url: " + imageURI + " ; server said: " + imageResponse.getStatusLine().getStatusCode() + "\t" + imageResponse.getStatusLine().getReasonPhrase());
@@ -51,6 +52,28 @@ public class ImageFetcher {
                 }
             }
         });
+    }
+
+    private byte[] downloadBrandLogo(final String url) {
+        if (url == null || url.isEmpty()) {
+            return null;
+        }
+        try {
+            DefaultHttpClient client = new DefaultHttpClient();
+            HttpGet imageRequest = new HttpGet(url);
+            imageRequest.addHeader("User-Agent", Sharethrough.USER_AGENT);
+            HttpResponse imageResponse = client.execute(imageRequest);
+            if (imageResponse.getStatusLine().getStatusCode() == 200) {
+                InputStream imageContent = imageResponse.getEntity().getContent();
+                byte[] imageBytes = convertInputStreamToByteArray(imageContent);
+                return imageBytes;
+            } else {
+                Log.e("Sharethrough", "failed to load brand image from url: " + url + " ; server said: " + imageResponse.getStatusLine().getStatusCode() + "\t" + imageResponse.getStatusLine().getReasonPhrase());
+            }
+        } catch (IOException e) {
+            Log.e("Sharethrough", "failed to load brand image from url: " + url, e);
+        }
+        return null;
     }
 
     private byte[] convertInputStreamToByteArray(InputStream inputStream) throws IOException {

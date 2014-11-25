@@ -23,20 +23,7 @@ public class SharethroughListAdapter extends BaseAdapter {
     private final int advertiserViewId;
     private final int thumbnailViewId;
     private final int optoutId;
-
-    /**
-     *
-     * @param context The Android context.
-     * @param adapter Your adapter.
-     * @param sharethrough An instance of your configured Sharethrough object.
-     * @param adLayoutResourceId The custom layout for Sharethrough's native ad unit.
-     * @param titleViewId The view which will display the ad's title.
-     * @param advertiserViewId The view which will display the ad's advertiser.
-     * @param thumbnailViewId The view which will display the ad's thumbnail image.
-     */
-    public SharethroughListAdapter(Context context, ListAdapter adapter, Sharethrough sharethrough, int adLayoutResourceId, int titleViewId, int advertiserViewId, int thumbnailViewId, int optoutId) {
-        this(context, adapter, sharethrough, adLayoutResourceId, titleViewId, -1, advertiserViewId, thumbnailViewId, optoutId);
-    }
+    private final int brandLogoId;
 
     /**
      *
@@ -48,8 +35,9 @@ public class SharethroughListAdapter extends BaseAdapter {
      * @param descriptionViewId The view which will display the ad's description.
      * @param advertiserViewId The view which will display the ad's advertiser.
      * @param thumbnailViewId The view which will display the ad's thumbnail image.
+     * @param brandLogoId The imageView which will display the ad's brand logo.
      */
-    public SharethroughListAdapter(Context context, ListAdapter adapter, Sharethrough sharethrough, int adLayoutResourceId, int titleViewId, int descriptionViewId, int advertiserViewId, int thumbnailViewId, int optoutId) {
+    public SharethroughListAdapter(Context context, ListAdapter adapter, Sharethrough sharethrough, int adLayoutResourceId, int titleViewId, int descriptionViewId, int advertiserViewId, int thumbnailViewId, int optoutId, int brandLogoId) {
         mContext = context;
         mAdapter = adapter;
         mSharethrough = sharethrough;
@@ -58,6 +46,7 @@ public class SharethroughListAdapter extends BaseAdapter {
         this.advertiserViewId = advertiserViewId;
         this.thumbnailViewId = thumbnailViewId;
         this.optoutId = optoutId;
+        this.brandLogoId = brandLogoId;
 
         mAdapter.registerDataSetObserver(new DataSetObserver() {
             @Override
@@ -128,7 +117,7 @@ public class SharethroughListAdapter extends BaseAdapter {
 
     private View getAd(int slotNumber, IAdView convertView) {
         return mSharethrough.getAdView(mContext, slotNumber, adLayoutResourceId, titleViewId, descriptionViewId,
-                advertiserViewId, thumbnailViewId, optoutId, convertView).getAdView();
+                advertiserViewId, thumbnailViewId, optoutId, brandLogoId, convertView).getAdView();
     }
 
     @Override

@@ -61,6 +61,18 @@ public class Renderer {
                 if (description != null) {
                     description.setText(creative.getDescription());
                 }
+
+                ImageView brandLogoView = adView.getBrandLogo();
+                if (brandLogoView != null) {
+                    Bitmap logoBitmap = creative.makeBrandLogo();
+                    if (logoBitmap != null) {
+                        brandLogoView.setImageBitmap(logoBitmap);
+                        brandLogoView.setVisibility(View.VISIBLE);
+                    } else {
+                        brandLogoView.setVisibility(View.GONE);
+                    }
+                }
+
                 adView.getAdvertiser().setText(creative.getAdvertiser());
 
                 FrameLayout thumbnailContainer = adView.getThumbnail();

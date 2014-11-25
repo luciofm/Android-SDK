@@ -195,6 +195,52 @@ public class RendererTest {
         verify(creative).getTitle();
     }
 
+    @Test
+    public void whenCreativeHasBrandLogo_andAdViewHasImageViewForIt_BrandLogoIsDisplayed() {
+        ImageView brandLogo = adView.getBrandLogo();
+        when(creative.makeBrandLogo()).thenReturn(bitmap);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
+
+        ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
+        shadowLooper.runOneTask();
+        shadowLooper.runOneTask();
+
+        assertThat(brandLogo.getVisibility()).isEqualTo(View.VISIBLE);
+
+        BitmapDrawable bitmapDrawable = (BitmapDrawable) brandLogo.getDrawable();
+        assertThat(bitmapDrawable.getBitmap()).isEqualTo(bitmap);
+    }
+
+    @Test
+    public void whenCreativeDoesNotHaveBrandLogo_andAdViewHasImageViewForIt_BrandLogoIsNotDisplayed() {
+        when(creative.makeBrandLogo()).thenReturn(null);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
+
+        ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
+        shadowLooper.runOneTask();
+        shadowLooper.runOneTask();
+
+        View brandLogo = adView.getBrandLogo();
+        assertThat(brandLogo.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void whenCreativeHasBrandLogo_andAdViewDoesNotHasImageViewForIt_NothingBadHappens() {
+        when(creative.makeBrandLogo()).thenReturn(bitmap);
+        adView.brandLogo = null;
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
+
+        ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
+        shadowLooper.runOneTask();
+        shadowLooper.runOneTask();
+    }
+
+    @Test
+    public void whenBrandLogoIsNull_NothingBadHappens() throws Exception {
+        adView.brandLogo = null;
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
+    }
+
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Test
@@ -222,6 +268,7 @@ public class RendererTest {
         TextView advertiser = mock(TextView.class);
         TextView description = mock(TextView.class);
         TextView title = mock(TextView.class);
+        ImageView brandLogo = new ImageView(Robolectric.application);
         ImageView optout = new ImageView(Robolectric.application);
         public boolean adReady_wasCalled;
 
@@ -260,6 +307,11 @@ public class RendererTest {
         @Override
         public FrameLayout getThumbnail() {
             return thumbnail;
+        }
+
+        @Override
+        public ImageView getBrandLogo() {
+            return brandLogo;
         }
 
         @Override

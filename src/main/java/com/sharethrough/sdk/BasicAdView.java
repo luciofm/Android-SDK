@@ -17,6 +17,7 @@ public class BasicAdView extends FrameLayout implements IAdView {
     private int advertiserViewId;
     private int thumbnailViewId;
     private int optoutViewId;
+    private int brandLogoId;
     private View view;
     private ProgressBar spinner;
 
@@ -36,27 +37,18 @@ public class BasicAdView extends FrameLayout implements IAdView {
      *
      * @param layoutResourceId The custom layout for Sharethrough's native ad unit.
      * @param titleViewId The view which will display the ad's title.
+     * @param descriptionViewId The view which will display the ad's description. This field can be -1
+     * @param brandLogoId The view which will display the brand logo (if available). This field can be -1
      * @param advertiserViewId The view which will display the ad's advertiser.
      * @param thumbnailViewId The view which will display the ad's thumbnail image.
      */
-    public void prepareWithResourceIds(final int layoutResourceId, final int titleViewId, final int advertiserViewId, final int thumbnailViewId, final int optoutViewId) {
-        prepareWithResourceIds(layoutResourceId, titleViewId, -1, advertiserViewId, thumbnailViewId, optoutViewId);
-    }
-
-    /**
-     *
-     * @param layoutResourceId The custom layout for Sharethrough's native ad unit.
-     * @param titleViewId The view which will display the ad's title.
-     * @param descriptionViewId The view which will display the ad's description.
-     * @param advertiserViewId The view which will display the ad's advertiser.
-     * @param thumbnailViewId The view which will display the ad's thumbnail image.
-     */
-    public void prepareWithResourceIds(final int layoutResourceId, final int titleViewId, final int descriptionViewId, final int advertiserViewId, final int thumbnailViewId, final int optoutViewId) {
+    public void prepareWithResourceIds(final int layoutResourceId, final int titleViewId, final int descriptionViewId, final int advertiserViewId, final int thumbnailViewId, final int optoutViewId, final int brandLogoId) {
         this.titleViewId = titleViewId;
         this.descriptionViewId = descriptionViewId;
         this.advertiserViewId = advertiserViewId;
         this.thumbnailViewId = thumbnailViewId;
         this.optoutViewId = optoutViewId;
+        this.brandLogoId = brandLogoId;
         checkResources();
         createChildren(layoutResourceId);
     }
@@ -111,5 +103,10 @@ public class BasicAdView extends FrameLayout implements IAdView {
     @Override
     public ImageView getOptout() {
         return (ImageView) this.findViewById(optoutViewId);
+    }
+
+    @Override
+    public ImageView getBrandLogo() {
+        return (ImageView) this.findViewById(brandLogoId);
     }
 }

@@ -52,7 +52,7 @@ public class AdFetcher {
                         adFetcherCallback.finishedLoadingWithNoAds();
                     }
                     for (final Response.Creative responseCreative : response.creatives) {
-                        imageFetcher.fetchImage(uri, responseCreative, new ImageFetcher.Callback() {
+                        imageFetcher.fetchCreativeImages(uri, responseCreative, new ImageFetcher.Callback() {
                             @Override
                             public void success(Creative value) {
                                 creativeHandler.apply(value);
@@ -125,6 +125,7 @@ public class AdFetcher {
             creative.creative.action = jsonCreativeInner.getString("action");
             creative.creative.mediaUrl = jsonCreativeInner.getString("media_url");
             creative.creative.shareUrl = jsonCreativeInner.getString("share_url");
+            creative.creative.brandLogoUrl = jsonCreativeInner.optString("brand_logo_url");
             creative.creative.title = jsonCreativeInner.getString("title");
             creative.creative.description = jsonCreativeInner.getString("description");
             creative.creative.advertiser = jsonCreativeInner.getString("advertiser");

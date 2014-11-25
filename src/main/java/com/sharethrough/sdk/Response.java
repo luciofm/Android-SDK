@@ -28,6 +28,8 @@ public class Response {
             @JsonProperty("media_url")
             public String mediaUrl;
             @JsonProperty("share_url")
+            public String brandLogoUrl;
+            @JsonProperty("brand_logo_url")
             public String shareUrl;
             @JsonProperty("variant_key")
             public String variantKey;
@@ -35,7 +37,6 @@ public class Response {
             public String advertiser;
             @JsonProperty("beacons")
             public Beacon beacon;
-
             @JsonProperty("thumbnail_url")
             public String thumbnailUrl;
             @JsonProperty("title")
