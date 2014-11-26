@@ -80,6 +80,40 @@ public class SharethroughListAdapterTest extends TestBase {
     }
 
     @Test
+    public void getItem_forAd_returnsNull() {
+        assertThat(subject.getItem(3)).isNull();
+    }
+
+    @Test
+    public void getItem_forNonAd_returnsDelegatedGetItem() {
+        final String[] strings = new String[100];
+        for (int i = 0; i < strings.length; i++) {
+            strings[i] =  "item_" + i;
+        }
+
+        when(adapter.getCount()).thenReturn(strings.length);
+        when(adapter.getItem(anyInt())).thenAnswer(new Answer<String>() {
+            @Override
+            public String answer(InvocationOnMock invocationOnMock) throws Throwable {
+                int position = (Integer) invocationOnMock.getArguments()[0];
+                return strings[position];
+            }
+        });
+
+        placementCallbackArgumentCaptor.getValue().call(new Placement(2, 1));
+        assertThat(subject.getCount()).isEqualTo(199);
+        assertThat(subject.getItem(0)).isSameAs(strings[0]);
+        assertThat(subject.getItem(1)).isSameAs(strings[1]);
+        assertThat(subject.getItem(2)).isNull();
+        assertThat(subject.getItem(3)).isSameAs(strings[2]);
+        assertThat(subject.getItem(4)).isNull();
+        for (int i = 5; i < strings.length; i++) {
+            assertThat(subject.getItem(i * 2 - 1)).isSameAs(strings[i]);
+            assertThat(subject.getItem(i * 2)).isNull();
+        }
+    }
+
+    @Test
     public void getItemViewType_forAd_returnsDelegatedGetViewTypeCount() throws Exception {
         when(adapter.getViewTypeCount()).thenReturn(8);
         assertThat(subject.getItemViewType(3)).isEqualTo(8);

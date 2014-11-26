@@ -93,7 +93,7 @@ public class SharethroughListAdapter extends BaseAdapter {
         if (isAd(position)) {
             return null;
         } else {
-            return mAdapter.getItemViewType(adjustedPosition(position));
+            return mAdapter.getItem(adjustedPosition(position));
         }
     }
 
