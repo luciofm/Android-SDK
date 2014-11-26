@@ -116,12 +116,6 @@ task createEclipseZipFolder << {
         include 'classes.jar'
         into "${eclipseZipFolder}/libs/"
     }
-    copy {
-        from('src/main/java/')
-        include('**/SharethroughStub.java')
-        includeEmptyDirs(false)
-        into "${eclipseZipFolder}/src"
-    }
 }
 createEclipseZip.dependsOn createEclipseZipFolder
 createEclipseZipFolder.dependsOn test
