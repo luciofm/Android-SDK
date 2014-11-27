@@ -94,4 +94,13 @@ public class CreativeTest extends TestBase {
 
         assertThat(subject.getClickBeacons()).isEqualTo(clickBeacons);
     }
+
+    @Test
+    public void getCustomEngagementUrl_returnsCustomEngagmentURl() {
+        responseCreative.creative.customEngagementLabel = "label";
+        responseCreative.creative.customEngagementUrl = "custom/url";
+
+        assertThat(subject.getCustomEngagementUrl()).isEqualTo("custom/url");
+        assertThat(subject.getCustomEngagementLabel()).isEqualTo("label");
+    }
 }

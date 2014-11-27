@@ -101,6 +101,14 @@ public class Creative {
         return String.valueOf(responseCreative.price);
     }
 
+    public String getCustomEngagementUrl() {
+        return responseCreative.creative.customEngagementUrl;
+    }
+
+    public String getCustomEngagementLabel() {
+        return responseCreative.creative.customEngagementLabel;
+    }
+
     public List<String> getClickBeacons() {
         return responseCreative.creative.beacon.click;
     }

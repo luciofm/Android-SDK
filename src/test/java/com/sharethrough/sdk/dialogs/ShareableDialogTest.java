@@ -24,13 +24,16 @@ import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.res.builder.RobolectricPackageManager;
+import org.robolectric.shadows.ShadowContext;
 import org.robolectric.shadows.ShadowMenuInflater;
+import org.robolectric.tester.android.view.TestMenuItem;
 
 import java.util.Arrays;
 
 import static org.fest.assertions.api.ANDROID.assertThat;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import static org.robolectric.Robolectric.shadowOf;
 
 @Config(shadows = ShareableDialogTest.MenuInflaterShadow.class)
 public class ShareableDialogTest extends TestBase {
@@ -104,6 +107,38 @@ public class ShareableDialogTest extends TestBase {
     public void whenOtherSelected_sendsPackageNameInBeacon() throws Exception {
         shareVia("com.something.else/com.something.else.Whatever");
         verify(beaconService).adShared(any(Context.class), eq(creative), eq("com.something.else"));
+    }
+
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    @Test
+    public void whenCreativeHasCustomEngagement_displaysButtonInActionBar() { //TODO implement this test
+        when(creative.getCustomEngagementUrl()).thenReturn("//custom.url");
+        when(creative.getCustomEngagementLabel()).thenReturn("custom_label");
+
+        subject = new ShareableDialog(Robolectric.application, android.R.style.Theme_Black, beaconService) {
+            @Override
+            protected Creative getCreative() {
+                return creative;
+            }
+        };
+        subject.show();
+
+        //get reference either to Menu, or the menuItem
+        //Check visibility
+        //Check title
+    }
+
+    @Test
+    public void whenCustomEngagmentSelected_IntentIsFiredWithCustomUrlData() {
+        when(creative.getCustomEngagementUrl()).thenReturn("//custom.url");
+        when(creative.getCustomEngagementLabel()).thenReturn("custom_label");
+
+        MenuItem item = new TestMenuItem(R.id.menu_item_custom);
+        subject.onMenuItemSelected(0, item);
+
+        ShadowContext shadowContext = shadowOf(subject.getContext());
+        Intent startedIntent = shadowContext.getShadowApplication().getNextStartedActivity();
+        assertThat(startedIntent.getData().toString()).isEqualTo("//custom.url");
     }
 
     @Implements(MenuInflater.class)

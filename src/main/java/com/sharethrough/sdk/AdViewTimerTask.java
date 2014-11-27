@@ -1,7 +1,6 @@
 package com.sharethrough.sdk;
 
 import android.graphics.Rect;
-import android.util.Log;
 
 import java.lang.ref.WeakReference;
 import java.util.Date;
@@ -39,7 +38,6 @@ public class AdViewTimerTask extends TimerTask {
             cancel();
             return;
         }
-        Log.v("Sharethrough", "AdViewTimer on " + adView + " with " + creative);
         if (isCancelled) return;
 
         Rect rect = new Rect();

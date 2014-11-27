@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,6 +41,18 @@ public abstract class ShareableDialog extends Dialog {
         actionBar.setBackgroundDrawable(new ColorDrawable(getContext().getResources().getColor(android.R.color.transparent)));
 
         new MenuInflater(getContext()).inflate(R.menu.share_menu, menu);
+
+        Creative creative = getCreative();
+
+        final String label = creative.getCustomEngagementLabel();
+        final String url = creative.getCustomEngagementUrl();
+
+        if (label != null && !label.isEmpty() && url != null && !url.isEmpty()) {
+            MenuItem custom = menu.findItem(R.id.menu_item_custom);
+            custom.setTitle(label);
+            custom.setVisible(true);
+        }
+
 
         // Locate MenuItem with ShareActionProvider
         MenuItem item = menu.findItem(R.id.menu_item_share);
@@ -85,6 +98,13 @@ public abstract class ShareableDialog extends Dialog {
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             cancel();
+            return true;
+        } else if (item.getItemId() == R.id.menu_item_custom) {
+            final String url = getCreative().getCustomEngagementUrl();
+            final Intent intent = new Intent();
+            intent.setData(Uri.parse(url));
+            getContext().startActivity(intent);
+
             return true;
         } else {
             return super.onMenuItemSelected(featureId, item);

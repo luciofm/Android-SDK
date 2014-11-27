@@ -43,6 +43,10 @@ public class Response {
             public String title;
             @JsonProperty("action")
             public String action;
+            @JsonProperty("custom_engagement_url")
+            public String customEngagementUrl;
+            @JsonProperty("custom_engagement_label")
+            public String customEngagementLabel;
 
             public static class Beacon {
                 @JsonProperty("visible")
