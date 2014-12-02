@@ -15,7 +15,7 @@ allprojects {
     version = version
 }
 
-apply plugin: 'com.android.library'
+apply plugin: 'android-library'
 apply plugin: 'robolectric'
 
 android {
@@ -179,3 +179,44 @@ idea {
         testOutputDir = file('build/test-classes/debug')
     }
 }
+
+sourceSets {
+    main {
+        java {
+            exclude 'com/sharethrough/sdk/beacons/**'
+            exclude 'com/sharethrough/sdk/dialogs/**'
+            exclude 'com/sharethrough/sdk/media/**'
+            exclude 'com/sharethrough/sdk/network/**'
+        }
+    }
+}
+
+task generateSDKDocs(type: Javadoc) {
+    title = "Sharethrough Android SDK"
+    description = "Generates Javadoc for SDK"
+    println("" + sourceSets)
+    source = sourceSets.main.allJava
+    exclude '**/BuildConfig.java'
+    exclude '**/R.java'
+}
+
+task testTask {
+    println("" + sourceSets.main.allJava)
+}
+
+//android.libraryVariants.all { variant ->
+//
+//    task("generate${variant.name}Javadoc", type: Javadoc) {
+//        title = "Sharethrough Android SDK"
+//        description "Generates Javadoc for $variant.name."
+//        source = variant.javaCompile.source
+////        ext.androidJar =
+////                "${android.plugin.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
+////        classpath = files(variant.javaCompile.classpath.files) + files(ext.androidJar)
+////        options.links("http://docs.oracle.com/javase/7/docs/api/");
+////        options.links("http://d.android.com/reference/");
+//        exclude '**/BuildConfig.java'
+//        exclude '**/R.java'
+//    }
+//
+//}
