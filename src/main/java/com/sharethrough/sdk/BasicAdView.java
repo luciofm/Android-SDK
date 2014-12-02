@@ -11,6 +11,9 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+/**
+ * This class implements IAdView and extends FrameLayout. This view contains everything needed to display a Sharethrough ad.
+ */
 public class BasicAdView extends FrameLayout implements IAdView {
     private int titleViewId;
     private int descriptionViewId;
@@ -21,6 +24,11 @@ public class BasicAdView extends FrameLayout implements IAdView {
     private View view;
     private ProgressBar spinner;
 
+    /**
+     * Constructor for creating a BasicAdView.
+     *
+     * @param context The Android context.
+     */
     public BasicAdView(Context context) {
         this(context, null, 0);
     }
@@ -34,6 +42,7 @@ public class BasicAdView extends FrameLayout implements IAdView {
     }
 
     /**
+     * This method passes in layouts and resource ids to be used during inflation and playing the BasicAdView into the view hierarchy.
      *
      * @param layoutResourceId The custom layout for Sharethrough's native ad unit.
      * @param titleViewId The view which will display the ad's title.

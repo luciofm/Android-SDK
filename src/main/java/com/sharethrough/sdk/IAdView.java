@@ -5,7 +5,13 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+/**
+ * Interface that defines methods used to construct a Sharethrough ad unit.
+ */
 public interface IAdView {
+    /**
+     * This method is called when the ad is ready to be displayed.
+     */
     void adReady();
 
     /**

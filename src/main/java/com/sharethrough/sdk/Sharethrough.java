@@ -18,6 +18,9 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Methods to handle configuration for Sharethrough's Android SDK.
+ */
 public class Sharethrough {
     public static final int DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
     private static final int MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
@@ -79,10 +82,26 @@ public class Sharethrough {
         this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString()), false);
     }
 
+    /**
+     * Returns an instance of the Sharethrough object which is used to fetch and display native ads within your mobile app.
+     * <p/>
+     * A default ad cache time of 20 seconds will be used.
+     *
+     * @param context   The Android context.
+     * @param placementKey  Your Sharethrough placement key that you will receive from Sharethrough.
+     * @param dfpEnabled    A boolean flag indicating if you would like to use Sharethrough's Direct Sell functionality via DFP.
+     */
     public Sharethrough(Context context, String placementKey, boolean dfpEnabled) {
         this(context, placementKey, DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS, dfpEnabled);
     }
 
+    /**
+     *
+     * @param context   The Android context.
+     * @param placementKey  Your Sharethrough placement key that you will receive from Sharethrough.
+     * @param adCacheTimeInMilliseconds     The ad cache time in milliseconds. e.g. a value of 100,000 will result in ads being refreshed every 100 seconds.
+     * @param dfpEnabled    A boolean flag indicating if you would like to use Sharethrough's Direct Sell functionality via DFP.
+     */
     public Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds, boolean dfpEnabled) {
         this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString()), dfpEnabled);
     }
@@ -224,10 +243,19 @@ public class Sharethrough {
         dfpNetworking.fetchDFPPath(EXECUTOR_SERVICE, placementKey, pathFetcherCallback);
     }
 
+    /**
+     *
+     * @param adView Any class that implements IAdView.
+     */
     public void putCreativeIntoAdView(IAdView adView) {
         putCreativeIntoAdView(adView, 0);
     }
 
+    /**
+     *
+     * @param adView    Any class that implements IAdView.
+     * @param feedPosition The starting position in your feed where you would like your first ad.
+     */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public void putCreativeIntoAdView(IAdView adView, int feedPosition) {
         Creative creative = creativesBySlot.get(feedPosition);
@@ -296,8 +324,14 @@ public class Sharethrough {
      * Interface definition for a callback to be invoked when the status of having or not having ads to show changes.
      */
     public interface OnStatusChangeListener {
+        /**
+         * The method is invoked when there are new ads to be shown.
+         */
         void newAdsToShow();
 
+        /**
+         * This method is invoked when there are no ads to be shown.
+         */
         void noAdsToShow();
     }
 

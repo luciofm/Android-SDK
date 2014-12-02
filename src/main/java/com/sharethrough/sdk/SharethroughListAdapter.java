@@ -10,6 +10,9 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 
+/**
+ * A list adapter which wraps your list adapter and inserts Sharethrough ads.
+ */
 public class SharethroughListAdapter extends BaseAdapter {
 
     private final ListAdapter mAdapter;
@@ -26,6 +29,7 @@ public class SharethroughListAdapter extends BaseAdapter {
     private final int brandLogoId;
 
     /**
+     * This constructor returns an instance of a SharethroughListAdapter, which wraps your own list adapter.
      *
      * @param context The Android context.
      * @param adapter Your adapter.
