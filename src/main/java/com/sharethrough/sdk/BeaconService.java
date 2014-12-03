@@ -73,11 +73,13 @@ public class BeaconService {
         beaconParams.put("engagement", "true");
 
         for (String uri : creative.getClickBeacons()) {
-            fireBeacon(new HashMap<String, String>(), "http:" + uri);
+            String cachedBustedUri = replaceCacheBusterParam(uri);
+            fireBeacon(new HashMap<String, String>(), "http:" + cachedBustedUri);
         }
 
         for (String uri : creative.getPlayBeacons()) {
-            fireBeacon(new HashMap<String, String>(), "http:" + uri);
+            String cachedBustedUri = replaceCacheBusterParam(uri);
+            fireBeacon(new HashMap<String, String>(), "http:" + cachedBustedUri);
         }
 
         fireBeacon(beaconParams);
@@ -98,7 +100,6 @@ public class BeaconService {
         fireBeacon(beaconParams);
     }
 
-
     public void adVisible(final View adView, final Creative creative) {
         Context context = adView.getContext();
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
@@ -107,11 +108,13 @@ public class BeaconService {
         beaconParams.put("type", "visible");
 
         for (String uri : creative.getVisibleBeacons()) {
-            fireBeacon(new HashMap<String, String>(), "http:" + uri);
+            String cachedBustedUri = replaceCacheBusterParam(uri);
+            fireBeacon(new HashMap<String, String>(), "http:" + cachedBustedUri);
         }
 
         fireBeacon(beaconParams);
     }
+
 
     public void adShared(final Context context, final Creative creative, final String medium) {
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
@@ -121,7 +124,6 @@ public class BeaconService {
         beaconParams.put("share", medium);
         fireBeacon(beaconParams);
     }
-
 
     public void videoPlayed(final Context context, final Creative creative, final int percent) {
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
@@ -156,5 +158,9 @@ public class BeaconService {
                 }
             }
         });
+    }
+
+    private String replaceCacheBusterParam(String uri) {
+        return uri.replaceAll("\\[timestamp\\]", String.valueOf(dateProvider.get().getTime()));
     }
 }

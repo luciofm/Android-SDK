@@ -161,7 +161,7 @@ public class BeaconServiceTest extends TestBase {
 
     @Test
     public void whenAdVisibleCalled_fireVisibleThirdPartyBeacons() throws Exception {
-        String[] initialUrls = {"//visibleEndOne", "//visibleEndTwo"};
+        String[] initialUrls = {"//visibleEndOne?cacheBuster=[timestamp]", "//visibleEndTwo?cacheBuster=[timestamp]"};
 
         ArrayList<String> visibleEndoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
 
@@ -183,14 +183,15 @@ public class BeaconServiceTest extends TestBase {
         List<HttpRequestInfo> info = Robolectric.getFakeHttpLayer().getSentHttpRequestInfos();
         assertThat(info.size()).isEqualTo(3);
         for (int i = 0; i < info.size() - 1; i++) {
-            String expectedUrl = "http:" + initialUrls[i];
+            String cacheBustedUrl = initialUrls[i].replaceAll("\\[timestamp\\]", String.valueOf(now.getTime()));
+            String expectedUrl = "http:" + cacheBustedUrl;
             assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
         }
     }
 
     @Test
     public void whenAdClickCalled_fireClickAndVideoThirdPartyBeacons() throws Exception {
-        String[] initialUrls = {"//click/EndOne", "//click/End[Two]", "//video/EndOne", "//video/EndTwo"};
+        String[] initialUrls = {"//click/EndOne", "//click/End[Two]?cacheBuster=[timestamp]", "//video/EndOne", "//video/EndTwo"};
 
         ArrayList<String> clickEndoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
         ArrayList<String> playEndoints = new ArrayList<>(Arrays.asList(initialUrls[2], initialUrls[3]));
@@ -214,7 +215,8 @@ public class BeaconServiceTest extends TestBase {
         List<HttpRequestInfo> info = Robolectric.getFakeHttpLayer().getSentHttpRequestInfos();
         assertThat(info.size()).isEqualTo(5);
         for (int i = 0; i < info.size() - 1; i++) {
-            String expectedUrl = "http:" + initialUrls[i].replace("[", "%5B").replace("]", "%5D");
+            String cacheBustedUrl = initialUrls[i].replaceAll("\\[timestamp\\]", String.valueOf(now.getTime()));
+            String expectedUrl = "http:" + cacheBustedUrl.replace("[", "%5B").replace("]", "%5D");
             assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
         }
     }
