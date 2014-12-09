@@ -35,11 +35,12 @@ public class SharethroughTest extends TestBase {
     @Mock private CreativesQueue availableCreatives;
     @Mock private PlacementFetcher placementFetcher;
     @Mock private Sharethrough.OnStatusChangeListener onStatusChangeListener;
-    @Mock
-    private DFPNetworking dfpNetworking;
+    @Mock private Placement placement;
+    @Mock private DFPNetworking dfpNetworking;
     private int adCacheTimeInMilliseconds;
     private String apiUri;
     @Captor private ArgumentCaptor<Function<Creative, Void>> creativeHandler;
+    @Captor private ArgumentCaptor<Function<Placement, Void>> placementHandler;
     @Captor private ArgumentCaptor<AdFetcher.Callback> adFetcherCallback;
     @Captor
     private ArgumentCaptor<DFPNetworking.DFPPathFetcherCallback> dfpPathFetcherCallback;
@@ -56,7 +57,7 @@ public class SharethroughTest extends TestBase {
         adView = makeMockAdView();
         apiUri = "http://btlr.sharethrough.com/v3?placement_key=" + key;
 
-        doNothing().when(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture());
+        doNothing().when(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
 
         createSubject(key);
     }
@@ -81,7 +82,7 @@ public class SharethroughTest extends TestBase {
 
     @Test
     public void settingKey_loadsAdsFromServer() throws Exception {
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture());
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
     }
 
     @Test(expected = KeyRequiredException.class)
@@ -138,7 +139,7 @@ public class SharethroughTest extends TestBase {
 
         subject.putCreativeIntoAdView(adView);
 
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture());
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
     }
 
     @Test
@@ -154,23 +155,23 @@ public class SharethroughTest extends TestBase {
         String serverPrefix = "http://dumb-waiter.sharethrough.com/?creative_type=video&placement_key=";
         Robolectric.application.getApplicationInfo().metaData.putString("STR_ADSERVER_API", serverPrefix);
         createSubject(key);
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(serverPrefix + key), creativeHandler.capture(), adFetcherCallback.capture());
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(serverPrefix + key), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
     }
 
     @Test
     public void whenRequestFinsihesAndImagesFinishDownloading_whenQueueWantsMore_fetchesMoreAds() throws Exception {
         when(availableCreatives.readyForMore()).thenReturn(true);
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture());
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
         reset(adFetcher);
         adFetcherCallback.getValue().finishedLoading();
 
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture());
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
     }
 
     @Test
     public void whenRequestFinsihesAndImagesFinishDownloading_whenQueueDoesNotWantsMore_doesNotFetchMoreAds() throws Exception {
         when(availableCreatives.readyForMore()).thenReturn(false);
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture());
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
         reset(adFetcher);
         adFetcherCallback.getValue().finishedLoading();
 
@@ -179,7 +180,7 @@ public class SharethroughTest extends TestBase {
 
     @Test
     public void whenFirstCreativeIsPrefetches_notifiesOnStatusChangeListenerOnMainThread() throws Exception {
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture());
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
 
         Robolectric.pauseMainLooper();
         creativeHandler.getValue().apply(creative);
@@ -191,7 +192,7 @@ public class SharethroughTest extends TestBase {
 
     @Test
     public void whenCreativeIsPrefetched_whenNewAdsToShowHasAlreadyBeenCalled_doesNotCallItAgain() throws Exception {
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture());
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
 
         Robolectric.pauseMainLooper();
         creativeHandler.getValue().apply(creative);
@@ -207,7 +208,7 @@ public class SharethroughTest extends TestBase {
 
     @Test
     public void whenFirstCreativeIsNotAvailable_notifiesOnStatusChangeListenerOnMainThread() throws Exception {
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture());
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
 
         Robolectric.pauseMainLooper();
         adFetcherCallback.getValue().finishedLoadingWithNoAds();
@@ -219,7 +220,7 @@ public class SharethroughTest extends TestBase {
 
     @Test
     public void whenCreativeIsPrefetched_whenNewAdsToShowHasBeenCalledButNoAdsToShowHasSinceBeenCalled_callsItAgain() throws Exception {
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture());
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
 
         // cause newAdsToShow
         Robolectric.pauseMainLooper();
@@ -256,13 +257,6 @@ public class SharethroughTest extends TestBase {
         int expectedCacheMilliseconds = (int) TimeUnit.SECONDS.toMillis(20);
 
         assertThat(adCacheMilliseconds).isEqualTo(expectedCacheMilliseconds);
-    }
-
-    @Test
-    public void getPlacement_callsFetcher() throws Exception {
-        Callback placementCallback = mock(Callback.class);
-        subject.getPlacement(placementCallback);
-        verify(placementFetcher).fetch(placementCallback);
     }
 
     @Test
@@ -326,7 +320,7 @@ public class SharethroughTest extends TestBase {
 
         dfpCreativeKeyCallback.getValue().receivedCreativeKey();
 
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri + "&creative_key=creativeKey"), creativeHandler.capture(), adFetcherCallback.capture());
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri + "&creative_key=creativeKey"), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
     }
 
     @Test
@@ -337,5 +331,74 @@ public class SharethroughTest extends TestBase {
 
         assertThat(subject.popCreativeKey("key")).isEqualTo("test-key");
         assertThat(subject.popCreativeKey("key")).isNull();
+    }
+
+    @Test
+    public void whenPlacementIsNotSet_setsPlacementAndCallsPlacementCallback() {
+        final boolean[] callbackWasInvoked = {false};
+        subject.setOrCallPlacementCallback(new Callback<Placement>() {
+            @Override
+            public void call(Placement result) {
+                callbackWasInvoked[0] = true;
+            }
+        });
+        subject.putCreativeIntoAdView(adView);
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
+        placementHandler.getValue().apply(placement);
+        assertThat(callbackWasInvoked[0]).isTrue();
+        assertThat(subject.placement).isEqualTo(placement);
+        assertThat(subject.placementSet).isTrue();
+    }
+
+    @Test
+    public void whenPlacementIsSet_doesNotSetPlacementOrCallPlacementCallback() {
+        final boolean[] callbackWasInvoked = {false};
+        subject.setOrCallPlacementCallback(new Callback<Placement>() {
+            @Override
+            public void call(Placement result) {
+                callbackWasInvoked[0] = true;
+            }
+        });
+
+        subject.placementSet = true;
+        subject.putCreativeIntoAdView(adView);
+        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
+        placementHandler.getValue().apply(placement);
+        assertThat(subject.placement).isNotEqualTo(placement);
+        assertThat(callbackWasInvoked[0]).isFalse();
+    }
+
+    @Test
+    public void whenPlacementIsSet_setOrCallPlacementCallback_callsPlacementCallback() {
+        final boolean[] callbackWasInvoked = {false};
+        subject.placementSet = true;
+        subject.setOrCallPlacementCallback(new Callback<Placement>() {
+            @Override
+            public void call(Placement result) {
+                callbackWasInvoked[0] = true;
+            }
+        });
+        assertThat(callbackWasInvoked[0]).isTrue();
+    }
+
+    @Test
+    public void whenPlacementIsNotSet_setOrCallPlacementCallback_setsPlacementCallback() {
+        final boolean[] callbackWasInvoked = {false};
+        subject.placementSet = false;
+        Callback<Placement> callback = new Callback<Placement>() {
+            @Override
+            public void call(Placement result) {
+                callbackWasInvoked[0] = true;
+            }
+        };
+
+        subject.setOrCallPlacementCallback(callback);
+        assertThat(callbackWasInvoked[0]).isFalse();
+    }
+
+    @Test
+    public void constructor_setsCorrectDefaultPlacement() {
+        assertThat(subject.placement.getArticlesBetweenAds()).isEqualTo(Integer.MAX_VALUE);
+        assertThat(subject.placement.getArticlesBeforeFirstAd()).isEqualTo(Integer.MAX_VALUE);
     }
 }

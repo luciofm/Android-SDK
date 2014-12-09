@@ -28,6 +28,7 @@ public class SharethroughListAdapterTest extends TestBase {
     private Sharethrough sharethrough;
     private ArgumentCaptor<Callback> placementCallbackArgumentCaptor;
     @Mock private BasicAdView mockAdView;
+    @Mock private Placement placement;
 
     @Before
     public void setUp() throws Exception {
@@ -35,18 +36,21 @@ public class SharethroughListAdapterTest extends TestBase {
         when(adapter.getCount()).thenReturn(4);
         when(adapter.getItem(anyInt())).thenReturn(new String("feedItem"));
 
+        when(placement.getArticlesBeforeFirstAd()).thenReturn(3);
+        when(placement.getArticlesBetweenAds()).thenReturn(Integer.MAX_VALUE);
+
         when(mockAdView.getAdView()).thenReturn(mockAdView);
 
         sharethrough = mock(Sharethrough.class);
 
         when(sharethrough.getAdView(any(Context.class), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), any(IAdView.class))).thenReturn(mockAdView);
-
+        sharethrough.placement = placement;
         subject = new SharethroughListAdapter(Robolectric.application, adapter, sharethrough, R.layout.ad, R.id.title, R.id.description, R.id.advertiser, R.id.thumbnail, R.id.optout, R.id.brand_logo);
         verify(adapter).registerDataSetObserver(any(DataSetObserver.class));
 
         placementCallbackArgumentCaptor = ArgumentCaptor.forClass(Callback.class);
-        verify(sharethrough).getPlacement(placementCallbackArgumentCaptor.capture());
-        placementCallbackArgumentCaptor.getValue().call(new Placement(3, Integer.MAX_VALUE));
+        verify(sharethrough).setOrCallPlacementCallback(placementCallbackArgumentCaptor.capture());
+        placementCallbackArgumentCaptor.getValue().call(sharethrough.placement);
     }
 
     @Test
@@ -100,7 +104,9 @@ public class SharethroughListAdapterTest extends TestBase {
             }
         });
 
-        placementCallbackArgumentCaptor.getValue().call(new Placement(2, 1));
+        when(sharethrough.placement.getArticlesBeforeFirstAd()).thenReturn(2);
+        when(sharethrough.placement.getArticlesBetweenAds()).thenReturn(1);
+        placementCallbackArgumentCaptor.getValue().call(sharethrough.placement);
         assertThat(subject.getCount()).isEqualTo(199);
         assertThat(subject.getItem(0)).isSameAs(strings[0]);
         assertThat(subject.getItem(1)).isSameAs(strings[1]);
@@ -276,9 +282,10 @@ public class SharethroughListAdapterTest extends TestBase {
 
         Robolectric.pauseMainLooper();
 
-        ArgumentCaptor<Callback> callbackArgumentCaptor = ArgumentCaptor.forClass(Callback.class);
-        verify(sharethrough).getPlacement(callbackArgumentCaptor.capture());
-        callbackArgumentCaptor.getValue().call(new Placement(1, 2));
+        when(sharethrough.placement.getArticlesBeforeFirstAd()).thenReturn(2);
+        when(sharethrough.placement.getArticlesBetweenAds()).thenReturn(1);
+
+        placementCallbackArgumentCaptor.getValue().call(sharethrough.placement);
 
         assertThat(wasChanged[0]).isFalse();
         Robolectric.unPauseMainLooper();
@@ -301,7 +308,10 @@ public class SharethroughListAdapterTest extends TestBase {
             }
         });
 
-        placementCallbackArgumentCaptor.getValue().call(new Placement(2, 1));
+        when(sharethrough.placement.getArticlesBeforeFirstAd()).thenReturn(2);
+        when(sharethrough.placement.getArticlesBetweenAds()).thenReturn(1);
+
+        placementCallbackArgumentCaptor.getValue().call(sharethrough.placement);
         assertThat(subject.getCount()).isEqualTo(199);
         assertThat(subject.getView(0, null, mock(ViewGroup.class))).isSameAs(views[0]);
         assertThat(subject.getView(1, null, mock(ViewGroup.class))).isSameAs(views[1]);
@@ -327,6 +337,9 @@ public class SharethroughListAdapterTest extends TestBase {
             }
         });
 
+        sharethrough.placement = mock(Placement.class);
+        when(sharethrough.placement.getArticlesBetweenAds()).thenReturn(Integer.MAX_VALUE);
+        when(sharethrough.placement.getArticlesBeforeFirstAd()).thenReturn(Integer.MAX_VALUE);
         subject = new SharethroughListAdapter(Robolectric.application, adapter, sharethrough, R.layout.ad, R.id.title, R.id.description, R.id.advertiser, R.id.thumbnail, R.id.optout, R.id.brand_logo);
 
         assertThat(subject.getCount()).isEqualTo(views.length);
