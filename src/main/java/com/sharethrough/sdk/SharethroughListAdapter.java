@@ -18,8 +18,6 @@ public class SharethroughListAdapter extends BaseAdapter {
     private final ListAdapter mAdapter;
     private final Context mContext;
     private final Sharethrough mSharethrough;
-    private Placement placement;
-
     private final int adLayoutResourceId;
     private final int titleViewId;
     private final int descriptionViewId;
@@ -65,15 +63,12 @@ public class SharethroughListAdapter extends BaseAdapter {
         });
 
         this.adLayoutResourceId = adLayoutResourceId;
-
-        placement = new Placement(Integer.MAX_VALUE, Integer.MAX_VALUE);
-        sharethrough.getPlacement(new Callback<Placement>() {
+        mSharethrough.setOrCallPlacementCallback(new Callback<Placement>() {
             @Override
             public void call(final Placement result) {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        placement = result;
                         notifyDataSetChanged();
                     }
                 });
@@ -149,26 +144,26 @@ public class SharethroughListAdapter extends BaseAdapter {
     }
 
     private int adjustedPosition(int position) {
-        if (position < placement.getArticlesBeforeFirstAd()) {
+        if (position < mSharethrough.placement.getArticlesBeforeFirstAd()) {
             return position;
         } else {
-            int numberOfAdsShown = 1 + (position - placement.getArticlesBeforeFirstAd()) / (placement.getArticlesBetweenAds() + 1);
+            int numberOfAdsShown = 1 + (position - mSharethrough.placement.getArticlesBeforeFirstAd()) / (mSharethrough.placement.getArticlesBetweenAds() + 1);
             return position - numberOfAdsShown;
         }
     }
 
     private boolean isAd(int position) {
-        int articlesBeforeFirstAd = placement.getArticlesBeforeFirstAd();
+        int articlesBeforeFirstAd = mSharethrough.placement.getArticlesBeforeFirstAd();
         return position == articlesBeforeFirstAd ||
                 position >= articlesBeforeFirstAd &&
-                        0 == (position - articlesBeforeFirstAd) % (placement.getArticlesBetweenAds() + 1);
+                        0 == (position - articlesBeforeFirstAd) % (mSharethrough.placement.getArticlesBetweenAds() + 1);
     }
 
     private int numberOfAds(int count) {
-        if (count < placement.getArticlesBeforeFirstAd()) {
+        if (count < mSharethrough.placement.getArticlesBeforeFirstAd()) {
             return 0;
         }
-        return 1 + (count - placement.getArticlesBeforeFirstAd()) / placement.getArticlesBetweenAds();
+        return 1 + (count - mSharethrough.placement.getArticlesBeforeFirstAd()) / mSharethrough.placement.getArticlesBetweenAds();
     }
 
     /**

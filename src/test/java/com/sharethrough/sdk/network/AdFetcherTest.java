@@ -23,7 +23,8 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 public class AdFetcherTest extends TestBase {
-    private static final String FIXTURE = Fixtures.getFile("assets/str_ad_youtube.json");
+    private static final String SINGLE_LAYOUT_FIXTURE = Fixtures.getFile("assets/str_single_ad_youtube.json");
+    private static final String MULTIPLE_LAYOUT_FIXTURE = Fixtures.getFile("assets/str_multiple_ad_youtube.json");
     private static final String NO_ADS_FIXTURE = Fixtures.getFile("assets/str_no_creatives.json");
     @Mock private ExecutorService executorService;
     @Mock private BeaconService beaconService;
@@ -31,10 +32,12 @@ public class AdFetcherTest extends TestBase {
     @Mock private Function<Creative, Void> creativeHandler;
     @Mock private Creative creative;
     @Mock private AdFetcher.Callback adFetcherCallback;
+    @Mock private Function<Placement, Void> placementHandler;
     private AdFetcher subject;
     private String apiUri;
     private String key;
-    @Captor private ArgumentCaptor<ImageFetcher.Callback> imageFetcherCallback;
+    @Captor
+    private ArgumentCaptor<ImageFetcher.Callback> imageFetcherCallback;
 
     @Before
     public void setUp() throws Exception {
@@ -46,9 +49,9 @@ public class AdFetcherTest extends TestBase {
 
     @Test
     public void fetchAds_whenServerReturnsAds_usesImageFetcherOnEachCreativeItReturns() throws Exception {
-        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, FIXTURE));
+        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
 
-        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback);
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
 
         verifyNoMoreInteractions(imageFetcher);
 
@@ -64,7 +67,7 @@ public class AdFetcherTest extends TestBase {
     public void fetchAds_whenServerRequestFails_doesNothing() throws Exception {
         Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(500, "Bad server"));
 
-        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback);
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
 
         Misc.runLast(executorService);
 
@@ -75,7 +78,7 @@ public class AdFetcherTest extends TestBase {
     public void fetchAds_whenExceptionOccursBeforeGettingHttpResponse_logsSomeStuff() throws Exception {
         Robolectric.addHttpResponseRule("GET", apiUri, null);
 
-        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback);
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
 
         Misc.runLast(executorService);
 
@@ -88,7 +91,7 @@ public class AdFetcherTest extends TestBase {
         String responseBody = "{234789wdfjkl ";
         Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, responseBody));
 
-        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback);
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
 
         Misc.runLast(executorService);
 
@@ -101,17 +104,17 @@ public class AdFetcherTest extends TestBase {
     @Test
     public void fetchAds_whenRequestReturnsZeroCreatives_callsFinshedLoadingWithNoAds() throws Exception {
         Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, NO_ADS_FIXTURE));
-        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback);
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
         Misc.runLast(executorService);
         verify(adFetcherCallback).finishedLoadingWithNoAds();
     }
 
     @Test
     public void fetchAds_whenRequestIsInProgress_doesNotStartNewRequest() throws Exception {
-        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, FIXTURE));
+        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
 
-        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback);
-        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback);
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
 
         ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
         verify(executorService).execute(runnableArgumentCaptor.capture());
@@ -120,14 +123,14 @@ public class AdFetcherTest extends TestBase {
 
     @Test
     public void fetchAds_whenPreviousRequestHasFinished_butImagesHaveNot_doesNotStartNewRequest() throws Exception {
-        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, FIXTURE));
+        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
 
-        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback);
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
 
         Misc.runLast(executorService);
         reset(executorService);
 
-        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback);
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
 
         verifyNoMoreInteractions(executorService);
     }
@@ -135,8 +138,8 @@ public class AdFetcherTest extends TestBase {
     @Test
     public void fetchAds_whenPreviousRequestAndNotAllImagesHaveFinished_doesNotStartNewRequest() throws Exception {
         // make first request
-        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, FIXTURE));
-        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback);
+        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
         Misc.runLast(executorService);
         reset(executorService);
 
@@ -145,7 +148,7 @@ public class AdFetcherTest extends TestBase {
         assertThat(imageFetcherCallback.getAllValues().size()).isGreaterThan(1);
         imageFetcherCallback.getAllValues().get(0).success(creative);
 
-        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback);
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
 
         verifyNoMoreInteractions(executorService);
     }
@@ -153,8 +156,8 @@ public class AdFetcherTest extends TestBase {
     @Test
     public void fetchAds_whenPreviousRequestAndAllImagesHaveFinished_startsNewRequest() throws Exception {
         // make first request
-        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, FIXTURE));
-        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback);
+        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
         Misc.runLast(executorService);
         reset(executorService);
 
@@ -164,7 +167,7 @@ public class AdFetcherTest extends TestBase {
             callback.success(creative);
         }
 
-        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback);
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
 
         verify(executorService).execute(any(Runnable.class));
     }
@@ -172,8 +175,8 @@ public class AdFetcherTest extends TestBase {
     @Test
     public void fetchAds_whenPreviousRequestAndAllImagesHaveFinished_doesCallback() throws Exception {
         // make first request
-        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, FIXTURE));
-        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback);
+        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
         Misc.runLast(executorService);
         reset(executorService);
 
@@ -189,8 +192,8 @@ public class AdFetcherTest extends TestBase {
     @Test
     public void fetchAds_whenPreviousRequestAndAllImagesHaveFinishedWithFailure_startsNewRequest() throws Exception {
         // make first request
-        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, FIXTURE));
-        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback);
+        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
         Misc.runLast(executorService);
         reset(executorService);
 
@@ -200,16 +203,75 @@ public class AdFetcherTest extends TestBase {
             callback.failure();
         }
 
-        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback);
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
 
         verify(executorService).execute(any(Runnable.class));
+    }
+
+    @Test
+    public void fetchAds_whenLayoutIsMultiple_callsApplyOnPlacementHandler() throws Exception {
+        final boolean[] placementHandlerWascalled = {false};
+        placementHandler = new Function<Placement, Void>() {
+            @Override
+            public Void apply(Placement placement) {
+                placementHandlerWascalled[0] = true;
+                assertThat(placement.getArticlesBeforeFirstAd()).isEqualTo(2);
+                assertThat(placement.getArticlesBetweenAds()).isEqualTo(3);
+                return null;
+            }
+        };
+
+        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, MULTIPLE_LAYOUT_FIXTURE));
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
+        Misc.runLast(executorService);
+        assertThat(placementHandlerWascalled[0]).isTrue();
+    }
+
+    @Test
+    public void fetchAds_whenLayoutIsSingle_doesNotCallApplyOnPlacementHandler() throws Exception {
+        final boolean[] placementHandlerWascalled = {false};
+        placementHandler = new Function<Placement, Void>() {
+            @Override
+            public Void apply(Placement placement) {
+                placementHandlerWascalled[0] = true;
+                return null;
+            }
+        };
+
+        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
+        Misc.runLast(executorService);
+        assertThat(placementHandlerWascalled[0]).isFalse();
+    }
+
+    @Test
+    public void fetchAds_whenPlacementHasNotBeenSet_CallsApplyOnPlacementHandlerAndSetsPlacementSetToTrue() {
+        final int[] placementHandlerCalledCounter = {0};
+        placementHandler = new Function<Placement, Void>() {
+            @Override
+            public Void apply(Placement placement) {
+                placementHandlerCalledCounter[0]++;
+                return null;
+            }
+        };
+        // first time
+        Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(200, MULTIPLE_LAYOUT_FIXTURE));
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
+        Misc.runLast(executorService);
+        assertThat(placementHandlerCalledCounter[0]).isEqualTo(1);
+
+        //second time
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
+        Misc.runLast(executorService);
+        assertThat(placementHandlerCalledCounter[0]).isEqualTo(1);
+
     }
 
     @Test
     public void whenServerReturns204_doesNothing() throws Exception {
         Robolectric.addHttpResponseRule("GET", apiUri, new TestHttpResponse(204, "I got nothing for ya"));
 
-        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback);
+        subject.fetchAds(imageFetcher, apiUri, creativeHandler, adFetcherCallback, placementHandler);
 
         Misc.runLast(executorService);
 

@@ -21,6 +21,7 @@ public class AdFetcher {
     private final String placementKey;
     private boolean isRunning;
     private int remainingImageRequests;
+    private boolean placementSet;
 
     public AdFetcher(Context context, String placementKey, ExecutorService executorService, BeaconService beaconService) {
         this.context = context;
@@ -29,7 +30,7 @@ public class AdFetcher {
         this.beaconService = beaconService;
     }
 
-    public synchronized void fetchAds(final ImageFetcher imageFetcher, final String apiUrl, final Function<Creative, Void> creativeHandler, final Callback adFetcherCallback) {
+    public synchronized void fetchAds(final ImageFetcher imageFetcher, final String apiUrl, final Function<Creative, Void> creativeHandler, final Callback adFetcherCallback, final Function<Placement, Void> placementHandler) {
         if (isRunning) return;
         isRunning = true;
         executorService.execute(new Runnable() {
@@ -46,6 +47,11 @@ public class AdFetcher {
                     InputStream content = client.execute(request).getEntity().getContent();
                     json = Misc.convertStreamToString(content);
                     Response response = getResponse(json);
+
+                    if (response.placement.layout.equals("multiple") && !placementSet) {
+                        placementHandler.apply(new Placement(response.placement.articlesBeforeFirstAd, response.placement.articlesBetweenAds));
+                        placementSet = true;
+                    }
 
                     remainingImageRequests += response.creatives.size();
                     if (remainingImageRequests == 0) {
@@ -112,6 +118,13 @@ public class AdFetcher {
     private Response getResponse(String json) throws JSONException {
         JSONObject jsonResponse = new JSONObject(json);
         Response response = new Response();
+        JSONObject jsonPlacement = jsonResponse.getJSONObject("placement");
+        Response.Placement placement = new Response.Placement();
+        placement.layout = jsonPlacement.getString("layout");
+        placement.articlesBeforeFirstAd = jsonPlacement.optInt("articlesBeforeFirstAd", Integer.MAX_VALUE);
+        placement.articlesBetweenAds = jsonPlacement.optInt("articlesBetweenAds", Integer.MAX_VALUE);
+        response.placement = placement;
+
         JSONArray creatives = jsonResponse.getJSONArray("creatives");
         response.creatives = new ArrayList<>(creatives.length());
         for (int i = 0; i < creatives.length(); i++) {

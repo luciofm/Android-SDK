@@ -3,6 +3,18 @@ package com.sharethrough.sdk;
 import java.util.List;
 
 public class Response {
+    @JsonProperty("placement")
+    public Placement placement;
+
+    public static class Placement {
+        @JsonProperty("layout")
+        public String layout;
+        @JsonProperty("articlesBeforeFirstAd")
+        public int articlesBeforeFirstAd;
+        @JsonProperty("articlesBetweenAds")
+        public int articlesBetweenAds;
+    }
+
     @JsonProperty("creatives")
     public List<Creative> creatives;
 
@@ -43,7 +55,6 @@ public class Response {
             public String title;
             @JsonProperty("action")
             public String action;
-            @JsonProperty("custom_engagement_url")
             public String customEngagementUrl;
             @JsonProperty("custom_engagement_label")
             public String customEngagementLabel;

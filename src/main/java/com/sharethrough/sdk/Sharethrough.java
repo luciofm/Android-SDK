@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Methods to handle configuration for Sharethrough's Android SDK.
  */
+@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
 public class Sharethrough {
     public static final int DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
     private static final int MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
@@ -58,6 +59,14 @@ public class Sharethrough {
     private final Context context; //TODO decide whether this is needed
     private String dfpPath;
     private boolean firedNewAdsToShow;
+    public Placement placement;
+    public boolean placementSet;
+    private Function<Placement, Void> placementHandler;
+    private Callback<Placement> placementCallback = new Callback<Placement>() {
+        @Override
+        public void call(Placement result) {
+        }
+    };
 
     //TODO make the constructors cleaner
 
@@ -122,6 +131,7 @@ public class Sharethrough {
         this.placementFetcher = placementFetcher;
         this.adCacheTimeInMilliseconds = Math.max(adCacheTimeInMilliseconds, MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS);
         this.availableCreatives = availableCreatives;
+        placement = new Placement(Integer.MAX_VALUE, Integer.MAX_VALUE);
 
         if (placementKey == null) throw new KeyRequiredException("placement_key is required");
 
@@ -164,6 +174,19 @@ public class Sharethrough {
                 fireNoAdsToShow();
             }
         };
+
+        placementHandler = new Function<Placement, Void>() {
+            @Override
+            public Void apply(Placement placement) {
+                if (!placementSet) {
+                    Sharethrough.this.placement = placement;
+                    placementSet = true;
+                    placementCallback.call(placement);
+                }
+                return null;
+            }
+        };
+
         this.adFetcher = adFetcher;
         this.imageFetcher = imageFetcher;
 
@@ -202,7 +225,7 @@ public class Sharethrough {
     }
 
     private void invokeAdFetcher(String url) {
-        this.adFetcher.fetchAds(this.imageFetcher, url, creativeHandler, adFetcherCallback);
+        this.adFetcher.fetchAds(this.imageFetcher, url, creativeHandler, adFetcherCallback, placementHandler);
     }
 
     private void fetchDfpAds() {
@@ -285,9 +308,14 @@ public class Sharethrough {
         return adCacheTimeInMilliseconds;
     }
 
-    public void getPlacement(Callback<Placement> placementCallback) {
-        placementFetcher.fetch(placementCallback);
+    public void setOrCallPlacementCallback(Callback<Placement> placementCallback) {
+        if (placementSet){
+            placementCallback.call(placement);
+        } else {
+            this.placementCallback = placementCallback;
+        }
     }
+
 
     /**
      * Register a callback to be invoked when the status of having or not having ads to show changes.
