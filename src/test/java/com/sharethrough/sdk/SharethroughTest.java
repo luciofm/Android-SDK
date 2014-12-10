@@ -6,7 +6,6 @@ import android.widget.TextView;
 import com.sharethrough.sdk.network.AdFetcher;
 import com.sharethrough.sdk.network.DFPNetworking;
 import com.sharethrough.sdk.network.ImageFetcher;
-import com.sharethrough.sdk.network.PlacementFetcher;
 import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +32,6 @@ public class SharethroughTest extends TestBase {
     @Mock private AdFetcher adFetcher;
     @Mock private Creative creative;
     @Mock private CreativesQueue availableCreatives;
-    @Mock private PlacementFetcher placementFetcher;
     @Mock private Sharethrough.OnStatusChangeListener onStatusChangeListener;
     @Mock private Placement placement;
     @Mock private DFPNetworking dfpNetworking;
@@ -64,7 +62,7 @@ public class SharethroughTest extends TestBase {
 
     private void createSubject(String key) {
         subject = new Sharethrough(Robolectric.application, key, adCacheTimeInMilliseconds, renderer,
-                availableCreatives, beaconService, adFetcher, imageFetcher, placementFetcher, null);
+                availableCreatives, beaconService, adFetcher, imageFetcher, null);
         subject.setOnStatusChangeListener(onStatusChangeListener);
     }
 
@@ -304,7 +302,7 @@ public class SharethroughTest extends TestBase {
     }
 
     private void createDfpSubject(String key) {
-        subject = new Sharethrough(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, availableCreatives, beaconService, adFetcher, imageFetcher, placementFetcher, dfpNetworking);
+        subject = new Sharethrough(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, availableCreatives, beaconService, adFetcher, imageFetcher, dfpNetworking);
         subject.setOnStatusChangeListener(onStatusChangeListener);
     }
 

@@ -12,7 +12,6 @@ import android.util.LruCache;
 import com.sharethrough.sdk.network.AdFetcher;
 import com.sharethrough.sdk.network.DFPNetworking;
 import com.sharethrough.sdk.network.ImageFetcher;
-import com.sharethrough.sdk.network.PlacementFetcher;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -28,7 +27,6 @@ public class Sharethrough {
     public static final String USER_AGENT = System.getProperty("http.agent");
     private final Renderer renderer;
     private final BeaconService beaconService;
-    private final PlacementFetcher placementFetcher;
     private final int adCacheTimeInMilliseconds;
     private final DFPNetworking dfpNetworking;
     private String placementKey;
@@ -120,15 +118,14 @@ public class Sharethrough {
                 new BeaconService(new DateProvider(), UUID.randomUUID(), EXECUTOR_SERVICE, advertisingIdProvider),
                 new AdFetcher(context, placementKey, EXECUTOR_SERVICE, new BeaconService(new DateProvider(), UUID.randomUUID(),
                         EXECUTOR_SERVICE, advertisingIdProvider)), new ImageFetcher(EXECUTOR_SERVICE, placementKey),
-                new PlacementFetcher(placementKey, EXECUTOR_SERVICE), dfpEnabled ? new DFPNetworking() : null);
+                dfpEnabled ? new DFPNetworking() : null);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-    Sharethrough(final Context context, final String placementKey, int adCacheTimeInMilliseconds, final Renderer renderer, final CreativesQueue availableCreatives, final BeaconService beaconService, AdFetcher adFetcher, ImageFetcher imageFetcher, PlacementFetcher placementFetcher, DFPNetworking dfpNetworking) {
+    Sharethrough(final Context context, final String placementKey, int adCacheTimeInMilliseconds, final Renderer renderer, final CreativesQueue availableCreatives, final BeaconService beaconService, AdFetcher adFetcher, ImageFetcher imageFetcher, DFPNetworking dfpNetworking) {
         this.placementKey = placementKey;
         this.renderer = renderer;
         this.beaconService = beaconService;
-        this.placementFetcher = placementFetcher;
         this.adCacheTimeInMilliseconds = Math.max(adCacheTimeInMilliseconds, MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS);
         this.availableCreatives = availableCreatives;
         placement = new Placement(Integer.MAX_VALUE, Integer.MAX_VALUE);
