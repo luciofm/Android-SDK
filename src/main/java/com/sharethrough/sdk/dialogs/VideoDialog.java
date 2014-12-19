@@ -43,7 +43,6 @@ public class VideoDialog extends ShareableDialog {
 
         videoView = (VideoView) findViewById(R.id.video);
         final String mediaUrl = creative.getMediaUrl();
-        Log.d("Sharethrough", "loading video from: " + mediaUrl);
         videoView.setVideoURI(Uri.parse(mediaUrl));
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override

@@ -14,16 +14,18 @@ public class AdViewTimerTask extends TimerTask {
     private final BeaconService beaconService;
     private final Provider<Date> dateProvider;
     private final Sharethrough sharethrough;
+    private final int feedPosition;
     private boolean isCancelled;
     private boolean hasBeenShown;
     private Date visibleStartTime;
     private final int adCacheTimeInMilliseconds;
     private final int adViewHashCode;
 
-    public AdViewTimerTask(IAdView adView, Creative creative, BeaconService beaconService, Provider<Date> dateProvider,
+    public AdViewTimerTask(IAdView adView, int feedPosition, Creative creative, BeaconService beaconService, Provider<Date> dateProvider,
                            Sharethrough sharethrough) {
         this.adViewRef = new WeakReference<>(adView);
         this.adViewHashCode = adView.hashCode();
+        this.feedPosition = feedPosition;
         this.creative = creative;
         this.beaconService = beaconService;
         this.dateProvider = dateProvider;
@@ -65,7 +67,7 @@ public class AdViewTimerTask extends TimerTask {
         } else {
             if ((dateProvider.get().getTime() - (visibleStartTime.getTime())) >= adCacheTimeInMilliseconds) {
                 if (!isCurrentlyVisible(adView, rect)) {
-                    sharethrough.putCreativeIntoAdView(adView);
+                    sharethrough.putCreativeIntoAdView(adView, feedPosition);
                     cancel();
                 }
             }

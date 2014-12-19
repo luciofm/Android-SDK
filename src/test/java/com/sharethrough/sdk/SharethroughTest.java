@@ -91,7 +91,7 @@ public class SharethroughTest extends TestBase {
 
     private void verifyCreativeHasBeenPlacedInAdview(TestAdView adView) {
         ArgumentCaptor<Creative> creativeArgumentCaptor = ArgumentCaptor.forClass(Creative.class);
-        verify(renderer).putCreativeIntoAdView(eq(adView), creativeArgumentCaptor.capture(), eq(beaconService), eq(subject), any(Timer.class));
+        verify(renderer).putCreativeIntoAdView(eq(adView), creativeArgumentCaptor.capture(), eq(beaconService), eq(subject), eq(0), any(Timer.class));
         assertThat(creativeArgumentCaptor.getValue()).isSameAs(this.creative);
     }
 
@@ -264,8 +264,8 @@ public class SharethroughTest extends TestBase {
         IAdView generatedAdView = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
         IAdView generatedAdView2 = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
 
-        verify(renderer).putCreativeIntoAdView(same(generatedAdView), same(creative), same(beaconService), same(subject), any(Timer.class));
-        verify(renderer).putCreativeIntoAdView(same(generatedAdView2), same(creative), same(beaconService), same(subject), any(Timer.class));
+        verify(renderer).putCreativeIntoAdView(same(generatedAdView), same(creative), same(beaconService), same(subject), eq(adSlot), any(Timer.class));
+        verify(renderer).putCreativeIntoAdView(same(generatedAdView2), same(creative), same(beaconService), same(subject), eq(adSlot), any(Timer.class));
     }
 
     @Test
@@ -277,7 +277,7 @@ public class SharethroughTest extends TestBase {
 
         assertThat(generatedAdView).isSameAs(generatedAdView2);
 
-        verify(renderer, times(2)).putCreativeIntoAdView(same(generatedAdView), same(creative), same(beaconService), same(subject), any(Timer.class));
+        verify(renderer, times(2)).putCreativeIntoAdView(same(generatedAdView), same(creative), same(beaconService), same(subject), eq(adSlot), any(Timer.class));
     }
 
     @Test
@@ -288,8 +288,8 @@ public class SharethroughTest extends TestBase {
         IAdView generatedAdView2 = subject.getAdView(Robolectric.application, 2, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView);
 
         assertThat(generatedAdView).isSameAs(generatedAdView2);
-        verify(renderer).putCreativeIntoAdView(same(generatedAdView), same(creative), same(beaconService), same(subject), any(Timer.class));
-        verify(renderer).putCreativeIntoAdView(same(generatedAdView2), same(creative2), same(beaconService), same(subject), any(Timer.class));
+        verify(renderer).putCreativeIntoAdView(same(generatedAdView), same(creative), same(beaconService), same(subject), eq(1), any(Timer.class));
+        verify(renderer).putCreativeIntoAdView(same(generatedAdView2), same(creative2), same(beaconService), same(subject), eq(2), any(Timer.class));
     }
 
     @Test

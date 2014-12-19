@@ -21,8 +21,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class Renderer {
+
     public void putCreativeIntoAdView(final IAdView adView, final Creative creative, final BeaconService beaconService,
-                                      final Sharethrough sharethrough, final Timer timer) {
+    final Sharethrough sharethrough, final Timer timer) {
+        putCreativeIntoAdView(adView, creative, beaconService, sharethrough, 0, timer);
+    }
+
+    public void putCreativeIntoAdView(final IAdView adView, final Creative creative, final BeaconService beaconService,
+                                      final Sharethrough sharethrough, final int feedPosition, final Timer timer) {
         final ViewGroup container = adView.getAdView();
         if (!creative.wasRendered) {
             beaconService.adReceived(container.getContext(), creative);
@@ -30,7 +36,7 @@ public class Renderer {
         }
         final Handler handler = new Handler(Looper.getMainLooper());
 
-        final TimerTask task = new AdViewTimerTask(adView, creative, beaconService, new DateProvider(), sharethrough);
+        final TimerTask task = new AdViewTimerTask(adView, feedPosition, creative, beaconService, new DateProvider(), sharethrough);
 
         container.setTag(creative);
 
