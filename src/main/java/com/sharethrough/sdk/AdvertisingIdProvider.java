@@ -27,7 +27,6 @@ public class AdvertisingIdProvider {
                         if (adInfo.isLimitAdTrackingEnabled()) {
                             advertisingId = defaultRandomAdvertisingId;
                         }
-                        Log.i("Sharethrough", "advertising ID 2: " + advertisingId);
                     } catch (Exception e) {
                         Log.d("Sharethrough", "Google Play Advertising Id failure", e);
                     }

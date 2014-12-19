@@ -23,6 +23,7 @@ public class AdViewTimerTaskTest extends TestBase {
     private long now;
     private boolean isVisible;
     private AdViewTimerTask subject;
+    private int feedPosition = 0;
     private Sharethrough sharethrough;
 
     @Before
@@ -44,7 +45,7 @@ public class AdViewTimerTaskTest extends TestBase {
         sharethrough = mock(Sharethrough.class);
         when(sharethrough.getAdCacheTimeInMilliseconds()).thenReturn((int) TimeUnit.SECONDS.toMillis(20));
 
-        subject = new AdViewTimerTask(adView, creative, beaconService, dateProvider, sharethrough);
+        subject = new AdViewTimerTask(adView, feedPosition, creative, beaconService, dateProvider, sharethrough);
     }
 
     @Test
@@ -127,7 +128,7 @@ public class AdViewTimerTaskTest extends TestBase {
 
         now += TimeUnit.SECONDS.toMillis(1);
         subject.run();
-        verify(sharethrough).putCreativeIntoAdView(adView);
+        verify(sharethrough).putCreativeIntoAdView(adView, feedPosition);
 
         now += TimeUnit.SECONDS.toMillis(1);
         subject.run();
@@ -145,7 +146,7 @@ public class AdViewTimerTaskTest extends TestBase {
 
         isVisible = false;
         subject.run();
-        verify(sharethrough).putCreativeIntoAdView(adView);
+        verify(sharethrough).putCreativeIntoAdView(adView, feedPosition);
     }
 
     private void makeAdViewVisible() {

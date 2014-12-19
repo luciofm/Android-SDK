@@ -33,7 +33,6 @@ public class ImageFetcher {
 
                     URI imageURI = URIUtils.resolve(apiURI, responseCreative.creative.thumbnailUrl);
                     HttpGet imageRequest = new HttpGet(imageURI);
-                    Log.d("Sharethrough", "fetching image:\t" + imageURI.toString());
                     imageRequest.addHeader("User-Agent", Sharethrough.USER_AGENT);
                     HttpResponse imageResponse = client.execute(imageRequest);
                     if (imageResponse.getStatusLine().getStatusCode() == 200) {

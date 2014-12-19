@@ -34,7 +34,7 @@ public class Sharethrough {
     private String dfpApiUrlPrefix = "&creative_key=";
     static final ExecutorService EXECUTOR_SERVICE = DefaultSharethroughExecutorServiceProivder.create();
     private final CreativesQueue availableCreatives;
-    private final SynchronizedWeakOrderedSet<IAdView> waitingAdViews = new SynchronizedWeakOrderedSet<>();
+    private final SynchronizedWeakOrderedSet<AdViewFeedPositionPair> waitingAdViews = new SynchronizedWeakOrderedSet<>();
     private final Function<Creative, Void> creativeHandler;
     private AdFetcher adFetcher;
     private ImageFetcher imageFetcher;
@@ -146,9 +146,10 @@ public class Sharethrough {
             @Override
             public Void apply(Creative creative) {
                 synchronized (waitingAdViews) {
-                    IAdView adView = waitingAdViews.popNext();
-                    if (adView != null) {
-                        renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this, new Timer("AdView timer for " + creative));
+                    AdViewFeedPositionPair adViewFeedPositionPair = waitingAdViews.popNext();
+                    if (adViewFeedPositionPair != null) {
+                        creativesBySlot.put((int) adViewFeedPositionPair.feedPosition, creative);
+                        renderer.putCreativeIntoAdView((IAdView) adViewFeedPositionPair.adView, creative, beaconService, Sharethrough.this, (int) adViewFeedPositionPair.feedPosition, new Timer("AdView timer for " + creative));
                     } else {
                         Sharethrough.this.availableCreatives.add(creative);
                         fireNewAdsToShow();
@@ -281,6 +282,7 @@ public class Sharethrough {
         Creative creative = creativesBySlot.get(feedPosition);
 
         long currentTime = new Date().getTime();
+
         if (creative != null && currentTime - creative.renderedTime >= adCacheTimeInMilliseconds) { //TODO make logic better
             creativesBySlot.remove(feedPosition);
             creative = null;
@@ -295,9 +297,9 @@ public class Sharethrough {
         }
         if (creative != null) {
             creativesBySlot.put(feedPosition, creative);
-            renderer.putCreativeIntoAdView(adView, creative, beaconService, this, new Timer("AdView timer for " + creative));
+            renderer.putCreativeIntoAdView(adView, creative, beaconService, this, feedPosition, new Timer("AdView timer for " + creative));
         } else {
-            waitingAdViews.put(adView);
+            waitingAdViews.put(new AdViewFeedPositionPair<>(adView, feedPosition));
         }
     }
 

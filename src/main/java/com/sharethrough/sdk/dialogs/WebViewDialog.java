@@ -57,13 +57,11 @@ public class WebViewDialog extends ShareableDialog {
         lifecycleCallbacks = new BaseActivityLifecycleCallbacks() {
             @Override
             public void onActivityPaused(Activity activity) {
-                Log.d("Sharethrough", "onPause:" + activity);
                 webView.onPause();
             }
 
             @Override
             public void onActivityResumed(Activity activity) {
-                Log.d("Sharethrough", "onResume:" + activity);
                 webView.onResume();
             }
         };
@@ -80,7 +78,6 @@ public class WebViewDialog extends ShareableDialog {
     }
 
     protected void loadPage() {
-        Log.d("Sharethrough", "WebView showing: " + creative.getMediaUrl());
         webView.loadUrl(creative.getMediaUrl());
     }
 
