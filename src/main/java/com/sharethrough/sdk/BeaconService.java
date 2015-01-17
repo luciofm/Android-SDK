@@ -24,12 +24,14 @@ public class BeaconService {
     private final ExecutorService executorService;
     private final AdvertisingIdProvider advertisingIdProvider;
     private final UUID session;
+    private final String appPackageName;
 
-    public BeaconService(final Provider<Date> dateProvider, final UUID session, final ExecutorService executorService, final AdvertisingIdProvider advertisingIdProvider) {
+    public BeaconService(final Provider<Date> dateProvider, final UUID session, final ExecutorService executorService, final AdvertisingIdProvider advertisingIdProvider, String appPackageName) {
         this.dateProvider = dateProvider;
         this.session = session;
         this.executorService = executorService;
         this.advertisingIdProvider = advertisingIdProvider;
+        this.appPackageName = appPackageName;
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -48,7 +50,7 @@ public class BeaconService {
         result.put("uid", advertisingIdProvider.getAdvertisingId());
         result.put("session", session.toString());
 
-        result.put("ua", "" + Sharethrough.USER_AGENT);
+        result.put("ua", "" + Sharethrough.USER_AGENT + "; " + appPackageName);
 
         return result;
     }
@@ -151,7 +153,7 @@ public class BeaconService {
                 Log.i("Sharethrough", "beacon:\t" + url);
                 try {
                     HttpGet request = new HttpGet(url);
-                    request.addHeader("User-Agent", Sharethrough.USER_AGENT);
+                    request.addHeader("User-Agent", Sharethrough.USER_AGENT + "; " + appPackageName);
                     client.execute(request);
                 } catch (Exception e) {
                     Log.e("Sharethrough", "beacon fire failed for " + url, e);

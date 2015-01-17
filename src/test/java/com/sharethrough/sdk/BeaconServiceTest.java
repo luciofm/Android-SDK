@@ -46,7 +46,7 @@ public class BeaconServiceTest extends TestBase {
         expectedCommonParams.put("session", session.toString());
         advertisingId = "abc";
         expectedCommonParams.put("uid", advertisingId);
-        expectedCommonParams.put("ua", "" + Sharethrough.USER_AGENT);
+        expectedCommonParams.put("ua", "" + Sharethrough.USER_AGENT + "; " + "com.example.sdk");
 
         responseCreative = new Response.Creative();
         responseCreative.creative = new Response.Creative.CreativeInner();
@@ -67,7 +67,7 @@ public class BeaconServiceTest extends TestBase {
         executorService = mock(ExecutorService.class);
         advertisingIdProvider = mock(AdvertisingIdProvider.class);
         when(advertisingIdProvider.getAdvertisingId()).thenReturn(advertisingId);
-        subject = new BeaconService(new DateProvider(), session, executorService, advertisingIdProvider);
+        subject = new BeaconService(new DateProvider(), session, executorService, advertisingIdProvider, "com.example.sdk");
     }
 
     @Test
