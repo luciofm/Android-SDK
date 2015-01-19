@@ -256,7 +256,7 @@ public class RendererTest {
         assertThat(optout.getMinimumHeight()).isEqualTo(20);
         assertThat(optout.getMinimumWidth()).isEqualTo(20);
         optout.performClick();
-        ANDROID.assertThat(shadowOf(Robolectric.application).getNextStartedActivity()).isEqualTo(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.sharethrough.com/privacy-policy/")));
+        ANDROID.assertThat(shadowOf(Robolectric.application).getNextStartedActivity()).isEqualTo(new Intent(Intent.ACTION_VIEW, Uri.parse(Sharethrough.PRIVACY_POLICY_ENDPOINT)));
     }
 
     public static MyTestAdView makeAdView() {

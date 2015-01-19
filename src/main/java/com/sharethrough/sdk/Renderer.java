@@ -132,7 +132,7 @@ public class Renderer {
         optout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent privacyIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.sharethrough.com/privacy-policy/"));
+                Intent privacyIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Sharethrough.PRIVACY_POLICY_ENDPOINT));
                 v.getContext().startActivity(privacyIntent);
             }
         });
