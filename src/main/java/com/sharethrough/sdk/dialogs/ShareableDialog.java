@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
@@ -26,9 +27,7 @@ public abstract class ShareableDialog extends Dialog {
 
     public ShareableDialog(Context context, int theme, BeaconService beaconService) {
         super(context, theme);
-
         requestWindowFeature(Window.FEATURE_ACTION_BAR);
-
         this.beaconService = beaconService;
     }
 
@@ -38,8 +37,7 @@ public abstract class ShareableDialog extends Dialog {
 
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setBackgroundDrawable(new ColorDrawable(getContext().getResources().getColor(android.R.color.transparent)));
-
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.BLACK));
         new MenuInflater(getContext()).inflate(R.menu.share_menu, menu);
 
         Creative creative = getCreative();
