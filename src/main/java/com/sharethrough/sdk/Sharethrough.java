@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 public class Sharethrough {
     public static final int DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
     private static final int MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
-    private static final String SDK_VERSION_NUMBER = "1.0.2";
+    private static final String SDK_VERSION_NUMBER = "1.0.3";
     public static String USER_AGENT = System.getProperty("http.agent") + "; STR " + SDK_VERSION_NUMBER;
     public static final String PRIVACY_POLICY_ENDPOINT = "http://native.sharethrough.com/privacy-policy.html";
     private final Renderer renderer;
