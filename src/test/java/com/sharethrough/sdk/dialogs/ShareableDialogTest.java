@@ -1,12 +1,14 @@
 package com.sharethrough.sdk.dialogs;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -27,6 +29,7 @@ import org.robolectric.res.builder.RobolectricPackageManager;
 import org.robolectric.shadows.ShadowContext;
 import org.robolectric.shadows.ShadowMenuInflater;
 import org.robolectric.tester.android.view.TestMenuItem;
+import org.robolectric.util.ActivityController;
 
 import java.util.Arrays;
 
@@ -41,6 +44,7 @@ public class ShareableDialogTest extends TestBase {
     private ShareableDialog subject;
     private Creative creative;
     private BeaconService beaconService;
+    private ActivityController<Activity> activityController;
 
     @Before
     public void setUp() throws Exception {
@@ -49,7 +53,6 @@ public class ShareableDialogTest extends TestBase {
         when(creative.getShareUrl()).thenReturn("http://share.me/with/friends");
 
         beaconService = mock(BeaconService.class);
-
         subject = new ShareableDialog(Robolectric.application, android.R.style.Theme_Black, beaconService) {
             @Override
             protected Creative getCreative() {
@@ -57,6 +60,7 @@ public class ShareableDialogTest extends TestBase {
             }
         };
         subject.show();
+        activityController = Robolectric.buildActivity(Activity.class).create().start().resume().visible();
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
