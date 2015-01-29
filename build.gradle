@@ -33,7 +33,7 @@ android {
     }
 
     compileSdkVersion 19
-    buildToolsVersion '19.1.0'
+    buildToolsVersion '21.1.1'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -69,7 +69,13 @@ android {
         versionCode 1
         versionName "1.0.2"
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
+        multiDexEnabled true
     }
+
+    dexOptions {
+        javaMaxHeapSize "2g"
+    }
+
     buildTypes {
         debug {
             minifyEnabled false
