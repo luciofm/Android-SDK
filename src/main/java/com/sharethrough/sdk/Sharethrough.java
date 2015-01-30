@@ -233,7 +233,11 @@ public class Sharethrough {
         if (creativeKey == null) {
             fetchDfpPath();
         } else {
-            invokeAdFetcher(apiUrlPrefix + placementKey + dfpApiUrlPrefix + creativeKey);
+            if (creativeKey.equals("STX_BACKFILL")){
+                invokeAdFetcher(apiUrlPrefix + placementKey);
+            } else {
+                invokeAdFetcher(apiUrlPrefix + placementKey + dfpApiUrlPrefix + creativeKey);
+            }
         }
     }
 
