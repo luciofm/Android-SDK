@@ -2,6 +2,8 @@ package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
@@ -25,13 +27,22 @@ public class BeaconService {
     private final AdvertisingIdProvider advertisingIdProvider;
     private final UUID session;
     private final String appPackageName;
+    private final Context context;
+    private String appVersionName;
 
-    public BeaconService(final Provider<Date> dateProvider, final UUID session, final ExecutorService executorService, final AdvertisingIdProvider advertisingIdProvider, String appPackageName) {
+    public BeaconService(final Provider<Date> dateProvider, final UUID session, final ExecutorService executorService, final AdvertisingIdProvider advertisingIdProvider, Context context) {
         this.dateProvider = dateProvider;
         this.session = session;
         this.executorService = executorService;
         this.advertisingIdProvider = advertisingIdProvider;
-        this.appPackageName = appPackageName;
+        this.context = context;
+        appPackageName = context.getPackageName();
+        try {
+            appVersionName = context.getPackageManager().getPackageInfo(appPackageName, PackageManager.GET_META_DATA).versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            appVersionName = "unknown";
+            e.printStackTrace();
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -51,6 +62,8 @@ public class BeaconService {
         result.put("session", session.toString());
 
         result.put("ua", "" + Sharethrough.USER_AGENT + "; " + appPackageName);
+        result.put("appName", appPackageName);
+        result.put("appId", appVersionName);
 
         return result;
     }
@@ -87,7 +100,7 @@ public class BeaconService {
         fireBeacon(beaconParams);
     }
 
-    public void adRequested(final Context context, final String placementKey) {
+    public void adRequested(final String placementKey) {
         Map<String, String> beaconParams = commonParams(context);
         beaconParams.put("type", "impressionRequest");
         beaconParams.put("pkey", placementKey);

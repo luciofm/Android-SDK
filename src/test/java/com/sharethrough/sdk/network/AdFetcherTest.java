@@ -44,7 +44,7 @@ public class AdFetcherTest extends TestBase {
         String apiUriPrefix = "http://api?key=";
         apiUri = apiUriPrefix + key;
         key = "key";
-        subject = new AdFetcher(Robolectric.application, key, executorService, beaconService);
+        subject = new AdFetcher(key, executorService, beaconService);
     }
 
     @Test
@@ -57,7 +57,7 @@ public class AdFetcherTest extends TestBase {
 
         Misc.runLast(executorService);
 
-        verify(beaconService).adRequested(Robolectric.application, key);
+        verify(beaconService).adRequested(key);
 
         verifyFetchedImage(imageFetcher, "//th.umb.na/il/URL1", apiUri, creativeHandler);
         verifyFetchedImage(imageFetcher, "//th.umb.na/il/URL2", apiUri, creativeHandler);

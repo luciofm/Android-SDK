@@ -1,6 +1,5 @@
 package com.sharethrough.sdk.network;
 
-import android.content.Context;
 import android.util.Log;
 import com.sharethrough.sdk.*;
 import org.apache.http.client.methods.HttpGet;
@@ -17,14 +16,12 @@ import java.util.concurrent.ExecutorService;
 public class AdFetcher {
     private final ExecutorService executorService;
     private final BeaconService beaconService;
-    private final Context context;
     private final String placementKey;
     private boolean isRunning;
     private int remainingImageRequests;
     private boolean placementSet;
 
-    public AdFetcher(Context context, String placementKey, ExecutorService executorService, BeaconService beaconService) {
-        this.context = context;
+    public AdFetcher(String placementKey, ExecutorService executorService, BeaconService beaconService) {
         this.placementKey = placementKey;
         this.executorService = executorService;
         this.beaconService = beaconService;
@@ -36,7 +33,7 @@ public class AdFetcher {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                beaconService.adRequested(context, placementKey);
+                beaconService.adRequested(placementKey);
                 final URI uri = URI.create(apiUrl);
                 String json = null;
                 try {

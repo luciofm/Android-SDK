@@ -1,5 +1,8 @@
 package com.sharethrough.sdk;
 
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import com.sharethrough.test.util.Misc;
 import org.apache.http.HttpRequest;
 import org.apache.http.NameValuePair;
@@ -7,6 +10,7 @@ import org.apache.http.RequestLine;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.robolectric.Robolectric;
 import org.robolectric.shadows.ShadowLog;
 import org.robolectric.tester.org.apache.http.HttpRequestInfo;
@@ -26,9 +30,12 @@ public class BeaconServiceTest extends TestBase {
     private Date now;
     private UUID session;
     private BeaconService subject;
-    private ExecutorService executorService;
+    @Mock private ExecutorService executorService;
     private Creative creative;
-    private AdvertisingIdProvider advertisingIdProvider;
+    @Mock private AdvertisingIdProvider advertisingIdProvider;
+    @Mock private Context context;
+    @Mock private PackageManager packageManager;
+    @Mock private PackageInfo packageInfo;
     private String advertisingId;
     private Response.Creative responseCreative;
 
@@ -46,7 +53,9 @@ public class BeaconServiceTest extends TestBase {
         expectedCommonParams.put("session", session.toString());
         advertisingId = "abc";
         expectedCommonParams.put("uid", advertisingId);
-        expectedCommonParams.put("ua", "" + Sharethrough.USER_AGENT + "; " + "com.example.sdk");
+        expectedCommonParams.put("ua", "" + Sharethrough.USER_AGENT + "; " + "com.sharethrough.android.sdk");
+        expectedCommonParams.put("appName", "com.sharethrough.android.sdk");
+        expectedCommonParams.put("appId", Sharethrough.SDK_VERSION_NUMBER);
 
         responseCreative = new Response.Creative();
         responseCreative.creative = new Response.Creative.CreativeInner();
@@ -64,10 +73,13 @@ public class BeaconServiceTest extends TestBase {
         responseCreative.creative.beacon = beacon;
         creative = new Creative(responseCreative, new byte[0], new byte[0], "placement key");
 
-        executorService = mock(ExecutorService.class);
-        advertisingIdProvider = mock(AdvertisingIdProvider.class);
+        packageInfo.versionName = "fake_app_id";
         when(advertisingIdProvider.getAdvertisingId()).thenReturn(advertisingId);
-        subject = new BeaconService(new DateProvider(), session, executorService, advertisingIdProvider, "com.example.sdk");
+        when(context.getPackageName()).thenReturn("com.example.sdk");
+        when(context.getPackageManager()).thenReturn(packageManager);
+        when(packageManager.getPackageInfo("com.example.sdk", PackageManager.GET_META_DATA)).thenReturn(packageInfo);
+
+        subject = new BeaconService(new DateProvider(), session, executorService, advertisingIdProvider, Robolectric.application);
     }
 
     @Test
@@ -115,7 +127,7 @@ public class BeaconServiceTest extends TestBase {
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
             public void run() {
-                subject.adRequested(Robolectric.application, key);
+                subject.adRequested(key);
             }
         });
     }

@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 public class Sharethrough {
     public static final int DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
     private static final int MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
-    private static final String SDK_VERSION_NUMBER = "1.0.3";
+    public static final String SDK_VERSION_NUMBER = "1.0.3";
     public static String USER_AGENT = System.getProperty("http.agent") + "; STR " + SDK_VERSION_NUMBER;
     public static final String PRIVACY_POLICY_ENDPOINT = "http://native.sharethrough.com/privacy-policy.html";
     private final Renderer renderer;
@@ -117,9 +117,9 @@ public class Sharethrough {
 
     Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds, AdvertisingIdProvider advertisingIdProvider, boolean dfpEnabled) {
         this(context, placementKey, adCacheTimeInMilliseconds, new Renderer(), new CreativesQueue(),
-                new BeaconService(new DateProvider(), UUID.randomUUID(), EXECUTOR_SERVICE, advertisingIdProvider, context.getPackageName()),
-                new AdFetcher(context, placementKey, EXECUTOR_SERVICE, new BeaconService(new DateProvider(), UUID.randomUUID(),
-                        EXECUTOR_SERVICE, advertisingIdProvider, context.getPackageName())), new ImageFetcher(EXECUTOR_SERVICE, placementKey),
+                new BeaconService(new DateProvider(), UUID.randomUUID(), EXECUTOR_SERVICE, advertisingIdProvider, context),
+                new AdFetcher(placementKey, EXECUTOR_SERVICE, new BeaconService(new DateProvider(), UUID.randomUUID(),
+                        EXECUTOR_SERVICE, advertisingIdProvider, context)), new ImageFetcher(EXECUTOR_SERVICE, placementKey),
                 dfpEnabled ? new DFPNetworking() : null);
     }
 
