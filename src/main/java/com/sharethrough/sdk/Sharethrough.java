@@ -12,6 +12,8 @@ import android.util.LruCache;
 import com.sharethrough.sdk.network.AdFetcher;
 import com.sharethrough.sdk.network.DFPNetworking;
 import com.sharethrough.sdk.network.ImageFetcher;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -32,8 +34,7 @@ public class Sharethrough {
     private final int adCacheTimeInMilliseconds;
     private final DFPNetworking dfpNetworking;
     private String placementKey;
-    private String apiUrlPrefix = "http://btlr.sharethrough.com/v3?placement_key=";
-    private String dfpApiUrlPrefix = "&creative_key=";
+    private String apiUrlPrefix = "http://btlr.sharethrough.com/v3";
     static final ExecutorService EXECUTOR_SERVICE = DefaultSharethroughExecutorServiceProivder.create();
     private final CreativesQueue availableCreatives;
     private final SynchronizedWeakOrderedSet<AdViewFeedPositionPair> waitingAdViews = new SynchronizedWeakOrderedSet<>();
@@ -220,12 +221,14 @@ public class Sharethrough {
         if (dfpNetworking != null) {
             fetchDfpAds();
         } else {
-            invokeAdFetcher(apiUrlPrefix + placementKey);
+            ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>(1);
+            queryStringParams.add(new BasicNameValuePair("placement_key", placementKey));
+            invokeAdFetcher(apiUrlPrefix, queryStringParams);
         }
     }
 
-    private void invokeAdFetcher(String url) {
-        this.adFetcher.fetchAds(this.imageFetcher, url, creativeHandler, adFetcherCallback, placementHandler);
+    private void invokeAdFetcher(String url, ArrayList<NameValuePair> queryStringParams) {
+        this.adFetcher.fetchAds(this.imageFetcher, url, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
     }
 
     private void fetchDfpAds() {
@@ -233,7 +236,11 @@ public class Sharethrough {
         if (creativeKey == null) {
             fetchDfpPath();
         } else {
-            invokeAdFetcher(apiUrlPrefix + placementKey + dfpApiUrlPrefix + creativeKey);
+            ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>(2);
+            queryStringParams.add(new BasicNameValuePair("placement_key", placementKey));
+            queryStringParams.add(new BasicNameValuePair("creative_key", creativeKey));
+
+            invokeAdFetcher(apiUrlPrefix, queryStringParams);
         }
     }
 

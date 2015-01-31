@@ -178,4 +178,12 @@ public class BeaconService {
     private String replaceCacheBusterParam(String uri) {
         return uri.replaceAll("\\[timestamp\\]", String.valueOf(dateProvider.get().getTime()));
     }
+
+    public String getAppPackageName() {
+        return appPackageName;
+    }
+
+    public String getAppVersionName() {
+        return appVersionName;
+    }
 }

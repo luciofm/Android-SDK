@@ -2,8 +2,11 @@ package com.sharethrough.sdk.network;
 
 import android.util.Log;
 import com.sharethrough.sdk.*;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,6 +14,7 @@ import org.json.JSONObject;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public class AdFetcher {
@@ -27,16 +31,21 @@ public class AdFetcher {
         this.beaconService = beaconService;
     }
 
-    public synchronized void fetchAds(final ImageFetcher imageFetcher, final String apiUrl, final Function<Creative, Void> creativeHandler, final Callback adFetcherCallback, final Function<Placement, Void> placementHandler) {
+    public synchronized void fetchAds(final ImageFetcher imageFetcher, final String apiUrl, final ArrayList<NameValuePair> queryStringParams, final Function<Creative, Void> creativeHandler, final Callback adFetcherCallback, final Function<Placement, Void> placementHandler) {
         if (isRunning) return;
         isRunning = true;
         executorService.execute(new Runnable() {
             @Override
             public void run() {
                 beaconService.adRequested(placementKey);
-                final URI uri = URI.create(apiUrl);
+
+                queryStringParams.add(new BasicNameValuePair("appId", beaconService.getAppVersionName()));
+                queryStringParams.add(new BasicNameValuePair("appName", beaconService.getAppPackageName()));
+
+                String formattedQueryStringParams = URLEncodedUtils.format(queryStringParams, "utf-8");
+                final URI uri = URI.create(apiUrl + "?" + formattedQueryStringParams );
                 String json = null;
-                try {
+                    try {
 
                     DefaultHttpClient client = new DefaultHttpClient();
                     HttpGet request = new HttpGet(uri);
