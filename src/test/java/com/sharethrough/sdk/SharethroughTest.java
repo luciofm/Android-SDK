@@ -307,7 +307,7 @@ public class SharethroughTest extends TestBase {
     }
 
     @Test
-    public void whenDfpModeIsTrue_usesDfpNetworking() {
+    public void whenDfpModeIsTrueAndIsNotBackfill_usesDfpNetworking() {
         createDfpSubject(key);
         verify(dfpNetworking).fetchDFPPath(eq(executorService), eq(key), dfpPathFetcherCallback.capture());
 
@@ -319,6 +319,21 @@ public class SharethroughTest extends TestBase {
         dfpCreativeKeyCallback.getValue().receivedCreativeKey();
 
         verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri + "&creative_key=creativeKey"), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
+    }
+
+    @Test
+    public void whenDfpModeIsTrueAndIsBackfill_callsSTXAdServer() {
+        createDfpSubject(key);
+        verify(dfpNetworking).fetchDFPPath(eq(executorService), eq(key), dfpPathFetcherCallback.capture());
+
+        dfpPathFetcherCallback.getValue().receivedURL("dfpPath");
+        verify(dfpNetworking).fetchCreativeKey(eq(Robolectric.application), eq("dfpPath"), dfpCreativeKeyCallback.capture());
+
+        Sharethrough.addCreativeKey("dfpPath", "STX_BACKFILL");
+
+        dfpCreativeKeyCallback.getValue().receivedCreativeKey();
+
+        verify(adFetcher, atLeastOnce()).fetchAds(same(imageFetcher), eq(apiUri), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
     }
 
     @Test
