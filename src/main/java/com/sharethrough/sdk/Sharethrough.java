@@ -238,7 +238,9 @@ public class Sharethrough {
         } else {
             ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>(2);
             queryStringParams.add(new BasicNameValuePair("placement_key", placementKey));
-            queryStringParams.add(new BasicNameValuePair("creative_key", creativeKey));
+            if (!creativeKey.equals("STX_BACKFILL")){
+              queryStringParams.add(new BasicNameValuePair("creative_key", creativeKey));
+            }
 
             invokeAdFetcher(apiUrlPrefix, queryStringParams);
         }
