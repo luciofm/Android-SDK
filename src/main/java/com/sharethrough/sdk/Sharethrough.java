@@ -12,6 +12,8 @@ import android.util.LruCache;
 import com.sharethrough.sdk.network.AdFetcher;
 import com.sharethrough.sdk.network.DFPNetworking;
 import com.sharethrough.sdk.network.ImageFetcher;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -24,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 public class Sharethrough {
     public static final int DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
     private static final int MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
-    private static final String SDK_VERSION_NUMBER = "1.0.3";
+    public static final String SDK_VERSION_NUMBER = "1.0.3";
     public static String USER_AGENT = System.getProperty("http.agent") + "; STR " + SDK_VERSION_NUMBER;
     public static final String PRIVACY_POLICY_ENDPOINT = "http://native.sharethrough.com/privacy-policy.html";
     private final Renderer renderer;
@@ -32,8 +34,7 @@ public class Sharethrough {
     private final int adCacheTimeInMilliseconds;
     private final DFPNetworking dfpNetworking;
     private String placementKey;
-    private String apiUrlPrefix = "http://btlr.sharethrough.com/v3?placement_key=";
-    private String dfpApiUrlPrefix = "&creative_key=";
+    private String apiUrlPrefix = "http://btlr.sharethrough.com/v3";
     static final ExecutorService EXECUTOR_SERVICE = DefaultSharethroughExecutorServiceProivder.create();
     private final CreativesQueue availableCreatives;
     private final SynchronizedWeakOrderedSet<AdViewFeedPositionPair> waitingAdViews = new SynchronizedWeakOrderedSet<>();
@@ -117,9 +118,9 @@ public class Sharethrough {
 
     Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds, AdvertisingIdProvider advertisingIdProvider, boolean dfpEnabled) {
         this(context, placementKey, adCacheTimeInMilliseconds, new Renderer(), new CreativesQueue(),
-                new BeaconService(new DateProvider(), UUID.randomUUID(), EXECUTOR_SERVICE, advertisingIdProvider, context.getPackageName()),
-                new AdFetcher(context, placementKey, EXECUTOR_SERVICE, new BeaconService(new DateProvider(), UUID.randomUUID(),
-                        EXECUTOR_SERVICE, advertisingIdProvider, context.getPackageName())), new ImageFetcher(EXECUTOR_SERVICE, placementKey),
+                new BeaconService(new DateProvider(), UUID.randomUUID(), EXECUTOR_SERVICE, advertisingIdProvider, context),
+                new AdFetcher(placementKey, EXECUTOR_SERVICE, new BeaconService(new DateProvider(), UUID.randomUUID(),
+                        EXECUTOR_SERVICE, advertisingIdProvider, context)), new ImageFetcher(EXECUTOR_SERVICE, placementKey),
                 dfpEnabled ? new DFPNetworking() : null);
     }
 
@@ -220,12 +221,14 @@ public class Sharethrough {
         if (dfpNetworking != null) {
             fetchDfpAds();
         } else {
-            invokeAdFetcher(apiUrlPrefix + placementKey);
+            ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>(1);
+            queryStringParams.add(new BasicNameValuePair("placement_key", placementKey));
+            invokeAdFetcher(apiUrlPrefix, queryStringParams);
         }
     }
 
-    private void invokeAdFetcher(String url) {
-        this.adFetcher.fetchAds(this.imageFetcher, url, creativeHandler, adFetcherCallback, placementHandler);
+    private void invokeAdFetcher(String url, ArrayList<NameValuePair> queryStringParams) {
+        this.adFetcher.fetchAds(this.imageFetcher, url, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
     }
 
     private void fetchDfpAds() {
@@ -233,11 +236,13 @@ public class Sharethrough {
         if (creativeKey == null) {
             fetchDfpPath();
         } else {
-            if (creativeKey.equals("STX_BACKFILL")){
-                invokeAdFetcher(apiUrlPrefix + placementKey);
-            } else {
-                invokeAdFetcher(apiUrlPrefix + placementKey + dfpApiUrlPrefix + creativeKey);
+            ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>(2);
+            queryStringParams.add(new BasicNameValuePair("placement_key", placementKey));
+            if (!creativeKey.equals("STX_BACKFILL")){
+              queryStringParams.add(new BasicNameValuePair("creative_key", creativeKey));
             }
+
+            invokeAdFetcher(apiUrlPrefix, queryStringParams);
         }
     }
 
