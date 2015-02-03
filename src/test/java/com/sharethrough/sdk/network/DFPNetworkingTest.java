@@ -29,7 +29,7 @@ public class DFPNetworkingTest extends TestBase {
     @Mock
     private ExecutorService executorService;
     private final String key = "12345";
-    private final String apiUrl = "https://native.sharethrough.com/placements/" + key + "/sdk.json";
+    private final String apiUrl = "https://platform-cdn.sharethrough.com/placements/" + key + "/sdk.json";
     private DFPNetworking subject;
     private static final boolean[] loadedAd = new boolean[1];
 

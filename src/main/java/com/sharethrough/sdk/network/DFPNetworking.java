@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutorService;
 
 public class DFPNetworking {
 
-    private static String BASE_URL = "https://native.sharethrough.com/placements/";
+    private static String BASE_URL = "https://platform-cdn.sharethrough.com/placements/";
 
     public void fetchDFPPath(ExecutorService executorService, final String key, final DFPPathFetcherCallback callback) {
         executorService.execute(new Runnable() {
