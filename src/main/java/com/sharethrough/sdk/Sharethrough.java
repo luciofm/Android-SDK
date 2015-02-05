@@ -68,6 +68,7 @@ public class Sharethrough {
         public void call(Placement result) {
         }
     };
+    private Stack<Function> creativeHandlerStack;
 
     //TODO make the constructors cleaner
 
@@ -160,8 +161,24 @@ public class Sharethrough {
 //                }
 //
 //                return null;
-//            }
 //        };
+//            }
+
+        creativeHandlerStack = new Stack<Function>();
+        creativeHandler = new Function<Creative,Void>() {
+            @Override
+            public Void apply(Creative creative) {
+                if (creativeHandlerStack.size() == 0) {
+                    availableCreatives.add(creative);
+                    fireNewAdsToShow();
+                } else {
+                    Function<Creative, Void> creativeHandlerCallback = creativeHandlerStack.pop();
+                    creativeHandlerCallback.apply(creative);
+                }
+                return null;
+            }
+        };
+
         adFetcherCallback = new AdFetcher.Callback() {
             @Override
             public void finishedLoading() {
@@ -307,19 +324,15 @@ public class Sharethrough {
             creativesBySlot.put(feedPosition, creative);
             renderer.putCreativeIntoAdView(adView, creative, beaconService, this, feedPosition, new Timer("AdView timer for " + creative));
         } else {
-            creativeHandler = new Function<Creative, Void>() {
-                @Override
-                public Void apply(Creative creative) {
-                    if (creativesBySlot.get(feedPosition) != null) {
-                        availableCreatives.add(creative);
-                        fireNewAdsToShow();
-                    } else {
-                        creativesBySlot.put(feedPosition, creative);
-                        renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this, feedPosition, new Timer("AdView timer for " + creative));
-                    }
-                    return null;
-                }
-            };
+            creativeHandlerStack.push(
+                    new Function<Creative, Void>() {
+                        @Override
+                        public Void apply(Creative creative) {
+                            creativesBySlot.put(feedPosition, creative);
+                            renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this, feedPosition, new Timer("AdView timer for " + creative));
+                            return null;
+                        }
+                    });
         }
 
         synchronized (availableCreatives) {
