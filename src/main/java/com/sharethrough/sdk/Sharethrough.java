@@ -68,7 +68,7 @@ public class Sharethrough {
         public void call(Placement result) {
         }
     };
-    private Stack<Function> creativeHandlerStack;
+    private SynchronizedWeakOrderedSet<Function> creativeHandlerStack;
 
     //TODO make the constructors cleaner
 
@@ -164,7 +164,7 @@ public class Sharethrough {
 //        };
 //            }
 
-        creativeHandlerStack = new Stack<Function>();
+        creativeHandlerStack = new SynchronizedWeakOrderedSet<Function>();
         creativeHandler = new Function<Creative,Void>() {
             @Override
             public Void apply(Creative creative) {
@@ -172,8 +172,10 @@ public class Sharethrough {
                     availableCreatives.add(creative);
                     fireNewAdsToShow();
                 } else {
-                    Function<Creative, Void> creativeHandlerCallback = creativeHandlerStack.pop();
-                    creativeHandlerCallback.apply(creative);
+                    Function<Creative, Void> creativeHandlerCallback = creativeHandlerStack.popNext();
+                    if(creativeHandlerCallback != null){
+                        creativeHandlerCallback.apply(creative);
+                    }
                 }
                 return null;
             }
@@ -324,7 +326,7 @@ public class Sharethrough {
             creativesBySlot.put(feedPosition, creative);
             renderer.putCreativeIntoAdView(adView, creative, beaconService, this, feedPosition, new Timer("AdView timer for " + creative));
         } else {
-            creativeHandlerStack.push(
+            creativeHandlerStack.put(
                     new Function<Creative, Void>() {
                         @Override
                         public Void apply(Creative creative) {
