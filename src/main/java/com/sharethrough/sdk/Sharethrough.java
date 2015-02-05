@@ -38,7 +38,7 @@ public class Sharethrough {
     static final ExecutorService EXECUTOR_SERVICE = DefaultSharethroughExecutorServiceProivder.create();
     private final CreativesQueue availableCreatives;
     private final SynchronizedWeakOrderedSet<AdViewFeedPositionPair> waitingAdViews = new SynchronizedWeakOrderedSet<>();
-    private final Function<Creative, Void> creativeHandler;
+    private Function<Creative, Void> creativeHandler;
     private AdFetcher adFetcher;
     private ImageFetcher imageFetcher;
     private AdFetcher.Callback adFetcherCallback;
@@ -145,23 +145,23 @@ public class Sharethrough {
             e.printStackTrace();
         }
 
-        creativeHandler = new Function<Creative, Void>() {
-            @Override
-            public Void apply(Creative creative) {
-                synchronized (waitingAdViews) {
-                    AdViewFeedPositionPair adViewFeedPositionPair = waitingAdViews.popNext();
-                    if (adViewFeedPositionPair != null) {
-                        creativesBySlot.put((int) adViewFeedPositionPair.feedPosition, creative);
-                        renderer.putCreativeIntoAdView((IAdView) adViewFeedPositionPair.adView, creative, beaconService, Sharethrough.this, (int) adViewFeedPositionPair.feedPosition, new Timer("AdView timer for " + creative));
-                    } else {
-                        Sharethrough.this.availableCreatives.add(creative);
-                        fireNewAdsToShow();
-                    }
-                }
-
-                return null;
-            }
-        };
+//        creativeHandler = new Function<Creative, Void>() {
+//            @Override
+//            public Void apply(Creative creative) {
+//                synchronized (waitingAdViews) {
+//                    AdViewFeedPositionPair adViewFeedPositionPair = waitingAdViews.popNext();
+//                    if (adViewFeedPositionPair != null) {
+//                        creativesBySlot.put((int) adViewFeedPositionPair.feedPosition, creative);
+//                        renderer.putCreativeIntoAdView((IAdView) adViewFeedPositionPair.adView, creative, beaconService, Sharethrough.this, (int) adViewFeedPositionPair.feedPosition, new Timer("AdView timer for " + creative));
+//                    } else {
+//                        Sharethrough.this.availableCreatives.add(creative);
+//                        fireNewAdsToShow();
+//                    }
+//                }
+//
+//                return null;
+//            }
+//        };
         adFetcherCallback = new AdFetcher.Callback() {
             @Override
             public void finishedLoading() {
@@ -289,7 +289,7 @@ public class Sharethrough {
      * @param feedPosition The starting position in your feed where you would like your first ad.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-    public void putCreativeIntoAdView(IAdView adView, int feedPosition) {
+    public void putCreativeIntoAdView(final IAdView adView, final int feedPosition) {
         Creative creative = creativesBySlot.get(feedPosition);
 
         long currentTime = new Date().getTime();
@@ -301,16 +301,31 @@ public class Sharethrough {
         if (creative == null) {
             synchronized (availableCreatives) {
                 creative = availableCreatives.getNext();
-                if (availableCreatives.readyForMore()) {
-                    fetchAds();
-                }
             }
         }
         if (creative != null) {
             creativesBySlot.put(feedPosition, creative);
             renderer.putCreativeIntoAdView(adView, creative, beaconService, this, feedPosition, new Timer("AdView timer for " + creative));
         } else {
-            waitingAdViews.put(new AdViewFeedPositionPair<>(adView, feedPosition));
+            creativeHandler = new Function<Creative, Void>() {
+                @Override
+                public Void apply(Creative creative) {
+                    if (creativesBySlot.get(feedPosition) != null) {
+                        availableCreatives.add(creative);
+                        fireNewAdsToShow();
+                    } else {
+                        creativesBySlot.put(feedPosition, creative);
+                        renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this, feedPosition, new Timer("AdView timer for " + creative));
+                    }
+                    return null;
+                }
+            };
+        }
+
+        synchronized (availableCreatives) {
+            if (availableCreatives.readyForMore()) {
+                fetchAds();
+            }
         }
     }
 
