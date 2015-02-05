@@ -18,4 +18,8 @@ public class CreativesQueue {
     public Creative getNext() {
         return list.isEmpty() ? null : list.remove(0);
     }
+
+    public int size(){
+        return list.size();
+    }
 }

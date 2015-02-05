@@ -1,7 +1,9 @@
 package com.sharethrough.sdk;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -148,16 +150,49 @@ public class SharethroughListAdapter extends BaseAdapter {
         if (position < mSharethrough.placement.getArticlesBeforeFirstAd()) {
             return position;
         } else {
-            int numberOfAdsShown = 1 + (position - mSharethrough.placement.getArticlesBeforeFirstAd()) / (mSharethrough.placement.getArticlesBetweenAds() + 1);
-            return position - numberOfAdsShown;
+            int numberOfAdsToPossiblyShow = 1 + (position - mSharethrough.placement.getArticlesBeforeFirstAd()) / (mSharethrough.placement.getArticlesBetweenAds() + 1);
+            int numberOfAdsAvailable = creativesCount();
+            int numberOfAdsShown = Math.min(numberOfAdsToPossiblyShow, numberOfAdsAvailable);
+            int adjustedPosition = position - numberOfAdsShown;
+
+            Log.d("STR", "position: " + position);
+            Log.d("STR", "adjusted position: " + adjustedPosition);
+            Log.d("STR", "numberOfAdsShown : " + numberOfAdsShown );
+
+            return adjustedPosition;
         }
     }
 
     private boolean isAd(int position) {
+//        int articlesBeforeFirstAd = mSharethrough.placement.getArticlesBeforeFirstAd();
+//        return position == articlesBeforeFirstAd ||
+//                position >= articlesBeforeFirstAd &&
+//                        0 == (position - articlesBeforeFirstAd) % (mSharethrough.placement.getArticlesBetweenAds() + 1);
+
         int articlesBeforeFirstAd = mSharethrough.placement.getArticlesBeforeFirstAd();
-        return position == articlesBeforeFirstAd ||
-                position >= articlesBeforeFirstAd &&
-                        0 == (position - articlesBeforeFirstAd) % (mSharethrough.placement.getArticlesBetweenAds() + 1);
+
+        if (creativesCount() == 0){
+            return false;
+        }
+
+        if (position == articlesBeforeFirstAd) {
+            return true;
+        }
+
+        int numberOfAdsToPossiblyShow = 1 + (position - mSharethrough.placement.getArticlesBeforeFirstAd()) / (mSharethrough.placement.getArticlesBetweenAds() + 1);
+        int numberOfAdsAvailable = creativesCount();
+        int numberOfAdsShown = Math.min(numberOfAdsToPossiblyShow, numberOfAdsAvailable);
+//        Log.d("STR", "position: " + position);
+//        Log.d("STR", "numberOfAdsShown: " + numberOfAdsShown);
+//        Log.d("STR", "numberOfAdsToPossiblyShow : " + numberOfAdsToPossiblyShow);
+//        Log.d("STR", "numberOfAdsAvailable: " + numberOfAdsAvailable);
+        return position >= articlesBeforeFirstAd &&
+                0 == (position - articlesBeforeFirstAd) % (mSharethrough.placement.getArticlesBetweenAds() + 1) && numberOfAdsToPossiblyShow <= numberOfAdsAvailable;
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+    private int creativesCount() {
+        return mSharethrough.availableCreatives.size() + mSharethrough.creativesBySlot.size();
     }
 
     private int numberOfAds(int count) {

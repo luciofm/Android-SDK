@@ -36,7 +36,7 @@ public class Sharethrough {
     private String placementKey;
     private String apiUrlPrefix = "http://btlr.sharethrough.com/v3";
     static final ExecutorService EXECUTOR_SERVICE = DefaultSharethroughExecutorServiceProivder.create();
-    private final CreativesQueue availableCreatives;
+    final CreativesQueue availableCreatives;
     private final SynchronizedWeakOrderedSet<AdViewFeedPositionPair> waitingAdViews = new SynchronizedWeakOrderedSet<>();
     private Function<Creative, Void> creativeHandler;
     private AdFetcher adFetcher;
@@ -54,7 +54,7 @@ public class Sharethrough {
         }
     };
     private Handler handler = new Handler(Looper.getMainLooper());
-    private LruCache<Integer, Creative> creativesBySlot = new LruCache<>(10);
+    LruCache<Integer, Creative> creativesBySlot = new LruCache<>(10);
 
     private static final Map<String, String> dfpCreativeIds = new HashMap<>();
     private final Context context; //TODO decide whether this is needed
@@ -309,12 +309,17 @@ public class Sharethrough {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public void putCreativeIntoAdView(final IAdView adView, final int feedPosition) {
+
         Creative creative = creativesBySlot.get(feedPosition);
+//        Log.d("TAG", "Creatives by slot: " + creativesBySlot.size());
+//        Log.d("TAG", "position: " + feedPosition);
+//        Log.d("TAG", "popped creative: " + creative);
 
         long currentTime = new Date().getTime();
 
         if (creative != null && currentTime - creative.renderedTime >= adCacheTimeInMilliseconds) { //TODO make logic better
             creativesBySlot.remove(feedPosition);
+//            Log.d("TAG", "removing from creativesBySLot");
             creative = null;
         }
         if (creative == null) {
@@ -322,14 +327,20 @@ public class Sharethrough {
                 creative = availableCreatives.getNext();
             }
         }
+
+//        Log.d("TAG", "after trying to getNext from Available Creatives, creative: " + creative);
+
+
         if (creative != null) {
             creativesBySlot.put(feedPosition, creative);
             renderer.putCreativeIntoAdView(adView, creative, beaconService, this, feedPosition, new Timer("AdView timer for " + creative));
+//            Log.d("TAG", "rendering creative");
         } else {
             creativeHandlerStack.put(
                     new Function<Creative, Void>() {
                         @Override
                         public Void apply(Creative creative) {
+//                            Log.d("TAG", "rendering creative from callback");
                             creativesBySlot.put(feedPosition, creative);
                             renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this, feedPosition, new Timer("AdView timer for " + creative));
                             return null;
@@ -339,6 +350,7 @@ public class Sharethrough {
 
         synchronized (availableCreatives) {
             if (availableCreatives.readyForMore()) {
+//                Log.d("TAG", "fetching more ads");
                 fetchAds();
             }
         }
