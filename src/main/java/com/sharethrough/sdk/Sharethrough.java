@@ -238,7 +238,7 @@ public class Sharethrough {
         } else {
             ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>(2);
             queryStringParams.add(new BasicNameValuePair("placement_key", placementKey));
-            if (!creativeKey.equals("STX_BACKFILL")){
+            if (!creativeKey.equals("STX_MONETIZE")){
               queryStringParams.add(new BasicNameValuePair("creative_key", creativeKey));
             }
 

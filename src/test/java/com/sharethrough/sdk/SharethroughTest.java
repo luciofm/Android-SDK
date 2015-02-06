@@ -339,7 +339,7 @@ public class SharethroughTest extends TestBase {
         dfpPathFetcherCallback.getValue().receivedURL("dfpPath");
         verify(dfpNetworking).fetchCreativeKey(eq(Robolectric.application), eq("dfpPath"), dfpCreativeKeyCallback.capture());
 
-        Sharethrough.addCreativeKey("dfpPath", "STX_BACKFILL");
+        Sharethrough.addCreativeKey("dfpPath", "STX_MONETIZE");
 
         dfpCreativeKeyCallback.getValue().receivedCreativeKey();
 
