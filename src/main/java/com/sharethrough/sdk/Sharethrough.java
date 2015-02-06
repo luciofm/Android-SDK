@@ -334,6 +334,7 @@ public class Sharethrough {
         if (creative != null) {
             creativesBySlot.put(feedPosition, creative);
             renderer.putCreativeIntoAdView(adView, creative, beaconService, this, feedPosition, new Timer("AdView timer for " + creative));
+            fireNewAdsToShow();
 //            Log.d("TAG", "rendering creative");
         } else {
             creativeHandlerStack.put(
@@ -343,6 +344,7 @@ public class Sharethrough {
 //                            Log.d("TAG", "rendering creative from callback");
                             creativesBySlot.put(feedPosition, creative);
                             renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this, feedPosition, new Timer("AdView timer for " + creative));
+                            fireNewAdsToShow();
                             return null;
                         }
                     });

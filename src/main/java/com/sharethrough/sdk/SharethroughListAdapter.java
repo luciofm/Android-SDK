@@ -111,8 +111,15 @@ public class SharethroughListAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (isAd(position)) {
+            // we must check to make sure convertView is correct type
+            if (convertView != null && !(convertView instanceof IAdView)) {
+                convertView = null;
+            }
             return getAd(position, (IAdView) convertView);
         } else {
+            if (convertView != null && convertView instanceof IAdView) {
+                convertView = null;
+            }
             return mAdapter.getView(adjustedPosition(position), convertView, parent);
         }
     }
@@ -146,23 +153,26 @@ public class SharethroughListAdapter extends BaseAdapter {
         return mAdapter.areAllItemsEnabled();
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     private int adjustedPosition(int position) {
         if (position < mSharethrough.placement.getArticlesBeforeFirstAd()) {
             return position;
         } else {
             int numberOfAdsToPossiblyShow = 1 + (position - mSharethrough.placement.getArticlesBeforeFirstAd()) / (mSharethrough.placement.getArticlesBetweenAds() + 1);
             int numberOfAdsAvailable = creativesCount();
+            int numberOfAdsPlaced = mSharethrough.creativesBySlot.size();
             int numberOfAdsShown = Math.min(numberOfAdsToPossiblyShow, numberOfAdsAvailable);
             int adjustedPosition = position - numberOfAdsShown;
 
-            Log.d("STR", "position: " + position);
-            Log.d("STR", "adjusted position: " + adjustedPosition);
-            Log.d("STR", "numberOfAdsShown : " + numberOfAdsShown );
+            Log.d("ADJUSTED", "position: " + position);
+            Log.d("ADJUSTED", "adjusted position: " + adjustedPosition);
+            Log.d("ADJUSTED", "numberOfAdsShown : " + numberOfAdsShown );
 
             return adjustedPosition;
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     private boolean isAd(int position) {
 //        int articlesBeforeFirstAd = mSharethrough.placement.getArticlesBeforeFirstAd();
 //        return position == articlesBeforeFirstAd ||
@@ -176,18 +186,17 @@ public class SharethroughListAdapter extends BaseAdapter {
         }
 
         if (position == articlesBeforeFirstAd) {
-            return true;
+            return mSharethrough.creativesBySlot.get(position) != null || mSharethrough.availableCreatives.size() != 0;
         }
 
-        int numberOfAdsToPossiblyShow = 1 + (position - mSharethrough.placement.getArticlesBeforeFirstAd()) / (mSharethrough.placement.getArticlesBetweenAds() + 1);
-        int numberOfAdsAvailable = creativesCount();
-        int numberOfAdsShown = Math.min(numberOfAdsToPossiblyShow, numberOfAdsAvailable);
-//        Log.d("STR", "position: " + position);
-//        Log.d("STR", "numberOfAdsShown: " + numberOfAdsShown);
-//        Log.d("STR", "numberOfAdsToPossiblyShow : " + numberOfAdsToPossiblyShow);
-//        Log.d("STR", "numberOfAdsAvailable: " + numberOfAdsAvailable);
-        return position >= articlesBeforeFirstAd &&
-                0 == (position - articlesBeforeFirstAd) % (mSharethrough.placement.getArticlesBetweenAds() + 1) && numberOfAdsToPossiblyShow <= numberOfAdsAvailable;
+//        int numberOfAdsToPossiblyShow = 1 + (position - mSharethrough.placement.getArticlesBeforeFirstAd()) / (mSharethrough.placement.getArticlesBetweenAds() + 1);
+//        int numberOfAdsAvailable = creativesCount();
+//        int numberOfAdsShown = Math.min(numberOfAdsToPossiblyShow, numberOfAdsAvailable);
+
+        boolean couldPossiblyBeAnAd = 0 == (position - articlesBeforeFirstAd) % (mSharethrough.placement.getArticlesBetweenAds() + 1);
+        boolean adAlreadyInPosition = mSharethrough.creativesBySlot.get(position) != null;
+
+        return position >= articlesBeforeFirstAd && couldPossiblyBeAnAd && (adAlreadyInPosition || mSharethrough.availableCreatives.size() != 0);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
