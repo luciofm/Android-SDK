@@ -103,11 +103,11 @@ public class MediaTest extends TestBase {
         }
 
         @Override
-        public void wasClicked(View view, BeaconService beaconService) {
+        public void wasClicked(View view, BeaconService beaconService, int feedPosition) {
         }
 
         @Override
-        public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService) {
+        public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition) {
         }
     }
 }

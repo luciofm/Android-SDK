@@ -38,6 +38,7 @@ public class BeaconServiceTest extends TestBase {
     @Mock private PackageInfo packageInfo;
     private String advertisingId;
     private Response.Creative responseCreative;
+    private int feedPosition;
 
     @Before
     public void setUp() throws Exception {
@@ -45,6 +46,7 @@ public class BeaconServiceTest extends TestBase {
 
         now = new Date(1000000000);
         session = UUID.randomUUID();
+        feedPosition = 5;
         expectedCommonParams = new HashMap();
         expectedCommonParams.put("umtime", "" + now.getTime());
         expectedCommonParams.put("ploc", "com.sharethrough.android.sdk");
@@ -112,7 +114,7 @@ public class BeaconServiceTest extends TestBase {
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
             public void run() {
-                subject.adClicked("fake user event", creative, RendererTest.makeAdView().getAdView());
+                subject.adClicked("fake user event", creative, RendererTest.makeAdView().getAdView(), feedPosition);
             }
         });
     }
@@ -139,7 +141,7 @@ public class BeaconServiceTest extends TestBase {
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
             public void run() {
-                subject.adReceived(Robolectric.application, creative);
+                subject.adReceived(Robolectric.application, creative, feedPosition);
             }
         });
     }
@@ -151,7 +153,7 @@ public class BeaconServiceTest extends TestBase {
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
             public void run() {
-                subject.adVisible(RendererTest.makeAdView(), creative);
+                subject.adVisible(RendererTest.makeAdView(), creative, feedPosition);
             }
         });
     }
@@ -166,7 +168,7 @@ public class BeaconServiceTest extends TestBase {
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
             public void run() {
-                subject.adShared(Robolectric.application, creative, "shareType");
+                subject.adShared(Robolectric.application, creative, "shareType", feedPosition);
             }
         });
     }
@@ -181,7 +183,7 @@ public class BeaconServiceTest extends TestBase {
 
         Creative testCreative = new Creative(responseCreative, new byte[0], new byte[0], "placement key");
 
-        subject.adVisible(RendererTest.makeAdView(), testCreative);
+        subject.adVisible(RendererTest.makeAdView(), testCreative, feedPosition);
 
         Robolectric.addHttpResponseRule(new RequestMatcher() {
             @Override
@@ -213,7 +215,7 @@ public class BeaconServiceTest extends TestBase {
 
         Creative testCreative = new Creative(responseCreative, new byte[0], new byte[0], "placement key");
 
-        subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView());
+        subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition);
 
         Robolectric.addHttpResponseRule(new RequestMatcher() {
             @Override
@@ -242,7 +244,7 @@ public class BeaconServiceTest extends TestBase {
 
         Creative testCreative = new Creative(responseCreative, new byte[0], new byte[0], "placement key");
 
-        subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView());
+        subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition);
 
         Robolectric.addHttpResponseRule(new RequestMatcher() {
             @Override
@@ -266,7 +268,7 @@ public class BeaconServiceTest extends TestBase {
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
             public void run() {
-                subject.videoPlayed(Robolectric.application, creative, 123);
+                subject.videoPlayed(Robolectric.application, creative, 123, feedPosition);
             }
         });
     }

@@ -23,12 +23,15 @@ public class PinterestTest extends TestBase {
     private Creative creative;
     private BeaconService beaconService;
     private Pinterest subject;
+    private int feedPosition;
 
     @Before
     public void setUp() throws Exception {
         creative = mock(Creative.class);
         when(creative.getMediaUrl()).thenReturn("http://ab.co/");
         beaconService = mock(BeaconService.class);
+        feedPosition = 5;
+
 
         subject = new Pinterest(creative);
     }
@@ -41,14 +44,14 @@ public class PinterestTest extends TestBase {
     @Test
     @Config(emulateSdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
     public void clickingOpensPinterestDialog() throws Exception {
-        subject.wasClicked(new View(Robolectric.application), beaconService);
+        subject.wasClicked(new View(Robolectric.application), beaconService, feedPosition);
         assertThat(ShadowDialog.getLatestDialog()).isInstanceOf(PinterestDialog.class);
     }
 
     @Test
     public void firesClickoutBeacon() throws Exception {
         TestAdView adView = RendererTest.makeAdView();
-        subject.fireAdClickBeacon(creative, adView, beaconService);
-        verify(beaconService).adClicked("clickout", creative, adView.getAdView());
+        subject.fireAdClickBeacon(creative, adView, beaconService, feedPosition);
+        verify(beaconService).adClicked("clickout", creative, adView.getAdView(), feedPosition);
     }
 }

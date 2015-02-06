@@ -11,9 +11,9 @@ import com.sharethrough.sdk.IAdView;
 public abstract class Media {
     public final static String THUMBNAIL = "ThumbnailImageView";
 
-    public abstract void wasClicked(View view, BeaconService beaconService);
+    public abstract void wasClicked(View view, BeaconService beaconService, int feedPosition);
 
-    public abstract void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService);
+    public abstract void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition);
 
     public final void overlayThumbnail(IAdView adView, ImageView thumbnailImage) {
         int overlayImageResourceId = getOverlayImageResourceId();

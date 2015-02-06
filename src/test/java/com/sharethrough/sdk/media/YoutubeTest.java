@@ -18,6 +18,7 @@ public class YoutubeTest extends TestBase {
     private Bitmap thumbnailBitmap;
     private Creative creative;
     private BeaconService beaconService;
+    private int feedPosition;
 
     @Before
     public void setUp() throws Exception {
@@ -25,6 +26,7 @@ public class YoutubeTest extends TestBase {
         creative = mock(Creative.class);
         beaconService = mock(BeaconService.class);
         when(creative.makeThumbnailImage()).thenReturn(thumbnailBitmap);
+        feedPosition = 5;
     }
 
     @Test
@@ -66,7 +68,7 @@ public class YoutubeTest extends TestBase {
         Youtube subject = new Youtube(creative);
 
         TestAdView adView = RendererTest.makeAdView();
-        subject.fireAdClickBeacon(creative, adView, beaconService);
-        verify(beaconService).adClicked("youtubePlay", creative, adView.getAdView());
+        subject.fireAdClickBeacon(creative, adView, beaconService, feedPosition);
+        verify(beaconService).adClicked("youtubePlay", creative, adView.getAdView(), feedPosition);
     }
 }

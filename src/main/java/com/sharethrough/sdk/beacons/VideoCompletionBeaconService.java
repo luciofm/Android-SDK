@@ -22,24 +22,24 @@ public class VideoCompletionBeaconService {
     }
 
     @JavascriptInterface
-    public void timeUpdate(double time, double duration) {
+    public void timeUpdate(double time, double duration, int feedPosition) {
         Log.v("Sharethrough", creative.getCreativeKey() + " video has played " + time + "s of " + duration + "s");
         double percent = time / duration;
         if (!quarterFired && percent >= 0.25) {
             quarterFired = true;
-            beaconService.videoPlayed(context, creative, 25);
+            beaconService.videoPlayed(context, creative, 25, feedPosition);
         }
         if (!halfFired && percent >= 0.5) {
             halfFired = true;
-            beaconService.videoPlayed(context, creative, 50);
+            beaconService.videoPlayed(context, creative, 50, feedPosition);
         }
         if (!threeQuartersFired && percent >= 0.75) {
             threeQuartersFired = true;
-            beaconService.videoPlayed(context, creative, 75);
+            beaconService.videoPlayed(context, creative, 75, feedPosition);
         }
         if (!finishedFired && percent >= 0.95) {
             finishedFired = true;
-            beaconService.videoPlayed(context, creative, 95);
+            beaconService.videoPlayed(context, creative, 95, feedPosition);
         }
     }
 }

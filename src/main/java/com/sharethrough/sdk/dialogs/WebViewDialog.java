@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -23,8 +22,8 @@ public class WebViewDialog extends ShareableDialog {
     protected WebView webView;
     private BaseActivityLifecycleCallbacks lifecycleCallbacks;
 
-    public WebViewDialog(Context context, Creative creative, BeaconService beaconService) {
-        super(context, android.R.style.Theme_Black, beaconService);
+    public WebViewDialog(Context context, Creative creative, BeaconService beaconService, int feedPosition) {
+        super(context, android.R.style.Theme_Black, beaconService, feedPosition);
         this.creative = creative;
     }
 

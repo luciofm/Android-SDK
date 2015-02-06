@@ -37,6 +37,7 @@ public class WebViewDialogTest extends TestBase {
     private WebView webView;
     private ShadowWebView shadowWebView;
     private BeaconService beaconService;
+    private int feedPosition;
 
     @Before
     public void setUp() throws Exception {
@@ -48,9 +49,10 @@ public class WebViewDialogTest extends TestBase {
         when(creative.getMediaUrl()).thenReturn(URL);
 
         beaconService = mock(BeaconService.class);
+        feedPosition = 5;
 
         activityController = Robolectric.buildActivity(Activity.class).create().start().visible().resume();
-        subject = new WebViewDialog(activityController.get(), creative, beaconService);
+        subject = new WebViewDialog(activityController.get(), creative, beaconService, feedPosition);
         subject.show();
 
         webView = Misc.findViewOfType(WebView.class, (ViewGroup) subject.getWindow().getDecorView());

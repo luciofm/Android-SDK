@@ -25,8 +25,8 @@ public class VideoDialog extends ShareableDialog {
     private VideoView videoView;
     private final VideoCompletionBeaconService videoBeacons;
 
-    public VideoDialog(Context context, Creative creative, BeaconService beaconService, boolean isLooping, Timer timer, VideoCompletionBeaconService videoBeacons) {
-        super(context, android.R.style.Theme_Black, beaconService);
+    public VideoDialog(Context context, Creative creative, BeaconService beaconService, boolean isLooping, Timer timer, VideoCompletionBeaconService videoBeacons, int feedPosition) {
+        super(context, android.R.style.Theme_Black, beaconService, feedPosition);
         this.creative = creative;
         this.isLooping = isLooping;
         this.timer = timer;
@@ -60,7 +60,7 @@ public class VideoDialog extends ShareableDialog {
                     @Override
                     public void run() {
                         try {
-                            videoBeacons.timeUpdate(videoView.getCurrentPosition(), videoView.getDuration());
+                            videoBeacons.timeUpdate(videoView.getCurrentPosition(), videoView.getDuration(), feedPosition);
                         } catch (Throwable tx) {
                             Log.e("Sharethrough", "video beacons error", tx);
                         }

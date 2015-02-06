@@ -17,7 +17,7 @@ public class Pinterest extends Clickout {
     }
 
     @Override
-    public void wasClicked(View v, BeaconService beaconService) {
-        new PinterestDialog(v.getContext(), getCreative(), beaconService).show();
+    public void wasClicked(View v, BeaconService beaconService, int feedPosition) {
+        new PinterestDialog(v.getContext(), getCreative(), beaconService, feedPosition).show();
     }
 }

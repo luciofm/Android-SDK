@@ -8,8 +8,8 @@ import com.sharethrough.sdk.beacons.VideoCompletionBeaconService;
 import com.sharethrough.sdk.media.Youtube;
 
 public class YoutubeDialog extends WebViewDialog {
-    public YoutubeDialog(Context context, Creative creative, BeaconService beaconService) {
-        super(context, creative, beaconService);
+    public YoutubeDialog(Context context, Creative creative, BeaconService beaconService, int feedPosition) {
+        super(context, creative, beaconService, feedPosition);
     }
 
     @Override

@@ -51,6 +51,7 @@ public class RendererTest {
     private Timer timer;
     private BeaconService beaconService;
     private Sharethrough sharethrough;
+    private int feedPosition;
 
     @Before
     public void setUp() throws Exception {
@@ -65,6 +66,7 @@ public class RendererTest {
         media = mock(Media.class);
         when(media.getCreative()).thenReturn(creative);
         when(creative.getMedia()).thenReturn(media);
+        feedPosition = 0;
 
         beaconService = mock(BeaconService.class);
 
@@ -107,7 +109,7 @@ public class RendererTest {
     @Test
     public void firesImpressionBeaconOnlyOnce() throws Exception {
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
-        verify(beaconService).adReceived(any(Context.class), eq(creative));
+        verify(beaconService).adReceived(any(Context.class), eq(creative), eq(feedPosition));
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
         verifyNoMoreInteractions(beaconService);
     }
@@ -168,8 +170,8 @@ public class RendererTest {
 
         adView.performClick();
 
-        verify(media).wasClicked(adView, beaconService);
-        verify(media).fireAdClickBeacon(creative, adView, beaconService);
+        verify(media).wasClicked(adView, beaconService, feedPosition);
+        verify(media).fireAdClickBeacon(creative, adView, beaconService, feedPosition);
     }
 
     @Test
