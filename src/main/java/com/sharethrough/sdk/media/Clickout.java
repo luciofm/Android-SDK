@@ -24,11 +24,11 @@ public class Clickout extends Media {
     }
 
     @Override
-    public void wasClicked(View v, BeaconService beaconService) {
-        new WebViewDialog(v.getContext(), creative, beaconService).show();
+    public void wasClicked(View v, BeaconService beaconService, int feedPosition) {
+        new WebViewDialog(v.getContext(), creative, beaconService, feedPosition).show();
     }
 
-    public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService) {
-        beaconService.adClicked("clickout", creative, adView.getAdView());
+    public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition) {
+        beaconService.adClicked("clickout", creative, adView.getAdView(), feedPosition);
     }
 }

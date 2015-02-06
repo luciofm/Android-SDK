@@ -26,6 +26,7 @@ public class YoutubeDialogTest extends TestBase {
     private YoutubeDialog subject;
     private Youtube youtube;
     private BeaconService beaconService;
+    private int feedPosition;
 
     @Before
     public void setUp() throws Exception {
@@ -33,10 +34,11 @@ public class YoutubeDialogTest extends TestBase {
         when(youtube.getId()).thenReturn("ABC");
         creative = mock(Creative.class);
         when(creative.getMedia()).thenReturn(youtube);
+        feedPosition = 5;
 
         beaconService = mock(BeaconService.class);
 
-        subject = new YoutubeDialog(Robolectric.application, creative, beaconService);
+        subject = new YoutubeDialog(Robolectric.application, creative, beaconService, feedPosition);
         subject.show();
     }
 

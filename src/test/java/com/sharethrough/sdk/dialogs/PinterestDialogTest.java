@@ -17,13 +17,15 @@ public class PinterestDialogTest extends TestBase {
     private Creative creative;
     private PinterestDialog subject;
     private String url;
+    private int feedPosition;
 
     @Before
     public void setUp() throws Exception {
+        feedPosition = 5;
         creative = mock(Creative.class);
         url = "http://ab.co/";
         when(creative.getMediaUrl()).thenReturn(url);
-        subject = new PinterestDialog(Robolectric.application, creative, mock(BeaconService.class));
+        subject = new PinterestDialog(Robolectric.application, creative, mock(BeaconService.class), feedPosition);
     }
 
     @Test

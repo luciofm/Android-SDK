@@ -29,8 +29,9 @@ public class HostedVideoTest extends TestBase {
         Creative creative = mock(Creative.class);
         when(creative.getMediaUrl()).thenReturn("http://ab.co");
         HostedVideo subject = new HostedVideo(creative);
+        int feedPosition = 5;
 
-        subject.wasClicked(new View(Robolectric.application), mock(BeaconService.class));
+        subject.wasClicked(new View(Robolectric.application), mock(BeaconService.class), feedPosition);
 
         assertThat(ShadowDialog.getLatestDialog()).isInstanceOf(VideoDialog.class);
     }
@@ -39,11 +40,12 @@ public class HostedVideoTest extends TestBase {
     public void firesAdClickedBeacon() throws Exception {
         Creative creative = mock(Creative.class);
         HostedVideo subject = new HostedVideo(creative);
+        int feedPosition = 5;
 
         BeaconService beaconService = mock(BeaconService.class);
         TestAdView adView = mock(TestAdView.class);
-        subject.fireAdClickBeacon(creative, adView, beaconService);
+        subject.fireAdClickBeacon(creative, adView, beaconService, feedPosition);
 
-        verify(beaconService).adClicked("videoPlay", creative, adView.getAdView());
+        verify(beaconService).adClicked("videoPlay", creative, adView.getAdView(), feedPosition);
     }
 }

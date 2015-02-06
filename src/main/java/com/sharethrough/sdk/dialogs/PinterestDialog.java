@@ -8,8 +8,8 @@ import com.sharethrough.sdk.Creative;
 
 
 public class PinterestDialog extends WebViewDialog {
-    public PinterestDialog(Context context, Creative creative, BeaconService beaconService) {
-        super(context, creative, beaconService);
+    public PinterestDialog(Context context, Creative creative, BeaconService beaconService, int feedPosition) {
+        super(context, creative, beaconService, feedPosition);
 
         CookieSyncManager.createInstance(context);
         CookieManager.getInstance().setCookie(creative.getMediaUrl(), "stay_in_browser=1");

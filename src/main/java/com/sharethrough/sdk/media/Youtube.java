@@ -40,12 +40,12 @@ public class Youtube extends Media {
     }
 
     @Override
-    public void wasClicked(View v, BeaconService beaconService) {
-        new YoutubeDialog(v.getContext(), creative, beaconService).show();
+    public void wasClicked(View v, BeaconService beaconService, int feedPosition) {
+        new YoutubeDialog(v.getContext(), creative, beaconService, feedPosition).show();
     }
 
     @Override
-    public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService) {
-        beaconService.adClicked("youtubePlay", creative, adView.getAdView());
+    public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition) {
+        beaconService.adClicked("youtubePlay", creative, adView.getAdView(), feedPosition);
     }
 }

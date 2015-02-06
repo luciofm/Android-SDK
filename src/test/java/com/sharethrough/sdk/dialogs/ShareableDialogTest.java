@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -45,15 +44,17 @@ public class ShareableDialogTest extends TestBase {
     private Creative creative;
     private BeaconService beaconService;
     private ActivityController<Activity> activityController;
+    private int feedPosition;
 
     @Before
     public void setUp() throws Exception {
         creative = mock(Creative.class);
         when(creative.getTitle()).thenReturn("Title");
         when(creative.getShareUrl()).thenReturn("http://share.me/with/friends");
+        feedPosition = 5;
 
         beaconService = mock(BeaconService.class);
-        subject = new ShareableDialog(Robolectric.application, android.R.style.Theme_Black, beaconService) {
+        subject = new ShareableDialog(Robolectric.application, android.R.style.Theme_Black, beaconService, feedPosition) {
             @Override
             protected Creative getCreative() {
                 return creative;
@@ -81,7 +82,7 @@ public class ShareableDialogTest extends TestBase {
     public void whenGmailSelected_sendsEmailBeacon() throws Exception {
         setUpPackages();
         shareVia("com.google.android.gm/com.google.android.gm.ComposeActivityGmail");
-        verify(beaconService).adShared(any(Context.class), eq(creative), eq("email"));
+        verify(beaconService).adShared(any(Context.class), eq(creative), eq("email"), eq(feedPosition));
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -89,28 +90,28 @@ public class ShareableDialogTest extends TestBase {
     public void whenEmailSelected_sendsEmailBeacon() throws Exception {
         setUpPackages();
         shareVia("com.foo.email/com.foo.email.Whatever");
-        verify(beaconService).adShared(any(Context.class), eq(creative), eq("email"));
+        verify(beaconService).adShared(any(Context.class), eq(creative), eq("email"), eq(feedPosition));
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Test
     public void whenFacebookSelected_sendsFacebookBeacon() throws Exception {
         shareVia("com.facebook.katana/com.facebook.katana.Whatever");
-        verify(beaconService).adShared(any(Context.class), eq(creative), eq("facebook"));
+        verify(beaconService).adShared(any(Context.class), eq(creative), eq("facebook"), eq(feedPosition));
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Test
     public void whenTwitterSelected_sendsTwitterBeacon() throws Exception {
         shareVia("com.twitter.android/com.twitter.android.Whatever");
-        verify(beaconService).adShared(any(Context.class), eq(creative), eq("twitter"));
+        verify(beaconService).adShared(any(Context.class), eq(creative), eq("twitter"), eq(feedPosition));
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Test
     public void whenOtherSelected_sendsPackageNameInBeacon() throws Exception {
         shareVia("com.something.else/com.something.else.Whatever");
-        verify(beaconService).adShared(any(Context.class), eq(creative), eq("com.something.else"));
+        verify(beaconService).adShared(any(Context.class), eq(creative), eq("com.something.else"), eq(feedPosition));
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -119,7 +120,7 @@ public class ShareableDialogTest extends TestBase {
         when(creative.getCustomEngagementUrl()).thenReturn("//custom.url");
         when(creative.getCustomEngagementLabel()).thenReturn("custom_label");
 
-        subject = new ShareableDialog(Robolectric.application, android.R.style.Theme_Black, beaconService) {
+        subject = new ShareableDialog(Robolectric.application, android.R.style.Theme_Black, beaconService, feedPosition) {
             @Override
             protected Creative getCreative() {
                 return creative;

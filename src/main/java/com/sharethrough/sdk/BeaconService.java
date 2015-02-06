@@ -79,13 +79,14 @@ public class BeaconService {
         return result;
     }
 
-    public void adClicked(final String userEvent, final Creative creative, View view) {
+    public void adClicked(final String userEvent, final Creative creative, View view, int feedPosition) {
         Map<String, String> beaconParams = commonParamsWithCreative(view.getContext(), creative);
         beaconParams.put("pheight", "" + view.getHeight());
         beaconParams.put("pwidth", "" + view.getWidth());
         beaconParams.put("type", "userEvent");
         beaconParams.put("userEvent", userEvent);
         beaconParams.put("engagement", "true");
+        beaconParams.put("placementIndex", String.valueOf(feedPosition));
 
         for (String uri : creative.getClickBeacons()) {
             String cachedBustedUri = replaceCacheBusterParam(uri);
@@ -108,19 +109,21 @@ public class BeaconService {
         fireBeacon(beaconParams);
     }
 
-    public void adReceived(final Context context, final Creative creative) {
+    public void adReceived(final Context context, final Creative creative, int feedPosition) {
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("type", "impression");
+        beaconParams.put("placementIndex", String.valueOf(feedPosition));
 
         fireBeacon(beaconParams);
     }
 
-    public void adVisible(final View adView, final Creative creative) {
+    public void adVisible(final View adView, final Creative creative, int feedPosition) {
         Context context = adView.getContext();
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("pheight", "" + adView.getHeight());
         beaconParams.put("pwidth", "" + adView.getWidth());
         beaconParams.put("type", "visible");
+        beaconParams.put("placementIndex", String.valueOf(feedPosition));
 
         for (String uri : creative.getVisibleBeacons()) {
             String cachedBustedUri = replaceCacheBusterParam(uri);
@@ -131,19 +134,21 @@ public class BeaconService {
     }
 
 
-    public void adShared(final Context context, final Creative creative, final String medium) {
+    public void adShared(final Context context, final Creative creative, final String medium, int feedPosition) {
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("type", "userEvent");
         beaconParams.put("userEvent", "share");
         beaconParams.put("engagement", "true");
         beaconParams.put("share", medium);
+        beaconParams.put("placementIndex", String.valueOf(feedPosition));
         fireBeacon(beaconParams);
     }
 
-    public void videoPlayed(final Context context, final Creative creative, final int percent) {
+    public void videoPlayed(final Context context, final Creative creative, final int percent, int feedPosition) {
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("type", "completionPercent");
         beaconParams.put("value", String.valueOf(percent));
+        beaconParams.put("placementIndex", String.valueOf(feedPosition));
         fireBeacon(beaconParams);
     }
 
