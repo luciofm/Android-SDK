@@ -62,6 +62,7 @@ public class AdFetcher {
                     remainingImageRequests += response.creatives.size();
                     if (remainingImageRequests == 0) {
                         adFetcherCallback.finishedLoadingWithNoAds();
+                        isRunning = false;
                     }
                     for (final Response.Creative responseCreative : response.creatives) {
                         imageFetcher.fetchCreativeImages(uri, responseCreative, new ImageFetcher.Callback() {
@@ -93,6 +94,7 @@ public class AdFetcher {
                     if (json != null) {
                         msg += ": " + json;
                     }
+                    isRunning = false;
                     Log.e("Sharethrough", msg, e);
                 }
             }

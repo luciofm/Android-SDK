@@ -6,7 +6,6 @@ import android.database.DataSetObserver;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -111,7 +110,7 @@ public class SharethroughListAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (isAd(position)) {
-            // we must check to make sure convertView is correct type
+            // we must check to make sure convertView is correct type, views may change type depending on ads availability
             if (convertView != null && !(convertView instanceof IAdView)) {
                 convertView = null;
             }
@@ -120,6 +119,7 @@ public class SharethroughListAdapter extends BaseAdapter {
             if (convertView != null && convertView instanceof IAdView) {
                 convertView = null;
             }
+            mSharethrough.fetchAdsIfReadyForMore();
             return mAdapter.getView(adjustedPosition(position), convertView, parent);
         }
     }
@@ -155,18 +155,17 @@ public class SharethroughListAdapter extends BaseAdapter {
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     private int adjustedPosition(int position) {
-        if (position < mSharethrough.placement.getArticlesBeforeFirstAd()) {
+        if (position <= mSharethrough.getArticlesBeforeFirstAd()) {
             return position;
         } else {
-            int numberOfAdsToPossiblyShow = 1 + (position - mSharethrough.placement.getArticlesBeforeFirstAd()) / (mSharethrough.placement.getArticlesBetweenAds() + 1);
             int numberOfAdsAvailable = creativesCount();
-            int numberOfAdsPlaced = mSharethrough.creativesBySlot.size();
-            int numberOfAdsShown = Math.min(numberOfAdsToPossiblyShow, numberOfAdsAvailable);
-            int adjustedPosition = position - numberOfAdsShown;
+            if (numberOfAdsAvailable == 0) {
+                return position;
+            }
 
-            Log.d("ADJUSTED", "position: " + position);
-            Log.d("ADJUSTED", "adjusted position: " + adjustedPosition);
-            Log.d("ADJUSTED", "numberOfAdsShown : " + numberOfAdsShown );
+            int numberOfAdsBeforePosition = mSharethrough.getNumberOfAdsBeforePosition(position);
+
+            int adjustedPosition = position - numberOfAdsBeforePosition;
 
             return adjustedPosition;
         }
@@ -174,41 +173,32 @@ public class SharethroughListAdapter extends BaseAdapter {
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     private boolean isAd(int position) {
-//        int articlesBeforeFirstAd = mSharethrough.placement.getArticlesBeforeFirstAd();
-//        return position == articlesBeforeFirstAd ||
-//                position >= articlesBeforeFirstAd &&
-//                        0 == (position - articlesBeforeFirstAd) % (mSharethrough.placement.getArticlesBetweenAds() + 1);
+        int articlesBeforeFirstAd = mSharethrough.getArticlesBeforeFirstAd();
 
-        int articlesBeforeFirstAd = mSharethrough.placement.getArticlesBeforeFirstAd();
-
-        if (creativesCount() == 0){
+        if ((mSharethrough.getNumberOfPlacedAds() + mSharethrough.getNumberOfAdsReadyToShow()) == 0) {
             return false;
         }
 
         if (position == articlesBeforeFirstAd) {
-            return mSharethrough.creativesBySlot.get(position) != null || mSharethrough.availableCreatives.size() != 0;
+            return mSharethrough.isAdAtPosition(position) || mSharethrough.getNumberOfAdsReadyToShow() != 0;
         }
 
-//        int numberOfAdsToPossiblyShow = 1 + (position - mSharethrough.placement.getArticlesBeforeFirstAd()) / (mSharethrough.placement.getArticlesBetweenAds() + 1);
-//        int numberOfAdsAvailable = creativesCount();
-//        int numberOfAdsShown = Math.min(numberOfAdsToPossiblyShow, numberOfAdsAvailable);
+        boolean couldPossiblyBeAnAd = 0 == (position - articlesBeforeFirstAd) % (mSharethrough.getArticlesBetweenAds() + 1);
+        boolean adAlreadyInPosition = mSharethrough.isAdAtPosition(position);
 
-        boolean couldPossiblyBeAnAd = 0 == (position - articlesBeforeFirstAd) % (mSharethrough.placement.getArticlesBetweenAds() + 1);
-        boolean adAlreadyInPosition = mSharethrough.creativesBySlot.get(position) != null;
-
-        return position >= articlesBeforeFirstAd && couldPossiblyBeAnAd && (adAlreadyInPosition || mSharethrough.availableCreatives.size() != 0);
+        return position >= articlesBeforeFirstAd && couldPossiblyBeAnAd && (adAlreadyInPosition || mSharethrough.getNumberOfAdsReadyToShow() != 0);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     private int creativesCount() {
-        return mSharethrough.availableCreatives.size() + mSharethrough.creativesBySlot.size();
+        return mSharethrough.getNumberOfAdsReadyToShow() + mSharethrough.getNumberOfPlacedAds();
     }
 
     private int numberOfAds(int count) {
-        if (count < mSharethrough.placement.getArticlesBeforeFirstAd()) {
+        if (count < mSharethrough.getArticlesBeforeFirstAd()) {
             return 0;
         }
-        return 1 + (count - mSharethrough.placement.getArticlesBeforeFirstAd()) / mSharethrough.placement.getArticlesBetweenAds();
+        return 1 + (count - mSharethrough.getArticlesBeforeFirstAd()) / mSharethrough.getArticlesBetweenAds();
     }
 
     /**
