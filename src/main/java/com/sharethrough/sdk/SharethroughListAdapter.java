@@ -86,7 +86,7 @@ public class SharethroughListAdapter extends BaseAdapter {
     @Override
     public int getCount() {
         int count = mAdapter.getCount();
-        return numberOfAds(count) + count;
+        return  mSharethrough.getNumberOfPlacedAds() + count;
     }
 
     @Override
@@ -192,13 +192,6 @@ public class SharethroughListAdapter extends BaseAdapter {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     private int creativesCount() {
         return mSharethrough.getNumberOfAdsReadyToShow() + mSharethrough.getNumberOfPlacedAds();
-    }
-
-    private int numberOfAds(int count) {
-        if (count < mSharethrough.getArticlesBeforeFirstAd()) {
-            return 0;
-        }
-        return 1 + (count - mSharethrough.getArticlesBeforeFirstAd()) / mSharethrough.getArticlesBetweenAds();
     }
 
     /**
