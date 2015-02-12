@@ -1,10 +1,11 @@
 package com.sharethrough.sdk;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -85,7 +86,7 @@ public class SharethroughListAdapter extends BaseAdapter {
     @Override
     public int getCount() {
         int count = mAdapter.getCount();
-        return numberOfAds(count) + count;
+        return  mSharethrough.getNumberOfPlacedAds() + count;
     }
 
     @Override
@@ -109,8 +110,16 @@ public class SharethroughListAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (isAd(position)) {
+            // we must check to make sure convertView is correct type, views may change type depending on ads availability
+            if (convertView != null && !(convertView instanceof IAdView)) {
+                convertView = null;
+            }
             return getAd(position, (IAdView) convertView);
         } else {
+            if (convertView != null && convertView instanceof IAdView) {
+                convertView = null;
+            }
+            mSharethrough.fetchAdsIfReadyForMore();
             return mAdapter.getView(adjustedPosition(position), convertView, parent);
         }
     }
@@ -144,27 +153,45 @@ public class SharethroughListAdapter extends BaseAdapter {
         return mAdapter.areAllItemsEnabled();
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     private int adjustedPosition(int position) {
-        if (position < mSharethrough.placement.getArticlesBeforeFirstAd()) {
+        if (position <= mSharethrough.getArticlesBeforeFirstAd()) {
             return position;
         } else {
-            int numberOfAdsShown = 1 + (position - mSharethrough.placement.getArticlesBeforeFirstAd()) / (mSharethrough.placement.getArticlesBetweenAds() + 1);
-            return position - numberOfAdsShown;
+            int numberOfAdsAvailable = creativesCount();
+            if (numberOfAdsAvailable == 0) {
+                return position;
+            }
+
+            int numberOfAdsBeforePosition = mSharethrough.getNumberOfAdsBeforePosition(position);
+
+            int adjustedPosition = position - numberOfAdsBeforePosition;
+
+            return adjustedPosition;
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     private boolean isAd(int position) {
-        int articlesBeforeFirstAd = mSharethrough.placement.getArticlesBeforeFirstAd();
-        return position == articlesBeforeFirstAd ||
-                position >= articlesBeforeFirstAd &&
-                        0 == (position - articlesBeforeFirstAd) % (mSharethrough.placement.getArticlesBetweenAds() + 1);
+        int articlesBeforeFirstAd = mSharethrough.getArticlesBeforeFirstAd();
+
+        if ((mSharethrough.getNumberOfPlacedAds() + mSharethrough.getNumberOfAdsReadyToShow()) == 0) {
+            return false;
+        }
+
+        if (position == articlesBeforeFirstAd) {
+            return mSharethrough.isAdAtPosition(position) || mSharethrough.getNumberOfAdsReadyToShow() != 0;
+        }
+
+        boolean couldPossiblyBeAnAd = 0 == (position - articlesBeforeFirstAd) % (mSharethrough.getArticlesBetweenAds() + 1);
+        boolean adAlreadyInPosition = mSharethrough.isAdAtPosition(position);
+
+        return position >= articlesBeforeFirstAd && couldPossiblyBeAnAd && (adAlreadyInPosition || mSharethrough.getNumberOfAdsReadyToShow() != 0);
     }
 
-    private int numberOfAds(int count) {
-        if (count < mSharethrough.placement.getArticlesBeforeFirstAd()) {
-            return 0;
-        }
-        return 1 + (count - mSharethrough.placement.getArticlesBeforeFirstAd()) / mSharethrough.placement.getArticlesBetweenAds();
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+    private int creativesCount() {
+        return mSharethrough.getNumberOfAdsReadyToShow() + mSharethrough.getNumberOfPlacedAds();
     }
 
     /**

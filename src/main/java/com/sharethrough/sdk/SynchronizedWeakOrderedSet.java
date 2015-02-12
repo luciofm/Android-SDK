@@ -30,4 +30,8 @@ public class SynchronizedWeakOrderedSet<T> {
 
         list.add(new WeakReference<>(object));
     }
+
+    public synchronized int size(){
+        return list.size();
+    }
 }
