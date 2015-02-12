@@ -36,7 +36,7 @@ public class Sharethrough {
     private String placementKey;
     private String apiUrlPrefix = "http://btlr.sharethrough.com/v3";
     static final ExecutorService EXECUTOR_SERVICE = DefaultSharethroughExecutorServiceProivder.create();
-    final CreativesQueue availableCreatives;
+    private final CreativesQueue availableCreatives;
     private Function<Creative, Void> creativeHandler;
     private AdFetcher adFetcher;
     private ImageFetcher imageFetcher;
@@ -53,13 +53,13 @@ public class Sharethrough {
         }
     };
     private Handler handler = new Handler(Looper.getMainLooper());
-    LruCache<Integer, Creative> creativesBySlot = new LruCache<>(10);
+    private final LruCache<Integer, Creative> creativesBySlot = new LruCache<>(10);
 
     private static final Map<String, String> dfpCreativeIds = new HashMap<>();
     private final Context context; //TODO decide whether this is needed
     private String dfpPath;
     private boolean firedNewAdsToShow;
-    public Placement placement;
+    private Placement placement;
     public boolean placementSet;
     private Function<Placement, Void> placementHandler;
     private Callback<Placement> placementCallback = new Callback<Placement>() {

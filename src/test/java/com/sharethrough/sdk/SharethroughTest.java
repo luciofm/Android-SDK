@@ -1,6 +1,7 @@
 package com.sharethrough.sdk;
 
 import android.os.Bundle;
+import android.util.LruCache;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import com.sharethrough.sdk.network.AdFetcher;
@@ -105,7 +106,7 @@ public class SharethroughTest extends TestBase {
     }
 
     @Test
-    public void whenACreativeIsReady_whenMoreAdViewIsWaiting_putsCreativeInFirstAdView() throws Exception {
+    public void whenACreativeIsReady_whenMoreAdVieworCreativeHandlerIsWaiting_putsCreativeInFirstAdView() throws Exception {
         // make two ad views wait
         TestAdView adView2 = makeMockAdView();
         subject.putCreativeIntoAdView(adView);
@@ -115,22 +116,6 @@ public class SharethroughTest extends TestBase {
         creativeHandler.getValue().apply(creative);
 
         verifyCreativeHasBeenPlacedInAdview(adView);
-    }
-
-    @Test
-    public void whenCreativeIsReady_andWaitingAdViewHasBeenGCd_ignoresWaitingAdView() throws Exception {
-        TestAdView myAdView = makeMockAdView();
-
-        subject.putCreativeIntoAdView(myAdView);
-
-        myAdView = null;
-        // hope WeakReferences are collected here
-        System.gc();
-        Thread.sleep(100);
-
-        creativeHandler.getValue().apply(creative);
-
-        verify(availableCreatives).add(creative);
     }
 
     @Test
