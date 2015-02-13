@@ -351,36 +351,64 @@ public class Sharethrough {
         }
     }
 
+    /**
+     * @return how many articles should be between ads. This is set on the server side.
+     */
     public int getArticlesBetweenAds() {
         return placement.getArticlesBetweenAds();
     }
 
+    /**
+     * @return how many articles to place before the first ad.
+     */
     public int getArticlesBeforeFirstAd() {
         return placement.getArticlesBeforeFirstAd();
     }
 
+    /**
+     * Fetches more ads if running low on ads.
+     */
     public void fetchAdsIfReadyForMore() {
         if (availableCreatives.readyForMore()) {
             fetchAds();
         }
     }
 
+    /**
+     * @param position The position to check for an ad
+     * @return whether there is an ad to be displayed at the current position.
+     */
     public boolean isAdAtPosition(int position) {
         return creativesBySlot.get(position) != null;
     }
 
+    /**
+     * @return the number of prefetched ads available to show.
+     */
     public int getNumberOfAdsReadyToShow() {
         return availableCreatives.size();
     }
 
+    /**
+     * @return a set containing all of the positions currently filled by ads
+     */
     public Set<Integer> getPositionsFilledByAds(){
         return creativesBySlot.snapshot().keySet();
     }
 
+    /**
+     * Note: The max number of stored ads is set to 10. New ads stored will eject the least recently seen ad.
+     * @return the number of ads currently placed.
+     */
     public int getNumberOfPlacedAds() {
         return creativesBySlot.size();
     }
 
+    /**
+     *
+     * @param position the position in your feed
+     * @return the number of ads shown before a certain position
+     */
     public int getNumberOfAdsBeforePosition(int position){
         int numberOfAdsBeforePosition = 0;
         Set<Integer> filledPositions = getPositionsFilledByAds();
