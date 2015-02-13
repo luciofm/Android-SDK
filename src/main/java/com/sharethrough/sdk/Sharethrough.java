@@ -59,7 +59,7 @@ public class Sharethrough {
     private final Context context; //TODO decide whether this is needed
     private String dfpPath;
     private boolean firedNewAdsToShow;
-    private Placement placement;
+    Placement placement;
     public boolean placementSet;
     private Function<Placement, Void> placementHandler;
     private Callback<Placement> placementCallback = new Callback<Placement>() {
