@@ -55,8 +55,10 @@ public class AdFetcher {
                     Response response = getResponse(json);
 
                     if (response.placement.layout.equals("multiple") && !placementSet) {
-                        placementHandler.apply(new Placement(response.placement.articlesBeforeFirstAd, response.placement.articlesBetweenAds));
-                        placementSet = true;
+                        if (!(response.placement.articlesBeforeFirstAd == 0 || response.placement.articlesBetweenAds == 0)) {
+                            placementHandler.apply(new Placement(response.placement.articlesBeforeFirstAd, response.placement.articlesBetweenAds));
+                            placementSet = true;
+                        }
                     }
 
                     remainingImageRequests += response.creatives.size();
