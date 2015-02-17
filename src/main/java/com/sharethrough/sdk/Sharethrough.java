@@ -9,13 +9,21 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.util.LruCache;
+
 import com.sharethrough.sdk.network.AdFetcher;
 import com.sharethrough.sdk.network.DFPNetworking;
 import com.sharethrough.sdk.network.ImageFetcher;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.Timer;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -67,7 +75,7 @@ public class Sharethrough {
         public void call(Placement result) {
         }
     };
-    private SynchronizedWeakOrderedSet<Function> creativeHandlerStack;
+    private SynchronizedWeakOrderedSet<AdViewFeedPositionPair> waitingAdViews;
 
     //TODO make the constructors cleaner
 
@@ -145,17 +153,21 @@ public class Sharethrough {
             e.printStackTrace();
         }
 
-        creativeHandlerStack = new SynchronizedWeakOrderedSet<Function>();
+        waitingAdViews = new SynchronizedWeakOrderedSet<AdViewFeedPositionPair>();
         creativeHandler = new Function<Creative,Void>() {
             @Override
             public Void apply(Creative creative) {
-                if (creativeHandlerStack.size() == 0) {
+                if (waitingAdViews.size() == 0) {
                     availableCreatives.add(creative);
                     fireNewAdsToShow();
                 } else {
-                    Function<Creative, Void> creativeHandlerCallback = creativeHandlerStack.popNext();
-                    if(creativeHandlerCallback != null){
-                        creativeHandlerCallback.apply(creative);
+                    AdViewFeedPositionPair adViewFeedPositionPair = waitingAdViews.popNext();
+                    if(adViewFeedPositionPair != null){
+                        IAdView adView = (IAdView) adViewFeedPositionPair.adView;
+                        int feedPosition = (int )adViewFeedPositionPair.feedPosition;
+                        creativesBySlot.put(feedPosition, creative);
+                        renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this, feedPosition, new Timer("AdView timer for " + creative));
+                        fireNewAdsToShow();
                     }
                 }
                 return null;
@@ -320,16 +332,8 @@ public class Sharethrough {
                 fireNewAdsToShow();
             }
         } else {
-            creativeHandlerStack.put(
-                    new Function<Creative, Void>() {
-                        @Override
-                        public Void apply(Creative creative) {
-                            creativesBySlot.put(feedPosition, creative);
-                            renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this, feedPosition, new Timer("AdView timer for " + creative));
-                            fireNewAdsToShow();
-                            return null;
-                        }
-                    });
+            AdViewFeedPositionPair<IAdView, Integer> adViewFeedPositionPair = new AdViewFeedPositionPair<IAdView, Integer>(adView, feedPosition);
+            waitingAdViews.put(adViewFeedPositionPair);
         }
 
         synchronized (availableCreatives) {
