@@ -19,6 +19,10 @@ public class Response {
     public List<Creative> creatives;
 
     public static class Creative {
+        @JsonProperty("adserverRequestId")
+        public String adserverRequestId;
+        @JsonProperty("auctionWinId")
+        public String auctionWinId;
         @JsonProperty("price")
         public Integer price;
         @JsonProperty("signature")

@@ -61,6 +61,8 @@ public class BeaconServiceTest extends TestBase {
 
         responseCreative = new Response.Creative();
         responseCreative.creative = new Response.Creative.CreativeInner();
+        responseCreative.adserverRequestId = "fake-adserver-request-id";
+        responseCreative.auctionWinId = "fake-auction-win-id";
         responseCreative.creative.variantKey = "variant key";
         responseCreative.creative.key = "creative key";
         responseCreative.signature = "signature";
@@ -97,6 +99,9 @@ public class BeaconServiceTest extends TestBase {
         expectedCommonParams.put("as", "signature");
         expectedCommonParams.put("at", "price type");
         expectedCommonParams.put("ap", "1000");
+        expectedCommonParams.put("arid", "fake-adserver-request-id");
+        expectedCommonParams.put("awid", "fake-auction-win-id");
+
 
         assertThat(subject.commonParamsWithCreative(Robolectric.application, creative)).isEqualTo(expectedCommonParams);
     }

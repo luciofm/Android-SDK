@@ -69,6 +69,14 @@ public class Creative {
         }
     }
 
+    public String getAdserverRequestId() {
+        return responseCreative.adserverRequestId;
+    }
+
+    public String getAuctionWinId() {
+        return responseCreative.auctionWinId;
+    }
+
     public String getShareUrl() {
         return responseCreative.creative.shareUrl;
     }
