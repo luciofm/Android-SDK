@@ -8,6 +8,8 @@
   "creatives": [
     {
       "price": 125167,
+      "adserverRequestId": "fake-adserver-request-id",
+      "auctionWinId": "fake-auction-win-id",
       "signature": "c19",
       "creative": {
         "creative_key": "ckey1",
@@ -36,6 +38,8 @@
     },
     {
       "price": 12567,
+      "adserverRequestId": "fake-adserver-request-id",
+      "auctionWinId": "fake-auction-win-id",
       "signature": "c19",
       "creative": {
         "creative_key": "ckey2",
