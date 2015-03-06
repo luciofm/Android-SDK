@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -41,7 +42,7 @@ import static org.robolectric.Robolectric.shadowOf;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
 @RunWith(SharethroughTestRunner.class)
-public class RendererTest {
+public class RendererTest extends TestBase {
 
     private Renderer subject;
     private Creative creative;
@@ -52,6 +53,7 @@ public class RendererTest {
     private BeaconService beaconService;
     private Sharethrough sharethrough;
     private int feedPosition;
+    @Mock private Placement placement;
 
     @Before
     public void setUp() throws Exception {
@@ -73,6 +75,7 @@ public class RendererTest {
         adView = makeAdView();
         timer = mock(Timer.class);
         sharethrough = mock(Sharethrough.class);
+        sharethrough.placement = placement;
 
         subject = new Renderer();
     }
@@ -171,7 +174,7 @@ public class RendererTest {
         adView.performClick();
 
         verify(media).wasClicked(adView, beaconService, feedPosition);
-        verify(media).fireAdClickBeacon(creative, adView, beaconService, feedPosition);
+        verify(media).fireAdClickBeacon(creative, adView, beaconService, feedPosition, placement);
     }
 
     @Test

@@ -10,6 +10,7 @@ import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -20,6 +21,7 @@ public class MediaTest extends TestBase {
     private boolean isThumbnailOverlayCentered;
     private int overlayImageResourceId;
     private ImageView thumbnailImageView;
+    @Mock private Placement placement;
 
     @Before
     public void setUp() throws Exception {
@@ -107,7 +109,7 @@ public class MediaTest extends TestBase {
         }
 
         @Override
-        public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition) {
+        public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition, Placement placement) {
         }
     }
 }

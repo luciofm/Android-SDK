@@ -4,6 +4,7 @@ import android.graphics.Rect;
 import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -25,6 +26,7 @@ public class AdViewTimerTaskTest extends TestBase {
     private AdViewTimerTask subject;
     private int feedPosition = 0;
     private Sharethrough sharethrough;
+    @Mock private Placement placement;
 
     @Before
     public void setUp() throws Exception {
@@ -44,6 +46,7 @@ public class AdViewTimerTaskTest extends TestBase {
         };
         sharethrough = mock(Sharethrough.class);
         when(sharethrough.getAdCacheTimeInMilliseconds()).thenReturn((int) TimeUnit.SECONDS.toMillis(20));
+        sharethrough.placement = placement;
 
         subject = new AdViewTimerTask(adView, feedPosition, creative, beaconService, dateProvider, sharethrough);
     }
@@ -104,7 +107,7 @@ public class AdViewTimerTaskTest extends TestBase {
         // visible for a continuous second yet
         now += 1000;
         subject.run();
-        verify(beaconService).adVisible(adView, creative, feedPosition);
+        verify(beaconService).adVisible(adView, creative, feedPosition, placement);
 
         // still visible, still over a second, but no need for a duplicate beacon
         subject.run();
@@ -166,6 +169,6 @@ public class AdViewTimerTaskTest extends TestBase {
         subject.run();
         now += TimeUnit.SECONDS.toMillis(1);
         subject.run();
-        verify(beaconService).adVisible(adView, creative, feedPosition);
+        verify(beaconService).adVisible(adView, creative, feedPosition, placement);
     }
 }

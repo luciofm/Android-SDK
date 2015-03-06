@@ -13,6 +13,8 @@ public class Response {
         public int articlesBeforeFirstAd;
         @JsonProperty("articlesBetweenAds")
         public int articlesBetweenAds;
+        @JsonProperty("status")
+        public String status;
     }
 
     @JsonProperty("creatives")

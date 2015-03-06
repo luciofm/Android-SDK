@@ -3,10 +3,12 @@ package com.sharethrough.sdk;
 public class Placement {
     private final int articlesBeforeFirstAd;
     private final int articlesBetweenAds;
+    private final String status;
 
-    public Placement(int articlesBeforeFirstAd, int articlesBetweenAds) {
-        this.articlesBeforeFirstAd = articlesBeforeFirstAd;
-        this.articlesBetweenAds = articlesBetweenAds;
+    public Placement(Response.Placement placement) {
+        this.articlesBeforeFirstAd = placement.articlesBeforeFirstAd;
+        this.articlesBetweenAds = placement.articlesBetweenAds;
+        this.status = placement.status;
     }
 
     public int getArticlesBeforeFirstAd() {
@@ -16,6 +18,8 @@ public class Placement {
     public int getArticlesBetweenAds() {
         return articlesBetweenAds;
     }
+
+    public String getStatus() { return status; }
 
     @Override
     public boolean equals(Object o) {
