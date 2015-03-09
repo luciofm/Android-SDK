@@ -59,7 +59,7 @@ public class BeaconService {
         result.put("bwidth", "" + size.x);
         result.put("bheight", "" + size.y);
 
-        result.put("uid", advertisingIdProvider.getAdvertisingId());
+        if (advertisingIdProvider.getAdvertisingId() != null) result.put("uid", advertisingIdProvider.getAdvertisingId());
         result.put("session", session.toString());
 
         result.put("ua", "" + Sharethrough.USER_AGENT + "; " + appPackageName);

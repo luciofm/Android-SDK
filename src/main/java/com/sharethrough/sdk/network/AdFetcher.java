@@ -41,7 +41,7 @@ public class AdFetcher {
             public void run() {
                 beaconService.adRequested(placementKey);
 
-                queryStringParams.add(new BasicNameValuePair("uid", advertisingIdProvider.getAdvertisingId()));
+                if (advertisingIdProvider.getAdvertisingId() != null) queryStringParams.add(new BasicNameValuePair("uid", advertisingIdProvider.getAdvertisingId()));
                 queryStringParams.add(new BasicNameValuePair("appId", beaconService.getAppVersionName()));
                 queryStringParams.add(new BasicNameValuePair("appName", beaconService.getAppPackageName()));
 

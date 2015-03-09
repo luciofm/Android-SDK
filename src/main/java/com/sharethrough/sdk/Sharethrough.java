@@ -97,7 +97,7 @@ public class Sharethrough {
      * @param adCacheTimeInMilliseconds The ad cache time in milliseconds. e.g. a value of 100,000 will result in ads being refreshed every 100 seconds.
      */
     public Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds) {
-        this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString()), false);
+        this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context, EXECUTOR_SERVICE), false);
     }
 
     /**
@@ -121,7 +121,7 @@ public class Sharethrough {
      * @param dfpEnabled    A boolean flag indicating if you would like to use Sharethrough's Direct Sell functionality via DFP.
      */
     public Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds, boolean dfpEnabled) {
-        this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context, EXECUTOR_SERVICE, UUID.randomUUID().toString()), dfpEnabled);
+        this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context, EXECUTOR_SERVICE), dfpEnabled);
     }
 
     Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds, AdvertisingIdProvider advertisingIdProvider, boolean dfpEnabled) {

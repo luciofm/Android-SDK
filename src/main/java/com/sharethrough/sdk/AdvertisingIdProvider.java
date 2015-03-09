@@ -12,8 +12,7 @@ import java.util.concurrent.ExecutorService;
 public class AdvertisingIdProvider {
     private String advertisingId;
 
-    public AdvertisingIdProvider(final Context context, ExecutorService executorService, final String defaultRandomAdvertisingId) {
-        advertisingId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+    public AdvertisingIdProvider(final Context context, ExecutorService executorService) {
         int googlePlayServicesAvailable = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
         if (googlePlayServicesAvailable != ConnectionResult.SUCCESS) {
 //            GooglePlayServicesUtil.getErrorDialog(googlePlayServicesAvailable, (Activity) context, 0).show();
@@ -25,7 +24,7 @@ public class AdvertisingIdProvider {
                         AdvertisingIdClient.Info adInfo = AdvertisingIdClient.getAdvertisingIdInfo(context);
                         advertisingId = adInfo.getId();
                         if (adInfo.isLimitAdTrackingEnabled()) {
-                            advertisingId = defaultRandomAdvertisingId;
+                            advertisingId = null;
                         }
                     } catch (Exception e) {
                         Log.d("Sharethrough", "Google Play Advertising Id failure", e);

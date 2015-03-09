@@ -85,6 +85,29 @@ public class AdFetcherTest extends TestBase {
     }
 
     @Test
+    public void fetchAds_whenAdvertisingIdIsNull_doesNotPassUidQueryStringParam() throws Exception {
+        when(advertisingIdProvider.getAdvertisingId()).thenReturn(null);
+
+        ArrayList<NameValuePair> stringParams = (ArrayList<NameValuePair>) queryStringParams.clone();
+        stringParams.add(new BasicNameValuePair("appId", "version-number"));
+        stringParams.add(new BasicNameValuePair("appName", "com.sharethrough.example"));
+
+        String uri = apiUri + "?" + URLEncodedUtils.format(stringParams, "utf-8");
+
+        Robolectric.addHttpResponseRule("GET", uri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
+        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
+
+        verifyNoMoreInteractions(imageFetcher);
+
+        Misc.runLast(executorService);
+
+        verify(beaconService).adRequested(key);
+
+        verifyFetchedImage(imageFetcher, "//th.umb.na/il/URL1", uri, creativeHandler);
+        verifyFetchedImage(imageFetcher, "//th.umb.na/il/URL2", uri, creativeHandler);
+    }
+
+    @Test
     public void fetchAds_whenServerRequestFails_doesNothing() throws Exception {
         Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(500, "Bad server"));
 
