@@ -1,6 +1,6 @@
 {
   "template": "<div></div>",
-  "status": "pre-live",
+  "status": "live",
   "articlesBeforeFirstAd": 2,
   "articlesBetweenAds": 3,
   "backfillTag": ""

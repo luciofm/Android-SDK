@@ -7,13 +7,14 @@ import android.widget.ImageView;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.IAdView;
+import com.sharethrough.sdk.Placement;
 
 public abstract class Media {
     public final static String THUMBNAIL = "ThumbnailImageView";
 
     public abstract void wasClicked(View view, BeaconService beaconService, int feedPosition);
 
-    public abstract void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition);
+    public abstract void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition, Placement placement);
 
     public final void overlayThumbnail(IAdView adView, ImageView thumbnailImage) {
         int overlayImageResourceId = getOverlayImageResourceId();

@@ -6,6 +6,7 @@ import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.IAdView;
+import com.sharethrough.sdk.Placement;
 import com.sharethrough.sdk.dialogs.YoutubeDialog;
 
 public class Youtube extends Media {
@@ -45,7 +46,7 @@ public class Youtube extends Media {
     }
 
     @Override
-    public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition) {
-        beaconService.adClicked("youtubePlay", creative, adView.getAdView(), feedPosition);
+    public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition, Placement placement) {
+        beaconService.adClicked("youtubePlay", creative, adView.getAdView(), feedPosition, placement);
     }
 }

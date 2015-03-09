@@ -3,16 +3,14 @@ package com.sharethrough.sdk.media;
 import android.graphics.Bitmap;
 import android.view.View;
 import com.sharethrough.android.sdk.R;
-import com.sharethrough.sdk.BeaconService;
-import com.sharethrough.sdk.Creative;
-import com.sharethrough.sdk.RendererTest;
-import com.sharethrough.sdk.TestBase;
+import com.sharethrough.sdk.*;
 import com.sharethrough.sdk.dialogs.ShareableDialogTest;
 import com.sharethrough.sdk.dialogs.VideoDialog;
 import com.sharethrough.sdk.dialogs.WebViewDialogTest;
 import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.robolectric.Robolectric;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowDialog;
@@ -27,6 +25,7 @@ public class VineTest extends TestBase {
     private BeaconService beaconService;
     private Vine subject;
     private int feedPosition;
+    @Mock private Placement placement;
 
     @Before
     public void setUp() throws Exception {
@@ -48,8 +47,8 @@ public class VineTest extends TestBase {
     @Test
     public void firesPlayBeacon() throws Exception {
         TestAdView adView = RendererTest.makeAdView();
-        subject.fireAdClickBeacon(creative, adView, beaconService, feedPosition);
-        verify(beaconService).adClicked("vinePlay", creative, adView.getAdView(), feedPosition);
+        subject.fireAdClickBeacon(creative, adView, beaconService, feedPosition, placement);
+        verify(beaconService).adClicked("vinePlay", creative, adView.getAdView(), feedPosition, placement);
     }
 
     @Config(emulateSdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})

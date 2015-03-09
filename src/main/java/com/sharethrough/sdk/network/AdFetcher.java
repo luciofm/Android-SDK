@@ -56,7 +56,7 @@ public class AdFetcher {
 
                     if (response.placement.layout.equals("multiple") && !placementSet) {
                         if (!(response.placement.articlesBeforeFirstAd == 0 || response.placement.articlesBetweenAds == 0)) {
-                            placementHandler.apply(new Placement(response.placement.articlesBeforeFirstAd, response.placement.articlesBetweenAds));
+                            placementHandler.apply(new Placement(response.placement));
                             placementSet = true;
                         }
                     }
@@ -133,6 +133,7 @@ public class AdFetcher {
         placement.layout = jsonPlacement.getString("layout");
         placement.articlesBeforeFirstAd = jsonPlacement.optInt("articlesBeforeFirstAd", Integer.MAX_VALUE);
         placement.articlesBetweenAds = jsonPlacement.optInt("articlesBetweenAds", Integer.MAX_VALUE);
+        placement.status = jsonPlacement.getString("status");
         response.placement = placement;
 
         JSONArray creatives = jsonResponse.getJSONArray("creatives");

@@ -139,7 +139,12 @@ public class Sharethrough {
         this.beaconService = beaconService;
         this.adCacheTimeInMilliseconds = Math.max(adCacheTimeInMilliseconds, MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS);
         this.availableCreatives = availableCreatives;
-        placement = new Placement(Integer.MAX_VALUE, Integer.MAX_VALUE);
+
+        Response.Placement responsePlacement = new Response.Placement();
+        responsePlacement.articlesBetweenAds = Integer.MAX_VALUE;
+        responsePlacement.articlesBeforeFirstAd = Integer.MAX_VALUE;
+        responsePlacement.status = "";
+        placement = new Placement(responsePlacement);
 
         if (placementKey == null) throw new KeyRequiredException("placement_key is required");
 

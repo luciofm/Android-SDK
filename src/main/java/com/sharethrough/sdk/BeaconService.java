@@ -16,6 +16,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -82,7 +83,7 @@ public class BeaconService {
         return result;
     }
 
-    public void adClicked(final String userEvent, final Creative creative, View view, int feedPosition) {
+    public void adClicked(final String userEvent, final Creative creative, View view, int feedPosition, Placement placement) {
         Map<String, String> beaconParams = commonParamsWithCreative(view.getContext(), creative);
         beaconParams.put("pheight", "" + view.getHeight());
         beaconParams.put("pwidth", "" + view.getWidth());
@@ -91,17 +92,19 @@ public class BeaconService {
         beaconParams.put("engagement", "true");
         beaconParams.put("placementIndex", String.valueOf(feedPosition));
 
-        for (String uri : creative.getClickBeacons()) {
-            String cachedBustedUri = replaceCacheBusterParam(uri);
-            fireBeacon(new HashMap<String, String>(), "http:" + cachedBustedUri);
-        }
 
-        for (String uri : creative.getPlayBeacons()) {
-            String cachedBustedUri = replaceCacheBusterParam(uri);
-            fireBeacon(new HashMap<String, String>(), "http:" + cachedBustedUri);
-        }
-
+        fireThirdPartyBeacons(creative.getClickBeacons(), placement.getStatus());
+        fireThirdPartyBeacons(creative.getPlayBeacons(), placement.getStatus());
         fireBeacon(beaconParams);
+    }
+
+    private void fireThirdPartyBeacons(List<String> thirdPartyBeacons, String status) {
+        if (!status.equals("pre-live")) {
+            for (String uri : thirdPartyBeacons) {
+                String cachedBustedUri = replaceCacheBusterParam(uri);
+                fireBeacon(new HashMap<String, String>(), "http:" + cachedBustedUri);
+            }
+        }
     }
 
     public void adRequested(final String placementKey) {
@@ -120,7 +123,7 @@ public class BeaconService {
         fireBeacon(beaconParams);
     }
 
-    public void adVisible(final View adView, final Creative creative, int feedPosition) {
+    public void adVisible(final View adView, final Creative creative, int feedPosition, Placement placement) {
         Context context = adView.getContext();
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("pheight", "" + adView.getHeight());
@@ -128,11 +131,7 @@ public class BeaconService {
         beaconParams.put("type", "visible");
         beaconParams.put("placementIndex", String.valueOf(feedPosition));
 
-        for (String uri : creative.getVisibleBeacons()) {
-            String cachedBustedUri = replaceCacheBusterParam(uri);
-            fireBeacon(new HashMap<String, String>(), "http:" + cachedBustedUri);
-        }
-
+        fireThirdPartyBeacons(creative.getVisibleBeacons(), placement.getStatus());
         fireBeacon(beaconParams);
     }
 

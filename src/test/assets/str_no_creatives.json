@@ -1,7 +1,8 @@
 {
   "placement": {
     "template": "<div/>",
-    "layout": "single"
+    "layout": "single",
+    "status": "live"
   },
   "creatives": []
 }

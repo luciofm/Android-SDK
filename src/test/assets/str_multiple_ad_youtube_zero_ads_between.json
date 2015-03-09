@@ -2,6 +2,7 @@
   "placement": {
     "template": "<div/>",
     "layout": "multiple",
+    "status": "live",
     "articlesBeforeFirstAd": 2,
     "articlesBetweenAds": 0
   },

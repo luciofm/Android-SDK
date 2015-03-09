@@ -3,6 +3,7 @@ package com.sharethrough.sdk;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.util.Log;
 import com.sharethrough.test.util.Misc;
 import org.apache.http.HttpRequest;
 import org.apache.http.NameValuePair;
@@ -36,6 +37,7 @@ public class BeaconServiceTest extends TestBase {
     @Mock private Context context;
     @Mock private PackageManager packageManager;
     @Mock private PackageInfo packageInfo;
+    @Mock private Placement placement;
     private String advertisingId;
     private Response.Creative responseCreative;
     private int feedPosition;
@@ -78,6 +80,7 @@ public class BeaconServiceTest extends TestBase {
         creative = new Creative(responseCreative, new byte[0], new byte[0], "placement key");
 
         packageInfo.versionName = "fake_app_id";
+        when(placement.getStatus()).thenReturn("live");
         when(advertisingIdProvider.getAdvertisingId()).thenReturn(advertisingId);
         when(context.getPackageName()).thenReturn("com.example.sdk");
         when(context.getPackageManager()).thenReturn(packageManager);
@@ -119,7 +122,7 @@ public class BeaconServiceTest extends TestBase {
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
             public void run() {
-                subject.adClicked("fake user event", creative, RendererTest.makeAdView().getAdView(), feedPosition);
+                subject.adClicked("fake user event", creative, RendererTest.makeAdView().getAdView(), feedPosition, placement);
             }
         });
     }
@@ -158,7 +161,7 @@ public class BeaconServiceTest extends TestBase {
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
             public void run() {
-                subject.adVisible(RendererTest.makeAdView(), creative, feedPosition);
+                subject.adVisible(RendererTest.makeAdView(), creative, feedPosition, placement);
             }
         });
     }
@@ -188,7 +191,7 @@ public class BeaconServiceTest extends TestBase {
 
         Creative testCreative = new Creative(responseCreative, new byte[0], new byte[0], "placement key");
 
-        subject.adVisible(RendererTest.makeAdView(), testCreative, feedPosition);
+        subject.adVisible(RendererTest.makeAdView(), testCreative, feedPosition, placement);
 
         Robolectric.addHttpResponseRule(new RequestMatcher() {
             @Override
@@ -220,7 +223,7 @@ public class BeaconServiceTest extends TestBase {
 
         Creative testCreative = new Creative(responseCreative, new byte[0], new byte[0], "placement key");
 
-        subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition);
+        subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition, placement);
 
         Robolectric.addHttpResponseRule(new RequestMatcher() {
             @Override
@@ -241,6 +244,38 @@ public class BeaconServiceTest extends TestBase {
     }
 
     @Test
+    public void whenPlacementStatusIsPreLiveAndAdClickCalled_doesNotFireClickAndVideoThirdPartyBeacons() throws Exception {
+        String[] initialUrls = {"//third-party/one", "//third-party/two", "//third-party/three", "//third-party/four"};
+
+        ArrayList<String> clickEndoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
+        ArrayList<String> playEndoints = new ArrayList<>(Arrays.asList(initialUrls[2], initialUrls[3]));
+
+        when(placement.getStatus()).thenReturn("pre-live");
+
+        responseCreative.creative.beacon.click = clickEndoints;
+        responseCreative.creative.beacon.play = playEndoints;
+
+        Creative testCreative = new Creative(responseCreative, new byte[0], new byte[0], "placement key");
+
+        subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition, placement);
+
+        Robolectric.addHttpResponseRule(new RequestMatcher() {
+            @Override
+            public boolean matches(HttpRequest request) {
+                return true;
+            }
+        }, new TestHttpResponse(200, ""));
+
+        Misc.runAll(executorService);
+
+        List<HttpRequestInfo> info = Robolectric.getFakeHttpLayer().getSentHttpRequestInfos();
+        assertThat(info.size()).isEqualTo(1);
+        for (int i = 0; i < info.size() - 1; i++) {
+            assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).doesNotContain("third-party");
+        }
+    }
+
+    @Test
     public void whenAThirdPartyBeaconIsInvalid_logsWithoutCrashing() throws Exception {
         String badUrl = "//%%%invalid%url%%%";
         List<String> clickEndoints = Arrays.asList(badUrl);
@@ -249,7 +284,7 @@ public class BeaconServiceTest extends TestBase {
 
         Creative testCreative = new Creative(responseCreative, new byte[0], new byte[0], "placement key");
 
-        subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition);
+        subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition, placement);
 
         Robolectric.addHttpResponseRule(new RequestMatcher() {
             @Override

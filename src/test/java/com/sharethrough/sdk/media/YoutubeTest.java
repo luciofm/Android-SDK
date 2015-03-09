@@ -2,13 +2,11 @@ package com.sharethrough.sdk.media;
 
 import android.graphics.Bitmap;
 import com.sharethrough.android.sdk.R;
-import com.sharethrough.sdk.BeaconService;
-import com.sharethrough.sdk.Creative;
-import com.sharethrough.sdk.RendererTest;
-import com.sharethrough.sdk.TestBase;
+import com.sharethrough.sdk.*;
 import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -19,6 +17,7 @@ public class YoutubeTest extends TestBase {
     private Creative creative;
     private BeaconService beaconService;
     private int feedPosition;
+    @Mock private Placement placement;
 
     @Before
     public void setUp() throws Exception {
@@ -68,7 +67,7 @@ public class YoutubeTest extends TestBase {
         Youtube subject = new Youtube(creative);
 
         TestAdView adView = RendererTest.makeAdView();
-        subject.fireAdClickBeacon(creative, adView, beaconService, feedPosition);
-        verify(beaconService).adClicked("youtubePlay", creative, adView.getAdView(), feedPosition);
+        subject.fireAdClickBeacon(creative, adView, beaconService, feedPosition, placement);
+        verify(beaconService).adClicked("youtubePlay", creative, adView.getAdView(), feedPosition, placement);
     }
 }

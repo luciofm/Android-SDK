@@ -4,6 +4,7 @@ import android.view.View;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.IAdView;
+import com.sharethrough.sdk.Placement;
 import com.sharethrough.sdk.dialogs.WebViewDialog;
 
 public class Clickout extends Media {
@@ -28,7 +29,7 @@ public class Clickout extends Media {
         new WebViewDialog(v.getContext(), creative, beaconService, feedPosition).show();
     }
 
-    public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition) {
-        beaconService.adClicked("clickout", creative, adView.getAdView(), feedPosition);
+    public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition, Placement placement) {
+        beaconService.adClicked("clickout", creative, adView.getAdView(), feedPosition, placement);
     }
 }
