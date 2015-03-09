@@ -39,6 +39,7 @@ public class AdFetcherTest extends TestBase {
     @Mock private Creative creative;
     @Mock private AdFetcher.Callback adFetcherCallback;
     @Mock private Function<Placement, Void> placementHandler;
+    @Mock private AdvertisingIdProvider advertisingIdProvider;
     private AdFetcher subject;
     private String apiUri;
     private String key;
@@ -58,11 +59,13 @@ public class AdFetcherTest extends TestBase {
 
         when(beaconService.getAppPackageName()).thenReturn("com.sharethrough.example");
         when(beaconService.getAppVersionName()).thenReturn("version-number");
+        when(advertisingIdProvider.getAdvertisingId()).thenReturn("fake-uid");
         expectedStringParams = (ArrayList<NameValuePair>) queryStringParams.clone();
+        expectedStringParams.add(new BasicNameValuePair("uid", "fake-uid"));
         expectedStringParams.add(new BasicNameValuePair("appId", "version-number"));
         expectedStringParams.add(new BasicNameValuePair("appName", "com.sharethrough.example"));
         expectedUri = apiUri + "?" + URLEncodedUtils.format(expectedStringParams, "utf-8");
-        subject = new AdFetcher(key, executorService, beaconService);
+        subject = new AdFetcher(key, executorService, beaconService, advertisingIdProvider);
     }
 
     @Test

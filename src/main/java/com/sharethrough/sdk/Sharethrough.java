@@ -128,7 +128,7 @@ public class Sharethrough {
         this(context, placementKey, adCacheTimeInMilliseconds, new Renderer(), new CreativesQueue(),
                 new BeaconService(new DateProvider(), UUID.randomUUID(), EXECUTOR_SERVICE, advertisingIdProvider, context),
                 new AdFetcher(placementKey, EXECUTOR_SERVICE, new BeaconService(new DateProvider(), UUID.randomUUID(),
-                        EXECUTOR_SERVICE, advertisingIdProvider, context)), new ImageFetcher(EXECUTOR_SERVICE, placementKey),
+                        EXECUTOR_SERVICE, advertisingIdProvider, context), advertisingIdProvider), new ImageFetcher(EXECUTOR_SERVICE, placementKey),
                 dfpEnabled ? new DFPNetworking() : null);
     }
 
