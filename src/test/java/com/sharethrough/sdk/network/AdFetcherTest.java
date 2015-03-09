@@ -39,6 +39,7 @@ public class AdFetcherTest extends TestBase {
     @Mock private Creative creative;
     @Mock private AdFetcher.Callback adFetcherCallback;
     @Mock private Function<Placement, Void> placementHandler;
+    @Mock private AdvertisingIdProvider advertisingIdProvider;
     private AdFetcher subject;
     private String apiUri;
     private String key;
@@ -58,11 +59,13 @@ public class AdFetcherTest extends TestBase {
 
         when(beaconService.getAppPackageName()).thenReturn("com.sharethrough.example");
         when(beaconService.getAppVersionName()).thenReturn("version-number");
+        when(advertisingIdProvider.getAdvertisingId()).thenReturn("fake-uid");
         expectedStringParams = (ArrayList<NameValuePair>) queryStringParams.clone();
+        expectedStringParams.add(new BasicNameValuePair("uid", "fake-uid"));
         expectedStringParams.add(new BasicNameValuePair("appId", "version-number"));
         expectedStringParams.add(new BasicNameValuePair("appName", "com.sharethrough.example"));
         expectedUri = apiUri + "?" + URLEncodedUtils.format(expectedStringParams, "utf-8");
-        subject = new AdFetcher(key, executorService, beaconService);
+        subject = new AdFetcher(key, executorService, beaconService, advertisingIdProvider);
     }
 
     @Test
@@ -79,6 +82,29 @@ public class AdFetcherTest extends TestBase {
 
         verifyFetchedImage(imageFetcher, "//th.umb.na/il/URL1", expectedUri, creativeHandler);
         verifyFetchedImage(imageFetcher, "//th.umb.na/il/URL2", expectedUri, creativeHandler);
+    }
+
+    @Test
+    public void fetchAds_whenAdvertisingIdIsNull_doesNotPassUidQueryStringParam() throws Exception {
+        when(advertisingIdProvider.getAdvertisingId()).thenReturn(null);
+
+        ArrayList<NameValuePair> stringParams = (ArrayList<NameValuePair>) queryStringParams.clone();
+        stringParams.add(new BasicNameValuePair("appId", "version-number"));
+        stringParams.add(new BasicNameValuePair("appName", "com.sharethrough.example"));
+
+        String uri = apiUri + "?" + URLEncodedUtils.format(stringParams, "utf-8");
+
+        Robolectric.addHttpResponseRule("GET", uri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
+        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
+
+        verifyNoMoreInteractions(imageFetcher);
+
+        Misc.runLast(executorService);
+
+        verify(beaconService).adRequested(key);
+
+        verifyFetchedImage(imageFetcher, "//th.umb.na/il/URL1", uri, creativeHandler);
+        verifyFetchedImage(imageFetcher, "//th.umb.na/il/URL2", uri, creativeHandler);
     }
 
     @Test

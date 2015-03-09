@@ -95,6 +95,14 @@ public class BeaconServiceTest extends TestBase {
     }
 
     @Test
+    public void whenAdvertisingIdNotSet_commonParams_returnsParamsSentInAllBeacons() throws Exception {
+        when(advertisingIdProvider.getAdvertisingId()).thenReturn(null);
+        HashMap<String, String> expectedCommonParamsWithoutAdvertisingId = new HashMap<>(expectedCommonParams);
+        expectedCommonParamsWithoutAdvertisingId.remove("uid");
+        assertThat(subject.commonParams(Robolectric.application)).isEqualTo(expectedCommonParamsWithoutAdvertisingId);
+    }
+
+    @Test
     public void commonParamsWithAd_returnsParamsSentInAllBeaconsForAnAd() throws Exception {
         expectedCommonParams.put("pkey", "placement key");
         expectedCommonParams.put("vkey", "variant key");

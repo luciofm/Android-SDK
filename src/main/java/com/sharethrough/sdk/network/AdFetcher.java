@@ -21,14 +21,16 @@ public class AdFetcher {
     private final ExecutorService executorService;
     private final BeaconService beaconService;
     private final String placementKey;
+    private final AdvertisingIdProvider advertisingIdProvider;
     private boolean isRunning;
     private int remainingImageRequests;
     private boolean placementSet;
 
-    public AdFetcher(String placementKey, ExecutorService executorService, BeaconService beaconService) {
+    public AdFetcher(String placementKey, ExecutorService executorService, BeaconService beaconService, AdvertisingIdProvider advertisingIdProvider) {
         this.placementKey = placementKey;
         this.executorService = executorService;
         this.beaconService = beaconService;
+        this.advertisingIdProvider = advertisingIdProvider;
     }
 
     public synchronized void fetchAds(final ImageFetcher imageFetcher, final String apiUrl, final ArrayList<NameValuePair> queryStringParams, final Function<Creative, Void> creativeHandler, final Callback adFetcherCallback, final Function<Placement, Void> placementHandler) {
@@ -39,6 +41,7 @@ public class AdFetcher {
             public void run() {
                 beaconService.adRequested(placementKey);
 
+                if (advertisingIdProvider.getAdvertisingId() != null) queryStringParams.add(new BasicNameValuePair("uid", advertisingIdProvider.getAdvertisingId()));
                 queryStringParams.add(new BasicNameValuePair("appId", beaconService.getAppVersionName()));
                 queryStringParams.add(new BasicNameValuePair("appName", beaconService.getAppPackageName()));
 

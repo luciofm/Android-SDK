@@ -40,15 +40,15 @@ public class AdvertisingIdProviderTest extends TestBase {
     @Test
     public void whenGooglePlayServicesIsUnavailable() throws Exception {
         MyGooglePlayServicesUtilShadow.IS_AVAILABLE = false;
-        AdvertisingIdProvider subject = new AdvertisingIdProvider(Robolectric.application, executorService, defaultId);
-        assertThat(subject.getAdvertisingId()).isEqualTo(MySettingsSecureShadow.DEVICE_ID);
+        AdvertisingIdProvider subject = new AdvertisingIdProvider(Robolectric.application, executorService);
+        assertThat(subject.getAdvertisingId()).isEqualTo(null);
     }
 
     @Test
     public void whenAdvertisingIdIsUnavailable() throws Exception {
         MyGooglePlayServicesUtilShadow.IS_AVAILABLE = true;
         MyAdvertisingIdClientShadow.ADVERTISING_ID = null;
-        AdvertisingIdProvider subject = new AdvertisingIdProvider(Robolectric.application, executorService, defaultId);
+        AdvertisingIdProvider subject = new AdvertisingIdProvider(Robolectric.application, executorService);
 
         ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
         verify(executorService).execute(runnableArgumentCaptor.capture());
@@ -56,18 +56,18 @@ public class AdvertisingIdProviderTest extends TestBase {
         thread.start();
         thread.join();
 
-        assertThat(subject.getAdvertisingId()).isEqualTo(MySettingsSecureShadow.DEVICE_ID);
+        assertThat(subject.getAdvertisingId()).isEqualTo(null);
     }
 
     @Test
     public void whenLimitedAdTrackingIsEnabled() throws Exception {
         MyGooglePlayServicesUtilShadow.IS_AVAILABLE = true;
         MyAdvertisingIdClientShadow.IS_LIMITED_AD_TRACKING_ENABLED = true;
-        AdvertisingIdProvider subject = new AdvertisingIdProvider(Robolectric.application, executorService, defaultId);
+        AdvertisingIdProvider subject = new AdvertisingIdProvider(Robolectric.application, executorService);
 
         com.sharethrough.test.util.Misc.runLast(executorService);
 
-        assertThat(subject.getAdvertisingId()).isEqualTo(defaultId);
+        assertThat(subject.getAdvertisingId()).isEqualTo(null);
     }
 
     @Test
@@ -76,7 +76,7 @@ public class AdvertisingIdProviderTest extends TestBase {
         MyAdvertisingIdClientShadow.IS_LIMITED_AD_TRACKING_ENABLED = false;
         MyAdvertisingIdClientShadow.ADVERTISING_ID = "0u812";
 
-        AdvertisingIdProvider subject = new AdvertisingIdProvider(Robolectric.application, executorService, defaultId);
+        AdvertisingIdProvider subject = new AdvertisingIdProvider(Robolectric.application, executorService);
 
         ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
         verify(executorService).execute(runnableArgumentCaptor.capture());
