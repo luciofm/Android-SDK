@@ -31,7 +31,7 @@ public class Renderer {
                                       final Sharethrough sharethrough, final int feedPosition, final Timer timer) {
         final ViewGroup container = adView.getAdView();
         if (!creative.wasRendered) {
-            beaconService.adReceived(container.getContext(), creative, feedPosition);
+            beaconService.adReceived(container.getContext(), creative, feedPosition, sharethrough.placement);
             creative.wasRendered = true;
         }
         final Handler handler = new Handler(Looper.getMainLooper());

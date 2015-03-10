@@ -115,11 +115,12 @@ public class BeaconService {
         fireBeacon(beaconParams);
     }
 
-    public void adReceived(final Context context, final Creative creative, int feedPosition) {
+    public void adReceived(final Context context, final Creative creative, int feedPosition, final Placement placement) {
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("type", "impression");
         beaconParams.put("placementIndex", String.valueOf(feedPosition));
 
+        fireThirdPartyBeacons(creative.getImpressionBeacons(), placement.getStatus());
         fireBeacon(beaconParams);
     }
 

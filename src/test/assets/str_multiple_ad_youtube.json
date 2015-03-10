@@ -20,6 +20,7 @@
         "variant_key": "12345",
         "advertiser": "Advertiser",
         "beacons": {
+          "impression": [],
           "visible": [],
           "click": [
             "clickBeaconOne",
@@ -50,6 +51,7 @@
         "variant_key": "12345",
         "advertiser": "Advertiser",
         "beacons": {
+          "impression": [],
           "visible": [],
           "click": ["clickBeaconOne", "clickBeaconTwo"],
           "play": ["playBeaconOne", "playBeaconTwo"]

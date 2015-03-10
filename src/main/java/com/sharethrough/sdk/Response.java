@@ -66,6 +66,8 @@ public class Response {
             public String customEngagementLabel;
 
             public static class Beacon {
+                @JsonProperty("impression")
+                public List<String> impression;
                 @JsonProperty("visible")
                 public List<String> visible;
                 @JsonProperty("click")
