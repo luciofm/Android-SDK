@@ -57,11 +57,9 @@ public class AdFetcher {
                     json = Misc.convertStreamToString(content);
                     Response response = getResponse(json);
 
-                    if (response.placement.layout.equals("multiple") && !placementSet) {
-                        if (!(response.placement.articlesBeforeFirstAd == 0 || response.placement.articlesBetweenAds == 0)) {
-                            placementHandler.apply(new Placement(response.placement));
-                            placementSet = true;
-                        }
+                    if (!placementSet) {
+                        placementHandler.apply(new Placement(response.placement));
+                        placementSet = true;
                     }
 
                     remainingImageRequests += response.creatives.size();
@@ -107,11 +105,17 @@ public class AdFetcher {
     }
 
     private void parseBeacons(Response.Creative creative, JSONObject beacons) throws JSONException {
-        JSONArray visibleBeacons = beacons.getJSONArray("visible");
+        creative.creative.beacon.impression = new ArrayList<>();
         creative.creative.beacon.visible = new ArrayList<>();
         creative.creative.beacon.play = new ArrayList<>();
         creative.creative.beacon.click = new ArrayList<>();
 
+        JSONArray impressionBeacons = beacons.getJSONArray("impression");
+        for (int k = 0; k < impressionBeacons.length(); k++) {
+            String s = impressionBeacons.getString(k);
+            creative.creative.beacon.impression.add(s);
+        }
+        JSONArray visibleBeacons = beacons.getJSONArray("visible");
         for (int k = 0; k < visibleBeacons.length(); k++) {
             String s = visibleBeacons.getString(k);
             creative.creative.beacon.visible.add(s);
@@ -182,5 +186,11 @@ public class AdFetcher {
         void finishedLoading();
 
         void finishedLoadingWithNoAds();
+    }
+
+    // only used for testing
+    public void setIsRunning(boolean value) {
+        isRunning = value;
+
     }
 }

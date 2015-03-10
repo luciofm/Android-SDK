@@ -128,4 +128,6 @@ public class Creative {
     public List<String> getVisibleBeacons() {
         return responseCreative.creative.beacon.visible;
     }
+
+    public List<String> getImpressionBeacons() { return responseCreative.creative.beacon.impression; }
 }

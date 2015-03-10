@@ -253,76 +253,6 @@ public class AdFetcherTest extends TestBase {
     }
 
     @Test
-    public void fetchAds_whenLayoutIsMultiple_callsApplyOnPlacementHandler() throws Exception {
-        final boolean[] placementHandlerWascalled = {false};
-        placementHandler = new Function<Placement, Void>() {
-            @Override
-            public Void apply(Placement placement) {
-                placementHandlerWascalled[0] = true;
-                assertThat(placement.getArticlesBeforeFirstAd()).isEqualTo(2);
-                assertThat(placement.getArticlesBetweenAds()).isEqualTo(3);
-                return null;
-            }
-        };
-
-        Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(200, MULTIPLE_LAYOUT_FIXTURE));
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-        Misc.runLast(executorService);
-        assertThat(placementHandlerWascalled[0]).isTrue();
-    }
-
-    @Test
-    public void fetchAds_whenLayoutIsSingle_doesNotCallApplyOnPlacementHandler() throws Exception {
-        final boolean[] placementHandlerWascalled = {false};
-        placementHandler = new Function<Placement, Void>() {
-            @Override
-            public Void apply(Placement placement) {
-                placementHandlerWascalled[0] = true;
-                return null;
-            }
-        };
-
-        Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-        Misc.runLast(executorService);
-        assertThat(placementHandlerWascalled[0]).isFalse();
-    }
-
-    @Test
-    public void fetchAds_whenLayoutIsMultipleAndArticlesBeforeFirstAdIsZero_doesNotCallApplyOnPlacementHandler() throws Exception {
-        final boolean[] placementHandlerWascalled = {false};
-        placementHandler = new Function<Placement, Void>() {
-            @Override
-            public Void apply(Placement placement) {
-                placementHandlerWascalled[0] = true;
-                return null;
-            }
-        };
-
-        Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(200, MULTIPLE_LAYOUT_FIXTURE_ZERO_BEFORE));
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-        Misc.runLast(executorService);
-        assertThat(placementHandlerWascalled[0]).isFalse();
-    }
-
-    @Test
-    public void fetchAds_whenLayoutIsMultipleAndArticlesBetweenAdsIsZero_doesNotCallApplyOnPlacementHandler() throws Exception {
-        final boolean[] placementHandlerWascalled = {false};
-        placementHandler = new Function<Placement, Void>() {
-            @Override
-            public Void apply(Placement placement) {
-                placementHandlerWascalled[0] = true;
-                return null;
-            }
-        };
-
-        Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(200, MULTIPLE_LAYOUT_FIXTURE_ZERO_BETWEEN));
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-        Misc.runLast(executorService);
-        assertThat(placementHandlerWascalled[0]).isFalse();
-    }
-
-    @Test
     public void fetchAds_whenPlacementHasNotBeenSet_CallsApplyOnPlacementHandlerAndSetsPlacementSetToTrue() {
         final int[] placementHandlerCalledCounter = {0};
         placementHandler = new Function<Placement, Void>() {
@@ -332,14 +262,19 @@ public class AdFetcherTest extends TestBase {
                 return null;
             }
         };
+        ArrayList<NameValuePair> qsParams = (ArrayList<NameValuePair>) queryStringParams.clone();
+
         // first time
         Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(200, MULTIPLE_LAYOUT_FIXTURE));
         subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
         Misc.runLast(executorService);
         assertThat(placementHandlerCalledCounter[0]).isEqualTo(1);
 
+        reset(executorService);
+
         //second time
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
+        subject.setIsRunning(false);
+        subject.fetchAds(imageFetcher, apiUri, qsParams, creativeHandler, adFetcherCallback, placementHandler);
         Misc.runLast(executorService);
         assertThat(placementHandlerCalledCounter[0]).isEqualTo(1);
 

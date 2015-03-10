@@ -3,7 +3,6 @@ package com.sharethrough.sdk;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.util.Log;
 import com.sharethrough.test.util.Misc;
 import org.apache.http.HttpRequest;
 import org.apache.http.NameValuePair;
@@ -75,6 +74,7 @@ public class BeaconServiceTest extends TestBase {
         beacon.click = new ArrayList<>();
         beacon.play = new ArrayList<>();
         beacon.visible = new ArrayList<>();
+        beacon.impression = new ArrayList<>();
 
         responseCreative.creative.beacon = beacon;
         creative = new Creative(responseCreative, new byte[0], new byte[0], "placement key");
@@ -157,7 +157,7 @@ public class BeaconServiceTest extends TestBase {
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
             public void run() {
-                subject.adReceived(Robolectric.application, creative, feedPosition);
+                subject.adReceived(Robolectric.application, creative, feedPosition, placement);
             }
         });
     }
@@ -187,6 +187,36 @@ public class BeaconServiceTest extends TestBase {
                 subject.adShared(Robolectric.application, creative, "shareType", feedPosition);
             }
         });
+    }
+
+    @Test
+    public void whenAdReceivedCalled_fireImpressionThirdPartyBeacons() throws Exception {
+        String[] initialUrls = {"//impressionEndOne?cacheBuster=[timestamp]", "//impressionEndTwo?cacheBuster=[timestamp]"};
+
+        ArrayList<String> impressionEndoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
+
+        responseCreative.creative.beacon.impression = impressionEndoints;
+
+        Creative testCreative = new Creative(responseCreative, new byte[0], new byte[0], "placement key");
+
+        subject.adReceived(Robolectric.application, testCreative, feedPosition, placement);
+
+        Robolectric.addHttpResponseRule(new RequestMatcher() {
+            @Override
+            public boolean matches(HttpRequest request) {
+                return true;
+            }
+        }, new TestHttpResponse(200, ""));
+
+        Misc.runAll(executorService);
+
+        List<HttpRequestInfo> info = Robolectric.getFakeHttpLayer().getSentHttpRequestInfos();
+        assertThat(info.size()).isEqualTo(3);
+        for (int i = 0; i < info.size() - 1; i++) {
+            String cacheBustedUrl = initialUrls[i].replaceAll("\\[timestamp\\]", String.valueOf(now.getTime()));
+            String expectedUrl = "http:" + cacheBustedUrl;
+            assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
+        }
     }
 
     @Test
