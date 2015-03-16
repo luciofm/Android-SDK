@@ -5,11 +5,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.VideoView;
+
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.TestBase;
 import com.sharethrough.sdk.beacons.VideoCompletionBeaconService;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -21,7 +23,10 @@ import java.util.TimerTask;
 
 import static com.sharethrough.test.util.Misc.findViewOfType;
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.robolectric.Robolectric.shadowOf;
 
 @Config(shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
@@ -102,7 +107,7 @@ public class VideoDialogTest extends TestBase {
         verify(timer).scheduleAtFixedRate(timerTaskArgumentCaptor.capture(), anyInt(), anyInt());
         timerTaskArgumentCaptor.getValue().run();
 
-        verify(videoBeacons).timeUpdate(videoView.getCurrentPosition(), videoView.getDuration(), feedPosition);
+        verify(videoBeacons).timeUpdate(videoView.getCurrentPosition(), videoView.getDuration());
 
         subject.cancel();
         verify(timer).cancel();

@@ -1,6 +1,7 @@
 package com.sharethrough.sdk.media;
 
 import android.view.View;
+
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
@@ -20,7 +21,7 @@ public class Vine extends Media {
 
     @Override
     public void wasClicked(View v, BeaconService beaconService, int feedPosition) {
-        new VideoDialog(v.getContext(), creative, beaconService, true, new Timer(), new VideoCompletionBeaconService(v.getContext(), creative, beaconService), feedPosition).show();
+        new VideoDialog(v.getContext(), creative, beaconService, true, new Timer(), new VideoCompletionBeaconService(v.getContext(), creative, beaconService, feedPosition), feedPosition).show();
     }
 
     @Override
