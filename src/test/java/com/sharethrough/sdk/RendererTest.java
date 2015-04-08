@@ -174,7 +174,7 @@ public class RendererTest extends TestBase {
         adView.performClick();
 
         verify(media).wasClicked(adView, beaconService, feedPosition);
-        verify(media).fireAdClickBeacon(creative, adView, beaconService, feedPosition, placement);
+        verify(media).fireAdClickBeaconOnFirstClick(creative, adView, beaconService, feedPosition, placement);
     }
 
     @Test

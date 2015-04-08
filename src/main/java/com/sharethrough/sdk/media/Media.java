@@ -15,7 +15,6 @@ public abstract class Media {
     public final static String THUMBNAIL = "ThumbnailImageView";
 
     public void fireAdClickBeaconOnFirstClick(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition, Placement placement) {
-        Log.i("Media", "Creative object hash: " + getCreative().hashCode() + ", Media object hash: " + this.hashCode());
         if (!getCreative().wasClicked()) {
             fireAdClickBeacon(creative, adView, beaconService, feedPosition, placement);
             getCreative().setClicked();
