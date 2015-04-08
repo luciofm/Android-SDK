@@ -113,7 +113,7 @@ public class Renderer {
                 container.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        media.fireAdClickBeacon(creative, adView, beaconService, feedPosition, sharethrough.placement);
+                        media.fireAdClickBeaconOnFirstClick(creative, adView, beaconService, feedPosition, sharethrough.placement);
                         media.wasClicked(v, beaconService, feedPosition);
                     }
                   }

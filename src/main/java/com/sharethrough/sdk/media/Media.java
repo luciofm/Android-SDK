@@ -8,9 +8,19 @@ import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.IAdView;
 import com.sharethrough.sdk.Placement;
+import android.util.Log;
+import java.lang.String;
 
 public abstract class Media {
     public final static String THUMBNAIL = "ThumbnailImageView";
+
+    public void fireAdClickBeaconOnFirstClick(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition, Placement placement) {
+        Log.i("Media", "Creative object hash: " + getCreative().hashCode() + ", Media object hash: " + this.hashCode());
+        if (!getCreative().wasClicked()) {
+            fireAdClickBeacon(creative, adView, beaconService, feedPosition, placement);
+            getCreative().setClicked();
+        }
+    }
 
     public abstract void wasClicked(View view, BeaconService beaconService, int feedPosition);
 
