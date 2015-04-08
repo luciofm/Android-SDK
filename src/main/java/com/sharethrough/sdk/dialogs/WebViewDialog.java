@@ -23,7 +23,7 @@ public class WebViewDialog extends ShareableDialog {
     private BaseActivityLifecycleCallbacks lifecycleCallbacks;
 
     public WebViewDialog(Context context, Creative creative, BeaconService beaconService, int feedPosition) {
-        super(context, android.R.style.Theme_Black, beaconService, feedPosition);
+        super(context, R.style.SharethroughBlackTheme, beaconService, feedPosition);
         this.creative = creative;
     }
 

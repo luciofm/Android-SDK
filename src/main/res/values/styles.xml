@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="SharethroughBlackTheme" parent="android:Theme.Black">
+        <item name="android:actionBarItemBackground">@drawable/action_bar_selector</item>
+        <item name="android:selectableItemBackground">@drawable/action_bar_selector</item>
+        <item name="android:actionBarStyle">@style/SharethroughActionBar</item>
+        <item name="android:dropDownListViewStyle">@style/MyApp.Theme.DropDownListView</item>
+    </style>
+    <style name="SharethroughActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:background">#000000</item>
+    </style>
+
+    <style name="MyApp.Theme.DropDownListView" parent="@android:style/Widget.Holo.ListView.DropDown">
+        <item name="android:listSelector">@drawable/drop_down_menu_selector</item>
+    </style>
+</resources>

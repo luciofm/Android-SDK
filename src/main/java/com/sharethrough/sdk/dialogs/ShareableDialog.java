@@ -39,7 +39,6 @@ public abstract class ShareableDialog extends Dialog {
 
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setBackgroundDrawable(new ColorDrawable(Color.BLACK));
         new MenuInflater(getContext()).inflate(R.menu.share_menu, menu);
 
         Creative creative = getCreative();
