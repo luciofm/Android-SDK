@@ -17,20 +17,39 @@ import static org.mockito.Mockito.*;
 import static org.robolectric.Robolectric.shadowOf;
 
 public class MediaTest extends TestBase {
-    private Creative creative;
     private boolean isThumbnailOverlayCentered;
     private int overlayImageResourceId;
-    private ImageView thumbnailImageView;
+    @Mock private ImageView thumbnailImageView;
+    @Mock private Creative creative;
     @Mock private Placement placement;
+    @Mock private IAdView adView;
+    @Mock private BeaconService beaconService;
 
     @Before
     public void setUp() throws Exception {
-        creative = mock(Creative.class);
         overlayImageResourceId = R.drawable.youtube;
 
-        thumbnailImageView = mock(ImageView.class);
         when(thumbnailImageView.getWidth()).thenReturn(100);
         when(thumbnailImageView.getHeight()).thenReturn(200);
+    }
+
+    @Test
+    public void whenCreativeHasNotBeenClicked_doesFireBeaconAndSetClickedOnCreative() throws Exception {
+        when(creative.wasClicked()).thenReturn(false);
+        Media subject = new TestMedia();
+        subject.fireAdClickBeaconOnFirstClick(creative, adView, beaconService, 0, placement);
+
+        verify(creative).setClicked();
+        assertThat(((TestMedia)subject).isBeaconFired()).isTrue();
+    }
+
+    @Test
+    public void whenCreativeHasBeenClicked_doesNotFireBeacon() throws Exception {
+        when(creative.wasClicked()).thenReturn(true);
+        Media subject = new TestMedia();
+        subject.fireAdClickBeaconOnFirstClick(creative, adView, beaconService, 0, placement);
+
+        assertThat(((TestMedia)subject).isBeaconFired()).isFalse();
     }
 
     @Test
@@ -89,6 +108,8 @@ public class MediaTest extends TestBase {
     }
 
     private class TestMedia extends Media {
+        private boolean beaconFired = false;
+
         @Override
         public int getOverlayImageResourceId() {
             return overlayImageResourceId;
@@ -110,6 +131,11 @@ public class MediaTest extends TestBase {
 
         @Override
         public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition, Placement placement) {
+            beaconFired = true;
+        }
+
+        public boolean isBeaconFired() {
+            return beaconFired;
         }
     }
 }

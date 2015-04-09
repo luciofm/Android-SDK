@@ -13,6 +13,7 @@ public class Creative {
     private final byte[] logoBytes;
     public boolean wasRendered;
     public long renderedTime = Long.MAX_VALUE;
+    private boolean wasClicked = false;
 
     public Creative(Response.Creative responseCreative, byte[] imageBytes, byte[] logoBytes, String placementKey) {
         this.responseCreative = responseCreative;
@@ -130,4 +131,12 @@ public class Creative {
     }
 
     public List<String> getImpressionBeacons() { return responseCreative.creative.beacon.impression; }
+
+    public boolean wasClicked(){
+        return wasClicked;
+    }
+
+    public void setClicked() {
+        wasClicked = true;
+    }
 }
