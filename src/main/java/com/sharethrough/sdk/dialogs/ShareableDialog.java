@@ -99,9 +99,17 @@ public abstract class ShareableDialog extends Dialog {
             cancel();
             return true;
         } else if (item.getItemId() == R.id.menu_item_custom) {
-            final String url = getCreative().getCustomEngagementUrl();
             final Intent intent = new Intent();
-            intent.setData(Uri.parse(url));
+
+            final String url = getCreative().getCustomEngagementUrl();
+            String pattern = "(^(\\s|/)+)|((\\s|/)+$)";
+            String canonicalUrl = url.replaceAll(pattern, "");
+            if (Uri.parse(canonicalUrl).isAbsolute()) {
+                intent.setData(Uri.parse(url));
+            } else {
+                intent.setData(Uri.parse("http://" + canonicalUrl));
+            }
+
             getContext().startActivity(intent);
 
             return true;
