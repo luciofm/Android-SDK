@@ -54,7 +54,7 @@ android {
 
         defaultConfig {
             versionCode code
-            versionName "1.1.2"
+            versionName "1.1.3"
             minSdkVersion 14
             targetSdkVersion 18
         }
@@ -67,7 +67,7 @@ android {
         minSdkVersion 9
         targetSdkVersion 14
         versionCode 1
-        versionName "1.1.2"
+        versionName "1.1.3"
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
         multiDexEnabled true
     }
