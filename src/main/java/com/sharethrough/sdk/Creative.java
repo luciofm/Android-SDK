@@ -95,7 +95,11 @@ public class Creative {
     }
 
     public String getCreativeKey() {
-        return responseCreative.creative.key;
+        return responseCreative.creative.creativeKey;
+    }
+
+    public String getCampaignKey() {
+        return responseCreative.creative.campaignKey;
     }
 
     public String getSignature() {

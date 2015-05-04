@@ -74,6 +74,7 @@ public class BeaconService {
         result.put("pkey", creative.getPlacementKey());
         result.put("vkey", creative.getVariantKey());
         result.put("ckey", creative.getCreativeKey());
+        result.put("campkey", creative.getCampaignKey());
         result.put("as", creative.getSignature());
         result.put("at", creative.getAuctionType());
         result.put("ap", creative.getAuctionPrice());
