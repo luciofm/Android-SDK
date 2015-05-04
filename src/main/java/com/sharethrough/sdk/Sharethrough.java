@@ -37,6 +37,8 @@ public class Sharethrough {
     public static final String SDK_VERSION_NUMBER = "1.1.3";
     public static String USER_AGENT = System.getProperty("http.agent") + "; STR " + SDK_VERSION_NUMBER;
     public static final String PRIVACY_POLICY_ENDPOINT = "http://platform-cdn.sharethrough.com/privacy-policy.html";
+    private static final String DFP_CREATIVE_KEY = "creativeKey";
+    private static final String DFP_CAMPAIGN_KEY = "campaignKey";
     private final Renderer renderer;
     private final BeaconService beaconService;
     private final int adCacheTimeInMilliseconds;
@@ -63,7 +65,7 @@ public class Sharethrough {
     private Handler handler = new Handler(Looper.getMainLooper());
     private final LruCache<Integer, Creative> creativesBySlot = new LruCache<>(10);
 
-    private static final Map<String, String> dfpCreativeIds = new HashMap<>();
+    private static final Map<String, Map<String, String>> dfpAdGroupIds = new HashMap<>();
     private final Context context; //TODO decide whether this is needed
     private String dfpPath;
     private boolean firedNewAdsToShow;
@@ -249,14 +251,23 @@ public class Sharethrough {
     }
 
     private void fetchDfpAds() {
-        String creativeKey = popCreativeKey(dfpPath);
-        if (creativeKey == null) {
+        Map<String, String> DFPKeys = popDFPKeys(dfpPath);
+        if (DFPKeys == null) {
             fetchDfpPath();
         } else {
             ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>(2);
             queryStringParams.add(new BasicNameValuePair("placement_key", placementKey));
-            if (!creativeKey.equals("STX_MONETIZE")){
-              queryStringParams.add(new BasicNameValuePair("creative_key", creativeKey));
+
+            if (DFPKeys.containsKey(DFP_CREATIVE_KEY)) {
+                String creativeKey = DFPKeys.get(DFP_CREATIVE_KEY);
+                if (!creativeKey.equals("STX_MONETIZE")){
+                    queryStringParams.add(new BasicNameValuePair("creative_key", creativeKey));
+                }
+            } else if (DFPKeys.containsKey(DFP_CAMPAIGN_KEY)) {
+                String campaignKey = DFPKeys.get(DFP_CAMPAIGN_KEY);
+                if (!campaignKey.equals("STX_MONETIZE")) {
+                    queryStringParams.add(new BasicNameValuePair("campaign_key", campaignKey));
+                }
             }
 
             invokeAdFetcher(apiUrlPrefix, queryStringParams);
@@ -472,11 +483,21 @@ public class Sharethrough {
         void noAdsToShow();
     }
 
-    public static void addCreativeKey(final String dfpPath, final String creativeKey) {
-        dfpCreativeIds.put(dfpPath, creativeKey);
+    public static void addDFPKeys(final String dfpPath, final String adGroupString) {
+        HashMap<String, String> dfpKeys= new HashMap<String, String>();
+        if (adGroupString.contains(DFP_CREATIVE_KEY)) {
+            String[] tokens = adGroupString.split("=");
+            dfpKeys.put(DFP_CREATIVE_KEY, tokens[1]);
+        } else if (adGroupString.contains(DFP_CAMPAIGN_KEY)) {
+            String[] tokens = adGroupString.split("=");
+            dfpKeys.put(DFP_CAMPAIGN_KEY, tokens[1]);
+        } else {
+            dfpKeys.put(DFP_CREATIVE_KEY, adGroupString);
+        }
+        dfpAdGroupIds.put(dfpPath, dfpKeys);
     }
 
-    public static String popCreativeKey(String dfpPath) {
-        return dfpCreativeIds.remove(dfpPath);
+    public static Map<String, String> popDFPKeys(String dfpPath) {
+        return dfpAdGroupIds.remove(dfpPath);
     }
 }
