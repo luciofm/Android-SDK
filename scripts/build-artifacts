@@ -23,8 +23,9 @@ cd "${TMP}/maven"
 git config --global user.email "travis-ci@sharethrough.com"
 git config --global user.name "Automated Build"
 
+BUILD_NUMBER=$((238 + $TRAVIS_BUILD_NUMBER))
 git add .
-git commit -m "Travis build ${TRAVIS_BUILD_NUMBER}"
+git commit -m "Travis build ${BUILD_NUMBER}"
 
 git remote rm origin
 git remote add origin ${OUTPUT_REPO}
