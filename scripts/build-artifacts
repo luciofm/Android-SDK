@@ -15,7 +15,8 @@ git clone ${OUTPUT_REPO} maven
 )
 
 pwd
-OUTPUT="${TMP}/maven/sharethrough-android-sdk-${TRAVIS_BUILD_NUMBER}"
+BUILD_NUMBER=$((238 + $TRAVIS_BUILD_NUMBER))
+OUTPUT="${TMP}/maven/sharethrough-android-sdk-${BUILD_NUMBER}"
 cp build/outputs/aar/*.aar "${OUTPUT}.aar"
 cp build/distributions/*.zip "${OUTPUT}.zip"
 cd "${TMP}/maven"
@@ -23,7 +24,6 @@ cd "${TMP}/maven"
 git config --global user.email "travis-ci@sharethrough.com"
 git config --global user.name "Automated Build"
 
-BUILD_NUMBER=$((238 + $TRAVIS_BUILD_NUMBER))
 git add .
 git commit -m "Travis build ${BUILD_NUMBER}"
 
