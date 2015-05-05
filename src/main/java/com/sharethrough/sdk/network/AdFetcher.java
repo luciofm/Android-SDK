@@ -167,7 +167,8 @@ public class AdFetcher {
             creative.creative.customEngagementUrl = jsonCreativeInner.optString("custom_engagement_url");
             creative.creative.customEngagementLabel = jsonCreativeInner.optString("custom_engagement_label");
 
-            creative.creative.key = jsonCreativeInner.getString("creative_key");
+            creative.creative.creativeKey = jsonCreativeInner.getString("creative_key");
+            creative.creative.campaignKey = jsonCreativeInner.getString("campaign_key");
             creative.creative.variantKey = jsonCreativeInner.getString("variant_key");
             creative.price = jsonCreative.getInt("price");
             creative.priceType = jsonCreative.getString("priceType");

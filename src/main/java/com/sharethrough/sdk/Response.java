@@ -40,7 +40,9 @@ public class Response {
 
         public static class CreativeInner {
             @JsonProperty("creative_key")
-            public String key;
+            public String creativeKey;
+            @JsonProperty("campaign_key")
+            public String campaignKey;
             @JsonProperty("description")
             public String description;
             @JsonProperty("media_url")

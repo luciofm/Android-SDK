@@ -21,6 +21,7 @@ import org.robolectric.annotation.Config;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.ExecutorService;
@@ -308,8 +309,9 @@ public class SharethroughTest extends TestBase {
         dfpPathFetcherCallback.getValue().receivedURL("dfpPath");
         verify(dfpNetworking).fetchCreativeKey(eq(Robolectric.application), eq("dfpPath"), dfpCreativeKeyCallback.capture());
 
-        Sharethrough.addCreativeKey("dfpPath", "creativeKey");
-        queryStringParams.add(new BasicNameValuePair("creative_key", "creativeKey"));
+        String serverParams = "creativeKey=abc123";
+        Sharethrough.addDFPKeys("dfpPath", serverParams);
+        queryStringParams.add(new BasicNameValuePair("creative_key", "abc123"));
 
         dfpCreativeKeyCallback.getValue().receivedCreativeKey();
 
@@ -324,7 +326,8 @@ public class SharethroughTest extends TestBase {
         dfpPathFetcherCallback.getValue().receivedURL("dfpPath");
         verify(dfpNetworking).fetchCreativeKey(eq(Robolectric.application), eq("dfpPath"), dfpCreativeKeyCallback.capture());
 
-        Sharethrough.addCreativeKey("dfpPath", "STX_MONETIZE");
+        String serverParams = "creativeKey=STX_MONETIZE";
+        Sharethrough.addDFPKeys("dfpPath", serverParams);
 
         dfpCreativeKeyCallback.getValue().receivedCreativeKey();
 
@@ -332,14 +335,41 @@ public class SharethroughTest extends TestBase {
     }
 
     @Test
-    public void addCreativeKey_putsKeyIntoMap() {
-        assertThat(subject.popCreativeKey("key")).isNull();
+    public void whenCreativeKey_addDFPKeys_putsHashMapIntoMap() {
+        assertThat(subject.popDFPKeys("key")).isNull();
 
-        subject.addCreativeKey("key", "test-key");
+        subject.addDFPKeys("key", "creativeKey=xyz789");
 
-        assertThat(subject.popCreativeKey("key")).isEqualTo("test-key");
-        assertThat(subject.popCreativeKey("key")).isNull();
+        HashMap<String, String> expectedHashMap = new HashMap<>();
+        expectedHashMap.put("creativeKey", "xyz789");
+        assertThat(subject.popDFPKeys("key")).isEqualTo(expectedHashMap);
+        assertThat(subject.popDFPKeys("key")).isNull();
     }
+
+    @Test
+    public void whenCampaignKey_addDFPKeys_putsHashMapIntoMap() {
+        assertThat(subject.popDFPKeys("key")).isNull();
+
+        subject.addDFPKeys("key", "campaignKey=campKey");
+
+        HashMap<String, String> expectedHashMap = new HashMap<>();
+        expectedHashMap.put("campaignKey", "campKey");
+        assertThat(subject.popDFPKeys("key")).isEqualTo(expectedHashMap);
+        assertThat(subject.popDFPKeys("key")).isNull();
+    }
+
+    @Test
+    public void whenNeither_addDFPKeys_putHashMapIntoMap() {
+        assertThat(subject.popDFPKeys("key")).isNull();
+
+        subject.addDFPKeys("key", "randomKey");
+
+        HashMap<String, String> expectedHashMap = new HashMap<>();
+        expectedHashMap.put("creativeKey", "randomKey");
+        assertThat(subject.popDFPKeys("key")).isEqualTo(expectedHashMap);
+        assertThat(subject.popDFPKeys("key")).isNull();
+    }
+
 
     @Test
     public void whenPlacementIsNotSet_setsPlacementAndCallsPlacementCallback() {

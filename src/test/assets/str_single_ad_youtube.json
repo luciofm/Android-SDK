@@ -12,6 +12,7 @@
       "signature": "c19",
       "creative": {
         "creative_key": "ckey1",
+        "campaign_key": "campkey1",
         "description": "Description.",
         "media_url": "mediaURL",
         "share_url": "shareURL",
@@ -43,6 +44,7 @@
       "signature": "c19",
       "creative": {
         "creative_key": "ckey2",
+        "campaign_key": "campkey2",
         "description": "Description.",
         "media_url": "mediaURL",
         "share_url": "shareURL",
