@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,10 +52,12 @@ public class Renderer {
                     @Override
                     public void onViewAttachedToWindow(View v) {
                         timer.schedule(task, 0, 100);
+                        Log.d("Renderer", "attaching to window");
                     }
 
                     @Override
                     public void onViewDetachedFromWindow(View v) {
+                        Log.d("Renderer", "DE-ttaching to window");
                         task.cancel();
                         timer.cancel();
                         timer.purge();

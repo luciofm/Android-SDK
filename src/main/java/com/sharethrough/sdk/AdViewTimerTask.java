@@ -44,6 +44,7 @@ public class AdViewTimerTask extends TimerTask {
 
         Rect rect = new Rect();
         if (!hasBeenShown) {
+
             if (isCurrentlyVisible(adView, rect)) {
                 int visibleArea = rect.width() * rect.height();
                 int viewArea = adView.getAdView().getHeight() * adView.getAdView().getWidth();
@@ -54,6 +55,7 @@ public class AdViewTimerTask extends TimerTask {
                             beaconService.adVisible(adView.getAdView(), creative, feedPosition, sharethrough.placement);
                             hasBeenShown = true;
                             creative.renderedTime = visibleStartTime.getTime();
+                            creative.wasVisible = true;
                         }
                     } else {
                         visibleStartTime = dateProvider.get();
@@ -65,6 +67,7 @@ public class AdViewTimerTask extends TimerTask {
                 visibleStartTime = null;
             }
         } else {
+
             if ((dateProvider.get().getTime() - (visibleStartTime.getTime())) >= adCacheTimeInMilliseconds) {
                 if (!isCurrentlyVisible(adView, rect)) {
                     sharethrough.putCreativeIntoAdView(adView, feedPosition);

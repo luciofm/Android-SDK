@@ -14,6 +14,7 @@ public class Creative {
     public boolean wasRendered;
     public long renderedTime = Long.MAX_VALUE;
     private boolean wasClicked = false;
+    public boolean wasVisible = false;
 
     public Creative(Response.Creative responseCreative, byte[] imageBytes, byte[] logoBytes, String placementKey) {
         this.responseCreative = responseCreative;
