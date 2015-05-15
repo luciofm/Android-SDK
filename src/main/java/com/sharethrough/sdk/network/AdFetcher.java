@@ -139,7 +139,7 @@ public class AdFetcher {
         Response.Placement placement = new Response.Placement();
         placement.layout = jsonPlacement.getString("layout");
         placement.articlesBeforeFirstAd = jsonPlacement.optInt("articlesBeforeFirstAd", Integer.MAX_VALUE);
-        placement.articlesBetweenAds = jsonPlacement.optInt("articlesBetweenAds", Integer.MAX_VALUE);
+        placement.articlesBetweenAds = 10;//jsonPlacement.optInt("articlesBetweenAds", Integer.MAX_VALUE);
         placement.status = jsonPlacement.getString("status");
         response.placement = placement;
 

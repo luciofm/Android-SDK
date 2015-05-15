@@ -52,12 +52,12 @@ public class Renderer {
                     @Override
                     public void onViewAttachedToWindow(View v) {
                         timer.schedule(task, 0, 100);
-                        Log.d("Renderer", "attaching to window");
+                        Log.d("jermaine Renderer", "attaching to window");
                     }
 
                     @Override
                     public void onViewDetachedFromWindow(View v) {
-                        Log.d("Renderer", "DE-ttaching to window");
+                        Log.d("jermaine Renderer", "DE-ttaching to window");
                         task.cancel();
                         timer.cancel();
                         timer.purge();

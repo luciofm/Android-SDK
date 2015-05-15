@@ -6,6 +6,7 @@ import java.lang.ref.WeakReference;
 import java.util.Date;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
+import android.util.Log;
 
 public class AdViewTimerTask extends TimerTask {
     public static final long VISIBILITY_TIME_THRESHOLD = TimeUnit.SECONDS.toMillis(1);
@@ -33,6 +34,47 @@ public class AdViewTimerTask extends TimerTask {
         this.adCacheTimeInMilliseconds = sharethrough.getAdCacheTimeInMilliseconds();
     }
 
+    private void fireVisibleBeaconIfThresholdReached( IAdView adView ) {
+        Rect rect = new Rect();
+        if (isCurrentlyVisible(adView, rect)) {
+            int visibleArea = rect.width() * rect.height();
+            int viewArea = adView.getAdView().getHeight() * adView.getAdView().getWidth();
+
+            if (visibleArea * 2 >= viewArea) {
+                if (visibleStartTime != null) {
+                    if (dateProvider.get().getTime() - visibleStartTime.getTime() >= VISIBILITY_TIME_THRESHOLD) {
+                        beaconService.adVisible(adView.getAdView(), creative, feedPosition, sharethrough.placement);
+                        creative.renderedTime = visibleStartTime.getTime();
+                        creative.wasVisible = true;
+                        //hasBeenShown = true;
+                        Log.d("jermaine", "fires beacon");
+                    }
+                } else {
+                    visibleStartTime = dateProvider.get();
+                }
+            } else {
+                visibleStartTime = null;
+            }
+        } else {
+            visibleStartTime = null;
+        }
+    }
+
+    private void replaceAdOnTimeout(IAdView adView) {
+        Rect rect = new Rect();
+        if (visibleStartTime == null) {
+            visibleStartTime = dateProvider.get();
+        }
+        if ((dateProvider.get().getTime() - (visibleStartTime.getTime())) >= adCacheTimeInMilliseconds) {
+            if (!isCurrentlyVisible(adView, rect)) {
+                Log.d("jermaine", " " +
+                        "renews ad");
+                sharethrough.putCreativeIntoAdView(adView, feedPosition);
+                cancel();
+            }
+        }
+    }
+
     @Override
     public void run() {
         IAdView adView = adViewRef.get();
@@ -42,39 +84,13 @@ public class AdViewTimerTask extends TimerTask {
         }
         if (isCancelled) return;
 
-        Rect rect = new Rect();
-        if (!hasBeenShown) {
-
-            if (isCurrentlyVisible(adView, rect)) {
-                int visibleArea = rect.width() * rect.height();
-                int viewArea = adView.getAdView().getHeight() * adView.getAdView().getWidth();
-
-                if (visibleArea * 2 >= viewArea) {
-                    if (visibleStartTime != null) {
-                        if (dateProvider.get().getTime() - visibleStartTime.getTime() >= VISIBILITY_TIME_THRESHOLD) {
-                            beaconService.adVisible(adView.getAdView(), creative, feedPosition, sharethrough.placement);
-                            hasBeenShown = true;
-                            creative.renderedTime = visibleStartTime.getTime();
-                            creative.wasVisible = true;
-                        }
-                    } else {
-                        visibleStartTime = dateProvider.get();
-                    }
-                } else {
-                    visibleStartTime = null;
-                }
-            } else {
-                visibleStartTime = null;
-            }
+        if (!creative.wasVisible) {
+            fireVisibleBeaconIfThresholdReached(adView);
         } else {
-
-            if ((dateProvider.get().getTime() - (visibleStartTime.getTime())) >= adCacheTimeInMilliseconds) {
-                if (!isCurrentlyVisible(adView, rect)) {
-                    sharethrough.putCreativeIntoAdView(adView, feedPosition);
-                    cancel();
-                }
-            }
+            // if visible beacon fired and creative has timed out, replace creative with new one
+            replaceAdOnTimeout(adView);
         }
+
     }
 
     private boolean isCurrentlyVisible(IAdView adView, Rect rect) {
