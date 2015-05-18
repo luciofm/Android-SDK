@@ -47,7 +47,7 @@ public class AdViewTimerTask extends TimerTask {
                         creative.renderedTime = visibleStartTime.getTime();
                         creative.wasVisible = true;
                         //hasBeenShown = true;
-                        Log.d("jermaine", "fires beacon");
+                        Log.d("jermaine", creative + " fires beacon");
                     }
                 } else {
                     visibleStartTime = dateProvider.get();
@@ -65,10 +65,10 @@ public class AdViewTimerTask extends TimerTask {
         if (visibleStartTime == null) {
             visibleStartTime = dateProvider.get();
         }
-        if ((dateProvider.get().getTime() - (visibleStartTime.getTime())) >= adCacheTimeInMilliseconds) {
+
+        if ((dateProvider.get().getTime() - creative.renderedTime) >= adCacheTimeInMilliseconds) {
             if (!isCurrentlyVisible(adView, rect)) {
-                Log.d("jermaine", " " +
-                        "renews ad");
+                Log.d("jermaine", creative + " expired, AdTimerTask renews ad");
                 sharethrough.putCreativeIntoAdView(adView, feedPosition);
                 cancel();
             }
@@ -86,9 +86,9 @@ public class AdViewTimerTask extends TimerTask {
 
         if (!creative.wasVisible) {
             fireVisibleBeaconIfThresholdReached(adView);
-        } else {
+        /*} else {
             // if visible beacon fired and creative has timed out, replace creative with new one
-            replaceAdOnTimeout(adView);
+            replaceAdOnTimeout(adView);*/
         }
 
     }

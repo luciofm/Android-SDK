@@ -32,8 +32,8 @@ import java.util.concurrent.TimeUnit;
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
 public class Sharethrough {
-    public static final int DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
-    private static final int MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
+    public static final int DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(5);
+    private static final int MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(5);
     public static final String SDK_VERSION_NUMBER = "1.1.4";
     public static String USER_AGENT = System.getProperty("http.agent") + "; STR " + SDK_VERSION_NUMBER;
     public static final String PRIVACY_POLICY_ENDPOINT = "http://platform-cdn.sharethrough.com/privacy-policy.html";
@@ -318,8 +318,9 @@ public class Sharethrough {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public void putCreativeIntoAdView(final IAdView adView, final int feedPosition) {
-
+        Log.d("jermaine", "Sharethrough.putCreativeIntoAdView called");
         Creative creative = creativesBySlot.get(feedPosition);
+
         int oldCreativeHashCode = 0;
         if (creative != null) {
             oldCreativeHashCode = creative.hashCode();
@@ -328,6 +329,7 @@ public class Sharethrough {
         long currentTime = new Date().getTime();
 
         if (creative != null && currentTime - creative.renderedTime >= adCacheTimeInMilliseconds) { //TODO make logic better
+            Log.d("jermaine", "cache timer reached, new creative inserted");
             if (availableCreatives.size() != 0) {
                 creativesBySlot.remove(feedPosition);
                 creative = null;

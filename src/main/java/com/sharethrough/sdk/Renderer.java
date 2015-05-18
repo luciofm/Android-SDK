@@ -37,8 +37,6 @@ public class Renderer {
         }
         final Handler handler = new Handler(Looper.getMainLooper());
 
-        final TimerTask task = new AdViewTimerTask(adView, feedPosition, creative, beaconService, new DateProvider(), sharethrough);
-
         container.setTag(creative);
 
         handler.post(new Runnable() {
@@ -48,20 +46,29 @@ public class Renderer {
                 if (container.getTag() != creative) return; // container has been recycled
                 adView.adReady();
 
+                final TimerTask visibleBeaconTask = null;
+
                 final View.OnAttachStateChangeListener onAttachStateChangeListener1 = new View.OnAttachStateChangeListener() {
                     @Override
                     public void onViewAttachedToWindow(View v) {
-                        timer.schedule(task, 0, 100);
-                        Log.d("jermaine Renderer", "attaching to window");
+                        //visibleBeaconTask.cancel();
+                        //visibleBeaconTimer.cancel();
+                        //visibleBeaconTimer.purge();
+
+                        //visibleBeaconTimer = new Timer();
+                        //visibleBeaconTask = new AdViewTimerTask(adView, feedPosition, creative, beaconService, new DateProvider(), sharethrough);
+                        //visibleBeaconTimer.schedule(visibleBeaconTask, 0, 100);
+                       // timer.schedule(visibleBeaconTask, 0, 100);
+                        //Log.d("jermaine", "window attached in listener");
                     }
 
                     @Override
                     public void onViewDetachedFromWindow(View v) {
-                        Log.d("jermaine Renderer", "DE-ttaching to window");
-                        task.cancel();
-                        timer.cancel();
-                        timer.purge();
-                        v.removeOnAttachStateChangeListener(this);
+                        //Log.d("jermaine", "window detached in listener");
+                        //task.cancel();
+                        //timer.cancel();
+                        //timer.purge();
+                        //v.removeOnAttachStateChangeListener(this);
                     }
                 };
 
@@ -99,10 +106,63 @@ public class Renderer {
                 thumbnailContainer.removeAllViews();
                 Context context = container.getContext();
 
-                final ImageView thumbnailImage = new ImageView(context);
-                thumbnailImage.setImageBitmap(thumbnailBitmap);
-                thumbnailImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                thumbnailImage.addOnAttachStateChangeListener(onAttachStateChangeListener1);
+                class VisibilityImageView extends ImageView
+                {
+                    Timer visibleBeaconTimer;
+                    AdViewTimerTask visibleBeaconTask;
+
+                    VisibilityImageView( Context context ){
+                        super(context);
+                    }
+
+                    @Override
+                    protected void onAttachedToWindow() {
+                        super.onAttachedToWindow();
+
+
+
+                        //cancel previously created timers before recreating them
+                        if (visibleBeaconTask != null && visibleBeaconTimer != null) {
+                            visibleBeaconTask.cancel();
+                            visibleBeaconTimer.cancel();
+                            visibleBeaconTimer.purge();
+                        }
+
+                        //call sharethrough.putcreativeintoadview if ad timed out, this would never get called for listadapter ads because the creative is always new
+                        DateProvider date = new DateProvider();
+                        if ((date.get().getTime() - creative.renderedTime) >= sharethrough.getAdCacheTimeInMilliseconds() && creative.wasVisible) {
+                            Log.d("jermaine", "putting in new ad because time expired");
+                            sharethrough.putCreativeIntoAdView(adView, feedPosition);
+                        } else {
+
+                            visibleBeaconTimer = new Timer();
+                            visibleBeaconTask = new AdViewTimerTask(adView, feedPosition, creative, beaconService, new DateProvider(), sharethrough);
+                            visibleBeaconTimer.schedule(visibleBeaconTask, 0, 100);
+                        }
+                     //   Log.d("jermaine", creative + " window attached");
+                    }
+
+                    @Override
+                    protected void onDetachedFromWindow() {
+                        super.onDetachedFromWindow();
+
+                        if (visibleBeaconTask != null && visibleBeaconTimer != null) {
+                            visibleBeaconTask.cancel();
+                            visibleBeaconTimer.cancel();
+                            visibleBeaconTimer.purge();
+
+                        }
+                       // Log.d("jermaine", creative + " window detached");
+
+
+                    }
+                }
+
+                //final ImageView thumbnailImage = new ImageView(context);
+                final VisibilityImageView thumbnailImage = new VisibilityImageView(context);
+                    thumbnailImage.setImageBitmap(thumbnailBitmap);
+                    thumbnailImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                //thumbnailImage.addOnAttachStateChangeListener(onAttachStateChangeListener1);
                 thumbnailContainer.addView(thumbnailImage,
                         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
 
