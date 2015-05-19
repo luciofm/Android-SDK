@@ -17,24 +17,21 @@ public class AdViewTimerTask extends TimerTask {
     private final Sharethrough sharethrough;
     private final int feedPosition;
     private boolean isCancelled;
-    private boolean hasBeenShown;
     private Date visibleStartTime;
-    private final int adCacheTimeInMilliseconds;
-    private final int adViewHashCode;
 
     public AdViewTimerTask(IAdView adView, int feedPosition, Creative creative, BeaconService beaconService, Provider<Date> dateProvider,
                            Sharethrough sharethrough) {
         this.adViewRef = new WeakReference<>(adView);
-        this.adViewHashCode = adView.hashCode();
         this.feedPosition = feedPosition;
         this.creative = creative;
         this.beaconService = beaconService;
         this.dateProvider = dateProvider;
         this.sharethrough = sharethrough;
-        this.adCacheTimeInMilliseconds = sharethrough.getAdCacheTimeInMilliseconds();
     }
 
     private void fireVisibleBeaconIfThresholdReached( IAdView adView ) {
+        if (creative.wasVisible) return;
+
         Rect rect = new Rect();
         if (isCurrentlyVisible(adView, rect)) {
             int visibleArea = rect.width() * rect.height();
@@ -46,7 +43,6 @@ public class AdViewTimerTask extends TimerTask {
                         beaconService.adVisible(adView.getAdView(), creative, feedPosition, sharethrough.placement);
                         creative.renderedTime = visibleStartTime.getTime();
                         creative.wasVisible = true;
-                        //hasBeenShown = true;
                         Log.d("jermaine", creative + " fires beacon");
                     }
                 } else {
@@ -60,21 +56,6 @@ public class AdViewTimerTask extends TimerTask {
         }
     }
 
-    private void replaceAdOnTimeout(IAdView adView) {
-        Rect rect = new Rect();
-        if (visibleStartTime == null) {
-            visibleStartTime = dateProvider.get();
-        }
-
-        if ((dateProvider.get().getTime() - creative.renderedTime) >= adCacheTimeInMilliseconds) {
-            if (!isCurrentlyVisible(adView, rect)) {
-                Log.d("jermaine", creative + " expired, AdTimerTask renews ad");
-                sharethrough.putCreativeIntoAdView(adView, feedPosition);
-                cancel();
-            }
-        }
-    }
-
     @Override
     public void run() {
         IAdView adView = adViewRef.get();
@@ -84,13 +65,7 @@ public class AdViewTimerTask extends TimerTask {
         }
         if (isCancelled) return;
 
-        if (!creative.wasVisible) {
-            fireVisibleBeaconIfThresholdReached(adView);
-        /*} else {
-            // if visible beacon fired and creative has timed out, replace creative with new one
-            replaceAdOnTimeout(adView);*/
-        }
-
+        fireVisibleBeaconIfThresholdReached(adView);
     }
 
     private boolean isCurrentlyVisible(IAdView adView, Rect rect) {

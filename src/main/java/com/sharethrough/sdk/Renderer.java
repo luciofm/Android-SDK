@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +18,6 @@ import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.media.Media;
 
 import java.util.Timer;
-import java.util.TimerTask;
 
 public class Renderer {
 
@@ -46,31 +44,6 @@ public class Renderer {
                 if (container.getTag() != creative) return; // container has been recycled
                 adView.adReady();
 
-                final TimerTask visibleBeaconTask = null;
-
-                final View.OnAttachStateChangeListener onAttachStateChangeListener1 = new View.OnAttachStateChangeListener() {
-                    @Override
-                    public void onViewAttachedToWindow(View v) {
-                        //visibleBeaconTask.cancel();
-                        //visibleBeaconTimer.cancel();
-                        //visibleBeaconTimer.purge();
-
-                        //visibleBeaconTimer = new Timer();
-                        //visibleBeaconTask = new AdViewTimerTask(adView, feedPosition, creative, beaconService, new DateProvider(), sharethrough);
-                        //visibleBeaconTimer.schedule(visibleBeaconTask, 0, 100);
-                       // timer.schedule(visibleBeaconTask, 0, 100);
-                        //Log.d("jermaine", "window attached in listener");
-                    }
-
-                    @Override
-                    public void onViewDetachedFromWindow(View v) {
-                        //Log.d("jermaine", "window detached in listener");
-                        //task.cancel();
-                        //timer.cancel();
-                        //timer.purge();
-                        //v.removeOnAttachStateChangeListener(this);
-                    }
-                };
 
                 adView.getTitle().setText(creative.getTitle());
                 TextView description = adView.getDescription();
@@ -106,63 +79,10 @@ public class Renderer {
                 thumbnailContainer.removeAllViews();
                 Context context = container.getContext();
 
-                class VisibilityImageView extends ImageView
-                {
-                    Timer visibleBeaconTimer;
-                    AdViewTimerTask visibleBeaconTask;
-
-                    VisibilityImageView( Context context ){
-                        super(context);
-                    }
-
-                    @Override
-                    protected void onAttachedToWindow() {
-                        super.onAttachedToWindow();
-
-
-
-                        //cancel previously created timers before recreating them
-                        if (visibleBeaconTask != null && visibleBeaconTimer != null) {
-                            visibleBeaconTask.cancel();
-                            visibleBeaconTimer.cancel();
-                            visibleBeaconTimer.purge();
-                        }
-
-                        //call sharethrough.putcreativeintoadview if ad timed out, this would never get called for listadapter ads because the creative is always new
-                        DateProvider date = new DateProvider();
-                        if ((date.get().getTime() - creative.renderedTime) >= sharethrough.getAdCacheTimeInMilliseconds() && creative.wasVisible) {
-                            Log.d("jermaine", "putting in new ad because time expired");
-                            sharethrough.putCreativeIntoAdView(adView, feedPosition);
-                        } else {
-
-                            visibleBeaconTimer = new Timer();
-                            visibleBeaconTask = new AdViewTimerTask(adView, feedPosition, creative, beaconService, new DateProvider(), sharethrough);
-                            visibleBeaconTimer.schedule(visibleBeaconTask, 0, 100);
-                        }
-                     //   Log.d("jermaine", creative + " window attached");
-                    }
-
-                    @Override
-                    protected void onDetachedFromWindow() {
-                        super.onDetachedFromWindow();
-
-                        if (visibleBeaconTask != null && visibleBeaconTimer != null) {
-                            visibleBeaconTask.cancel();
-                            visibleBeaconTimer.cancel();
-                            visibleBeaconTimer.purge();
-
-                        }
-                       // Log.d("jermaine", creative + " window detached");
-
-
-                    }
-                }
-
-                //final ImageView thumbnailImage = new ImageView(context);
-                final VisibilityImageView thumbnailImage = new VisibilityImageView(context);
+                final AdImageView thumbnailImage = new AdImageView(context, sharethrough, creative, adView, feedPosition, beaconService);
                     thumbnailImage.setImageBitmap(thumbnailBitmap);
                     thumbnailImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                //thumbnailImage.addOnAttachStateChangeListener(onAttachStateChangeListener1);
+
                 thumbnailContainer.addView(thumbnailImage,
                         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
 

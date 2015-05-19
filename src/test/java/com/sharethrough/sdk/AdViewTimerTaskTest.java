@@ -117,39 +117,13 @@ public class AdViewTimerTaskTest extends TestBase {
 
     }
 
-    @Test
-    public void whenAdViewBecomesVisible_andBecomesInvisible_showsNewAdAfterCacheExpires() throws Exception {
-        reset(sharethrough);
-
-        makeAdViewVisible();
-
-        isVisible = false;
-
-        now += TimeUnit.SECONDS.toMillis(18);
-        subject.run();
-        verifyNoMoreInteractions(sharethrough);
-
-        now += TimeUnit.SECONDS.toMillis(1);
-        subject.run();
-        verify(sharethrough).putCreativeIntoAdView(adView, feedPosition);
-
-        now += TimeUnit.SECONDS.toMillis(1);
-        subject.run();
-        verifyNoMoreInteractions(sharethrough);
-    }
 
     @Test
-    public void whenCacheExpires_doesShowNewAdUntilCurrentAdBecomesInvisible() throws Exception {
+    public void whenCreativeHasBeenShown_DoesNotFireBeacon() throws Exception{
         reset(sharethrough);
-
         makeAdViewVisible();
-        now += TimeUnit.SECONDS.toMillis(19);
         subject.run();
-        verifyNoMoreInteractions(sharethrough);
-
-        isVisible = false;
-        subject.run();
-        verify(sharethrough).putCreativeIntoAdView(adView, feedPosition);
+        verifyNoMoreInteractions(beaconService);
     }
 
     private void makeAdViewVisible() {
