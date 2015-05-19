@@ -80,8 +80,8 @@ public class Renderer {
                 Context context = container.getContext();
 
                 final AdImageView thumbnailImage = new AdImageView(context, sharethrough, creative, adView, feedPosition, beaconService);
-                    thumbnailImage.setImageBitmap(thumbnailBitmap);
-                    thumbnailImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                thumbnailImage.setImageBitmap(thumbnailBitmap);
+                thumbnailImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
                 thumbnailContainer.addView(thumbnailImage,
                         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
@@ -101,8 +101,6 @@ public class Renderer {
                     }
                   }
                 );
-
-
 
                 placeOptoutIcon(adView);
             }

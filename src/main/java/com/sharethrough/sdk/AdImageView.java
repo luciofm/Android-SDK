@@ -1,14 +1,10 @@
 package com.sharethrough.sdk;
 
 import android.content.Context;
-import android.util.Log;
 import android.widget.ImageView;
-
-import java.util.Date;
 import java.util.Timer;
 
-class AdImageView extends ImageView
-{
+class AdImageView extends ImageView {
     Timer visibleBeaconTimer;
     AdViewTimerTask visibleBeaconTask;
     Sharethrough sharethrough;
@@ -18,7 +14,7 @@ class AdImageView extends ImageView
     BeaconService beaconService;
     Context context;
 
-    AdImageView(Context context, Sharethrough sharethrough, Creative creative, IAdView adview, int feedPosition, BeaconService beaconService){
+    AdImageView(Context context, Sharethrough sharethrough, Creative creative, IAdView adview, int feedPosition, BeaconService beaconService) {
         super(context);
         this.sharethrough = sharethrough;
         this.creative = creative;
@@ -28,53 +24,52 @@ class AdImageView extends ImageView
         this.context = context;
     }
 
-    protected Timer getTimer()
-    {
-        return new Timer();
-    }
-
-    protected DateProvider getDateProvider() {
-        return new DateProvider();
-    }
-
-
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        //cancel previously created timers before recreating them
-        if (visibleBeaconTask != null && visibleBeaconTimer != null) {
-            visibleBeaconTask.cancel();
-            visibleBeaconTimer.cancel();
-            visibleBeaconTimer.purge();
+        killVisibleBeaconTask();
+
+        if (forceAdRefreshIfRecyclerViewAndExpired()) {
+            return;
         }
 
-        //call sharethrough.putcreativeintoadview if ad timed out, this would never get called for listadapter ads because the creative is always new
-        if ((getDateProvider().get().getTime() - creative.renderedTime) >= sharethrough.getAdCacheTimeInMilliseconds() && creative.wasVisible) {
-            Log.d("jermaine", "putting in new ad because time expired");
-            sharethrough.putCreativeIntoAdView(adView, feedPosition);
-        } else {
-
-            visibleBeaconTimer = getTimer();
-            visibleBeaconTask = new AdViewTimerTask(adView, feedPosition, creative, beaconService, new DateProvider(), sharethrough);
-            visibleBeaconTimer.schedule(visibleBeaconTask, 0, 100);
-        }
-        //   Log.d("jermaine", creative + " window attached");
+        scheduleVisibleBeaconTask();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        killVisibleBeaconTask();
+    }
 
+    private void scheduleVisibleBeaconTask() {
+        visibleBeaconTimer = getTimer();
+        visibleBeaconTask = new AdViewTimerTask(adView, feedPosition, creative, beaconService, new DateProvider(), sharethrough);
+        visibleBeaconTimer.schedule(visibleBeaconTask, 0, 100);
+    }
+
+    private boolean forceAdRefreshIfRecyclerViewAndExpired() {
+        long currentTime = (new DateProvider()).get().getTime();
+        if (creative.wasVisible && (currentTime - creative.renderedTime) >= sharethrough.getAdCacheTimeInMilliseconds()) {
+            sharethrough.putCreativeIntoAdView(adView, feedPosition);
+            return true;
+        }
+
+        return false;
+    }
+
+    private void killVisibleBeaconTask() {
         if (visibleBeaconTask != null && visibleBeaconTimer != null) {
             visibleBeaconTask.cancel();
             visibleBeaconTimer.cancel();
             visibleBeaconTimer.purge();
-
         }
-        // Log.d("jermaine", creative + " window detached");
-
-
     }
+
+    protected Timer getTimer() {
+        return new Timer();
+    }
+
 }
 

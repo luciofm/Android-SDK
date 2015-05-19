@@ -1,7 +1,6 @@
 package com.sharethrough.sdk;
 
 import android.graphics.Rect;
-
 import java.lang.ref.WeakReference;
 import java.util.Date;
 import java.util.TimerTask;
@@ -29,27 +28,32 @@ public class AdViewTimerTask extends TimerTask {
         this.sharethrough = sharethrough;
     }
 
+    private void setVisibleStartTime()
+    {
+        if( visibleStartTime == null ){
+            visibleStartTime = dateProvider.get();
+        }
+    }
+
+    private void fireBeacon(IAdView adView) {
+        creative.renderedTime = visibleStartTime.getTime();
+        creative.wasVisible = true;
+        beaconService.adVisible(adView.getAdView(), creative, feedPosition, sharethrough.placement);
+    }
+
+    private boolean hasAdBeenOnScreenForTimeThreshold() {
+        return dateProvider.get().getTime() - visibleStartTime.getTime() >= VISIBILITY_TIME_THRESHOLD;
+    }
+
     private void fireVisibleBeaconIfThresholdReached( IAdView adView ) {
-        if (creative.wasVisible) return;
+        if (creative.wasVisible) {
+            return;
+        }
 
-        Rect rect = new Rect();
-        if (isCurrentlyVisible(adView, rect)) {
-            int visibleArea = rect.width() * rect.height();
-            int viewArea = adView.getAdView().getHeight() * adView.getAdView().getWidth();
-
-            if (visibleArea * 2 >= viewArea) {
-                if (visibleStartTime != null) {
-                    if (dateProvider.get().getTime() - visibleStartTime.getTime() >= VISIBILITY_TIME_THRESHOLD) {
-                        beaconService.adVisible(adView.getAdView(), creative, feedPosition, sharethrough.placement);
-                        creative.renderedTime = visibleStartTime.getTime();
-                        creative.wasVisible = true;
-                        Log.d("jermaine", creative + " fires beacon");
-                    }
-                } else {
-                    visibleStartTime = dateProvider.get();
-                }
-            } else {
-                visibleStartTime = null;
+        if(is50PercentOfAdIsOnScreen(adView)) {
+            setVisibleStartTime();
+            if (hasAdBeenOnScreenForTimeThreshold()) {
+                fireBeacon(adView);
             }
         } else {
             visibleStartTime = null;
@@ -68,8 +72,18 @@ public class AdViewTimerTask extends TimerTask {
         fireVisibleBeaconIfThresholdReached(adView);
     }
 
-    private boolean isCurrentlyVisible(IAdView adView, Rect rect) {
-        return adView.getAdView().isShown() && adView.getAdView().getGlobalVisibleRect(rect);
+    private boolean is50PercentOfAdIsOnScreen(IAdView adView) {
+        Rect rect = new Rect();
+        if( adView.getAdView().isShown() && adView.getAdView().getGlobalVisibleRect(rect) ) {
+            int visibleArea = rect.width() * rect.height();
+            int viewArea = adView.getAdView().getHeight() * adView.getAdView().getWidth();
+
+            if (visibleArea * 2 >= viewArea) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override

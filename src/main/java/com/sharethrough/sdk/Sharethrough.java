@@ -318,7 +318,6 @@ public class Sharethrough {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public void putCreativeIntoAdView(final IAdView adView, final int feedPosition) {
-        Log.d("jermaine", "Sharethrough.putCreativeIntoAdView called");
         Creative creative = creativesBySlot.get(feedPosition);
 
         int oldCreativeHashCode = 0;
@@ -329,7 +328,6 @@ public class Sharethrough {
         long currentTime = new Date().getTime();
 
         if (creative != null && currentTime - creative.renderedTime >= adCacheTimeInMilliseconds) { //TODO make logic better
-            Log.d("jermaine", "cache timer reached, new creative inserted");
             if (availableCreatives.size() != 0) {
                 creativesBySlot.remove(feedPosition);
                 creative = null;
