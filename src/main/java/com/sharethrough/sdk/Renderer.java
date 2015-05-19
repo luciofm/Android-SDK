@@ -18,7 +18,6 @@ import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.media.Media;
 
 import java.util.Timer;
-import java.util.TimerTask;
 
 public class Renderer {
 
@@ -36,8 +35,6 @@ public class Renderer {
         }
         final Handler handler = new Handler(Looper.getMainLooper());
 
-        final TimerTask task = new AdViewTimerTask(adView, feedPosition, creative, beaconService, new DateProvider(), sharethrough);
-
         container.setTag(creative);
 
         handler.post(new Runnable() {
@@ -47,20 +44,6 @@ public class Renderer {
                 if (container.getTag() != creative) return; // container has been recycled
                 adView.adReady();
 
-                final View.OnAttachStateChangeListener onAttachStateChangeListener1 = new View.OnAttachStateChangeListener() {
-                    @Override
-                    public void onViewAttachedToWindow(View v) {
-                        timer.schedule(task, 0, 100);
-                    }
-
-                    @Override
-                    public void onViewDetachedFromWindow(View v) {
-                        task.cancel();
-                        timer.cancel();
-                        timer.purge();
-                        v.removeOnAttachStateChangeListener(this);
-                    }
-                };
 
                 adView.getTitle().setText(creative.getTitle());
                 TextView description = adView.getDescription();
@@ -96,10 +79,10 @@ public class Renderer {
                 thumbnailContainer.removeAllViews();
                 Context context = container.getContext();
 
-                final ImageView thumbnailImage = new ImageView(context);
+                final AdImageView thumbnailImage = new AdImageView(context, sharethrough, creative, adView, feedPosition, beaconService);
                 thumbnailImage.setImageBitmap(thumbnailBitmap);
                 thumbnailImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                thumbnailImage.addOnAttachStateChangeListener(onAttachStateChangeListener1);
+
                 thumbnailContainer.addView(thumbnailImage,
                         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
 
@@ -118,8 +101,6 @@ public class Renderer {
                     }
                   }
                 );
-
-
 
                 placeOptoutIcon(adView);
             }

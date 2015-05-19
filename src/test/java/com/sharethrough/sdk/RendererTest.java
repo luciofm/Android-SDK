@@ -118,56 +118,6 @@ public class RendererTest extends TestBase {
     }
 
     @Test
-    @Config(shadows = {MyImageViewShadow.class, MyViewShadow.class})
-    public void usesAdViewTimerTask() throws Exception {
-        final List<View> addedChildren = Lists.newArrayList();
-
-        final FrameLayout mockThumbnail = adView.getThumbnail();
-        Mockito.doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-                View viewBeingAdded = (View) invocationOnMock.getArguments()[0];
-                addedChildren.add(viewBeingAdded);
-
-                if (viewBeingAdded instanceof ImageView) {
-                    MyImageViewShadow myImageViewShadow = (MyImageViewShadow) shadowOf(viewBeingAdded);
-                    if (myImageViewShadow.onAttachStateListener != null) {
-                        myImageViewShadow.onAttachStateListener.onViewAttachedToWindow(viewBeingAdded);
-                    }
-                }
-                return null;
-            }
-        }).when(mockThumbnail).addView(any(View.class), any(FrameLayout.LayoutParams.class));
-
-        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
-
-        ArgumentCaptor<AdViewTimerTask> timerTaskArgumentCaptor = ArgumentCaptor.forClass(AdViewTimerTask.class);
-        verify(timer).schedule(timerTaskArgumentCaptor.capture(), anyLong(), anyLong());
-        AdViewTimerTask timerTask = timerTaskArgumentCaptor.getValue();
-        assertThat(timerTask.getAdView()).isSameAs(adView);
-
-        assertThat(timerTask.isCancelled()).isFalse();
-        for (View addedChild : addedChildren) {
-            if (addedChild instanceof ImageView) {
-                MyImageViewShadow myImageViewShadow = (MyImageViewShadow) shadowOf(addedChild);
-                if (myImageViewShadow.onAttachStateListener != null) {
-                    myImageViewShadow.onAttachStateListener.onViewDetachedFromWindow(addedChild);
-                    addedChild.removeOnAttachStateChangeListener(myImageViewShadow.onAttachStateListener);
-                }
-            }
-        }
-        assertThat(timerTask.isCancelled()).isTrue();
-        verify(timer).cancel();
-        verify(timer).purge();
-        for (View addedChild : addedChildren) {
-            if (addedChild instanceof ImageView) {
-                MyImageViewShadow myImageViewShadow = (MyImageViewShadow) shadowOf(addedChild);
-                assertThat(myImageViewShadow.onAttachStateListener).isNull();
-            }
-        }
-    }
-
-    @Test
     public void whenAdIsClicked_firesMediaBeacon_andMediaClickListener() throws Exception {
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
 

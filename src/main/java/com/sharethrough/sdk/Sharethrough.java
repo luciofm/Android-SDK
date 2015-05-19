@@ -318,8 +318,8 @@ public class Sharethrough {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public void putCreativeIntoAdView(final IAdView adView, final int feedPosition) {
-
         Creative creative = creativesBySlot.get(feedPosition);
+
         int oldCreativeHashCode = 0;
         if (creative != null) {
             oldCreativeHashCode = creative.hashCode();
