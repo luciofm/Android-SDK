@@ -2,12 +2,10 @@ package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
-import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
@@ -172,13 +170,14 @@ public class BeaconService {
                 DefaultHttpClient client = new DefaultHttpClient();
                 String url = uriBuilder.build().toString();
                 url = url.replace("[", "%5B").replace("]", "%5D");
-                Log.i("Sharethrough", "beacon:\t" + url);
+                Logger.d("beacon fired type: " + beaconParams.get("type"));
+                Logger.i("beacon url: " + url);
                 try {
                     HttpGet request = new HttpGet(url);
                     request.addHeader("User-Agent", Sharethrough.USER_AGENT + "; " + appPackageName);
                     client.execute(request);
                 } catch (Exception e) {
-                    Log.e("Sharethrough", "beacon fire failed for " + url, e);
+                    Logger.e("beacon failed to fire: " + url + ", exception: " + e);
                 }
             }
         });

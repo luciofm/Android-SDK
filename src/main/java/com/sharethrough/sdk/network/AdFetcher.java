@@ -1,6 +1,5 @@
 package com.sharethrough.sdk.network;
 
-import android.util.Log;
 import com.sharethrough.sdk.*;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpGet;
@@ -14,7 +13,6 @@ import org.json.JSONObject;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public class AdFetcher {
@@ -39,6 +37,7 @@ public class AdFetcher {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
+                Logger.d("ad request sent pkey:" + placementKey);
                 beaconService.adRequested(placementKey);
 
                 if (advertisingIdProvider.getAdvertisingId() != null) queryStringParams.add(new BasicNameValuePair("uid", advertisingIdProvider.getAdvertisingId()));
@@ -48,7 +47,7 @@ public class AdFetcher {
                 String formattedQueryStringParams = URLEncodedUtils.format(queryStringParams, "utf-8");
                 final URI uri = URI.create(apiUrl + "?" + formattedQueryStringParams );
                 String json = null;
-                    try {
+                try {
 
                     DefaultHttpClient client = new DefaultHttpClient();
                     HttpGet request = new HttpGet(uri);
@@ -98,7 +97,7 @@ public class AdFetcher {
                         msg += ": " + json;
                     }
                     isRunning = false;
-                    Log.e("Sharethrough", msg, e);
+                    Logger.e(msg);
                 }
             }
         });
