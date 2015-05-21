@@ -170,14 +170,14 @@ public class BeaconService {
                 DefaultHttpClient client = new DefaultHttpClient();
                 String url = uriBuilder.build().toString();
                 url = url.replace("[", "%5B").replace("]", "%5D");
-                Logger.d("beacon fired type: " + beaconParams.get("type"));
-                Logger.i("beacon url: " + url);
+                if(Logger.isLoggingEnabled()) Logger.d("beacon fired type: " + beaconParams.get("type"));
+                if(Logger.isLoggingEnabled()) Logger.i("beacon url: " + url);
                 try {
                     HttpGet request = new HttpGet(url);
                     request.addHeader("User-Agent", Sharethrough.USER_AGENT + "; " + appPackageName);
                     client.execute(request);
                 } catch (Exception e) {
-                    Logger.e("beacon failed to fire: " + url + ", exception: " + e);
+                    if(Logger.isLoggingEnabled()) Logger.e("beacon fired failed for " + url, e);
                 }
             }
         });

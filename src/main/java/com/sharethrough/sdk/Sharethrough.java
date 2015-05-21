@@ -167,7 +167,9 @@ public class Sharethrough {
             public Void apply(Creative creative) {
                 if (waitingAdViews.size() == 0) {
                     availableCreatives.add(creative);
-                    Logger.d("insert creative ckey:" + creative.getCreativeKey() + ", creative cache size: " + availableCreatives.size());
+                    if (creative != null) {
+                        if(Logger.isLoggingEnabled()) Logger.d("insert creative ckey:" + creative.getCreativeKey() + ", creative cache size: " + availableCreatives.size());
+                    }
                     fireNewAdsToShow();
                 } else {
                     AdViewFeedPositionPair adViewFeedPositionPair = waitingAdViews.popNext();
@@ -325,7 +327,7 @@ public class Sharethrough {
         int oldCreativeHashCode = 0;
         if (creative != null) {
             oldCreativeHashCode = creative.hashCode();
-            Logger.d( "get creative ckey: " + creative.getCreativeKey() + " from creative slot at position " + feedPosition);
+            if(Logger.isLoggingEnabled()) Logger.d( "get creative ckey: " + creative.getCreativeKey() + " from creative slot at position " + feedPosition);
         }
 
         long currentTime = new Date().getTime();
@@ -341,7 +343,7 @@ public class Sharethrough {
             synchronized (availableCreatives) {
                 creative = availableCreatives.getNext();
                 if( creative != null && availableCreatives != null ) {
-                    Logger.d("pop creative ckey: " + creative.getCreativeKey() + " at position " + feedPosition + ", creative cache size: " + availableCreatives.size());
+                    if(Logger.isLoggingEnabled()) Logger.d("pop creative ckey: " + creative.getCreativeKey() + " at position " + feedPosition + ", creative cache size: " + availableCreatives.size());
                 }
             }
         }

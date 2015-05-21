@@ -37,7 +37,7 @@ public class AdFetcher {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                Logger.d("ad request sent pkey:" + placementKey);
+                if(Logger.isLoggingEnabled()) Logger.d("ad request sent pkey:" + placementKey);
                 beaconService.adRequested(placementKey);
 
                 if (advertisingIdProvider.getAdvertisingId() != null) queryStringParams.add(new BasicNameValuePair("uid", advertisingIdProvider.getAdvertisingId()));
@@ -97,7 +97,7 @@ public class AdFetcher {
                         msg += ": " + json;
                     }
                     isRunning = false;
-                    Logger.e(msg);
+                    if(Logger.isLoggingEnabled()) Logger.e(msg, e);
                 }
             }
         });

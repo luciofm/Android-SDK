@@ -51,6 +51,7 @@ public class AdFetcherTest extends TestBase {
 
     @Before
     public void setUp() throws Exception {
+        Logger.enabled = true;
         String apiUriPrefix = "http://api";
         apiUri = apiUriPrefix;
         key = "key";
@@ -126,8 +127,8 @@ public class AdFetcherTest extends TestBase {
 
         Misc.runLast(executorService);
 
-        List<ShadowLog.LogItem> logsForTag = ShadowLog.getLogsForTag("Sharethrough");
-        assertThat(logsForTag.get(0).msg).isEqualTo("failed to get ads for key " + key + ": " + expectedUri);
+        List<ShadowLog.LogItem> logsForTag = ShadowLog.getLogs();
+        assertThat(logsForTag.get(1).msg).isEqualTo("failed to get ads for key " + key + ": " + expectedUri);
     }
 
     @Test
@@ -139,8 +140,8 @@ public class AdFetcherTest extends TestBase {
 
         Misc.runLast(executorService);
 
-        List<ShadowLog.LogItem> logsForTag = ShadowLog.getLogsForTag("Sharethrough");
-        assertThat(logsForTag.get(0).msg).isEqualTo("failed to get ads for key " + key + ": " + expectedUri + ": " + responseBody);
+        List<ShadowLog.LogItem> logsForTag = ShadowLog.getLogs();
+        assertThat(logsForTag.get(1).msg).isEqualTo("failed to get ads for key " + key + ": " + expectedUri + ": " + responseBody);
 
         verify(adFetcherCallback).finishedLoadingWithNoAds();
     }

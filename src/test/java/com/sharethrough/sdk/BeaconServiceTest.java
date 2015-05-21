@@ -43,6 +43,7 @@ public class BeaconServiceTest extends TestBase {
 
     @Before
     public void setUp() throws Exception {
+        Logger.enabled = true;
         System.setProperty("http.agent", "Robolectric");
 
         now = new Date(1000000000);
@@ -337,7 +338,7 @@ public class BeaconServiceTest extends TestBase {
 
         List<HttpRequestInfo> info = Robolectric.getFakeHttpLayer().getSentHttpRequestInfos();
         assertThat(info.size()).isEqualTo(1);
-        assertThat(ShadowLog.getLogs().get(0).msg).contains(badUrl);
+        assertThat(ShadowLog.getLogs().get(2).msg).contains(badUrl);
     }
 
     @Test
