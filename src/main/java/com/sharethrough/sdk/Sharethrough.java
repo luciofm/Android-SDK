@@ -136,6 +136,7 @@ public class Sharethrough {
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     Sharethrough(final Context context, final String placementKey, int adCacheTimeInMilliseconds, final Renderer renderer, final CreativesQueue availableCreatives, final BeaconService beaconService, AdFetcher adFetcher, ImageFetcher imageFetcher, DFPNetworking dfpNetworking) {
+        Logger.setContext(context); //initialize logger with context
         this.placementKey = placementKey;
         this.renderer = renderer;
         this.beaconService = beaconService;
@@ -166,6 +167,9 @@ public class Sharethrough {
             public Void apply(Creative creative) {
                 if (waitingAdViews.size() == 0) {
                     availableCreatives.add(creative);
+                    if (creative != null) {
+                        if(Logger.isLoggingEnabled()) Logger.d("insert creative ckey:" + creative.getCreativeKey() + ", creative cache size: " + availableCreatives.size());
+                    }
                     fireNewAdsToShow();
                 } else {
                     AdViewFeedPositionPair adViewFeedPositionPair = waitingAdViews.popNext();
@@ -323,6 +327,7 @@ public class Sharethrough {
         int oldCreativeHashCode = 0;
         if (creative != null) {
             oldCreativeHashCode = creative.hashCode();
+            if(Logger.isLoggingEnabled()) Logger.d( "get creative ckey: " + creative.getCreativeKey() + " from creative slot at position " + feedPosition);
         }
 
         long currentTime = new Date().getTime();
@@ -337,6 +342,9 @@ public class Sharethrough {
         if (creative == null) {
             synchronized (availableCreatives) {
                 creative = availableCreatives.getNext();
+                if( creative != null && availableCreatives != null ) {
+                    if(Logger.isLoggingEnabled()) Logger.d("pop creative ckey: " + creative.getCreativeKey() + " at position " + feedPosition + ", creative cache size: " + availableCreatives.size());
+                }
             }
         }
 

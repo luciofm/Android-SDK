@@ -121,6 +121,8 @@ public class SharethroughListAdapter extends BaseAdapter {
             }
             mSharethrough.fetchAdsIfReadyForMore();
             return mAdapter.getView(adjustedPosition(position), convertView, parent);
+
+
         }
     }
 
