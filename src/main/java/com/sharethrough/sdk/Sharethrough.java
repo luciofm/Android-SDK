@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 public class Sharethrough {
     public static final int DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
     private static final int MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
-    public static final String SDK_VERSION_NUMBER = "1.1.4";
+    public static final String SDK_VERSION_NUMBER = "1.1.6";
     public static String USER_AGENT = System.getProperty("http.agent") + "; STR " + SDK_VERSION_NUMBER;
     public static final String PRIVACY_POLICY_ENDPOINT = "http://platform-cdn.sharethrough.com/privacy-policy.html";
     private static final String DFP_CREATIVE_KEY = "creativeKey";
@@ -68,7 +68,7 @@ public class Sharethrough {
     private static final Map<String, Map<String, String>> dfpAdGroupIds = new HashMap<>();
     private final Context context; //TODO decide whether this is needed
     private String dfpPath;
-    private boolean firedNewAdsToShow;
+    public boolean firedNewAdsToShow;
     Placement placement;
     public boolean placementSet;
     private Function<Placement, Void> placementHandler;
@@ -137,6 +137,7 @@ public class Sharethrough {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     Sharethrough(final Context context, final String placementKey, int adCacheTimeInMilliseconds, final Renderer renderer, final CreativesQueue availableCreatives, final BeaconService beaconService, AdFetcher adFetcher, ImageFetcher imageFetcher, DFPNetworking dfpNetworking) {
         Logger.setContext(context); //initialize logger with context
+        Logger.enabled = true;
         this.placementKey = placementKey;
         this.renderer = renderer;
         this.beaconService = beaconService;
@@ -315,6 +316,37 @@ public class Sharethrough {
         putCreativeIntoAdView(adView, 0);
     }
 
+
+    /**
+     * Return a cached creative (used) or removes a new available creative from the queue (not used)
+     * @param feedPosition, isAdRenewed
+     * @return null if there is no creatives to show in both the slot and queue, and sets the isAdRenewed to true if
+     * there is a new creative to show
+     */
+    private Creative getCreativeToShow(int feedPosition, boolean[] isAdRenewed) {
+        Creative creative = creativesBySlot.get(feedPosition);
+        if (creative == null || creative.hasExpired(adCacheTimeInMilliseconds)) {
+
+            if (availableCreatives.size() != 0) {
+                synchronized (availableCreatives) {
+                    creative = availableCreatives.getNext();
+                }
+                creativesBySlot.put(feedPosition, creative);
+                (isAdRenewed[0]) = true;
+            }
+        }
+
+        if (Logger.isLoggingEnabled() && creative != null) {
+            if (isAdRenewed[0]) {
+                Logger.d("pop creative ckey: " + creative.getCreativeKey() + " at position " + feedPosition + ", creative cache size: " + availableCreatives.size());
+            } else {
+                Logger.d("get creative ckey: " + creative.getCreativeKey() + " from creative slot at position " + feedPosition);
+            }
+        }
+
+        return creative;
+    }
+
     /**
      *
      * @param adView    Any class that implements IAdView.
@@ -322,44 +354,23 @@ public class Sharethrough {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public void putCreativeIntoAdView(final IAdView adView, final int feedPosition) {
-        Creative creative = creativesBySlot.get(feedPosition);
+        boolean[] isAdRenewed = new boolean[1];
+        isAdRenewed[0] = false;
 
-        int oldCreativeHashCode = 0;
+        Creative creative = getCreativeToShow(feedPosition, isAdRenewed);
         if (creative != null) {
-            oldCreativeHashCode = creative.hashCode();
-            if(Logger.isLoggingEnabled()) Logger.d( "get creative ckey: " + creative.getCreativeKey() + " from creative slot at position " + feedPosition);
-        }
-
-        long currentTime = new Date().getTime();
-
-        if (creative != null && currentTime - creative.renderedTime >= adCacheTimeInMilliseconds) { //TODO make logic better
-            if (availableCreatives.size() != 0) {
-                creativesBySlot.remove(feedPosition);
-                creative = null;
-            }
-        }
-
-        if (creative == null) {
-            synchronized (availableCreatives) {
-                creative = availableCreatives.getNext();
-                if( creative != null && availableCreatives != null ) {
-                    if(Logger.isLoggingEnabled()) Logger.d("pop creative ckey: " + creative.getCreativeKey() + " at position " + feedPosition + ", creative cache size: " + availableCreatives.size());
-                }
-            }
-        }
-
-        if (creative != null) {
-            int newCreativeHashCode = creative.hashCode();
-            creativesBySlot.put(feedPosition, creative);
             renderer.putCreativeIntoAdView(adView, creative, beaconService, this, feedPosition, new Timer("AdView timer for " + creative));
-            if (oldCreativeHashCode != newCreativeHashCode) {
+            if( isAdRenewed[0] ){
                 fireNewAdsToShow();
             }
-        } else {
+        }
+        else{
+            if(Logger.enabled)Logger.d("there are no ads to show at position: " + feedPosition);
             AdViewFeedPositionPair<IAdView, Integer> adViewFeedPositionPair = new AdViewFeedPositionPair<IAdView, Integer>(adView, feedPosition);
             waitingAdViews.put(adViewFeedPositionPair);
         }
 
+        //grab more ads if appropriate
         synchronized (availableCreatives) {
             if (availableCreatives.readyForMore()) {
                 fetchAds();

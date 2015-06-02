@@ -6,7 +6,11 @@ import android.webkit.JavascriptInterface;
 
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
+import com.sharethrough.sdk.Logger;
 
+/**
+ * Javascript interface that notifies video completion rate
+ */
 public class VideoCompletionBeaconService {
     private final Context context;
     private final Creative creative;
@@ -28,7 +32,8 @@ public class VideoCompletionBeaconService {
     // NOTE: params must match function signature of SharethroughYoutube.timeUpdate in youtube_html string
     // DEBUGGING INSTRUCTIONS: https://developer.chrome.com/devtools/docs/remote-debugging#debugging-webviews
     public void timeUpdate(double time, double duration) {
-        Log.v("Sharethrough", creative.getCreativeKey() + " video has played " + time + "s of " + duration + "s");
+        if(Logger.isLoggingEnabled()) Logger.i(creative.getCreativeKey() + " video has played " + time + "s of " + duration + "s");
+
         double percent = time / duration;
         if (!quarterFired && percent >= 0.25) {
             quarterFired = true;

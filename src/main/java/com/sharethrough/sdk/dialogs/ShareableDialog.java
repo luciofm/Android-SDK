@@ -22,6 +22,11 @@ import com.sharethrough.sdk.Creative;
 
 import java.util.List;
 
+
+/**
+ this base class provides beacon firing when a user tries to share the ad content with another android package.
+ */
+
 public abstract class ShareableDialog extends Dialog {
     protected final BeaconService beaconService;
     protected final int feedPosition;

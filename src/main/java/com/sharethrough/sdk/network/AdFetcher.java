@@ -31,8 +31,13 @@ public class AdFetcher {
         this.advertisingIdProvider = advertisingIdProvider;
     }
 
-    public synchronized void fetchAds(final ImageFetcher imageFetcher, final String apiUrl, final ArrayList<NameValuePair> queryStringParams, final Function<Creative, Void> creativeHandler, final Callback adFetcherCallback, final Function<Placement, Void> placementHandler) {
-        if (isRunning) return;
+    public synchronized void fetchAds(final ImageFetcher imageFetcher,
+                                      final String apiUrl,
+                                      final ArrayList<NameValuePair> queryStringParams,
+                                      final Function<Creative, Void> creativeHandler,
+                                      final Callback adFetcherCallback,
+                                      final Function<Placement, Void> placementHandler) {
+        if (isRunning) return; //isRunning ensures all creative assets are fetched (e.g images) before another ad request can be executed.
         isRunning = true;
         executorService.execute(new Runnable() {
             @Override
@@ -40,12 +45,15 @@ public class AdFetcher {
                 if(Logger.isLoggingEnabled()) Logger.d("ad request sent pkey:" + placementKey);
                 beaconService.adRequested(placementKey);
 
-                if (advertisingIdProvider.getAdvertisingId() != null) queryStringParams.add(new BasicNameValuePair("uid", advertisingIdProvider.getAdvertisingId()));
+                //see if we have an available google advertising ID.
+                if (advertisingIdProvider.getAdvertisingId() != null) {
+                    queryStringParams.add(new BasicNameValuePair("uid", advertisingIdProvider.getAdvertisingId()));
+                }
                 queryStringParams.add(new BasicNameValuePair("appId", beaconService.getAppVersionName()));
                 queryStringParams.add(new BasicNameValuePair("appName", beaconService.getAppPackageName()));
-
                 String formattedQueryStringParams = URLEncodedUtils.format(queryStringParams, "utf-8");
                 final URI uri = URI.create(apiUrl + "?" + formattedQueryStringParams );
+
                 String json = null;
                 try {
 
@@ -56,15 +64,19 @@ public class AdFetcher {
                     json = Misc.convertStreamToString(content);
                     Response response = getResponse(json);
 
+                    //Placement information will be referenced in the sharethrough object.
                     if (!placementSet) {
                         placementHandler.apply(new Placement(response.placement));
                         placementSet = true;
                     }
 
-                    remainingImageRequests += response.creatives.size();
+                    remainingImageRequests = response.creatives.size();
+                    if(Logger.isLoggingEnabled()) Logger.d("ad request returned " + remainingImageRequests + " creatives");
+
                     if (remainingImageRequests == 0) {
                         adFetcherCallback.finishedLoadingWithNoAds();
                         isRunning = false;
+                        return;
                     }
                     for (final Response.Creative responseCreative : response.creatives) {
                         imageFetcher.fetchCreativeImages(uri, responseCreative, new ImageFetcher.Callback() {
@@ -81,7 +93,7 @@ public class AdFetcher {
 
                             private void decCount() {
                                 synchronized (AdFetcher.this) {
-                                    remainingImageRequests -= 1;
+                                    remainingImageRequests--;
                                     if (remainingImageRequests == 0) {
                                         isRunning = false;
                                         adFetcherCallback.finishedLoading();
