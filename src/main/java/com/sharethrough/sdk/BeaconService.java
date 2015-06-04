@@ -169,7 +169,7 @@ public class BeaconService {
 
                 DefaultHttpClient client = new DefaultHttpClient();
                 String url = uriBuilder.build().toString();
-                url = url.replace("[", "%5B").replace("]", "%5D");
+                url = url.replace("[", "%5B").replace("]", "%5D").replaceAll("%", "%25");
                 if(Logger.isLoggingEnabled()) Logger.d("beacon fired type: " + beaconParams.get("type"));
                 if(Logger.isLoggingEnabled()) Logger.i("beacon url: " + url);
                 try {
