@@ -169,7 +169,7 @@ public class Sharethrough {
                 if (waitingAdViews.size() == 0) {
                     availableCreatives.add(creative);
                     if (creative != null) {
-                        if(Logger.isLoggingEnabled()) Logger.d("insert creative ckey:" + creative.getCreativeKey() + ", creative cache size: " + availableCreatives.size());
+                        Logger.d("insert creative ckey: %s, creative cache size %d", creative.getCreativeKey(), availableCreatives.size());
                     }
                     fireNewAdsToShow();
                 } else {
@@ -336,11 +336,11 @@ public class Sharethrough {
             }
         }
 
-        if (Logger.isLoggingEnabled() && creative != null) {
+        if (creative != null) {
             if (isAdRenewed[0]) {
-                Logger.d("pop creative ckey: " + creative.getCreativeKey() + " at position " + feedPosition + ", creative cache size: " + availableCreatives.size());
+                Logger.d("pop creative ckey: %s at position %d , creative cache size: %d ", creative.getCreativeKey() ,feedPosition , availableCreatives.size());
             } else {
-                Logger.d("get creative ckey: " + creative.getCreativeKey() + " from creative slot at position " + feedPosition);
+                Logger.d("get creative ckey: %s from creative slot at position %d",creative.getCreativeKey(), feedPosition);
             }
         }
 

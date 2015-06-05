@@ -32,7 +32,7 @@ public class VideoCompletionBeaconService {
     // NOTE: params must match function signature of SharethroughYoutube.timeUpdate in youtube_html string
     // DEBUGGING INSTRUCTIONS: https://developer.chrome.com/devtools/docs/remote-debugging#debugging-webviews
     public void timeUpdate(double time, double duration) {
-        if(Logger.isLoggingEnabled()) Logger.i(creative.getCreativeKey() + " video has played " + time + "s of " + duration + "s");
+        Logger.i("%s video has played %d s of %d s",creative.getCreativeKey(), time, duration);
 
         double percent = time / duration;
         if (!quarterFired && percent >= 0.25) {

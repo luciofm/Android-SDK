@@ -42,7 +42,7 @@ public class AdFetcher {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                if(Logger.isLoggingEnabled()) Logger.d("ad request sent pkey:" + placementKey);
+                Logger.d("ad request sent pkey: %s", placementKey);
                 beaconService.adRequested(placementKey);
 
                 //see if we have an available google advertising ID.
@@ -71,7 +71,7 @@ public class AdFetcher {
                     }
 
                     remainingImageRequests = response.creatives.size();
-                    if(Logger.isLoggingEnabled()) Logger.d("ad request returned " + remainingImageRequests + " creatives");
+                    Logger.d("ad request returned %d creatives ",remainingImageRequests);
 
                     if (remainingImageRequests == 0) {
                         adFetcherCallback.finishedLoadingWithNoAds();
@@ -109,7 +109,7 @@ public class AdFetcher {
                         msg += ": " + json;
                     }
                     isRunning = false;
-                    if(Logger.isLoggingEnabled()) Logger.e(msg, e);
+                    Logger.e(msg, e);
                 }
             }
         });
