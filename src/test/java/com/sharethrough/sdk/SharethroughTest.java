@@ -137,6 +137,7 @@ public class SharethroughTest extends TestBase {
 
     @Test
     public void putCreativeIntoAdView_whenQueueHasCreatives_usesNextCreative() {
+        when(availableCreatives.size()).thenReturn(1);
         when(availableCreatives.getNext()).thenReturn(creative).thenThrow(new RuntimeException("Too many calls to getNext"));
 
         subject.putCreativeIntoAdView(adView);
@@ -255,6 +256,7 @@ public class SharethroughTest extends TestBase {
     @Test
     public void getAdView_whenAdViewsBySlotContainsAdviewForPosition_returnsStoredAdview() {
         int adSlot = 2;
+        when(availableCreatives.size()).thenReturn(1);
         when(availableCreatives.getNext()).thenReturn(creative);
         IAdView generatedAdView = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
         IAdView generatedAdView2 = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
@@ -266,6 +268,7 @@ public class SharethroughTest extends TestBase {
     @Test
     public void getAdView_whenRecyclingViews_withSameFeedPosition_returnsRecycledView_withSameCreative() throws Exception {
         int adSlot = 2;
+        when(availableCreatives.size()).thenReturn(1);
         when(availableCreatives.getNext()).thenReturn(creative);
         IAdView generatedAdView = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
         IAdView generatedAdView2 = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView);
@@ -278,6 +281,7 @@ public class SharethroughTest extends TestBase {
     @Test
     public void getAdView_whenRecyclingViews_withDiffFeedPosition_returnsRecycledView_withNewCreative() throws Exception {
         Creative creative2 = mock(Creative.class);
+        when(availableCreatives.size()).thenReturn(2);
         when(availableCreatives.getNext()).thenReturn(creative).thenReturn(creative2).thenThrow(new RuntimeException("Too many calls"));
         IAdView generatedAdView = subject.getAdView(Robolectric.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
         IAdView generatedAdView2 = subject.getAdView(Robolectric.application, 2, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView);
@@ -295,6 +299,54 @@ public class SharethroughTest extends TestBase {
         IAdView generatedAdView2 = subject.getAdView(Robolectric.application, 12, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
         assertThat(generatedAdView).isNotSameAs(generatedAdView2);
     }
+
+    @Test
+    public void ifSlotIsEmptyAndThereAreMoreAdsToShow_fireNewAdsIsCalled() {
+        int adSlot = 2;
+        when(availableCreatives.size()).thenReturn(1);
+        when(availableCreatives.getNext()).thenReturn(creative);
+        IAdView generatedAdView = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+
+        assertThat(subject.firedNewAdsToShow);
+    }
+
+    @Test
+    public void ifSlotNOTEmptyAndCreativeExpired_fireNewAdsIsCalled() {
+        Creative creative2 = mock(Creative.class);
+        when(availableCreatives.size()).thenReturn(2);
+        when(availableCreatives.getNext()).thenReturn(creative).thenReturn(creative2).thenThrow(new RuntimeException("Too many calls"));
+        IAdView generatedAdView = subject.getAdView(Robolectric.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        when(creative.hasExpired(anyInt())).thenReturn(true);
+        subject.firedNewAdsToShow = false;
+        IAdView generatedAdView2 = subject.getAdView(Robolectric.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView);
+        assertThat(generatedAdView).isSameAs(generatedAdView2);
+
+        assertThat(subject.firedNewAdsToShow);
+    }
+
+    @Test
+    public void ifSlotNOTEmptyAndCreativeNOTExpired_fireNewAdsIsNOTCalled() {
+        Creative creative2 = mock(Creative.class);
+        when(availableCreatives.size()).thenReturn(2);
+        when(availableCreatives.getNext()).thenReturn(creative).thenReturn(creative2).thenThrow(new RuntimeException("Too many calls"));
+        IAdView generatedAdView = subject.getAdView(Robolectric.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        when(creative.hasExpired(anyInt())).thenReturn(false);
+        subject.firedNewAdsToShow = false;
+        IAdView generatedAdView2 = subject.getAdView(Robolectric.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView);
+        assertThat(generatedAdView).isSameAs(generatedAdView2);
+
+        assertThat(false == subject.firedNewAdsToShow);
+    }
+
+    @Test
+    public void ifSlotEmptyAndNoAdsAvailable_fireNewAdsIsNOTCalled() {
+        int adSlot = 2;
+        when(availableCreatives.size()).thenReturn(0);
+        IAdView generatedAdView = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+
+        assertThat(false == subject.firedNewAdsToShow);
+    }
+
 
     private void createDfpSubject(String key) {
         subject = new Sharethrough(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, availableCreatives, beaconService, adFetcher, imageFetcher, dfpNetworking);

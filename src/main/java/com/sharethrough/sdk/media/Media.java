@@ -25,6 +25,9 @@ public abstract class Media {
 
     public abstract void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition, Placement placement);
 
+    /*
+    Puts the Media icon over where the thumbnail image will be (ie. red youtube icon)
+     */
     public final void overlayThumbnail(IAdView adView, ImageView thumbnailImage) {
         int overlayImageResourceId = getOverlayImageResourceId();
         if (overlayImageResourceId < 0) return;

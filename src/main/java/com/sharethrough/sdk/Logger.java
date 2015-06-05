@@ -58,19 +58,46 @@ public class Logger {
         return logStatement.toString();
     }
 
-    public static void d(String statement) {
-       Log.d(createTag(), statement);
+    public static void d(String statement, Object... params) {
+        if(false == isLoggingEnabled()) {
+            return;
+        }
+
+        if(params.length != 0) {
+            statement = String.format(statement, params);
+        }
+        Log.d(createTag(), statement);
     }
 
-    public static void i(String statement) {
+    public static void i(String statement, Object... params) {
+        if(false == isLoggingEnabled()) {
+            return;
+        }
+
+        if(params.length != 0) {
+            statement = String.format(statement, params);
+        }
         Log.i(createTag(), statement);
     }
 
-    public static void w(String statement) {
+    public static void w(String statement, Object... params) {
+        if(false == isLoggingEnabled()) {
+            return;
+        }
+
+        if(params.length != 0) {
+            statement = String.format(statement, params);
+        }
         Log.w(createTag(), statement);
     }
 
-    public static void e(String statement, Exception e) {
+    public static void e(String statement, Exception e,  Object... params) {
+        if(false == isLoggingEnabled()) {
+            return;
+        }
+        if(params.length != 0) {
+            statement = String.format(statement, params);
+        }
         Log.e(createTag(), statement, e);
     }
 }
