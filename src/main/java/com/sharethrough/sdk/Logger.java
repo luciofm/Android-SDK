@@ -59,8 +59,7 @@ public class Logger {
     }
 
     public static void d(String statement, Object... params) {
-        if(false == isLoggingEnabled())
-        {
+        if(false == isLoggingEnabled()) {
             return;
         }
 
@@ -71,8 +70,7 @@ public class Logger {
     }
 
     public static void i(String statement, Object... params) {
-        if(false == isLoggingEnabled())
-        {
+        if(false == isLoggingEnabled()) {
             return;
         }
 
@@ -83,8 +81,7 @@ public class Logger {
     }
 
     public static void w(String statement, Object... params) {
-        if(false == isLoggingEnabled())
-        {
+        if(false == isLoggingEnabled()) {
             return;
         }
 
@@ -95,8 +92,7 @@ public class Logger {
     }
 
     public static void e(String statement, Exception e,  Object... params) {
-        if(false == isLoggingEnabled())
-        {
+        if(false == isLoggingEnabled()) {
             return;
         }
         if(params.length != 0) {
