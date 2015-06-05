@@ -12,6 +12,7 @@ import android.view.WindowManager;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import java.net.URLDecoder;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -167,9 +168,13 @@ public class BeaconService {
                     uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
                 }
 
+
                 DefaultHttpClient client = new DefaultHttpClient();
                 String url = uriBuilder.build().toString();
-                url = url.replace("[", "%5B").replace("]", "%5D").replaceAll("%", "%25");
+
+
+                url = url.replace("[", "%5B").replace("]", "%5D");
+                url = url.replaceAll("%(?![0-9])", "%25");
                 Logger.d("beacon fired type: %s", beaconParams.get("type"));
                 Logger.i("beacon url: %s", url);
                 try {

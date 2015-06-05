@@ -318,7 +318,7 @@ public class BeaconServiceTest extends TestBase {
 
     @Test
     public void whenAThirdPartyBeaconIsInvalid_logsWithoutCrashing() throws Exception {
-        String badUrl = "//%%%invalid%url%%%";
+        String badUrl = "//%%%invalid%3url%%%";
         List<String> clickEndoints = Arrays.asList(badUrl);
 
         responseCreative.creative.beacon.click = clickEndoints;
@@ -338,7 +338,7 @@ public class BeaconServiceTest extends TestBase {
 
         List<HttpRequestInfo> info = Robolectric.getFakeHttpLayer().getSentHttpRequestInfos();
         assertThat(info.size()).isEqualTo(1);
-        assertThat(ShadowLog.getLogs().get(2).msg).contains(badUrl);
+        assertThat(ShadowLog.getLogs().get(2).msg).contains("http://%25%25%25invalid%3url%25%25%25");
     }
 
     @Test
