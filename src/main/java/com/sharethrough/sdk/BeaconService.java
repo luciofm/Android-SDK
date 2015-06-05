@@ -174,7 +174,6 @@ public class BeaconService {
 
 
                 url = url.replace("[", "%5B").replace("]", "%5D");
-                url = url.replaceAll("%(?![0-9])", "%25");
                 Logger.d("beacon fired type: %s", beaconParams.get("type"));
                 Logger.i("beacon url: %s", url);
                 try {
