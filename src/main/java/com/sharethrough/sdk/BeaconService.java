@@ -174,7 +174,7 @@ public class BeaconService {
 
 
                 url = url.replace("[", "%5B").replace("]", "%5D");
-                Logger.d("beacon fired type: %s", beaconParams.get("type"));
+                Logger.d("beacon fired type: %s", beaconParams.get("type")==null?"third party beacon ":beaconParams.get("type"));
                 Logger.i("beacon url: %s", url);
                 try {
                     HttpGet request = new HttpGet(url);
