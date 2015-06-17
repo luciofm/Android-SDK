@@ -2,6 +2,7 @@ package com.sharethrough.sdk;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import com.sharethrough.sdk.media.*;
 
 import java.util.List;
@@ -84,11 +85,11 @@ public class Creative {
     }
 
     public String getShareUrl() {
-        return responseCreative.creative.shareUrl;
+        return convertToAbsoluteUrl(responseCreative.creative.shareUrl);
     }
 
     public String getMediaUrl() {
-        return responseCreative.creative.mediaUrl;
+        return convertToAbsoluteUrl(responseCreative.creative.mediaUrl);
     }
 
     public String getPlacementKey() {
@@ -120,7 +121,7 @@ public class Creative {
     }
 
     public String getCustomEngagementUrl() {
-        return responseCreative.creative.customEngagementUrl;
+        return convertToAbsoluteUrl(responseCreative.creative.customEngagementUrl);
     }
 
     public String getCustomEngagementLabel() {
@@ -147,5 +148,15 @@ public class Creative {
 
     public void setClicked() {
         wasClicked = true;
+    }
+
+    public static String convertToAbsoluteUrl(String url) {
+        String pattern = "(^(\\s|/)+)|((\\s|/)+$)";
+        String canonicalUrl = url.replaceAll(pattern, "");
+        if (Uri.parse(canonicalUrl).isAbsolute()) {
+            return canonicalUrl;
+        } else {
+            return "http://" + canonicalUrl;
+        }
     }
 }
