@@ -134,32 +134,6 @@ public class ShareableDialogTest extends TestBase {
     }
 
     @Test
-    public void whenCustomEngagmentSelectedWithRelativeUrl_IntentIsFiredWithCustomUrlData() {
-        when(creative.getCustomEngagementUrl()).thenReturn("custom.url");
-        when(creative.getCustomEngagementLabel()).thenReturn("custom_label");
-
-        MenuItem item = new TestMenuItem(R.id.menu_item_custom);
-        subject.onMenuItemSelected(0, item);
-
-        ShadowContext shadowContext = shadowOf(subject.getContext());
-        Intent startedIntent = shadowContext.getShadowApplication().getNextStartedActivity();
-        assertThat(startedIntent.getData().toString()).isEqualTo("http://custom.url");
-    }
-
-    @Test
-    public void whenCustomEngagmentSelectedWithRelativeUrlwithWhiteSpaceAndSlash_IntentIsFiredWithCustomUrlData() {
-        when(creative.getCustomEngagementUrl()).thenReturn(" /custom.url/ ");
-        when(creative.getCustomEngagementLabel()).thenReturn("custom_label");
-
-        MenuItem item = new TestMenuItem(R.id.menu_item_custom);
-        subject.onMenuItemSelected(0, item);
-
-        ShadowContext shadowContext = shadowOf(subject.getContext());
-        Intent startedIntent = shadowContext.getShadowApplication().getNextStartedActivity();
-        assertThat(startedIntent.getData().toString()).isEqualTo("http://custom.url");
-    }
-
-    @Test
     public void whenCustomEngagmentSelectedWithAbsoluteUrl_IntentIsFiredWithCustomUrlData() {
         when(creative.getCustomEngagementUrl()).thenReturn("http://custom.url");
         when(creative.getCustomEngagementLabel()).thenReturn("custom_label");

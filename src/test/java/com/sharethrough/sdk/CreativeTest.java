@@ -100,7 +100,19 @@ public class CreativeTest extends TestBase {
         responseCreative.creative.customEngagementLabel = "label";
         responseCreative.creative.customEngagementUrl = "custom/url";
 
-        assertThat(subject.getCustomEngagementUrl()).isEqualTo("custom/url");
+        assertThat(subject.getCustomEngagementUrl()).isEqualTo("http://custom/url");
         assertThat(subject.getCustomEngagementLabel()).isEqualTo("label");
+    }
+
+    @Test
+    public void getRelativeMediaUrl_returnsAbsoluteMediaUrl() {
+        responseCreative.creative.mediaUrl = "//media.url/";
+        assertThat(subject.getMediaUrl()).isEqualToIgnoringCase("http://media.url");
+    }
+
+    @Test
+    public void getAbsoluteMediaUrl_returnsAbsoluteMediaUrl() {
+        responseCreative.creative.mediaUrl = "http://media.url/";
+        assertThat(subject.getMediaUrl()).isEqualToIgnoringCase("http://media.url");
     }
 }
