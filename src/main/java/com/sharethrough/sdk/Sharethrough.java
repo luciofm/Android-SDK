@@ -37,8 +37,8 @@ public class Sharethrough {
     public static final String SDK_VERSION_NUMBER = "1.1.6";
     public static String USER_AGENT = System.getProperty("http.agent") + "; STR " + SDK_VERSION_NUMBER;
     public static final String PRIVACY_POLICY_ENDPOINT = "http://platform-cdn.sharethrough.com/privacy-policy.html";
-    private static final String DFP_CREATIVE_KEY = "creativeKey";
-    private static final String DFP_CAMPAIGN_KEY = "campaignKey";
+    private static final String DFP_CREATIVE_KEY = "creative_key";
+    private static final String DFP_CAMPAIGN_KEY = "campaign_key";
     private final Renderer renderer;
     private final BeaconService beaconService;
     private final int adCacheTimeInMilliseconds;

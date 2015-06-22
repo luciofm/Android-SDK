@@ -36,10 +36,10 @@ public class STRDFPMediatorTest extends TestBase {
         com.google.android.gms.ads.mediation.MediationAdRequest mediationAdRequest = mock(com.google.android.gms.ads.mediation.MediationAdRequest.class);
         when(mediationAdRequest.getKeywords()).thenReturn(keywords);
 
-        subject.requestBannerAd(Robolectric.application, mock(CustomEventBannerListener.class), "creativeKey=abc123", AdSize.SMART_BANNER, mediationAdRequest, null);
+        subject.requestBannerAd(Robolectric.application, mock(CustomEventBannerListener.class), "creative_key=abc123", AdSize.SMART_BANNER, mediationAdRequest, null);
 
         HashMap<String, String> expectedHashMap = new HashMap<>();
-        expectedHashMap.put("creativeKey", "abc123");
+        expectedHashMap.put("creative_key", "abc123");
 
         assertThat(Sharethrough.popDFPKeys(dfpPath)).isEqualTo(expectedHashMap);
     }
@@ -55,13 +55,13 @@ public class STRDFPMediatorTest extends TestBase {
                 mock(com.google.ads.mediation.customevent.CustomEventBannerListener.class),
                 myActivity,
                 "tag",
-                "campaignKey=xyz789",
+                "campaign_key=xyz789",
                 com.google.ads.AdSize.SMART_BANNER,
                 mediationAdRequest,
                 null);
 
         HashMap<String, String> expectedHashMap = new HashMap<>();
-        expectedHashMap.put("campaignKey", "xyz789");
+        expectedHashMap.put("campaign_key", "xyz789");
 
         assertThat(Sharethrough.popDFPKeys(dfpPath)).isEqualTo(expectedHashMap);
     }

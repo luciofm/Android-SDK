@@ -361,7 +361,7 @@ public class SharethroughTest extends TestBase {
         dfpPathFetcherCallback.getValue().receivedURL("dfpPath");
         verify(dfpNetworking).fetchCreativeKey(eq(Robolectric.application), eq("dfpPath"), dfpCreativeKeyCallback.capture());
 
-        String serverParams = "creativeKey=abc123";
+        String serverParams = "creative_key=abc123";
         Sharethrough.addDFPKeys("dfpPath", serverParams);
         queryStringParams.add(new BasicNameValuePair("creative_key", "abc123"));
 
@@ -378,7 +378,7 @@ public class SharethroughTest extends TestBase {
         dfpPathFetcherCallback.getValue().receivedURL("dfpPath");
         verify(dfpNetworking).fetchCreativeKey(eq(Robolectric.application), eq("dfpPath"), dfpCreativeKeyCallback.capture());
 
-        String serverParams = "creativeKey=STX_MONETIZE";
+        String serverParams = "creative_key=STX_MONETIZE";
         Sharethrough.addDFPKeys("dfpPath", serverParams);
 
         dfpCreativeKeyCallback.getValue().receivedCreativeKey();
@@ -390,10 +390,10 @@ public class SharethroughTest extends TestBase {
     public void whenCreativeKey_addDFPKeys_putsHashMapIntoMap() {
         assertThat(subject.popDFPKeys("key")).isNull();
 
-        subject.addDFPKeys("key", "creativeKey=xyz789");
+        subject.addDFPKeys("key", "creative_key=xyz789");
 
         HashMap<String, String> expectedHashMap = new HashMap<>();
-        expectedHashMap.put("creativeKey", "xyz789");
+        expectedHashMap.put("creative_key", "xyz789");
         assertThat(subject.popDFPKeys("key")).isEqualTo(expectedHashMap);
         assertThat(subject.popDFPKeys("key")).isNull();
     }
@@ -402,10 +402,10 @@ public class SharethroughTest extends TestBase {
     public void whenCampaignKey_addDFPKeys_putsHashMapIntoMap() {
         assertThat(subject.popDFPKeys("key")).isNull();
 
-        subject.addDFPKeys("key", "campaignKey=campKey");
+        subject.addDFPKeys("key", "campaign_key=campKey");
 
         HashMap<String, String> expectedHashMap = new HashMap<>();
-        expectedHashMap.put("campaignKey", "campKey");
+        expectedHashMap.put("campaign_key", "campKey");
         assertThat(subject.popDFPKeys("key")).isEqualTo(expectedHashMap);
         assertThat(subject.popDFPKeys("key")).isNull();
     }
@@ -417,7 +417,7 @@ public class SharethroughTest extends TestBase {
         subject.addDFPKeys("key", "randomKey");
 
         HashMap<String, String> expectedHashMap = new HashMap<>();
-        expectedHashMap.put("creativeKey", "randomKey");
+        expectedHashMap.put("creative_key", "randomKey");
         assertThat(subject.popDFPKeys("key")).isEqualTo(expectedHashMap);
         assertThat(subject.popDFPKeys("key")).isNull();
     }
