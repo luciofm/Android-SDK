@@ -44,7 +44,6 @@ public class Logger {
                 }
             }
             catch (Exception e){
-                Log.w(createTag(),"cannot read external log file");
             }
         }
 
