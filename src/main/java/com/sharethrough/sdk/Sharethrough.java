@@ -10,6 +10,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.util.LruCache;
 
+import com.sharethrough.android.sdk.BuildConfig;
 import com.sharethrough.sdk.network.AdFetcher;
 import com.sharethrough.sdk.network.DFPNetworking;
 import com.sharethrough.sdk.network.ImageFetcher;
@@ -34,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 public class Sharethrough {
     public static final int DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
     private static final int MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
-    public static final String SDK_VERSION_NUMBER = "1.1.6";
+    public static final String SDK_VERSION_NUMBER = BuildConfig.VERSION_NAME;
     public static String USER_AGENT = System.getProperty("http.agent") + "; STR " + SDK_VERSION_NUMBER;
     public static final String PRIVACY_POLICY_ENDPOINT = "http://platform-cdn.sharethrough.com/privacy-policy.html";
     private static final String DFP_CREATIVE_KEY = "creative_key";
