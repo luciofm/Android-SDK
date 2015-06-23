@@ -34,12 +34,17 @@ public class Logger {
         if (enabled) return true;
 
         if (mContext != null && isExternalStorageReadable()) {
-            StringBuilder path = new StringBuilder(mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString());
-            path.append("/sharethroughlog");
+            try {
+                StringBuilder path = new StringBuilder(mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString());
+                path.append("/sharethroughlog");
 
-            File file = new File(path.toString());
-            if (file.exists()) {
-                enabled = true;
+                File file = new File(path.toString());
+                if (file.exists()) {
+                    enabled = true;
+                }
+            }
+            catch (Exception e){
+                Log.w(createTag(),"cannot read external log file");
             }
         }
 
