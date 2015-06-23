@@ -21,16 +21,29 @@ public class Logger {
     public static boolean enabled = false;
     static private Context mContext;
 
+    public static boolean isExternalStorageReadable(){
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state) ||
+                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
     public static boolean isLoggingEnabled() {
         if (enabled) return true;
 
-        if (mContext != null) {
-            StringBuilder path = new StringBuilder(mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString());
-            path.append("/sharethroughlog");
+        if (mContext != null && isExternalStorageReadable()) {
+            try {
+                StringBuilder path = new StringBuilder(mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString());
+                path.append("/sharethroughlog");
 
-            File file = new File(path.toString());
-            if (file.exists()) {
-                enabled = true;
+                File file = new File(path.toString());
+                if (file.exists()) {
+                    enabled = true;
+                }
+            }
+            catch (Exception e){
             }
         }
 
@@ -41,7 +54,7 @@ public class Logger {
         if (context == null) {
             Log.w(createTag(), "Cannot initialize Logger with null context");
         }
-        mContext = context;
+        mContext = context.getApplicationContext();
     }
 
     private static String createTag() {
