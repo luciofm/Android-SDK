@@ -35,15 +35,14 @@ public class WebViewDialog extends ShareableDialog {
         this.creative = creative;
     }
 
-    private boolean isArticleType()
-    {
+    private boolean isArticleType() {
         return creative.getMedia() instanceof Article;
     }
 
     protected void fireTimeInViewBeacon(){
         fireTimeInViewBeacon(Calendar.getInstance().getTimeInMillis());
     }
-    protected void fireTimeInViewBeacon(long endTime){
+    protected void fireTimeInViewBeacon(long endTime) {
         //we only fire this beacon if it is an article type media
         if(isArticleType()) {
             //we only fire this beacon once per webview
