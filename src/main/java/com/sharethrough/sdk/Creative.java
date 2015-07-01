@@ -66,6 +66,8 @@ public class Creative {
                 return new Instagram(this);
             case "pinterest":
                 return new Pinterest(this);
+            case "article":
+                return new Article(this);
             case "clickout":
             default:
                 return new Clickout(this);

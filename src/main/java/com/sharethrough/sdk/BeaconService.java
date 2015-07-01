@@ -12,7 +12,6 @@ import android.view.WindowManager;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import java.net.URLDecoder;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -81,6 +80,15 @@ public class BeaconService {
         result.put("awid", creative.getAuctionWinId());
 
         return result;
+    }
+
+    public void fireArticleDurationForAd(final Context context, final Creative creative, long timeSpentInView){
+        Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
+        beaconParams.put("type","userEvent");
+        beaconParams.put("userEvent","articleViewDuration");
+        beaconParams.put("duration",String.valueOf(timeSpentInView));
+        beaconParams.put("engagement", "true");
+        fireBeacon(beaconParams);
     }
 
     public void adClicked(final String userEvent, final Creative creative, View view, int feedPosition, Placement placement) {
@@ -175,6 +183,7 @@ public class BeaconService {
 
                 url = url.replace("[", "%5B").replace("]", "%5D");
                 Logger.d("beacon fired type: %s", beaconParams.get("type")==null?"third party beacon ":beaconParams.get("type"));
+                Logger.d("beacon user event: %s", beaconParams.get("userEvent"));
                 Logger.i("beacon url: %s", url);
                 try {
                     HttpGet request = new HttpGet(url);
