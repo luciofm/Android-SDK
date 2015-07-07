@@ -119,7 +119,6 @@ public class SharethroughListAdapter extends BaseAdapter {
             if (convertView != null && convertView instanceof IAdView) {
                 convertView = null;
             }
-            mSharethrough.fetchAdsIfReadyForMore();
             return mAdapter.getView(adjustedPosition(position), convertView, parent);
 
 

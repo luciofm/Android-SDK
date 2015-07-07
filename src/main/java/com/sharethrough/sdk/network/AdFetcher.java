@@ -96,7 +96,6 @@ public class AdFetcher {
                                     remainingImageRequests--;
                                     if (remainingImageRequests == 0) {
                                         isRunning = false;
-                                        adFetcherCallback.finishedLoading();
                                     }
                                 }
                             }
@@ -195,8 +194,6 @@ public class AdFetcher {
     }
 
     public interface Callback {
-        void finishedLoading();
-
         void finishedLoadingWithNoAds();
     }
 

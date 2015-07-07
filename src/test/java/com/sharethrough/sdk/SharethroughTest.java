@@ -153,26 +153,6 @@ public class SharethroughTest extends TestBase {
     }
 
     @Test
-    public void whenRequestFinsihesAndImagesFinishDownloading_whenQueueWantsMore_fetchesMoreAds() throws Exception {
-        when(availableCreatives.readyForMore()).thenReturn(true);
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), eq(queryStringParams), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
-        reset(adFetcher);
-        adFetcherCallback.getValue().finishedLoading();
-
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), eq(queryStringParams), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
-    }
-
-    @Test
-    public void whenRequestFinsihesAndImagesFinishDownloading_whenQueueDoesNotWantsMore_doesNotFetchMoreAds() throws Exception {
-        when(availableCreatives.readyForMore()).thenReturn(false);
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), eq(queryStringParams), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
-        reset(adFetcher);
-        adFetcherCallback.getValue().finishedLoading();
-
-        verifyNoMoreInteractions(adFetcher);
-    }
-
-    @Test
     public void whenFirstCreativeIsPrefetches_notifiesOnStatusChangeListenerOnMainThread() throws Exception {
         verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), eq(queryStringParams), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
 

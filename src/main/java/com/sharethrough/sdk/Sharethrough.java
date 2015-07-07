@@ -189,13 +189,6 @@ public class Sharethrough {
 
         adFetcherCallback = new AdFetcher.Callback() {
             @Override
-            public void finishedLoading() {
-                if (availableCreatives.readyForMore()) {
-                    fetchAds();
-                }
-            }
-
-            @Override
             public void finishedLoadingWithNoAds() {
                 fireNoAdsToShow();
             }
@@ -366,7 +359,7 @@ public class Sharethrough {
             }
         }
         else{
-            if(Logger.enabled)Logger.d("there are no ads to show at position: " + feedPosition);
+            Logger.d("there are no ads to show at position: " + feedPosition);
             AdViewFeedPositionPair<IAdView, Integer> adViewFeedPositionPair = new AdViewFeedPositionPair<IAdView, Integer>(adView, feedPosition);
             waitingAdViews.put(adViewFeedPositionPair);
         }
