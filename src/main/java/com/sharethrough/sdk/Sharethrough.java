@@ -18,13 +18,7 @@ import com.sharethrough.sdk.network.ImageFetcher;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.Timer;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -64,7 +58,9 @@ public class Sharethrough {
         }
     };
     private Handler handler = new Handler(Looper.getMainLooper());
-    private final LruCache<Integer, Creative> creativesBySlot = new LruCache<>(10);
+    private final LruCache<Integer, Creative> creativesBySlot = new LruCache<>(2);
+    private final Set<Integer> creativeIndices = new HashSet<>(); //contains history of all indices for creatives, whereas creativesBySlot only caches the last 10
+
 
     private static final Map<String, Map<String, String>> dfpAdGroupIds = new HashMap<>();
     private final Context context; //TODO decide whether this is needed
@@ -178,7 +174,7 @@ public class Sharethrough {
                     if(adViewFeedPositionPair != null){
                         IAdView adView = (IAdView) adViewFeedPositionPair.adView;
                         int feedPosition = (int )adViewFeedPositionPair.feedPosition;
-                        creativesBySlot.put(feedPosition, creative);
+                        insertCreativeIntoSlot(feedPosition, creative);
                         renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this, feedPosition, new Timer("AdView timer for " + creative));
                         fireNewAdsToShow();
                     }
@@ -212,6 +208,11 @@ public class Sharethrough {
         this.dfpNetworking = dfpNetworking;
         this.context = context;
         fetchAds();
+    }
+
+    private void insertCreativeIntoSlot(int feedPosition, Creative creative) {
+        creativesBySlot.put(feedPosition, creative);
+        creativeIndices.add(feedPosition);
     }
 
     private void fireNoAdsToShow() {
@@ -325,7 +326,7 @@ public class Sharethrough {
                 synchronized (availableCreatives) {
                     creative = availableCreatives.getNext();
                 }
-                creativesBySlot.put(feedPosition, creative);
+                insertCreativeIntoSlot(feedPosition, creative);
                 (isAdRenewed[0]) = true;
             }
         }
@@ -433,7 +434,7 @@ public class Sharethrough {
      * @return the number of ads currently placed.
      */
     public int getNumberOfPlacedAds() {
-        return creativesBySlot.size();
+        return creativeIndices.size();
     }
 
     /**
@@ -443,7 +444,7 @@ public class Sharethrough {
      */
     public int getNumberOfAdsBeforePosition(int position){
         int numberOfAdsBeforePosition = 0;
-        Set<Integer> filledPositions = getPositionsFilledByAds();
+        Set<Integer> filledPositions = creativeIndices;
         for (Integer filledPosition : filledPositions) {
             if(filledPosition < position) numberOfAdsBeforePosition++;
         }

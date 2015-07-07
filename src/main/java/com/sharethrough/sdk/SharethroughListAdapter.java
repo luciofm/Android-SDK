@@ -108,29 +108,6 @@ public class SharethroughListAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        if (isAd(position)) {
-            // we must check to make sure convertView is correct type, views may change type depending on ads availability
-            if (convertView != null && !(convertView instanceof IAdView)) {
-                convertView = null;
-            }
-            return getAd(position, (IAdView) convertView);
-        } else {
-            if (convertView != null && convertView instanceof IAdView) {
-                convertView = null;
-            }
-            return mAdapter.getView(adjustedPosition(position), convertView, parent);
-
-
-        }
-    }
-
-    private View getAd(int slotNumber, IAdView convertView) {
-        return mSharethrough.getAdView(mContext, slotNumber, adLayoutResourceId, titleViewId, descriptionViewId,
-                advertiserViewId, thumbnailViewId, optoutId, brandLogoId, convertView).getAdView();
-    }
-
-    @Override
     public int getItemViewType(int position) {
         if (isAd(position)) {
             return mAdapter.getViewTypeCount();
@@ -154,46 +131,103 @@ public class SharethroughListAdapter extends BaseAdapter {
         return mAdapter.areAllItemsEnabled();
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        if (isAd(position) && (mSharethrough.getNumberOfAdsReadyToShow() != 0)) {
+            // we must check to make sure convertView is correct type, views may change type depending on ads availability
+            if (convertView != null && !(convertView instanceof IAdView)) {
+                convertView = null;
+            }
+            return getAd(position, (IAdView) convertView);
+        } else {
+            if (convertView != null && convertView instanceof IAdView) {
+                convertView = null;
+            }
+            mSharethrough.fetchAdsIfReadyForMore();
+            return mAdapter.getView(adjustedPosition(position), convertView, parent);
+        }
+    }
+
+    /**
+     * Get ad view from Sharethrough
+     * @param slotNumber position
+     * @param convertView convertView
+     * @return ad view
+     */
+    private View getAd(int slotNumber, IAdView convertView) {
+        return mSharethrough.getAdView(mContext, slotNumber, adLayoutResourceId, titleViewId, descriptionViewId,
+                advertiserViewId, thumbnailViewId, optoutId, brandLogoId, convertView).getAdView();
+    }
+
+    /**
+     * Converts Sharethrough adapter position TO publisher's adapter position
+     * @param position index
+     * @return adjusted position
+     */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     private int adjustedPosition(int position) {
         if (position <= mSharethrough.getArticlesBeforeFirstAd()) {
             return position;
         } else {
-            int numberOfAdsAvailable = creativesCount();
-            if (numberOfAdsAvailable == 0) {
-                return position;
-            }
-
             int numberOfAdsBeforePosition = mSharethrough.getNumberOfAdsBeforePosition(position);
-
-            int adjustedPosition = position - numberOfAdsBeforePosition;
-
-            return adjustedPosition;
+            return position - numberOfAdsBeforePosition;
         }
     }
 
+    /**
+     * Checks if given position should be an ad
+     * @param position index of list
+     * @return true if position should be an ad, false otherwise
+     */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     private boolean isAd(int position) {
         int articlesBeforeFirstAd = mSharethrough.getArticlesBeforeFirstAd();
+        int articlesBetweenAds = mSharethrough.getArticlesBetweenAds();
 
-        if ((mSharethrough.getNumberOfPlacedAds() + mSharethrough.getNumberOfAdsReadyToShow()) == 0) {
+        if (position < articlesBeforeFirstAd) {
+            return false;
+        }
+        else if (position == articlesBeforeFirstAd) {
+            return true;
+        }
+        else if ( ((position - articlesBeforeFirstAd) % (articlesBetweenAds+1)) == 0) {
+            return true;
+        }
+        else {
             return false;
         }
 
-        if (position == articlesBeforeFirstAd) {
-            return mSharethrough.isAdAtPosition(position) || mSharethrough.getNumberOfAdsReadyToShow() != 0;
-        }
-
-        boolean couldPossiblyBeAnAd = 0 == (position - articlesBeforeFirstAd) % (mSharethrough.getArticlesBetweenAds() + 1);
-        boolean adAlreadyInPosition = mSharethrough.isAdAtPosition(position);
-
-        return position >= articlesBeforeFirstAd && couldPossiblyBeAnAd && (adAlreadyInPosition || mSharethrough.getNumberOfAdsReadyToShow() != 0);
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-    private int creativesCount() {
-        return mSharethrough.getNumberOfAdsReadyToShow() + mSharethrough.getNumberOfPlacedAds();
-    }
+
+
+
+
+
+
+
+
+
+
 
     /**
      *
