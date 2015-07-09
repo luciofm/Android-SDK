@@ -6,6 +6,7 @@ import android.database.DataSetObserver;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -17,9 +18,11 @@ import android.widget.ListAdapter;
  */
 public class SharethroughListAdapter extends BaseAdapter {
 
-    private final ListAdapter mAdapter;
+    private final ListAdapter mOriginalAdapter;
     private final Context mContext;
     private final Sharethrough mSharethrough;
+    
+    // Ad variables
     private final int adLayoutResourceId;
     private final int titleViewId;
     private final int descriptionViewId;
@@ -32,7 +35,7 @@ public class SharethroughListAdapter extends BaseAdapter {
      * This constructor returns an instance of a SharethroughListAdapter, which wraps your own list adapter.
      *
      * @param context The Android context.
-     * @param adapter Your adapter.
+     * @param originalAdapter Your adapter.
      * @param sharethrough An instance of your configured Sharethrough object.
      * @param adLayoutResourceId The custom layout for Sharethrough's native ad unit.
      * @param titleViewId The view which will display the ad's title.
@@ -41,10 +44,11 @@ public class SharethroughListAdapter extends BaseAdapter {
      * @param thumbnailViewId The view which will display the ad's thumbnail image.
      * @param brandLogoId The imageView which will display the ad's brand logo.
      */
-    public SharethroughListAdapter(Context context, ListAdapter adapter, Sharethrough sharethrough, int adLayoutResourceId, int titleViewId, int descriptionViewId, int advertiserViewId, int thumbnailViewId, int optoutId, int brandLogoId) {
+    public SharethroughListAdapter(Context context, ListAdapter originalAdapter, Sharethrough sharethrough, int adLayoutResourceId, int titleViewId, int descriptionViewId, int advertiserViewId, int thumbnailViewId, int optoutId, int brandLogoId) {
         mContext = context;
-        mAdapter = adapter;
+        mOriginalAdapter = originalAdapter;
         mSharethrough = sharethrough;
+        this.adLayoutResourceId = adLayoutResourceId;
         this.titleViewId = titleViewId;
         this.descriptionViewId = descriptionViewId;
         this.advertiserViewId = advertiserViewId;
@@ -52,7 +56,7 @@ public class SharethroughListAdapter extends BaseAdapter {
         this.optoutId = optoutId;
         this.brandLogoId = brandLogoId;
 
-        mAdapter.registerDataSetObserver(new DataSetObserver() {
+        mOriginalAdapter.registerDataSetObserver(new DataSetObserver() {
             @Override
             public void onChanged() {
                 notifyDataSetChanged();
@@ -64,7 +68,6 @@ public class SharethroughListAdapter extends BaseAdapter {
             }
         });
 
-        this.adLayoutResourceId = adLayoutResourceId;
         mSharethrough.setOrCallPlacementCallback(new Callback<Placement>() {
             @Override
             public void call(final Placement result) {
@@ -80,12 +83,12 @@ public class SharethroughListAdapter extends BaseAdapter {
 
     @Override
     public boolean isEnabled(int position) {
-        return isAd(position) || mAdapter.isEnabled(adjustedPosition(position));
+        return isAd(position) || mOriginalAdapter.isEnabled(adjustedPosition(position));
     }
 
     @Override
     public int getCount() {
-        int count = mAdapter.getCount();
+        int count = mOriginalAdapter.getCount();
         return  mSharethrough.getNumberOfPlacedAds() + count;
     }
 
@@ -94,7 +97,7 @@ public class SharethroughListAdapter extends BaseAdapter {
         if (isAd(position)) {
             return null;
         } else {
-            return mAdapter.getItem(adjustedPosition(position));
+            return mOriginalAdapter.getItem(adjustedPosition(position));
         }
     }
 
@@ -104,67 +107,55 @@ public class SharethroughListAdapter extends BaseAdapter {
             return -1;
         }
 
-        return mAdapter.getItemId(adjustedPosition(position));
+        return mOriginalAdapter.getItemId(adjustedPosition(position));
     }
 
     @Override
     public int getItemViewType(int position) {
         if (isAd(position)) {
-            return mAdapter.getViewTypeCount();
+            return mOriginalAdapter.getViewTypeCount();
         } else {
-            return mAdapter.getItemViewType(adjustedPosition(position));
+            return mOriginalAdapter.getItemViewType(adjustedPosition(position));
         }
     }
 
     @Override
     public int getViewTypeCount() {
-        return 1 + mAdapter.getViewTypeCount();
+        return 1 + mOriginalAdapter.getViewTypeCount();
     }
 
     @Override
     public boolean hasStableIds() {
-        return mAdapter.hasStableIds();
+        return mOriginalAdapter.hasStableIds();
     }
 
     @Override
     public boolean areAllItemsEnabled() {
-        return mAdapter.areAllItemsEnabled();
+        return mOriginalAdapter.areAllItemsEnabled();
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if (isAd(position) && (mSharethrough.getNumberOfAdsReadyToShow() != 0)) {
-            // we must check to make sure convertView is correct type, views may change type depending on ads availability
-            if (convertView != null && !(convertView instanceof IAdView)) {
-                convertView = null;
-            }
-            return getAd(position, (IAdView) convertView);
-        } else {
-            if (convertView != null && convertView instanceof IAdView) {
-                convertView = null;
-            }
-            mSharethrough.fetchAdsIfReadyForMore();
-            return mAdapter.getView(adjustedPosition(position), convertView, parent);
+        boolean hasAdToShowForPosition = mSharethrough.isAdAtPosition(position) || mSharethrough.getNumberOfAdsReadyToShow() != 0;
+
+        //if position is an ad and there's ads to show
+        if (isAd(position) && hasAdToShowForPosition) {
+            return getAd(position, convertView instanceof IAdView? (IAdView) convertView: null);
         }
+
+        //if position is an ad but there are no ads available
+        if(isAd(position)){
+            if(mSharethrough.creativeIndices.contains(position)) {
+                mSharethrough.creativeIndices.remove(position);
+                //force redraw of articles below this position
+                notifyDataSetChanged();
+            }
+        }
+
+        mSharethrough.fetchAdsIfReadyForMore();
+        return mOriginalAdapter.getView(adjustedPosition(position),
+                                        convertView instanceof IAdView? null:  convertView,
+                                        parent);
     }
 
     /**
@@ -209,26 +200,14 @@ public class SharethroughListAdapter extends BaseAdapter {
         else if (position == articlesBeforeFirstAd) {
             return true;
         }
-        else if ( ((position - articlesBeforeFirstAd) % (articlesBetweenAds+1)) == 0) {
+        else if ( ((position - (articlesBeforeFirstAd)) >= articlesBetweenAds) && ((position - (articlesBeforeFirstAd)) % (articlesBetweenAds+1)) == 0) {
             return true;
         }
         else {
             return false;
         }
-
     }
-
-
-
-
-
-
-
-
-
-
-
-
+    
     /**
      *
      * @param onItemLongClickListener The original listener callback.

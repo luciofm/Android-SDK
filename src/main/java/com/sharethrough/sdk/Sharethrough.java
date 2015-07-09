@@ -58,8 +58,8 @@ public class Sharethrough {
         }
     };
     private Handler handler = new Handler(Looper.getMainLooper());
-    private final LruCache<Integer, Creative> creativesBySlot = new LruCache<>(2);
-    private final Set<Integer> creativeIndices = new HashSet<>(); //contains history of all indices for creatives, whereas creativesBySlot only caches the last 10
+    private final LruCache<Integer, Creative> creativesBySlot = new LruCache<>(10);
+    public final Set<Integer> creativeIndices = new HashSet<>(); //contains history of all indices for creatives, whereas creativesBySlot only caches the last 10
 
 
     private static final Map<String, Map<String, String>> dfpAdGroupIds = new HashMap<>();
@@ -211,8 +211,10 @@ public class Sharethrough {
     }
 
     private void insertCreativeIntoSlot(int feedPosition, Creative creative) {
-        creativesBySlot.put(feedPosition, creative);
-        creativeIndices.add(feedPosition);
+        if( creative != null ) {
+            creativesBySlot.put(feedPosition, creative);
+            creativeIndices.add(feedPosition);
+        }
     }
 
     private void fireNoAdsToShow() {
