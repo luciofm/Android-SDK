@@ -15,6 +15,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 
+import java.util.HashSet;
+
 import static org.fest.assertions.api.ANDROID.assertThat;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -69,6 +71,74 @@ public class SharethroughListAdapterTest extends TestBase {
         subject.getView(3, null, null);
         verifyNoMoreInteractions(adapter);
     }
+
+    @Test
+    public void getView_returnsIAdViewWhenGivenIAdView_whenPositionisAdSlotAndThereAreAdsToShow() {
+
+        when(sharethrough.getArticlesBeforeFirstAd()).thenReturn(2);
+        when(sharethrough.getArticlesBetweenAds()).thenReturn(3);
+        when(sharethrough.getNumberOfAdsReadyToShow()).thenReturn(1);
+
+        int adPosition = 2;
+        View view = subject.getView(adPosition, mockAdView, null);
+        assertThat(view instanceof IAdView).isTrue();
+    }
+
+    @Test
+    public void getView_returnsIAdViewWhenGivenNull_whenPositionIsAdSlotAndThereAreAdsToShow() {
+
+        when(sharethrough.getArticlesBeforeFirstAd()).thenReturn(2);
+        when(sharethrough.getArticlesBetweenAds()).thenReturn(3);
+        when(sharethrough.getNumberOfAdsReadyToShow()).thenReturn(1);
+
+        int adPosition = 6;
+        View view = subject.getView(adPosition, null, null);
+        assertThat(view instanceof IAdView).isTrue();
+    }
+
+    @Test
+    public void getView_returnsIAdViewWhenGivenArticleView_whenPositionisAdSlotAndThereAreAdsToShow() {
+
+        when(sharethrough.getArticlesBeforeFirstAd()).thenReturn(2);
+        when(sharethrough.getArticlesBetweenAds()).thenReturn(3);
+        when(sharethrough.getNumberOfAdsReadyToShow()).thenReturn(1);
+
+        int adPosition = 2;
+        View articleView = new View(Robolectric.application.getApplicationContext());
+        View view = subject.getView(adPosition, articleView, null);
+        assertThat(view instanceof IAdView).isTrue();
+    }
+
+    @Test
+    public void getView_returnsArticleViewWhenGivenArticleView_whenPositionisArticleSlotAndThereAreNoAdsToShow() {
+
+        when(sharethrough.getArticlesBeforeFirstAd()).thenReturn(2);
+        when(sharethrough.getArticlesBetweenAds()).thenReturn(3);
+        when(sharethrough.getNumberOfAdsReadyToShow()).thenReturn(0);
+
+        int articlePosition = 4;
+        View articleView = new View(Robolectric.application.getApplicationContext());
+        View view = subject.getView(articlePosition, articleView, null);
+        assertThat(view instanceof IAdView).isFalse();
+    }
+
+    @Test
+    public void getView_returnsArticleViewWhenGivenIAdView_whenPositionisAdSlotAndThereAreNoAdsToShow() {
+
+        when(sharethrough.getArticlesBeforeFirstAd()).thenReturn(2);
+        when(sharethrough.getArticlesBetweenAds()).thenReturn(3);
+        when(sharethrough.getNumberOfAdsReadyToShow()).thenReturn(0);
+
+        int adPosition = 6;
+        sharethrough.creativeIndices = new HashSet<>();
+        sharethrough.creativeIndices.add(adPosition);
+
+        // verify index is removed
+        View view = subject.getView(adPosition, mockAdView, null);
+        assertThat(view instanceof IAdView).isFalse();
+        assertThat(sharethrough.creativeIndices.contains(adPosition)).isFalse();
+    }
+
 
     @Test
     public void inflatesProperLayoutForAd() throws Exception {

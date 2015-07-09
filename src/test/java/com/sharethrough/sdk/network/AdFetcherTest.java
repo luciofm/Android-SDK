@@ -218,23 +218,6 @@ public class AdFetcherTest extends TestBase {
     }
 
     @Test
-    public void fetchAds_whenPreviousRequestAndAllImagesHaveFinished_doesCallback() throws Exception {
-        // make first request
-        Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-        Misc.runLast(executorService);
-        reset(executorService);
-
-        // finish loading all images
-        verify(imageFetcher, atLeastOnce()).fetchCreativeImages(any(URI.class), any(Response.Creative.class), imageFetcherCallback.capture());
-        for (ImageFetcher.Callback callback : imageFetcherCallback.getAllValues()) {
-            callback.success(creative);
-        }
-
-        verify(adFetcherCallback).finishedLoading();
-    }
-
-    @Test
     public void fetchAds_whenPreviousRequestAndAllImagesHaveFinishedWithFailure_startsNewRequest() throws Exception {
         // make first request
         Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
