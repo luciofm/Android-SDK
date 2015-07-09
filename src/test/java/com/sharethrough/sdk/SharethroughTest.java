@@ -305,6 +305,34 @@ public class SharethroughTest extends TestBase {
     }
 
     @Test
+    public void creativeIndicesStoresAllUniqueCreativeIndexHistory_creativesBySlotOnlyCachesTenUniqueIndices() {
+        when(availableCreatives.size()).thenReturn(11);
+        when(availableCreatives.getNext()).thenReturn(creative).thenReturn(creative).thenReturn(creative).thenReturn(creative).thenReturn(creative).thenReturn(creative).thenReturn(creative)
+                .thenReturn(creative).thenReturn(creative).thenReturn(creative).thenReturn(creative).thenReturn(creative);
+
+        IAdView generatedAdView1 = subject.getAdView(Robolectric.application, 2, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView2 = subject.getAdView(Robolectric.application, 5, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView3 = subject.getAdView(Robolectric.application, 8, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView4 = subject.getAdView(Robolectric.application, 11, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView5 = subject.getAdView(Robolectric.application, 14, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView6 = subject.getAdView(Robolectric.application, 17, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView7 = subject.getAdView(Robolectric.application, 20, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView8 = subject.getAdView(Robolectric.application, 23, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView9 = subject.getAdView(Robolectric.application, 26, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView10 = subject.getAdView(Robolectric.application, 29, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView11 = subject.getAdView(Robolectric.application, 32, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+
+        IAdView generatedAdView12 = subject.getAdView(Robolectric.application, 8, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView3);
+
+        assertThat(subject.getPositionsFilledByAds().size()).isEqualTo(10);
+        assertThat(subject.creativeIndices.size()).isEqualTo(11);
+        assertThat(subject.getNumberOfAdsBeforePosition(0)).isEqualTo(0);
+        assertThat(subject.getNumberOfAdsBeforePosition(11)).isEqualTo(3);
+        assertThat(subject.getNumberOfAdsBeforePosition(21)).isEqualTo(7);
+        assertThat(subject.getNumberOfAdsBeforePosition(50)).isEqualTo(11);
+    }
+
+    @Test
     public void ifSlotNOTEmptyAndCreativeNOTExpired_fireNewAdsIsNOTCalled() {
         Creative creative2 = mock(Creative.class);
         when(availableCreatives.size()).thenReturn(2);
