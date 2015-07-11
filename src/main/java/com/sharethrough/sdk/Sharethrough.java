@@ -12,6 +12,7 @@ import android.util.LruCache;
 
 import com.sharethrough.android.sdk.BuildConfig;
 import com.sharethrough.sdk.network.AdFetcher;
+import com.sharethrough.sdk.network.AdManager;
 import com.sharethrough.sdk.network.DFPNetworking;
 import com.sharethrough.sdk.network.ImageFetcher;
 
@@ -40,12 +41,12 @@ public class Sharethrough {
     private final DFPNetworking dfpNetworking;
     private String placementKey;
     private String apiUrlPrefix = "http://btlr.sharethrough.com/v3";
-    static final ExecutorService EXECUTOR_SERVICE = DefaultSharethroughExecutorServiceProivder.create();
     private final CreativesQueue availableCreatives;
     private Function<Creative, Void> creativeHandler;
     private AdFetcher adFetcher;
     private ImageFetcher imageFetcher;
     private AdFetcher.Callback adFetcherCallback;
+    private AdManager adManager;
     private OnStatusChangeListener onStatusChangeListener = new OnStatusChangeListener() {
         @Override
         public void newAdsToShow() {
@@ -96,7 +97,7 @@ public class Sharethrough {
      * @param adCacheTimeInMilliseconds The ad cache time in milliseconds. e.g. a value of 100,000 will result in ads being refreshed every 100 seconds.
      */
     public Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds) {
-        this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context, EXECUTOR_SERVICE), false);
+        this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context), false);
     }
 
     /**
@@ -120,14 +121,14 @@ public class Sharethrough {
      * @param dfpEnabled    A boolean flag indicating if you would like to use Sharethrough's Direct Sell functionality via DFP.
      */
     public Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds, boolean dfpEnabled) {
-        this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context, EXECUTOR_SERVICE), dfpEnabled);
+        this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context), dfpEnabled);
     }
 
     Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds, AdvertisingIdProvider advertisingIdProvider, boolean dfpEnabled) {
         this(context, placementKey, adCacheTimeInMilliseconds, new Renderer(), new CreativesQueue(),
-                new BeaconService(new DateProvider(), UUID.randomUUID(), EXECUTOR_SERVICE, advertisingIdProvider, context),
-                new AdFetcher(placementKey, EXECUTOR_SERVICE, new BeaconService(new DateProvider(), UUID.randomUUID(),
-                        EXECUTOR_SERVICE, advertisingIdProvider, context), advertisingIdProvider), new ImageFetcher(EXECUTOR_SERVICE, placementKey),
+                new BeaconService(new DateProvider(), UUID.randomUUID(), advertisingIdProvider, context),
+                new AdFetcher(placementKey, new BeaconService(new DateProvider(), UUID.randomUUID(),
+                         advertisingIdProvider, context), advertisingIdProvider), new ImageFetcher(placementKey),
                 dfpEnabled ? new DFPNetworking() : null);
     }
 
@@ -207,8 +208,37 @@ public class Sharethrough {
 
         this.dfpNetworking = dfpNetworking;
         this.context = context;
+
+
+
+        adManager = new AdManager();
+        adManager.registerListener(adManagerListener);
+
         fetchAds();
     }
+
+    private AdManager.AdManagerListener adManagerListener = new AdManager.AdManagerListener() {
+        @Override
+        public void onAdsReady(List<Creative> listOfCreativesReadyForShow, Placement placement) {
+            for (Creative creative : listOfCreativesReadyForShow) {
+                availableCreatives.add(creative);
+                Logger.d("insert creative ckey: %s, creative cache size %d", creative.getCreativeKey(), availableCreatives.size());
+            }
+
+            if (!placementSet) {
+                Sharethrough.this.placement = placement;
+                placementSet = true;
+                placementCallback.call(placement);
+            }
+
+            fireNewAdsToShow();
+        }
+
+        @Override
+        public void onAdsFailedToLoad() {
+
+        }
+    };
 
     private void insertCreativeIntoSlot(int feedPosition, Creative creative) {
         if( creative != null ) {
@@ -249,7 +279,8 @@ public class Sharethrough {
     }
 
     private void invokeAdFetcher(String url, ArrayList<NameValuePair> queryStringParams) {
-        this.adFetcher.fetchAds(this.imageFetcher, url, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
+        //this.adFetcher.fetchAds(this.imageFetcher, url, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
+        adManager.fetchAds(url, queryStringParams);
     }
 
     private void fetchDfpAds() {
@@ -302,7 +333,7 @@ public class Sharethrough {
             }
         };
 
-        dfpNetworking.fetchDFPPath(EXECUTOR_SERVICE, placementKey, pathFetcherCallback);
+        dfpNetworking.fetchDFPPath(placementKey, pathFetcherCallback);
     }
 
     /**
@@ -390,14 +421,16 @@ public class Sharethrough {
      /* @return how many articles should be between ads. This is set on the server side.
      */
     public int getArticlesBetweenAds() {
-        return placement.getArticlesBetweenAds();
+        return 3;
+//        return placement.getArticlesBetweenAds();
     }
 
     /**
      * @return how many articles to place before the first ad.
      */
     public int getArticlesBeforeFirstAd() {
-        return placement.getArticlesBeforeFirstAd();
+        return 2;
+  //      return placement.getArticlesBeforeFirstAd();
     }
 
     /**

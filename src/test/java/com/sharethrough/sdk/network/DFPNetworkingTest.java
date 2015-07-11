@@ -2,6 +2,7 @@ package com.sharethrough.sdk.network;
 
 import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
 import com.google.android.gms.ads.doubleclick.PublisherAdView;
+import com.sharethrough.sdk.STRExecutorService;
 import com.sharethrough.sdk.TestBase;
 import com.sharethrough.test.Fixtures;
 import com.sharethrough.test.util.Misc;
@@ -46,7 +47,7 @@ public class DFPNetworkingTest extends TestBase {
         final String[] receivedUrl = new String[1];
         final boolean[] error = new boolean[1];
 
-        subject.fetchDFPPath(executorService, key, new DFPNetworking.DFPPathFetcherCallback() {
+        subject.fetchDFPPath(key, new DFPNetworking.DFPPathFetcherCallback() {
             @Override
             public void receivedURL(String url) {
                 receivedUrl[0] = url;
@@ -58,7 +59,7 @@ public class DFPNetworkingTest extends TestBase {
             }
         });
 
-        Misc.runLast(executorService);
+        Misc.runLast(STRExecutorService.getInstance());
 
         assertThat(error[0]).isFalse();
         assertThat(receivedUrl[0]).isEqualTo("/fake/dfp/url");

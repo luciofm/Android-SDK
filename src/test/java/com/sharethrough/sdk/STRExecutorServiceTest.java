@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 
 import static org.mockito.Mockito.verify;
 
-public class DefaultSharethroughExecutorServiceProivderTest extends TestBase {
+public class STRExecutorServiceTest extends TestBase {
 
     private ExecutorService subject;
     @Mock
@@ -16,7 +16,8 @@ public class DefaultSharethroughExecutorServiceProivderTest extends TestBase {
 
     @Before
     public void setUp() throws Exception {
-        subject = DefaultSharethroughExecutorServiceProivder.create();
+        STRExecutorService.setExecutorService(null);
+        subject = STRExecutorService.getInstance();
     }
 
     @Test

@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 
 public class AdFetcher {
-    private final ExecutorService executorService;
     private final BeaconService beaconService;
     private final String placementKey;
     private final AdvertisingIdProvider advertisingIdProvider;
@@ -24,9 +23,8 @@ public class AdFetcher {
     private int remainingImageRequests;
     private boolean placementSet;
 
-    public AdFetcher(String placementKey, ExecutorService executorService, BeaconService beaconService, AdvertisingIdProvider advertisingIdProvider) {
+    public AdFetcher(String placementKey, BeaconService beaconService, AdvertisingIdProvider advertisingIdProvider) {
         this.placementKey = placementKey;
-        this.executorService = executorService;
         this.beaconService = beaconService;
         this.advertisingIdProvider = advertisingIdProvider;
     }
@@ -39,7 +37,7 @@ public class AdFetcher {
                                       final Function<Placement, Void> placementHandler) {
         if (isRunning) return; //isRunning ensures all creative assets are fetched (e.g images) before another ad request can be executed.
         isRunning = true;
-        executorService.execute(new Runnable() {
+        STRExecutorService.getInstance().execute(new Runnable() {
             @Override
             public void run() {
                 Logger.d("ad request sent pkey: %s", placementKey);
@@ -52,7 +50,7 @@ public class AdFetcher {
                 queryStringParams.add(new BasicNameValuePair("appId", beaconService.getAppVersionName()));
                 queryStringParams.add(new BasicNameValuePair("appName", beaconService.getAppPackageName()));
                 String formattedQueryStringParams = URLEncodedUtils.format(queryStringParams, "utf-8");
-                final URI uri = URI.create(apiUrl + "?" + formattedQueryStringParams );
+                final URI uri = URI.create(apiUrl + "?" + formattedQueryStringParams);
 
                 String json = null;
                 try {
@@ -71,7 +69,7 @@ public class AdFetcher {
                     }
 
                     remainingImageRequests = response.creatives.size();
-                    Logger.d("ad request returned %d creatives ",remainingImageRequests);
+                    Logger.d("ad request returned %d creatives ", remainingImageRequests);
 
                     if (remainingImageRequests == 0) {
                         adFetcherCallback.finishedLoadingWithNoAds();

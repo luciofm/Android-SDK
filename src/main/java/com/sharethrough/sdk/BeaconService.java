@@ -22,17 +22,15 @@ import java.util.concurrent.ExecutorService;
 public class BeaconService {
     public static String TRACKING_URL = "http://b.sharethrough.com/butler";
     private final Provider<Date> dateProvider;
-    private final ExecutorService executorService;
     private final AdvertisingIdProvider advertisingIdProvider;
     private final UUID session;
     private final String appPackageName;
     private final Context context;
     private String appVersionName;
 
-    public BeaconService(final Provider<Date> dateProvider, final UUID session, final ExecutorService executorService, final AdvertisingIdProvider advertisingIdProvider, Context context) {
+    public BeaconService(final Provider<Date> dateProvider, final UUID session, final AdvertisingIdProvider advertisingIdProvider, Context context) {
         this.dateProvider = dateProvider;
         this.session = session;
-        this.executorService = executorService;
         this.advertisingIdProvider = advertisingIdProvider;
         this.context = context;
         appPackageName = context.getPackageName();
@@ -168,7 +166,7 @@ public class BeaconService {
     }
 
     private void fireBeacon(final Map<String, String> beaconParams, final String uri) {
-        executorService.execute(new Runnable() {
+        STRExecutorService.getInstance().execute(new Runnable() {
             @Override
             public void run() {
                 Uri.Builder uriBuilder = Uri.parse(uri).buildUpon();
@@ -182,7 +180,7 @@ public class BeaconService {
 
 
                 url = url.replace("[", "%5B").replace("]", "%5D");
-                Logger.d("beacon fired type: %s", beaconParams.get("type")==null?"third party beacon ":beaconParams.get("type"));
+                Logger.d("beacon fired type: %s", beaconParams.get("type") == null ? "third party beacon " : beaconParams.get("type"));
                 Logger.d("beacon user event: %s", beaconParams.get("userEvent"));
                 Logger.i("beacon url: %s", url);
                 try {

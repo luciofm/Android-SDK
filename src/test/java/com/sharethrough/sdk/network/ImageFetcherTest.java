@@ -2,6 +2,7 @@ package com.sharethrough.sdk.network;
 
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.Response;
+import com.sharethrough.sdk.STRExecutorService;
 import com.sharethrough.sdk.TestBase;
 import com.sharethrough.test.util.Misc;
 import org.junit.Before;
@@ -39,7 +40,8 @@ public class ImageFetcherTest extends TestBase {
 
         responseCreative.creative.brandLogoUrl = "//br.and/logo";
 
-        subject = new ImageFetcher(executorService, "key");
+        subject = new ImageFetcher("key");
+        STRExecutorService.setExecutorService(executorService);
     }
 
     @Test
@@ -50,7 +52,7 @@ public class ImageFetcherTest extends TestBase {
         Robolectric.addHttpResponseRule("GET", "http:" + responseCreative.creative.thumbnailUrl, new TestHttpResponse(200, imageBytes));
         subject.fetchCreativeImages(apiUri, responseCreative, creativeHandler);
 
-        Misc.runLast(executorService);
+        Misc.runLast(STRExecutorService.getInstance());
 
         ArgumentCaptor<Creative> creativeArgumentCaptor = ArgumentCaptor.forClass(Creative.class);
         verify(creativeHandler).success(creativeArgumentCaptor.capture());

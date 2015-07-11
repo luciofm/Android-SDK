@@ -66,7 +66,8 @@ public class AdFetcherTest extends TestBase {
         expectedStringParams.add(new BasicNameValuePair("appId", "version-number"));
         expectedStringParams.add(new BasicNameValuePair("appName", "com.sharethrough.example"));
         expectedUri = apiUri + "?" + URLEncodedUtils.format(expectedStringParams, "utf-8");
-        subject = new AdFetcher(key, executorService, beaconService, advertisingIdProvider);
+        subject = new AdFetcher(key, beaconService, advertisingIdProvider);
+        STRExecutorService.setExecutorService(executorService);
     }
 
     @Test
@@ -138,7 +139,7 @@ public class AdFetcherTest extends TestBase {
 
         subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
 
-        Misc.runLast(executorService);
+        Misc.runLast(STRExecutorService.getInstance());
 
         List<ShadowLog.LogItem> logsForTag = ShadowLog.getLogs();
         assertThat(logsForTag.get(1).msg).isEqualTo("failed to get ads for key " + key + ": " + expectedUri + ": " + responseBody);

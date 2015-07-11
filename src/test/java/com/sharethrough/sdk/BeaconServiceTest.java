@@ -88,7 +88,9 @@ public class BeaconServiceTest extends TestBase {
         when(context.getPackageManager()).thenReturn(packageManager);
         when(packageManager.getPackageInfo("com.example.sdk", PackageManager.GET_META_DATA)).thenReturn(packageInfo);
 
-        subject = new BeaconService(new DateProvider(), session, executorService, advertisingIdProvider, Robolectric.application);
+        subject = new BeaconService(new DateProvider(), session, advertisingIdProvider, Robolectric.application);
+
+        STRExecutorService.setExecutorService(executorService);
     }
 
     @Test
@@ -380,7 +382,7 @@ public class BeaconServiceTest extends TestBase {
 
         fireBeacon.run();
 
-        Misc.runLast(executorService);
+        Misc.runLast(STRExecutorService.getInstance());
 
         assertThat(wasCalled[0]).isTrue();
     }

@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.media.Media;
+import com.squareup.picasso.Picasso;
 
 import java.util.Timer;
 
@@ -52,7 +53,8 @@ public class Renderer {
                 }
 
                 ImageView brandLogoView = adView.getBrandLogo();
-                if (brandLogoView != null) {
+
+                /*if (brandLogoView != null) {
                     Bitmap logoBitmap = creative.makeBrandLogo();
                     if (logoBitmap != null) {
                         brandLogoView.setImageBitmap(logoBitmap);
@@ -60,7 +62,7 @@ public class Renderer {
                     } else {
                         brandLogoView.setVisibility(View.GONE);
                     }
-                }
+                }*/
 
                 adView.getAdvertiser().setText(creative.getAdvertiser());
 
@@ -70,18 +72,20 @@ public class Renderer {
                 int width = thumbnailContainer.getWidth();
 
                 final Bitmap thumbnailBitmap;
-                if (height > 0 && width > 0) {
+                /*if (height > 0 && width > 0) {
                     thumbnailBitmap = creative.makeThumbnailImage(height, width);
                 } else {
                     thumbnailBitmap = creative.makeThumbnailImage();
-                }
+                }*/
 
                 thumbnailContainer.removeAllViews();
                 Context context = container.getContext();
 
                 final AdImageView thumbnailImage = new AdImageView(context, sharethrough, creative, adView, feedPosition, beaconService);
-                thumbnailImage.setImageBitmap(thumbnailBitmap);
-                thumbnailImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
+//                thumbnailImage.setImageBitmap(thumbnailBitmap);
+//                thumbnailImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                //    Logger.d("image url danica %s", creative.getImageUrl());
+                Picasso.with(context).load("http:"+creative.getImageUrl()).into(thumbnailImage);
 
                 thumbnailContainer.addView(thumbnailImage,
                         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));

@@ -36,6 +36,14 @@ public class Creative {
         return responseCreative.creative.description;
     }
 
+    public String getImageUrl() {
+        return responseCreative.creative.thumbnailUrl;
+    }
+
+    public String getLogoUrl() {
+        return responseCreative.creative.brandLogoUrl;
+    }
+
     public Bitmap makeThumbnailImage() {
         return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
     }

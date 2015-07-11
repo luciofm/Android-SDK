@@ -60,7 +60,6 @@ public class SharethroughTest extends TestBase {
     public void setUp() throws Exception {
         Robolectric.application.getApplicationInfo().metaData = new Bundle();
 
-        Robolectric.Reflection.setFinalStaticField(Sharethrough.class, "EXECUTOR_SERVICE", executorService);
         adView = makeMockAdView();
         apiUri = "http://btlr.sharethrough.com/v3";
         queryStringParams = new ArrayList<>(1);
@@ -364,7 +363,7 @@ public class SharethroughTest extends TestBase {
     @Test
     public void whenDfpModeIsTrueAndIsNotBackfill_usesDfpNetworking() {
         createDfpSubject(key);
-        verify(dfpNetworking).fetchDFPPath(eq(executorService), eq(key), dfpPathFetcherCallback.capture());
+        verify(dfpNetworking).fetchDFPPath(eq(key), dfpPathFetcherCallback.capture());
 
         dfpPathFetcherCallback.getValue().receivedURL("dfpPath");
         verify(dfpNetworking).fetchCreativeKey(eq(Robolectric.application), eq("dfpPath"), dfpCreativeKeyCallback.capture());
@@ -381,7 +380,7 @@ public class SharethroughTest extends TestBase {
     @Test
     public void whenDfpModeIsTrueAndIsBackfill_callsSTXAdServer() {
         createDfpSubject(key);
-        verify(dfpNetworking).fetchDFPPath(eq(executorService), eq(key), dfpPathFetcherCallback.capture());
+        verify(dfpNetworking).fetchDFPPath(eq(key), dfpPathFetcherCallback.capture());
 
         dfpPathFetcherCallback.getValue().receivedURL("dfpPath");
         verify(dfpNetworking).fetchCreativeKey(eq(Robolectric.application), eq("dfpPath"), dfpCreativeKeyCallback.capture());

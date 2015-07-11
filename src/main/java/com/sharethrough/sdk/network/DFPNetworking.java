@@ -9,6 +9,7 @@ import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
 import com.google.android.gms.ads.doubleclick.PublisherAdView;
 import com.sharethrough.sdk.Misc;
+import com.sharethrough.sdk.STRExecutorService;
 import com.sharethrough.sdk.Sharethrough;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -23,8 +24,8 @@ public class DFPNetworking {
 
     private static String BASE_URL = "https://platform-cdn.sharethrough.com/placements/";
 
-    public void fetchDFPPath(ExecutorService executorService, final String key, final DFPPathFetcherCallback callback) {
-        executorService.execute(new Runnable() {
+    public void fetchDFPPath(final String key, final DFPPathFetcherCallback callback) {
+        STRExecutorService.getInstance().execute(new Runnable() {
             @Override
             public void run() {
                 final URI uri = URI.create(BASE_URL + key + "/sdk.json");

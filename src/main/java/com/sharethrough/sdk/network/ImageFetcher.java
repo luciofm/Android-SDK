@@ -3,6 +3,7 @@ package com.sharethrough.sdk.network;
 import android.util.Log;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.Response;
+import com.sharethrough.sdk.STRExecutorService;
 import com.sharethrough.sdk.Sharethrough;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -16,16 +17,14 @@ import java.net.URI;
 import java.util.concurrent.ExecutorService;
 
 public class ImageFetcher {
-    private final ExecutorService executorService;
     private String key;
 
-    public ImageFetcher(ExecutorService executorService, String key) {
-        this.executorService = executorService;
+    public ImageFetcher(String key) {
         this.key = key;
     }
 
     public void fetchCreativeImages(final URI apiURI, final Response.Creative responseCreative, final Callback creativeHandler) {
-        executorService.execute(new Runnable() {
+        STRExecutorService.getInstance().execute(new Runnable() {
             @Override
             public void run() {
                 try {
