@@ -46,7 +46,7 @@ public class AdManager {
         this.adManagerListener = adManagerListener;
     }
 
-    private void setAdFetcherListener() {
+    protected void setAdFetcherListener() {
         adFetcher.setAdFetcherListener(new AdFetcher.AdFetcherListener() {
             @Override
             public void onAdResponseLoaded(Response response) {
@@ -86,6 +86,7 @@ public class AdManager {
         String adRequestUrl = generateRequestUrl(url, queryStringParams, advertisingId);
 
         Logger.d("ad request sent pkey: %s", queryStringParams.get(0));
+        Logger.d("ad request url: %s", adRequestUrl);
         adFetcher.fetchAds(adRequestUrl);
     }
 
@@ -112,6 +113,9 @@ public class AdManager {
         return result;
     }
 
+    public static void setAdManagerInstance(AdManager adManager) {
+        instance = adManager;
+    }
 
 
 

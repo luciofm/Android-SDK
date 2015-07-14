@@ -9,6 +9,7 @@ import com.sharethrough.test.util.Misc;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.robolectric.Robolectric;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
@@ -18,6 +19,7 @@ import org.robolectric.shadows.ShadowView;
 import org.robolectric.tester.org.apache.http.TestHttpResponse;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -58,8 +60,7 @@ public class DFPNetworkingTest extends TestBase {
                 error[0] = true;
             }
         });
-
-        Misc.runLast(STRExecutorService.getInstance());
+        STRExecutorService.getInstance().awaitTermination(1000, TimeUnit.MILLISECONDS);
 
         assertThat(error[0]).isFalse();
         assertThat(receivedUrl[0]).isEqualTo("/fake/dfp/url");

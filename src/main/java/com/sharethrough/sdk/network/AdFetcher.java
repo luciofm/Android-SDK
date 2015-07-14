@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AdFetcher {
-    private AdFetcherListener adFetcherListener;
+    protected AdFetcherListener adFetcherListener;
 
     public interface AdFetcherListener{
         void onAdResponseLoaded(Response response);

@@ -15,6 +15,7 @@ import com.sharethrough.sdk.network.AdManager;
 import com.sharethrough.sdk.network.DFPNetworking;
 
 
+import com.squareup.picasso.Picasso;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
@@ -124,6 +125,10 @@ public class Sharethrough {
                 new BeaconService(new DateProvider(), UUID.randomUUID(), advertisingIdProvider, context, placementKey), dfpEnabled ? new DFPNetworking() : null);
     }
 
+    protected AdvertisingIdProvider getAdvertisingIdProvider(Context context){
+        return new AdvertisingIdProvider(context.getApplicationContext());
+    }
+
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     Sharethrough(final Context context, final String placementKey, int adCacheTimeInMilliseconds, final Renderer renderer, final CreativesQueue availableCreatives, final BeaconService beaconService, DFPNetworking dfpNetworking) {
         Logger.setContext(context); //initialize logger with context
@@ -134,7 +139,7 @@ public class Sharethrough {
         this.beaconService = beaconService;
         this.adCacheTimeInMilliseconds = Math.max(adCacheTimeInMilliseconds, MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS);
         this.availableCreatives = availableCreatives;
-        this.advertisingIdProvider = new AdvertisingIdProvider(context);
+        this.advertisingIdProvider = getAdvertisingIdProvider(context);
         this.waitingAdViews = new SynchronizedWeakOrderedSet<AdViewFeedPositionPair>();
         this.dfpNetworking = dfpNetworking;
 
@@ -143,6 +148,8 @@ public class Sharethrough {
         responsePlacement.articlesBeforeFirstAd = Integer.MAX_VALUE;
         responsePlacement.status = "";
         placement = new Placement(responsePlacement);
+
+        // TODO build Picasso instance with STRExecutorService
 
         if (placementKey == null) throw new KeyRequiredException("placement_key is required");
 
