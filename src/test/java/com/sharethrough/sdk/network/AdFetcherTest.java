@@ -21,6 +21,7 @@ import org.robolectric.tester.org.apache.http.TestHttpResponse;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -28,269 +29,93 @@ import static org.mockito.Mockito.*;
 
 public class AdFetcherTest extends TestBase {
     private static final String SINGLE_LAYOUT_FIXTURE = Fixtures.getFile("assets/str_single_ad_youtube.json");
-    private static final String MULTIPLE_LAYOUT_FIXTURE = Fixtures.getFile("assets/str_multiple_ad_youtube.json");
-    private static final String MULTIPLE_LAYOUT_FIXTURE_ZERO_BEFORE = Fixtures.getFile("assets/str_multiple_ad_youtube_zero_ads_before.json");
-    private static final String MULTIPLE_LAYOUT_FIXTURE_ZERO_BETWEEN = Fixtures.getFile("assets/str_multiple_ad_youtube_zero_ads_between.json");
-    private static final String NO_ADS_FIXTURE = Fixtures.getFile("assets/str_no_creatives.json");
-    @Mock private ExecutorService executorService;
-    @Mock private BeaconService beaconService;
-    @Mock private ImageFetcher imageFetcher;
-    @Mock private Function<Creative, Void> creativeHandler;
-    @Mock private Creative creative;
-    @Mock private AdFetcher.Callback adFetcherCallback;
-    @Mock private Function<Placement, Void> placementHandler;
-    @Mock private AdvertisingIdProvider advertisingIdProvider;
-    private AdFetcher subject;
+    private static final String NO_CREATIVE_FIXTURE = Fixtures.getFile("assets/str_no_creatives.json");
+    @Mock private AdFetcher.AdFetcherListener adfetcherlistener;
+    private AdFetcherStub subject;
     private String apiUri;
     private String key;
-    @Captor
-    private ArgumentCaptor<ImageFetcher.Callback> imageFetcherCallback;
-    private ArrayList<NameValuePair> queryStringParams;
+
     private String expectedUri;
+    private ArrayList<NameValuePair> queryStringParams;
     private ArrayList<NameValuePair> expectedStringParams;
+
+    class AdFetcherStub extends  AdFetcher{
+        public void fetchAds(String adRequestUrl){
+            SendHttpRequestTask sendHttpRequestTask = new SendHttpRequestTask();
+            try {
+                sendHttpRequestTask.execute(adRequestUrl).get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
     @Before
     public void setUp() throws Exception {
         Logger.enabled = true;
-        String apiUriPrefix = "http://api";
-        apiUri = apiUriPrefix;
+        subject = new AdFetcherStub();
+        apiUri = "http://api";
         key = "key";
         queryStringParams = new ArrayList<NameValuePair>(1);
         queryStringParams.add(new BasicNameValuePair("key", key));
 
-        when(beaconService.getAppPackageName()).thenReturn("com.sharethrough.example");
-        when(beaconService.getAppVersionName()).thenReturn("version-number");
-        when(advertisingIdProvider.getAdvertisingId()).thenReturn("fake-uid");
         expectedStringParams = (ArrayList<NameValuePair>) queryStringParams.clone();
         expectedStringParams.add(new BasicNameValuePair("uid", "fake-uid"));
         expectedStringParams.add(new BasicNameValuePair("appId", "version-number"));
         expectedStringParams.add(new BasicNameValuePair("appName", "com.sharethrough.example"));
         expectedUri = apiUri + "?" + URLEncodedUtils.format(expectedStringParams, "utf-8");
-        subject = new AdFetcher(key, beaconService, advertisingIdProvider);
-        STRExecutorService.setExecutorService(executorService);
+
+        subject.setAdFetcherListener(adfetcherlistener);
     }
 
     @Test
-    public void fetchAds_whenServerReturnsAds_usesImageFetcherOnEachCreativeItReturns() throws Exception {
+    public void fetchAds_whenServerReturnsAds_callBackWithJsonResponse() throws  Exception{
         Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
-
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-
-        verifyNoMoreInteractions(imageFetcher);
-
-        Misc.runLast(executorService);
-
-        verify(beaconService).adRequested(key);
-
-        verifyFetchedImage(imageFetcher, "//th.umb.na/il/URL1", expectedUri, creativeHandler);
-        verifyFetchedImage(imageFetcher, "//th.umb.na/il/URL2", expectedUri, creativeHandler);
+        subject.fetchAds(expectedUri);
+        verify(adfetcherlistener).onAdResponseLoaded((Response) anyObject());
     }
 
-    @Test
-    public void fetchAds_whenAdvertisingIdIsNull_doesNotPassUidQueryStringParam() throws Exception {
-        when(advertisingIdProvider.getAdvertisingId()).thenReturn(null);
-
-        ArrayList<NameValuePair> stringParams = (ArrayList<NameValuePair>) queryStringParams.clone();
-        stringParams.add(new BasicNameValuePair("appId", "version-number"));
-        stringParams.add(new BasicNameValuePair("appName", "com.sharethrough.example"));
-
-        String uri = apiUri + "?" + URLEncodedUtils.format(stringParams, "utf-8");
-
-        Robolectric.addHttpResponseRule("GET", uri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-
-        verifyNoMoreInteractions(imageFetcher);
-
-        Misc.runLast(executorService);
-
-        verify(beaconService).adRequested(key);
-
-        verifyFetchedImage(imageFetcher, "//th.umb.na/il/URL1", uri, creativeHandler);
-        verifyFetchedImage(imageFetcher, "//th.umb.na/il/URL2", uri, creativeHandler);
-    }
 
     @Test
-    public void fetchAds_whenServerRequestFails_doesNothing() throws Exception {
+    public void fetchAds_whenServerRequestFails_callBackWithAdsFailedToLoad() throws Exception {
         Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(500, "Bad server"));
-
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-
-        Misc.runLast(executorService);
-
-        verifyNoMoreInteractions(imageFetcher);
+        subject.fetchAds(expectedUri);
+        verify(adfetcherlistener).onAdResponseFailed();
     }
 
     @Test
-    public void fetchAds_whenExceptionOccursBeforeGettingHttpResponse_logsSomeStuff() throws Exception {
+    public void fetchAds_whenExceptionOccursBeforeGettingHttpResponse_callBackWithAdsFailedToLoad() throws Exception {
         Robolectric.addHttpResponseRule("GET", expectedUri, null);
 
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-
-        Misc.runLast(executorService);
-
-        List<ShadowLog.LogItem> logsForTag = ShadowLog.getLogs();
-        assertThat(logsForTag.get(1).msg).isEqualTo("failed to get ads for key " + key + ": " + expectedUri);
+        subject.fetchAds(expectedUri);
+        verify(adfetcherlistener).onAdResponseFailed();
     }
 
     @Test
-    public void fetchAds_whenExceptionOccursAfterGettingHttpResponse_logsSomeStuffAndStuffAboutResponse() throws Exception {
+    public void fetchAds_whenExceptionOccursAfterGettingHttpResponse_callBackWithAdsFailedToLoad() throws Exception {
         String responseBody = "{234789wdfjkl ";
         Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(200, responseBody));
 
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-
-        Misc.runLast(STRExecutorService.getInstance());
-
-        List<ShadowLog.LogItem> logsForTag = ShadowLog.getLogs();
-        assertThat(logsForTag.get(1).msg).isEqualTo("failed to get ads for key " + key + ": " + expectedUri + ": " + responseBody);
-
-        verify(adFetcherCallback).finishedLoadingWithNoAds();
+        subject.fetchAds(expectedUri);
+        verify(adfetcherlistener).onAdResponseFailed();
     }
 
-    @Test
-    public void fetchAds_whenRequestReturnsZeroCreatives_callsFinshedLoadingWithNoAds() throws Exception {
-        Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(200, NO_ADS_FIXTURE));
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-        Misc.runLast(executorService);
-        verify(adFetcherCallback).finishedLoadingWithNoAds();
-    }
 
     @Test
-    public void fetchAds_whenRequestIsInProgress_doesNotStartNewRequest() throws Exception {
-        Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
-
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-
-        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(executorService).execute(runnableArgumentCaptor.capture());
-        assertThat(runnableArgumentCaptor.getAllValues()).hasSize(1);
-    }
-
-    @Test
-    public void fetchAds_whenPreviousRequestHasFinished_butImagesHaveNot_doesNotStartNewRequest() throws Exception {
-        Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
-
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-
-        Misc.runLast(executorService);
-        reset(executorService);
-
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-
-        verifyNoMoreInteractions(executorService);
-    }
-
-    @Test
-    public void fetchAds_whenPreviousRequestAndNotAllImagesHaveFinished_doesNotStartNewRequest() throws Exception {
-        // make first request
-        Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-        Misc.runLast(executorService);
-        reset(executorService);
-
-        // finish loading only one image
-        verify(imageFetcher, atLeastOnce()).fetchCreativeImages(any(URI.class), any(Response.Creative.class), imageFetcherCallback.capture());
-        assertThat(imageFetcherCallback.getAllValues().size()).isGreaterThan(1);
-        imageFetcherCallback.getAllValues().get(0).success(creative);
-
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-
-        verifyNoMoreInteractions(executorService);
-    }
-
-    @Test
-    public void fetchAds_whenPreviousRequestAndAllImagesHaveFinished_startsNewRequest() throws Exception {
-        // make first request
-        Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-        Misc.runLast(executorService);
-        reset(executorService);
-
-        // finish loading all images
-        verify(imageFetcher, atLeastOnce()).fetchCreativeImages(any(URI.class), any(Response.Creative.class), imageFetcherCallback.capture());
-        for (ImageFetcher.Callback callback : imageFetcherCallback.getAllValues()) {
-            callback.success(creative);
-        }
-
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-
-        verify(executorService).execute(any(Runnable.class));
-    }
-
-    @Test
-    public void fetchAds_whenPreviousRequestAndAllImagesHaveFinishedWithFailure_startsNewRequest() throws Exception {
-        // make first request
-        Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(200, SINGLE_LAYOUT_FIXTURE));
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-        Misc.runLast(executorService);
-        reset(executorService);
-
-        // finish loading all images
-        verify(imageFetcher, atLeastOnce()).fetchCreativeImages(any(URI.class), any(Response.Creative.class), imageFetcherCallback.capture());
-        for (ImageFetcher.Callback callback : imageFetcherCallback.getAllValues()) {
-            callback.failure();
-        }
-
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-
-        verify(executorService).execute(any(Runnable.class));
-    }
-
-    @Test
-    public void fetchAds_whenPlacementHasNotBeenSet_CallsApplyOnPlacementHandlerAndSetsPlacementSetToTrue() {
-        final int[] placementHandlerCalledCounter = {0};
-        placementHandler = new Function<Placement, Void>() {
-            @Override
-            public Void apply(Placement placement) {
-                placementHandlerCalledCounter[0]++;
-                return null;
-            }
-        };
-        ArrayList<NameValuePair> qsParams = (ArrayList<NameValuePair>) queryStringParams.clone();
-
-        // first time
-        Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(200, MULTIPLE_LAYOUT_FIXTURE));
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-        Misc.runLast(executorService);
-        assertThat(placementHandlerCalledCounter[0]).isEqualTo(1);
-
-        reset(executorService);
-
-        //second time
-        subject.setIsRunning(false);
-        subject.fetchAds(imageFetcher, apiUri, qsParams, creativeHandler, adFetcherCallback, placementHandler);
-        Misc.runLast(executorService);
-        assertThat(placementHandlerCalledCounter[0]).isEqualTo(1);
-
-    }
-
-    @Test
-    public void whenServerReturns204_doesNothing() throws Exception {
+    public void whenServerReturns204_callBackWithJsonResponse() throws Exception {
         Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(204, "I got nothing for ya"));
 
-        subject.fetchAds(imageFetcher, apiUri, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-
-        Misc.runLast(executorService);
-
-        verifyNoMoreInteractions(imageFetcher);
+        subject.fetchAds(expectedUri);
+        verify(adfetcherlistener).onAdResponseFailed();
     }
 
-    private void verifyFetchedImage(ImageFetcher imageFetcher, final String imageUrl, String apiUri, Function<Creative, Void> creativeHandler) {
-        verify(imageFetcher).fetchCreativeImages(eq(URI.create(apiUri)), Matchers.argThat(new BaseMatcher<Response.Creative>() {
-            @Override
-            public boolean matches(Object o) {
-                if (o instanceof Response.Creative) {
-                    Response.Creative creative = (Response.Creative) o;
-                    return creative.creative.thumbnailUrl.equals(imageUrl);
-                }
-                return false;
-            }
-
-            @Override
-            public void describeTo(Description description) {
-
-            }
-        }), any(ImageFetcher.Callback.class));
+    @Test
+    public void fetchAds_whenServerReturnsNoAds_callBackWithJsonResponse() throws  Exception{
+        Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(200, NO_CREATIVE_FIXTURE));
+        subject.fetchAds(expectedUri);
+        verify(adfetcherlistener).onAdResponseLoaded((Response) anyObject());
     }
 }

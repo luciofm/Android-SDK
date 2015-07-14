@@ -16,6 +16,8 @@ import android.widget.TextView;
 import com.sharethrough.sdk.media.Media;
 import com.sharethrough.sdk.test.SharethroughTestRunner;
 import com.sharethrough.test.util.TestAdView;
+import com.squareup.picasso.Picasso;
+import org.apache.tools.ant.taskdefs.Sleep;
 import org.fest.assertions.api.ANDROID;
 import org.fest.util.Lists;
 import org.junit.Before;
@@ -62,9 +64,9 @@ public class RendererTest extends TestBase {
         when(creative.getDescription()).thenReturn("description");
         when(creative.getAdvertiser()).thenReturn("advertiser");
         when(creative.getTitle()).thenReturn("title");
+        when(creative.getBrandLogoUrl()).thenReturn("logoBrandUrl");
+        when(creative.getThumbnailUrl()).thenReturn("fake_image.jpg");
         bitmap = mock(Bitmap.class);
-        when(creative.makeThumbnailImage()).thenReturn(bitmap);
-        when(creative.makeThumbnailImage(anyInt(), anyInt())).thenReturn(bitmap);
         media = mock(Media.class);
         when(media.getCreative()).thenReturn(creative);
         when(creative.getMedia()).thenReturn(media);
@@ -83,7 +85,6 @@ public class RendererTest extends TestBase {
     @Test
     public void onUIthread_callsCallback_andShowsTitleDescriptionAdvertiserAndThumbnailWithOverlay() throws Exception {
         Robolectric.pauseMainLooper();
-
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
 
         verifyNoMoreInteractions(adView.getTitle());
@@ -101,8 +102,6 @@ public class RendererTest extends TestBase {
         verify(adView.getThumbnail(), atLeastOnce()).addView(thumbnailViewCaptor.capture(), any(FrameLayout.LayoutParams.class));
 
         ImageView thumbnailImageView = (ImageView) thumbnailViewCaptor.getAllValues().get(0);
-        BitmapDrawable bitmapDrawable = (BitmapDrawable) thumbnailImageView.getDrawable();
-        assertThat(bitmapDrawable.getBitmap()).isEqualTo(bitmap);
 
         verifyNoMoreInteractions(media);
         shadowLooper.runOneTask();
@@ -153,7 +152,6 @@ public class RendererTest extends TestBase {
     @Test
     public void whenCreativeHasBrandLogo_andAdViewHasImageViewForIt_BrandLogoIsDisplayed() {
         ImageView brandLogo = adView.getBrandLogo();
-        when(creative.makeBrandLogo()).thenReturn(bitmap);
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
 
         ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
@@ -161,14 +159,11 @@ public class RendererTest extends TestBase {
         shadowLooper.runOneTask();
 
         assertThat(brandLogo.getVisibility()).isEqualTo(View.VISIBLE);
-
-        BitmapDrawable bitmapDrawable = (BitmapDrawable) brandLogo.getDrawable();
-        assertThat(bitmapDrawable.getBitmap()).isEqualTo(bitmap);
     }
 
     @Test
     public void whenCreativeDoesNotHaveBrandLogo_andAdViewHasImageViewForIt_BrandLogoIsNotDisplayed() {
-        when(creative.makeBrandLogo()).thenReturn(null);
+        when(creative.getBrandLogoUrl()).thenReturn("");
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
 
         ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
@@ -181,7 +176,6 @@ public class RendererTest extends TestBase {
 
     @Test
     public void whenCreativeHasBrandLogo_andAdViewDoesNotHasImageViewForIt_NothingBadHappens() {
-        when(creative.makeBrandLogo()).thenReturn(bitmap);
         adView.brandLogo = null;
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
 

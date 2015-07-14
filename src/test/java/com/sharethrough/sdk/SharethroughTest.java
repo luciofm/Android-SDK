@@ -1,15 +1,12 @@
 package com.sharethrough.sdk;
 
 import android.os.Bundle;
-import android.util.LruCache;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import com.sharethrough.sdk.network.AdFetcher;
 import com.sharethrough.sdk.network.DFPNetworking;
-import com.sharethrough.sdk.network.ImageFetcher;
 import com.sharethrough.test.util.TestAdView;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,10 +16,8 @@ import org.mockito.Mock;
 import org.robolectric.Robolectric;
 import org.robolectric.annotation.Config;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +30,6 @@ public class SharethroughTest extends TestBase {
     @Mock private ExecutorService executorService;
     @Mock private Renderer renderer;
     @Mock private BeaconService beaconService;
-    @Mock private ImageFetcher imageFetcher;
     @Mock private AdFetcher adFetcher;
     @Mock private Creative creative;
     @Mock private CreativesQueue availableCreatives;
@@ -47,7 +41,6 @@ public class SharethroughTest extends TestBase {
     private String apiUri;
     @Captor private ArgumentCaptor<Function<Creative, Void>> creativeHandler;
     @Captor private ArgumentCaptor<Function<Placement, Void>> placementHandler;
-    @Captor private ArgumentCaptor<AdFetcher.Callback> adFetcherCallback;
     @Captor
     private ArgumentCaptor<DFPNetworking.DFPPathFetcherCallback> dfpPathFetcherCallback;
     @Captor
@@ -65,14 +58,14 @@ public class SharethroughTest extends TestBase {
         queryStringParams = new ArrayList<>(1);
         queryStringParams.add(new BasicNameValuePair("placement_key", key));
 
-        doNothing().when(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), eq(queryStringParams), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
+        doNothing().when(adFetcher).fetchAds( eq(apiUri));
 
         createSubject(key);
     }
 
     private void createSubject(String key) {
         subject = new Sharethrough(Robolectric.application, key, adCacheTimeInMilliseconds, renderer,
-                availableCreatives, beaconService, adFetcher, imageFetcher, null);
+                availableCreatives, beaconService, null);
         subject.setOnStatusChangeListener(onStatusChangeListener);
     }
 
@@ -90,7 +83,7 @@ public class SharethroughTest extends TestBase {
 
     @Test
     public void settingKey_loadsAdsFromServer() throws Exception {
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), eq(queryStringParams), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
+        verify(adFetcher).fetchAds(eq(apiUri));
     }
 
     @Test(expected = KeyRequiredException.class)
@@ -131,7 +124,7 @@ public class SharethroughTest extends TestBase {
 
         subject.putCreativeIntoAdView(adView);
 
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), eq(queryStringParams), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
+        verify(adFetcher).fetchAds(eq(apiUri));
     }
 
     @Test
@@ -148,12 +141,12 @@ public class SharethroughTest extends TestBase {
         String serverPrefix = "http://dumb-waiter.sharethrough.com/";
         Robolectric.application.getApplicationInfo().metaData.putString("STR_ADSERVER_API", serverPrefix);
         createSubject(key);
-        verify(adFetcher, atLeastOnce()).fetchAds(same(imageFetcher), eq(serverPrefix), eq(queryStringParams), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
+        verify(adFetcher, atLeastOnce()).fetchAds(eq(serverPrefix));
     }
 
     @Test
     public void whenFirstCreativeIsPrefetches_notifiesOnStatusChangeListenerOnMainThread() throws Exception {
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), eq(queryStringParams), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
+        verify(adFetcher).fetchAds(eq(apiUri));
 
         Robolectric.pauseMainLooper();
         creativeHandler.getValue().apply(creative);
@@ -165,7 +158,7 @@ public class SharethroughTest extends TestBase {
 
     @Test
     public void whenCreativeIsPrefetched_whenNewAdsToShowHasAlreadyBeenCalled_doesNotCallItAgain() throws Exception {
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), eq(queryStringParams), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
+        verify(adFetcher).fetchAds(eq(apiUri));
 
         Robolectric.pauseMainLooper();
         creativeHandler.getValue().apply(creative);
@@ -181,10 +174,9 @@ public class SharethroughTest extends TestBase {
 
     @Test
     public void whenFirstCreativeIsNotAvailable_notifiesOnStatusChangeListenerOnMainThread() throws Exception {
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), eq(queryStringParams), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
+        verify(adFetcher).fetchAds(eq(apiUri));
 
         Robolectric.pauseMainLooper();
-        adFetcherCallback.getValue().finishedLoadingWithNoAds();
         verifyNoMoreInteractions(onStatusChangeListener);
         Robolectric.unPauseMainLooper();
 
@@ -193,7 +185,7 @@ public class SharethroughTest extends TestBase {
 
     @Test
     public void whenCreativeIsPrefetched_whenNewAdsToShowHasBeenCalledButNoAdsToShowHasSinceBeenCalled_callsItAgain() throws Exception {
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), eq(queryStringParams), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
+        verify(adFetcher).fetchAds(eq(apiUri));
 
         // cause newAdsToShow
         Robolectric.pauseMainLooper();
@@ -205,7 +197,6 @@ public class SharethroughTest extends TestBase {
 
         // cause noAdsToShow
         Robolectric.pauseMainLooper();
-        adFetcherCallback.getValue().finishedLoadingWithNoAds();
         verifyNoMoreInteractions(onStatusChangeListener);
         Robolectric.unPauseMainLooper();
         verify(onStatusChangeListener).noAdsToShow();
@@ -356,7 +347,7 @@ public class SharethroughTest extends TestBase {
 
 
     private void createDfpSubject(String key) {
-        subject = new Sharethrough(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, availableCreatives, beaconService, adFetcher, imageFetcher, dfpNetworking);
+        subject = new Sharethrough(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, availableCreatives, beaconService, dfpNetworking);
         subject.setOnStatusChangeListener(onStatusChangeListener);
     }
 
@@ -374,7 +365,7 @@ public class SharethroughTest extends TestBase {
 
         dfpCreativeKeyCallback.getValue().receivedCreativeKey();
 
-        verify(adFetcher, atLeastOnce()).fetchAds(same(imageFetcher), eq(apiUri), eq(queryStringParams), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
+        verify(adFetcher, atLeastOnce()).fetchAds(eq(apiUri));
     }
 
     @Test
@@ -390,7 +381,7 @@ public class SharethroughTest extends TestBase {
 
         dfpCreativeKeyCallback.getValue().receivedCreativeKey();
 
-        verify(adFetcher, atLeastOnce()).fetchAds(same(imageFetcher), eq(apiUri), eq(queryStringParams), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
+        verify(adFetcher, atLeastOnce()).fetchAds(eq(apiUri));
     }
 
     @Test
@@ -440,7 +431,7 @@ public class SharethroughTest extends TestBase {
             }
         });
         subject.putCreativeIntoAdView(adView);
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), eq(queryStringParams), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
+        verify(adFetcher).fetchAds(eq(apiUri));
         placementHandler.getValue().apply(placement);
         assertThat(callbackWasInvoked[0]).isTrue();
         assertThat(subject.placement).isEqualTo(placement);
@@ -459,7 +450,7 @@ public class SharethroughTest extends TestBase {
 
         subject.placementSet = true;
         subject.putCreativeIntoAdView(adView);
-        verify(adFetcher).fetchAds(same(imageFetcher), eq(apiUri), eq(queryStringParams), creativeHandler.capture(), adFetcherCallback.capture(), placementHandler.capture());
+        verify(adFetcher).fetchAds(eq(apiUri));
         placementHandler.getValue().apply(placement);
         assertThat(subject.placement).isNotEqualTo(placement);
         assertThat(callbackWasInvoked[0]).isFalse();

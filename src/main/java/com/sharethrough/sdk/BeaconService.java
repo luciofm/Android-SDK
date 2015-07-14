@@ -27,12 +27,14 @@ public class BeaconService {
     private final String appPackageName;
     private final Context context;
     private String appVersionName;
+    private String placementKey;
 
-    public BeaconService(final Provider<Date> dateProvider, final UUID session, final AdvertisingIdProvider advertisingIdProvider, Context context) {
+    public BeaconService(final Provider<Date> dateProvider, final UUID session, final AdvertisingIdProvider advertisingIdProvider, Context context, String pkey) {
         this.dateProvider = dateProvider;
         this.session = session;
         this.advertisingIdProvider = advertisingIdProvider;
         this.context = context;
+        this.placementKey = pkey;
         appPackageName = context.getPackageName();
         try {
             appVersionName = context.getPackageManager().getPackageInfo(appPackageName, PackageManager.GET_META_DATA).versionName;
@@ -67,7 +69,7 @@ public class BeaconService {
 
     Map<String, String> commonParamsWithCreative(final Context context, final Creative creative) {
         Map<String, String> result = commonParams(context);
-        result.put("pkey", creative.getPlacementKey());
+        result.put("pkey", placementKey);
         result.put("vkey", creative.getVariantKey());
         result.put("ckey", creative.getCreativeKey());
         result.put("campkey", creative.getCampaignKey());

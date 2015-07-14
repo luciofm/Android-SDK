@@ -20,7 +20,7 @@ public class CreativeTest extends TestBase {
         responseCreative = new Response.Creative();
         responseCreative.creative = new Response.Creative.CreativeInner();
         responseCreative.creative.beacon = new Response.Creative.CreativeInner.Beacon();
-        subject = new Creative(responseCreative, IMAGE_BYTES, LOGO_BYTES, "placement key");
+        subject = new Creative(responseCreative);
     }
 
     @Test

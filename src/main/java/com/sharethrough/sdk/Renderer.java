@@ -1,9 +1,7 @@
 package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -45,48 +43,28 @@ public class Renderer {
                 if (container.getTag() != creative) return; // container has been recycled
                 adView.adReady();
 
-
                 adView.getTitle().setText(creative.getTitle());
                 TextView description = adView.getDescription();
                 if (description != null) {
                     description.setText(creative.getDescription());
                 }
 
-                ImageView brandLogoView = adView.getBrandLogo();
-
-                /*if (brandLogoView != null) {
-                    Bitmap logoBitmap = creative.makeBrandLogo();
-                    if (logoBitmap != null) {
-                        brandLogoView.setImageBitmap(logoBitmap);
-                        brandLogoView.setVisibility(View.VISIBLE);
-                    } else {
-                        brandLogoView.setVisibility(View.GONE);
-                    }
-                }*/
-
                 adView.getAdvertiser().setText(creative.getAdvertiser());
 
+                ImageView brandLogoView = adView.getBrandLogo();
+                if (brandLogoView != null ){
+                    if(creative.getBrandLogoUrl() != null && false == creative.getBrandLogoUrl().isEmpty()) {
+                        Picasso.with(container.getContext()).load(creative.getBrandLogoUrl()).fit().centerCrop().tag("STRBrandLogo").into(brandLogoView);
+                        brandLogoView.setVisibility(View.VISIBLE);
+                    }else{
+                        brandLogoView.setVisibility(View.GONE);
+                    }
+                }
+
                 FrameLayout thumbnailContainer = adView.getThumbnail();
-
-                int height = thumbnailContainer.getHeight();
-                int width = thumbnailContainer.getWidth();
-
-                final Bitmap thumbnailBitmap;
-                /*if (height > 0 && width > 0) {
-                    thumbnailBitmap = creative.makeThumbnailImage(height, width);
-                } else {
-                    thumbnailBitmap = creative.makeThumbnailImage();
-                }*/
-
                 thumbnailContainer.removeAllViews();
-                Context context = container.getContext();
-
-                final AdImageView thumbnailImage = new AdImageView(context, sharethrough, creative, adView, feedPosition, beaconService);
-//                thumbnailImage.setImageBitmap(thumbnailBitmap);
-//                thumbnailImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                //    Logger.d("image url danica %s", creative.getImageUrl());
-                Picasso.with(context).load("http:"+creative.getImageUrl()).into(thumbnailImage);
-
+                final AdImageView thumbnailImage = new AdImageView(container.getContext(), sharethrough, creative, adView, feedPosition, beaconService);
+                Picasso.with(container.getContext()).load(creative.getThumbnailUrl()).fit().centerCrop().tag("STRAdImage").into(thumbnailImage);
                 thumbnailContainer.addView(thumbnailImage,
                         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
 

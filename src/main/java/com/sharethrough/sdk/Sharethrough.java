@@ -11,16 +11,14 @@ import android.util.Log;
 import android.util.LruCache;
 
 import com.sharethrough.android.sdk.BuildConfig;
-import com.sharethrough.sdk.network.AdFetcher;
 import com.sharethrough.sdk.network.AdManager;
 import com.sharethrough.sdk.network.DFPNetworking;
-import com.sharethrough.sdk.network.ImageFetcher;
+
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.util.*;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -42,11 +40,8 @@ public class Sharethrough {
     private String placementKey;
     private String apiUrlPrefix = "http://btlr.sharethrough.com/v3";
     private final CreativesQueue availableCreatives;
-    private Function<Creative, Void> creativeHandler;
-    private AdFetcher adFetcher;
-    private ImageFetcher imageFetcher;
-    private AdFetcher.Callback adFetcherCallback;
-    private AdManager adManager;
+    private AdvertisingIdProvider advertisingIdProvider;
+
     private OnStatusChangeListener onStatusChangeListener = new OnStatusChangeListener() {
         @Override
         public void newAdsToShow() {
@@ -126,21 +121,22 @@ public class Sharethrough {
 
     Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds, AdvertisingIdProvider advertisingIdProvider, boolean dfpEnabled) {
         this(context, placementKey, adCacheTimeInMilliseconds, new Renderer(), new CreativesQueue(),
-                new BeaconService(new DateProvider(), UUID.randomUUID(), advertisingIdProvider, context),
-                new AdFetcher(placementKey, new BeaconService(new DateProvider(), UUID.randomUUID(),
-                         advertisingIdProvider, context), advertisingIdProvider), new ImageFetcher(placementKey),
-                dfpEnabled ? new DFPNetworking() : null);
+                new BeaconService(new DateProvider(), UUID.randomUUID(), advertisingIdProvider, context, placementKey), dfpEnabled ? new DFPNetworking() : null);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-    Sharethrough(final Context context, final String placementKey, int adCacheTimeInMilliseconds, final Renderer renderer, final CreativesQueue availableCreatives, final BeaconService beaconService, AdFetcher adFetcher, ImageFetcher imageFetcher, DFPNetworking dfpNetworking) {
+    Sharethrough(final Context context, final String placementKey, int adCacheTimeInMilliseconds, final Renderer renderer, final CreativesQueue availableCreatives, final BeaconService beaconService, DFPNetworking dfpNetworking) {
         Logger.setContext(context); //initialize logger with context
         Logger.enabled = true;
+        this.context = context;
         this.placementKey = placementKey;
         this.renderer = renderer;
         this.beaconService = beaconService;
         this.adCacheTimeInMilliseconds = Math.max(adCacheTimeInMilliseconds, MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS);
         this.availableCreatives = availableCreatives;
+        this.advertisingIdProvider = new AdvertisingIdProvider(context);
+        this.waitingAdViews = new SynchronizedWeakOrderedSet<AdViewFeedPositionPair>();
+        this.dfpNetworking = dfpNetworking;
 
         Response.Placement responsePlacement = new Response.Placement();
         responsePlacement.articlesBetweenAds = Integer.MAX_VALUE;
@@ -160,10 +156,21 @@ public class Sharethrough {
             e.printStackTrace();
         }
 
-        waitingAdViews = new SynchronizedWeakOrderedSet<AdViewFeedPositionPair>();
-        creativeHandler = new Function<Creative,Void>() {
-            @Override
-            public Void apply(Creative creative) {
+        AdManager.getInstance(context).setAdManagerListener(adManagerListener);
+
+        fetchAds();
+    }
+
+    private AdManager.AdManagerListener adManagerListener = new AdManager.AdManagerListener() {
+        @Override
+        public void onAdsReady(List<Creative> listOfCreativesReadyForShow, Placement placement) {
+            if (!placementSet) {
+                Sharethrough.this.placement = placement;
+                placementSet = true;
+                placementCallback.call(placement);
+            }
+
+            for(Creative creative : listOfCreativesReadyForShow) {
                 if (waitingAdViews.size() == 0) {
                     availableCreatives.add(creative);
                     if (creative != null) {
@@ -172,66 +179,20 @@ public class Sharethrough {
                     fireNewAdsToShow();
                 } else {
                     AdViewFeedPositionPair adViewFeedPositionPair = waitingAdViews.popNext();
-                    if(adViewFeedPositionPair != null){
+                    if (adViewFeedPositionPair != null) {
                         IAdView adView = (IAdView) adViewFeedPositionPair.adView;
-                        int feedPosition = (int )adViewFeedPositionPair.feedPosition;
+                        int feedPosition = (int) adViewFeedPositionPair.feedPosition;
                         insertCreativeIntoSlot(feedPosition, creative);
                         renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this, feedPosition, new Timer("AdView timer for " + creative));
                         fireNewAdsToShow();
                     }
                 }
-                return null;
             }
-        };
+        }
 
-        adFetcherCallback = new AdFetcher.Callback() {
-            @Override
-            public void finishedLoadingWithNoAds() {
-                fireNoAdsToShow();
-            }
-        };
-
-        placementHandler = new Function<Placement, Void>() {
-            @Override
-            public Void apply(Placement placement) {
-                if (!placementSet) {
-                    Sharethrough.this.placement = placement;
-                    placementSet = true;
-                    placementCallback.call(placement);
-                }
-                return null;
-            }
-        };
-
-        this.adFetcher = adFetcher;
-        this.imageFetcher = imageFetcher;
-
-        this.dfpNetworking = dfpNetworking;
-        this.context = context;
-
-
-
-        adManager = new AdManager();
-        adManager.registerListener(adManagerListener);
-
-        fetchAds();
-    }
-
-    private AdManager.AdManagerListener adManagerListener = new AdManager.AdManagerListener() {
         @Override
-        public void onAdsReady(List<Creative> listOfCreativesReadyForShow, Placement placement) {
-            for (Creative creative : listOfCreativesReadyForShow) {
-                availableCreatives.add(creative);
-                Logger.d("insert creative ckey: %s, creative cache size %d", creative.getCreativeKey(), availableCreatives.size());
-            }
-
-            if (!placementSet) {
-                Sharethrough.this.placement = placement;
-                placementSet = true;
-                placementCallback.call(placement);
-            }
-
-            fireNewAdsToShow();
+        public void onNoAdsToShow(){
+            fireNoAdsToShow();
         }
 
         @Override
@@ -279,8 +240,7 @@ public class Sharethrough {
     }
 
     private void invokeAdFetcher(String url, ArrayList<NameValuePair> queryStringParams) {
-        //this.adFetcher.fetchAds(this.imageFetcher, url, queryStringParams, creativeHandler, adFetcherCallback, placementHandler);
-        adManager.fetchAds(url, queryStringParams);
+        AdManager.getInstance(context).fetchAds(url, queryStringParams, advertisingIdProvider.getAdvertisingId());
     }
 
     private void fetchDfpAds() {
