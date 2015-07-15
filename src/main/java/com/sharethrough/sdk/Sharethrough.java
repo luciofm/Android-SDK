@@ -168,7 +168,7 @@ public class Sharethrough {
         fetchAds();
     }
 
-    private AdManager.AdManagerListener adManagerListener = new AdManager.AdManagerListener() {
+    protected AdManager.AdManagerListener adManagerListener = new AdManager.AdManagerListener() {
         @Override
         public void onAdsReady(List<Creative> listOfCreativesReadyForShow, Placement placement) {
             if (!placementSet) {
