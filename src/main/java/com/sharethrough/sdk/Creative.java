@@ -9,19 +9,16 @@ import java.util.List;
 
 public class Creative {
     private final Response.Creative responseCreative;
-    private final byte[] imageBytes;
-    private final String placementKey;
-    private final byte[] logoBytes;
+    //private final byte[] imageBytes;
+    //private final byte[] logoBytes;
     public boolean wasRendered;
     public long renderedTime = Long.MAX_VALUE;
     private boolean wasClicked = false;
     public boolean wasVisible = false;
 
-    public Creative(Response.Creative responseCreative, byte[] imageBytes, byte[] logoBytes, String placementKey) {
+
+    public Creative(Response.Creative responseCreative) {
         this.responseCreative = responseCreative;
-        this.imageBytes = imageBytes;
-        this.logoBytes = logoBytes;
-        this.placementKey = placementKey;
     }
 
     public String getTitle() {
@@ -36,11 +33,19 @@ public class Creative {
         return responseCreative.creative.description;
     }
 
-    public Bitmap makeThumbnailImage() {
-        return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+    public String getThumbnailUrl() {
+        return convertToAbsoluteUrl(responseCreative.creative.thumbnailUrl);
     }
 
-    public Bitmap makeThumbnailImage(int height, int width) {
+    public String getBrandLogoUrl() {
+        return convertToAbsoluteUrl(responseCreative.creative.brandLogoUrl);
+    }
+
+    /*public Bitmap makeThumbnailImage() {
+        return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+    }*/
+
+    /*public Bitmap makeThumbnailImage(int height, int width) {
         BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.outHeight = height;
         opts.outWidth = width;
@@ -52,7 +57,7 @@ public class Creative {
             return BitmapFactory.decodeByteArray(logoBytes, 0, logoBytes.length);
         }
         return null;
-    }
+    }*/
 
     public Media getMedia() {
         switch (responseCreative.creative.action) {
@@ -92,10 +97,6 @@ public class Creative {
 
     public String getMediaUrl() {
         return convertToAbsoluteUrl(responseCreative.creative.mediaUrl);
-    }
-
-    public String getPlacementKey() {
-        return placementKey;
     }
 
     public String getVariantKey() {

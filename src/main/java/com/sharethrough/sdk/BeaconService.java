@@ -22,19 +22,19 @@ import java.util.concurrent.ExecutorService;
 public class BeaconService {
     public static String TRACKING_URL = "http://b.sharethrough.com/butler";
     private final Provider<Date> dateProvider;
-    private final ExecutorService executorService;
     private final AdvertisingIdProvider advertisingIdProvider;
     private final UUID session;
     private final String appPackageName;
     private final Context context;
     private String appVersionName;
+    private String placementKey;
 
-    public BeaconService(final Provider<Date> dateProvider, final UUID session, final ExecutorService executorService, final AdvertisingIdProvider advertisingIdProvider, Context context) {
+    public BeaconService(final Provider<Date> dateProvider, final UUID session, final AdvertisingIdProvider advertisingIdProvider, Context context, String pkey) {
         this.dateProvider = dateProvider;
         this.session = session;
-        this.executorService = executorService;
         this.advertisingIdProvider = advertisingIdProvider;
         this.context = context;
+        this.placementKey = pkey;
         appPackageName = context.getPackageName();
         try {
             appVersionName = context.getPackageManager().getPackageInfo(appPackageName, PackageManager.GET_META_DATA).versionName;
@@ -69,7 +69,7 @@ public class BeaconService {
 
     Map<String, String> commonParamsWithCreative(final Context context, final Creative creative) {
         Map<String, String> result = commonParams(context);
-        result.put("pkey", creative.getPlacementKey());
+        result.put("pkey", placementKey);
         result.put("vkey", creative.getVariantKey());
         result.put("ckey", creative.getCreativeKey());
         result.put("campkey", creative.getCampaignKey());
@@ -168,7 +168,7 @@ public class BeaconService {
     }
 
     private void fireBeacon(final Map<String, String> beaconParams, final String uri) {
-        executorService.execute(new Runnable() {
+        STRExecutorService.getInstance().execute(new Runnable() {
             @Override
             public void run() {
                 Uri.Builder uriBuilder = Uri.parse(uri).buildUpon();
@@ -182,7 +182,7 @@ public class BeaconService {
 
 
                 url = url.replace("[", "%5B").replace("]", "%5D");
-                Logger.d("beacon fired type: %s", beaconParams.get("type")==null?"third party beacon ":beaconParams.get("type"));
+                Logger.d("beacon fired type: %s", beaconParams.get("type") == null ? "third party beacon " : beaconParams.get("type"));
                 Logger.d("beacon user event: %s", beaconParams.get("userEvent"));
                 Logger.i("beacon url: %s", url);
                 try {

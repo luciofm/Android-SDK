@@ -234,5 +234,6 @@ public class WebViewDialogTest extends TestBase {
         public synchronized PluginState getPluginState() {
             return pluginState;
         }
+
     }
 }

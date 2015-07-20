@@ -58,7 +58,7 @@ public class Logger {
     }
 
     private static String createTag() {
-        final int stackLevel = 2;
+        final int stackLevel = 3;
         Throwable stack = new Throwable().fillInStackTrace();
         StackTraceElement[] trace = stack.getStackTrace();
         StringBuilder logStatement = new StringBuilder("");

@@ -1,7 +1,13 @@
 package com.sharethrough.sdk.network;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import com.sharethrough.sdk.*;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -10,137 +16,66 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
+import java.util.List;
 
 public class AdFetcher {
-    private final ExecutorService executorService;
-    private final BeaconService beaconService;
-    private final String placementKey;
-    private final AdvertisingIdProvider advertisingIdProvider;
-    private boolean isRunning;
-    private int remainingImageRequests;
-    private boolean placementSet;
+    protected AdFetcherListener adFetcherListener;
 
-    public AdFetcher(String placementKey, ExecutorService executorService, BeaconService beaconService, AdvertisingIdProvider advertisingIdProvider) {
-        this.placementKey = placementKey;
-        this.executorService = executorService;
-        this.beaconService = beaconService;
-        this.advertisingIdProvider = advertisingIdProvider;
+    public interface AdFetcherListener{
+        void onAdResponseLoaded(Response response);
+        void onAdResponseFailed();
     }
 
-    public synchronized void fetchAds(final ImageFetcher imageFetcher,
-                                      final String apiUrl,
-                                      final ArrayList<NameValuePair> queryStringParams,
-                                      final Function<Creative, Void> creativeHandler,
-                                      final Callback adFetcherCallback,
-                                      final Function<Placement, Void> placementHandler) {
-        if (isRunning) return; //isRunning ensures all creative assets are fetched (e.g images) before another ad request can be executed.
-        isRunning = true;
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                Logger.d("ad request sent pkey: %s", placementKey);
-                beaconService.adRequested(placementKey);
+    public void setAdFetcherListener(AdFetcherListener adFetcherListener) {
+        this.adFetcherListener = adFetcherListener;
+    }
 
-                //see if we have an available google advertising ID.
-                if (advertisingIdProvider.getAdvertisingId() != null) {
-                    queryStringParams.add(new BasicNameValuePair("uid", advertisingIdProvider.getAdvertisingId()));
-                }
-                queryStringParams.add(new BasicNameValuePair("appId", beaconService.getAppVersionName()));
-                queryStringParams.add(new BasicNameValuePair("appName", beaconService.getAppPackageName()));
-                String formattedQueryStringParams = URLEncodedUtils.format(queryStringParams, "utf-8");
-                final URI uri = URI.create(apiUrl + "?" + formattedQueryStringParams );
+    public void fetchAds(String adRequestUrl){
+        SendHttpRequestTask sendHttpRequestTask = new SendHttpRequestTask();
+        sendHttpRequestTask.execute(adRequestUrl);
+    }
 
-                String json = null;
-                try {
+    protected class SendHttpRequestTask extends AsyncTask<String, Void, String> {
 
-                    DefaultHttpClient client = new DefaultHttpClient();
-                    HttpGet request = new HttpGet(uri);
-                    request.addHeader("User-Agent", Sharethrough.USER_AGENT);
+        @Override
+        protected String doInBackground(String... params) {
+
+            if( params[0] == null || params[0].isEmpty()){
+                return null;
+            }
+
+            String json;
+            try {
+
+                DefaultHttpClient client = new DefaultHttpClient();
+                HttpGet request = new HttpGet(params[0]);
+                request.addHeader("User-Agent", Sharethrough.USER_AGENT);
+                HttpResponse httpResponse = client.execute(request);
+                int code = httpResponse.getStatusLine().getStatusCode();
+
+                if (code == 200) {
                     InputStream content = client.execute(request).getEntity().getContent();
                     json = Misc.convertStreamToString(content);
                     Response response = getResponse(json);
 
-                    //Placement information will be referenced in the sharethrough object.
-                    if (!placementSet) {
-                        placementHandler.apply(new Placement(response.placement));
-                        placementSet = true;
-                    }
-
-                    remainingImageRequests = response.creatives.size();
-                    Logger.d("ad request returned %d creatives ",remainingImageRequests);
-
-                    if (remainingImageRequests == 0) {
-                        adFetcherCallback.finishedLoadingWithNoAds();
-                        isRunning = false;
-                        return;
-                    }
-                    for (final Response.Creative responseCreative : response.creatives) {
-                        imageFetcher.fetchCreativeImages(uri, responseCreative, new ImageFetcher.Callback() {
-                            @Override
-                            public void success(Creative value) {
-                                creativeHandler.apply(value);
-                                decCount();
-                            }
-
-                            @Override
-                            public void failure() {
-                                decCount();
-                            }
-
-                            private void decCount() {
-                                synchronized (AdFetcher.this) {
-                                    remainingImageRequests--;
-                                    if (remainingImageRequests == 0) {
-                                        isRunning = false;
-                                    }
-                                }
-                            }
-                        });
-                    }
-                } catch (Exception e) {
-                    adFetcherCallback.finishedLoadingWithNoAds();
-                    String msg = "failed to get ads for key " + placementKey + ": " + uri;
-                    if (json != null) {
-                        msg += ": " + json;
-                    }
-                    isRunning = false;
-                    Logger.e(msg, e);
+                    // notify adFetcherListener
+                    adFetcherListener.onAdResponseLoaded(response);
+                } else {
+                    throw new HttpException("Status code is not 200");
                 }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                adFetcherListener.onAdResponseFailed();
             }
-        });
-    }
-
-    private void parseBeacons(Response.Creative creative, JSONObject beacons) throws JSONException {
-        creative.creative.beacon.impression = new ArrayList<>();
-        creative.creative.beacon.visible = new ArrayList<>();
-        creative.creative.beacon.play = new ArrayList<>();
-        creative.creative.beacon.click = new ArrayList<>();
-
-        JSONArray impressionBeacons = beacons.getJSONArray("impression");
-        for (int k = 0; k < impressionBeacons.length(); k++) {
-            String s = impressionBeacons.getString(k);
-            creative.creative.beacon.impression.add(s);
-        }
-        JSONArray visibleBeacons = beacons.getJSONArray("visible");
-        for (int k = 0; k < visibleBeacons.length(); k++) {
-            String s = visibleBeacons.getString(k);
-            creative.creative.beacon.visible.add(s);
-        }
-        JSONArray clickBeacons = beacons.getJSONArray("click");
-        for (int k = 0; k < clickBeacons.length(); k++) {
-            String s = clickBeacons.getString(k);
-            creative.creative.beacon.click.add(s);
-        }
-        JSONArray playBeacons = beacons.getJSONArray("play");
-        for (int k = 0; k < playBeacons.length(); k++) {
-            String s = playBeacons.getString(k);
-            creative.creative.beacon.play.add(s);
+            return null;
         }
     }
+
 
     private Response getResponse(String json) throws JSONException {
         JSONObject jsonResponse = new JSONObject(json);
@@ -193,13 +128,32 @@ public class AdFetcher {
         return response;
     }
 
-    public interface Callback {
-        void finishedLoadingWithNoAds();
+    private void parseBeacons(Response.Creative creative, JSONObject beacons) throws JSONException {
+        creative.creative.beacon.impression = new ArrayList<>();
+        creative.creative.beacon.visible = new ArrayList<>();
+        creative.creative.beacon.play = new ArrayList<>();
+        creative.creative.beacon.click = new ArrayList<>();
+
+        JSONArray impressionBeacons = beacons.getJSONArray("impression");
+        for (int k = 0; k < impressionBeacons.length(); k++) {
+            String s = impressionBeacons.getString(k);
+            creative.creative.beacon.impression.add(s);
+        }
+        JSONArray visibleBeacons = beacons.getJSONArray("visible");
+        for (int k = 0; k < visibleBeacons.length(); k++) {
+            String s = visibleBeacons.getString(k);
+            creative.creative.beacon.visible.add(s);
+        }
+        JSONArray clickBeacons = beacons.getJSONArray("click");
+        for (int k = 0; k < clickBeacons.length(); k++) {
+            String s = clickBeacons.getString(k);
+            creative.creative.beacon.click.add(s);
+        }
+        JSONArray playBeacons = beacons.getJSONArray("play");
+        for (int k = 0; k < playBeacons.length(); k++) {
+            String s = playBeacons.getString(k);
+            creative.creative.beacon.play.add(s);
+        }
     }
 
-    // only used for testing
-    public void setIsRunning(boolean value) {
-        isRunning = value;
-
-    }
 }

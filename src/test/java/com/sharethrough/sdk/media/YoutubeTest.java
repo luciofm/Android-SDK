@@ -24,7 +24,6 @@ public class YoutubeTest extends TestBase {
         thumbnailBitmap = mock(Bitmap.class);
         creative = mock(Creative.class);
         beaconService = mock(BeaconService.class);
-        when(creative.makeThumbnailImage()).thenReturn(thumbnailBitmap);
         feedPosition = 5;
     }
 

@@ -12,12 +12,12 @@ import java.util.concurrent.ExecutorService;
 public class AdvertisingIdProvider {
     private String advertisingId;
 
-    public AdvertisingIdProvider(final Context context, ExecutorService executorService) {
+    public AdvertisingIdProvider(final Context context) {
         int googlePlayServicesAvailable = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
         if (googlePlayServicesAvailable != ConnectionResult.SUCCESS) {
 //            GooglePlayServicesUtil.getErrorDialog(googlePlayServicesAvailable, (Activity) context, 0).show();
         } else {
-            executorService.execute(new Runnable() {
+            STRExecutorService.getInstance().execute(new Runnable() {
                 @Override
                 public void run() {
                     try {

@@ -2,12 +2,14 @@ package com.sharethrough.sdk.network;
 
 import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
 import com.google.android.gms.ads.doubleclick.PublisherAdView;
+import com.sharethrough.sdk.STRExecutorService;
 import com.sharethrough.sdk.TestBase;
 import com.sharethrough.test.Fixtures;
 import com.sharethrough.test.util.Misc;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.robolectric.Robolectric;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
@@ -17,6 +19,7 @@ import org.robolectric.shadows.ShadowView;
 import org.robolectric.tester.org.apache.http.TestHttpResponse;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -46,7 +49,7 @@ public class DFPNetworkingTest extends TestBase {
         final String[] receivedUrl = new String[1];
         final boolean[] error = new boolean[1];
 
-        subject.fetchDFPPath(executorService, key, new DFPNetworking.DFPPathFetcherCallback() {
+        subject.fetchDFPPath(key, new DFPNetworking.DFPPathFetcherCallback() {
             @Override
             public void receivedURL(String url) {
                 receivedUrl[0] = url;
@@ -57,8 +60,7 @@ public class DFPNetworkingTest extends TestBase {
                 error[0] = true;
             }
         });
-
-        Misc.runLast(executorService);
+        STRExecutorService.getInstance().awaitTermination(1000, TimeUnit.MILLISECONDS);
 
         assertThat(error[0]).isFalse();
         assertThat(receivedUrl[0]).isEqualTo("/fake/dfp/url");

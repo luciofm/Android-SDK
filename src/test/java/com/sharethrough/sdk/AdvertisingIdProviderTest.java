@@ -29,18 +29,17 @@ import static org.mockito.Mockito.verify;
 })
 public class AdvertisingIdProviderTest extends TestBase {
 
-    private ExecutorService executorService;
     private final String defaultId = "L00MB@";
 
     @Before
     public void setUp() throws Exception {
-        executorService = mock(ExecutorService.class);
+        STRExecutorService.setExecutorService(mock(ExecutorService.class));
     }
 
     @Test
     public void whenGooglePlayServicesIsUnavailable() throws Exception {
         MyGooglePlayServicesUtilShadow.IS_AVAILABLE = false;
-        AdvertisingIdProvider subject = new AdvertisingIdProvider(Robolectric.application, executorService);
+        AdvertisingIdProvider subject = new AdvertisingIdProvider(Robolectric.application);
         assertThat(subject.getAdvertisingId()).isEqualTo(null);
     }
 
@@ -48,10 +47,10 @@ public class AdvertisingIdProviderTest extends TestBase {
     public void whenAdvertisingIdIsUnavailable() throws Exception {
         MyGooglePlayServicesUtilShadow.IS_AVAILABLE = true;
         MyAdvertisingIdClientShadow.ADVERTISING_ID = null;
-        AdvertisingIdProvider subject = new AdvertisingIdProvider(Robolectric.application, executorService);
+        AdvertisingIdProvider subject = new AdvertisingIdProvider(Robolectric.application);
 
         ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(executorService).execute(runnableArgumentCaptor.capture());
+        verify(STRExecutorService.getInstance()).execute(runnableArgumentCaptor.capture());
         Thread thread = new Thread(runnableArgumentCaptor.getValue());
         thread.start();
         thread.join();
@@ -63,9 +62,9 @@ public class AdvertisingIdProviderTest extends TestBase {
     public void whenLimitedAdTrackingIsEnabled() throws Exception {
         MyGooglePlayServicesUtilShadow.IS_AVAILABLE = true;
         MyAdvertisingIdClientShadow.IS_LIMITED_AD_TRACKING_ENABLED = true;
-        AdvertisingIdProvider subject = new AdvertisingIdProvider(Robolectric.application, executorService);
+        AdvertisingIdProvider subject = new AdvertisingIdProvider(Robolectric.application);
 
-        com.sharethrough.test.util.Misc.runLast(executorService);
+        com.sharethrough.test.util.Misc.runLast(STRExecutorService.getInstance());
 
         assertThat(subject.getAdvertisingId()).isEqualTo(null);
     }
@@ -76,10 +75,10 @@ public class AdvertisingIdProviderTest extends TestBase {
         MyAdvertisingIdClientShadow.IS_LIMITED_AD_TRACKING_ENABLED = false;
         MyAdvertisingIdClientShadow.ADVERTISING_ID = "0u812";
 
-        AdvertisingIdProvider subject = new AdvertisingIdProvider(Robolectric.application, executorService);
+        AdvertisingIdProvider subject = new AdvertisingIdProvider(Robolectric.application);
 
         ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(executorService).execute(runnableArgumentCaptor.capture());
+        verify(STRExecutorService.getInstance()).execute(runnableArgumentCaptor.capture());
         Thread thread = new Thread(runnableArgumentCaptor.getValue());
         thread.start();
         thread.join();
