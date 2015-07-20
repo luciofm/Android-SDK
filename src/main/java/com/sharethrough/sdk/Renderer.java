@@ -65,6 +65,7 @@ public class Renderer {
                 thumbnailContainer.removeAllViews();
                 final AdImageView thumbnailImage = new AdImageView(container.getContext(), sharethrough, creative, adView, feedPosition, beaconService);
                 Picasso.with(container.getContext()).load(creative.getThumbnailUrl()).fit().centerCrop().tag("STRAdImage").into(thumbnailImage);
+                sharethrough.fetchAdsIfReadyForMore();
                 thumbnailContainer.addView(thumbnailImage,
                         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
 

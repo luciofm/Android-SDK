@@ -65,7 +65,6 @@ public class Sharethrough {
     public boolean firedNewAdsToShow;
     Placement placement;
     public boolean placementSet;
-    private Function<Placement, Void> placementHandler;
     private Callback<Placement> placementCallback = new Callback<Placement>() {
         @Override
         public void call(Placement result) {
