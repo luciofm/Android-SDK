@@ -15,7 +15,6 @@ import com.sharethrough.sdk.network.AdManager;
 import com.sharethrough.sdk.network.DFPNetworking;
 
 
-import com.squareup.picasso.Picasso;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 

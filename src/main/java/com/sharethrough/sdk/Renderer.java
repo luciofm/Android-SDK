@@ -14,7 +14,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.media.Media;
-import com.squareup.picasso.Picasso;
+import com.sharethrough.STRPicasso.Picasso;
+
 
 import java.util.Timer;
 

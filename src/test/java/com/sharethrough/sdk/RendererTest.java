@@ -16,7 +16,6 @@ import android.widget.TextView;
 import com.sharethrough.sdk.media.Media;
 import com.sharethrough.sdk.test.SharethroughTestRunner;
 import com.sharethrough.test.util.TestAdView;
-import com.squareup.picasso.Picasso;
 import org.apache.tools.ant.taskdefs.Sleep;
 import org.fest.assertions.api.ANDROID;
 import org.fest.util.Lists;
