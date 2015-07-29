@@ -68,6 +68,7 @@ public class BeaconServiceTest extends TestBase {
         responseCreative.creative.variantKey = "variant key";
         responseCreative.creative.creativeKey = "creative key";
         responseCreative.creative.campaignKey= "campaign key";
+        responseCreative.creative.dealId= "";
         responseCreative.signature = "signature";
         responseCreative.priceType = "price type";
         responseCreative.price = 1000;
@@ -107,7 +108,7 @@ public class BeaconServiceTest extends TestBase {
     }
 
     @Test
-    public void commonParamsWithAd_returnsParamsSentInAllBeaconsForAnAd() throws Exception {
+    public void commonParamsWithAd_Has_No_DealID_returnsParamsSentInAllBeaconsForAnAd() throws Exception {
         expectedCommonParams.put("pkey", "placement key");
         expectedCommonParams.put("vkey", "variant key");
         expectedCommonParams.put("ckey", "creative key");
@@ -119,6 +120,36 @@ public class BeaconServiceTest extends TestBase {
         expectedCommonParams.put("awid", "fake-auction-win-id");
 
 
+        assertThat(subject.commonParamsWithCreative(Robolectric.application, creative)).isEqualTo(expectedCommonParams);
+    }
+
+    @Test
+    public void commonParamsWithAd_Has_DealID_returnsParamsSentInAllBeaconsForAnAd() throws Exception {
+        Response.Creative responseCreativeWithDealId = new Response.Creative();
+        responseCreativeWithDealId.creative = new Response.Creative.CreativeInner();
+        responseCreativeWithDealId.adserverRequestId = "fake-adserver-request-id";
+        responseCreativeWithDealId.auctionWinId = "fake-auction-win-id";
+        responseCreativeWithDealId.creative.variantKey = "variant key";
+        responseCreativeWithDealId.creative.creativeKey = "creative key";
+        responseCreativeWithDealId.creative.campaignKey= "campaign key";
+        responseCreativeWithDealId.creative.dealId = "";
+        responseCreativeWithDealId.signature = "signature";
+        responseCreativeWithDealId.priceType = "price type";
+        responseCreativeWithDealId.price = 1000;
+        responseCreativeWithDealId.creative.dealId = "fake_deal_id";
+
+        creative = new Creative(responseCreativeWithDealId);
+
+        expectedCommonParams.put("pkey", "placement key");
+        expectedCommonParams.put("vkey", "variant key");
+        expectedCommonParams.put("ckey", "creative key");
+        expectedCommonParams.put("campkey", "campaign key");
+        expectedCommonParams.put("as", "signature");
+        expectedCommonParams.put("at", "price type");
+        expectedCommonParams.put("ap", "1000");
+        expectedCommonParams.put("arid", "fake-adserver-request-id");
+        expectedCommonParams.put("awid", "fake-auction-win-id");
+        expectedCommonParams.put("deal_id", "fake_deal_id");
         assertThat(subject.commonParamsWithCreative(Robolectric.application, creative)).isEqualTo(expectedCommonParams);
     }
 

@@ -162,4 +162,8 @@ public class Creative {
             return "http://" + canonicalUrl;
         }
     }
+
+    public String getDealId(){
+        return responseCreative.creative.dealId;
+    }
 }
