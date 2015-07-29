@@ -48,12 +48,13 @@ public class DFPNetworkingTest extends TestBase {
         Robolectric.addHttpResponseRule("GET", apiUrl, new TestHttpResponse(200, DFP_URL_FIXTURE));
         final String[] receivedUrl = new String[1];
         final boolean[] error = new boolean[1];
-        error[0] = true;
+
+        STRExecutorService.setExecutorService(executorService);
 
         subject.fetchDFPPath(key, new DFPNetworking.DFPPathFetcherCallback() {
             @Override
             public void receivedURL(String url) {
-                error[0] = false;
+                receivedUrl[0] = url;
             }
 
             @Override
@@ -61,10 +62,10 @@ public class DFPNetworkingTest extends TestBase {
                 error[0] = true;
             }
         });
-        STRExecutorService.getInstance().awaitTermination(1000, TimeUnit.MILLISECONDS);
 
+        Misc.runLast(STRExecutorService.getInstance());
         assertThat(error[0]).isFalse();
-        //assertThat(receivedUrl[0]).isEqualTo("/fake/dfp/url");
+        assertThat(receivedUrl[0]).isEqualTo("/fake/dfp/url");
     }
 
     @Config(shadows = {
