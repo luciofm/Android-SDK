@@ -49,6 +49,8 @@ public class DFPNetworkingTest extends TestBase {
         final String[] receivedUrl = new String[1];
         final boolean[] error = new boolean[1];
 
+        STRExecutorService.setExecutorService(executorService);
+
         subject.fetchDFPPath(key, new DFPNetworking.DFPPathFetcherCallback() {
             @Override
             public void receivedURL(String url) {
@@ -60,8 +62,8 @@ public class DFPNetworkingTest extends TestBase {
                 error[0] = true;
             }
         });
-        STRExecutorService.getInstance().awaitTermination(1000, TimeUnit.MILLISECONDS);
 
+        Misc.runLast(STRExecutorService.getInstance());
         assertThat(error[0]).isFalse();
         assertThat(receivedUrl[0]).isEqualTo("/fake/dfp/url");
     }

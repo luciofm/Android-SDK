@@ -78,7 +78,9 @@ public class BeaconService {
         result.put("ap", creative.getAuctionPrice());
         result.put("arid", creative.getAdserverRequestId());
         result.put("awid", creative.getAuctionWinId());
-
+        if(false == creative.getDealId().isEmpty()) {
+            result.put("deal_id", creative.getDealId());
+        }
         return result;
     }
 

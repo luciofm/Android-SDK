@@ -66,6 +66,8 @@ public class Response {
             public String customEngagementUrl;
             @JsonProperty("custom_engagement_label")
             public String customEngagementLabel;
+            @JsonProperty("deal_id")
+            public String dealId;
 
             public static class Beacon {
                 @JsonProperty("impression")
