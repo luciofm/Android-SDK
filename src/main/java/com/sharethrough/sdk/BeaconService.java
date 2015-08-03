@@ -9,6 +9,7 @@ import android.os.Build;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
+import com.sharethrough.android.sdk.BuildConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
@@ -60,7 +61,7 @@ public class BeaconService {
         if (advertisingIdProvider.getAdvertisingId() != null) result.put("uid", advertisingIdProvider.getAdvertisingId());
         result.put("session", session.toString());
 
-        result.put("ua", "" + Sharethrough.USER_AGENT + "; " + appPackageName);
+        result.put("ua", Build.MODEL + "; Android " + Build.VERSION.RELEASE + "; " + appPackageName + "; STR " + BuildConfig.VERSION_NAME);
         result.put("appName", appPackageName);
         result.put("appId", appVersionName);
 
