@@ -3,6 +3,8 @@ package com.sharethrough.sdk;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
+import com.sharethrough.android.sdk.BuildConfig;
 import com.sharethrough.test.util.Misc;
 import org.apache.http.HttpRequest;
 import org.apache.http.NameValuePair;
@@ -57,7 +59,8 @@ public class BeaconServiceTest extends TestBase {
         expectedCommonParams.put("session", session.toString());
         advertisingId = "abc";
         expectedCommonParams.put("uid", advertisingId);
-        expectedCommonParams.put("ua", "" + Sharethrough.USER_AGENT + "; " + "com.sharethrough.android.sdk");
+        expectedCommonParams.put("ua", Build.MODEL + "; Android " + Build.VERSION.RELEASE + "; " + "com.sharethrough.android.sdk" + "; STR " + BuildConfig.VERSION_NAME);
+
         expectedCommonParams.put("appName", "com.sharethrough.android.sdk");
         expectedCommonParams.put("appId", Sharethrough.SDK_VERSION_NUMBER);
 
