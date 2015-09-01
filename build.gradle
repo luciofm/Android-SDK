@@ -43,14 +43,7 @@ android {
 
     def versionPropsFile = file('version.properties')
 
-    def getVersionName = { ->
-        def stdout = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'rev-parse', '--short', 'HEAD'
-            standardOutput = stdout
-        }
-        return stdout.toString().trim()
-    }
+    def version = 'v0.0.0'
 
     if (versionPropsFile.canRead()) {
         def Properties versionProps = new Properties()
@@ -58,11 +51,11 @@ android {
         versionProps.load(new FileInputStream(versionPropsFile))
 
         def code = versionProps['VERSION_CODE'].toInteger() + 1
-        def version = getVersionName()
+        version = versionProps['VERSION_NAME']
 
         versionProps['VERSION_CODE']=code.toString()
-        versionProps['VERSION_NAME']=version.toString()
         versionProps.store(versionPropsFile.newWriter(), null)
+
 
         defaultConfig {
             versionCode code
@@ -79,7 +72,7 @@ android {
         minSdkVersion 9
         targetSdkVersion 14
         versionCode 1
-        versionName getVersionName()
+        versionName version
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
         multiDexEnabled true
     }
