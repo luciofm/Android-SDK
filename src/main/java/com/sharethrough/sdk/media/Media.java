@@ -28,7 +28,7 @@ public abstract class Media {
     /*
     Puts the Media icon over where the thumbnail image will be (ie. red youtube icon)
      */
-    public final void overlayThumbnail(IAdView adView, ImageView thumbnailImage) {
+    public void swapMedia(IAdView adView, ImageView thumbnailImage) {
         int overlayImageResourceId = getOverlayImageResourceId();
         if (overlayImageResourceId < 0) return;
         FrameLayout thumbnail = adView.getThumbnail();
@@ -42,6 +42,8 @@ public abstract class Media {
         thumbnail.addView(overlayIcon, new FrameLayout.LayoutParams(overlayMax, overlayMax, gravity));
 
         thumbnailImage.setTag(THUMBNAIL);
+
+
     }
 
     public boolean isThumbnailOverlayCentered() {

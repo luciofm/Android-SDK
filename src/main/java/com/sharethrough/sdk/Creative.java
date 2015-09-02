@@ -73,6 +73,8 @@ public class Creative {
                 return new Pinterest(this);
             case "article":
                 return new Article(this);
+            case "autoplay":
+                return new AutoPlayVideo(this);
             case "clickout":
             default:
                 return new Clickout(this);

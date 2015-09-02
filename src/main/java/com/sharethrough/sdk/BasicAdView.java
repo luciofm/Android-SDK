@@ -23,6 +23,7 @@ public class BasicAdView extends FrameLayout implements IAdView {
     private int brandLogoId;
     private View view;
     private ProgressBar spinner;
+    private ScreenListener screenListener;
 
     /**
      * Constructor for creating a BasicAdView.
@@ -117,5 +118,29 @@ public class BasicAdView extends FrameLayout implements IAdView {
     @Override
     public ImageView getBrandLogo() {
         return (ImageView) this.findViewById(brandLogoId);
+    }
+
+    @Override
+    public ScreenListener getScreenListener() {
+        return screenListener;
+    }
+
+    @Override
+    public void setScreenListener(ScreenListener screenListener) {
+        this.screenListener = screenListener;
+    }
+
+
+    @Override
+    public void onScreen(){
+        if( screenListener == null ) return;
+        screenListener.onScreen();
+    }
+
+
+    @Override
+    public void offScreen(){
+        if( screenListener == null ) return;
+        screenListener.offScreen();
     }
 }

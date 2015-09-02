@@ -49,4 +49,19 @@ public interface IAdView {
      * implementation will be a subclass of <code>ViewGroup</code> and you should return <code>this</code>.
      */
     ViewGroup getAdView();
+
+    ScreenListener getScreenListener();
+
+    void setScreenListener(ScreenListener screenListener);
+
+    //when ad is visible this is called via the timertask
+    void onScreen();
+
+    //when ad is not visible this is called via the timertask
+    void offScreen();
+
+    interface ScreenListener{
+        public void onScreen();
+        public void offScreen();
+    }
 }

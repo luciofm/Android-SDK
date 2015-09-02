@@ -60,6 +60,16 @@ public class AdViewTimerTask extends TimerTask {
         }
     }
 
+    private void fireVisibilityEventsWhenAppropriate( IAdView adView ) {
+        if( adView == null ) return;
+        if (is50PercentOfAdIsOnScreen(adView)) {
+            adView.onScreen();
+        }
+        else {
+            adView.offScreen();
+        }
+    }
+
     @Override
     public void run() {
         IAdView adView = adViewRef.get();
@@ -70,6 +80,7 @@ public class AdViewTimerTask extends TimerTask {
         if (isCancelled) return;
 
         fireVisibleBeaconIfThresholdReached(adView);
+        fireVisibilityEventsWhenAppropriate(adView);
     }
 
     private boolean is50PercentOfAdIsOnScreen(IAdView adView) {
