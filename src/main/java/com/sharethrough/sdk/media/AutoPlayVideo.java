@@ -10,18 +10,19 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.VideoView;
 import com.sharethrough.android.sdk.R;
-import com.sharethrough.sdk.BeaconService;
-import com.sharethrough.sdk.Creative;
-import com.sharethrough.sdk.IAdView;
-import com.sharethrough.sdk.Placement;
+import com.sharethrough.sdk.*;
 import com.sharethrough.sdk.beacons.VideoCompletionBeaconService;
 import com.sharethrough.sdk.dialogs.VideoDialog;
 
 import java.util.Timer;
+import java.util.TimerTask;
 
 public class AutoPlayVideo extends Media {
     private final Creative creative;
-    boolean isPlaying = false;
+    boolean beforeUserEngagement = true;
+    Timer timer = new Timer();
+    PlaybackTimerTask task;
+
 
     public AutoPlayVideo(Creative creative) {
         this.creative = creative;
@@ -29,6 +30,7 @@ public class AutoPlayVideo extends Media {
 
     @Override
     public void wasClicked(View view, BeaconService beaconService, int feedPosition) {
+        beforeUserEngagement = false;
         new VideoDialog(view.getContext(), creative, beaconService, false, new Timer(), new VideoCompletionBeaconService(view.getContext(), creative, beaconService, feedPosition), feedPosition).show();
     }
 
@@ -58,6 +60,7 @@ public class AutoPlayVideo extends Media {
                 mp.setLooping(false);
                 mp.setVolume(0f, 0f);
                 mp.start();
+
             }
         });
 
@@ -69,11 +72,15 @@ public class AutoPlayVideo extends Media {
             }
         });
 
+        task = new PlaybackTimerTask(vw);
+        timer.schedule(task, 0, 1000);
+
         adView.setScreenListener( new IAdView.ScreenListener() {
             @Override
             public void onScreen() {
                 if (!vw.isPlaying()) {
                     vw.start();
+                    timer.schedule(task, 0, 1000);
                 }
             }
 
@@ -81,12 +88,39 @@ public class AutoPlayVideo extends Media {
             public void offScreen() {
                 if (vw.isPlaying() && vw.canPause()) {
                     vw.pause();
+                    timer.cancel();
                 }
             }
         } );
 
 
     }
+
+    public class PlaybackTimerTask extends TimerTask {
+        private VideoView videoView;
+        public PlaybackTimerTask (VideoView videoView) {
+            this.videoView = videoView;
+        }
+        @Override
+        public void run() {
+            if (!beforeUserEngagement) return;
+            if (videoView!= null) {
+                Logger.d("Danica %d", videoView.getCurrentPosition());
+                if (videoView.getCurrentPosition() >= 3000 && videoView.getCurrentPosition() < 4000) {
+                    Logger.d("Danica 3 second");
+                }
+                else if (videoView.getCurrentPosition() >= 10000 && videoView.getCurrentPosition() <11000) {
+                    Logger.d("Danica 10 second");
+
+                }
+                else if (videoView.getCurrentPosition() >= 11000) {
+                    this.cancel();
+                    Logger.d("Danica canceled");
+                }
+            }
+        }
+    }
+
 
     @Override
     public Creative getCreative() {
