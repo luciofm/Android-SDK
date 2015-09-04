@@ -21,7 +21,7 @@ public class HostedVideo extends Media {
 
     @Override
     public void wasClicked(View view, BeaconService beaconService, int feedPosition) {
-        new VideoDialog(view.getContext(), creative, beaconService, false, new Timer(), new VideoCompletionBeaconService(view.getContext(), creative, beaconService, feedPosition), feedPosition).show();
+        new VideoDialog(view.getContext(), creative, beaconService, false, new Timer(), new VideoCompletionBeaconService(view.getContext(), creative, beaconService, feedPosition), feedPosition, 0).show();
     }
 
     @Override

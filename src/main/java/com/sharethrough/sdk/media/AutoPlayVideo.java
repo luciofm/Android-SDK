@@ -18,10 +18,15 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class AutoPlayVideo extends Media {
+    private String videoViewTag;
     private final Creative creative;
-    boolean beforeUserEngagement = true;
+
+    private Object lock = new Object();
+    boolean hasAdBeenClicked = true;
+    boolean videoCompleted = false;
+
     Timer timer = new Timer();
-    PlaybackTimerTask task;
+    PlaybackTimerTask silentAutoPlayBeaconTask;
 
 
     public AutoPlayVideo(Creative creative) {
@@ -30,8 +35,15 @@ public class AutoPlayVideo extends Media {
 
     @Override
     public void wasClicked(View view, BeaconService beaconService, int feedPosition) {
-        beforeUserEngagement = false;
-        new VideoDialog(view.getContext(), creative, beaconService, false, new Timer(), new VideoCompletionBeaconService(view.getContext(), creative, beaconService, feedPosition), feedPosition).show();
+        hasAdBeenClicked = true;
+        timer.cancel();
+
+        VideoView videoView = (VideoView)view.findViewWithTag(videoViewTag);
+        if (videoView.isPlaying() && videoView.canPause()) {
+            videoView.pause();
+        }
+
+        new VideoDialog(view.getContext(), creative, beaconService, false, new Timer(), new VideoCompletionBeaconService(view.getContext(), creative, beaconService, feedPosition), feedPosition, videoView.getCurrentPosition()).show();
     }
 
     @Override
@@ -50,7 +62,10 @@ public class AutoPlayVideo extends Media {
         FrameLayout thumbnailContainer = adView.getThumbnail();
 
         final VideoView vw = new VideoView(adView.getAdView().getContext().getApplicationContext());
-        thumbnailContainer.addView(vw, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
+        videoViewTag = "SharethroughAutoPlayVideoView";
+        vw.setTag(videoViewTag);
+
+
         Uri uri = Uri.parse(getCreative().getMediaUrl());
         vw.setVideoURI(uri);
 
@@ -60,6 +75,7 @@ public class AutoPlayVideo extends Media {
                 mp.setLooping(false);
                 mp.setVolume(0f, 0f);
                 mp.start();
+                //adView.getThumbnail().addView(vw, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
 
             }
         });
@@ -67,28 +83,38 @@ public class AutoPlayVideo extends Media {
         vw.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                adView.setScreenListener(null);
+                synchronized (lock) {
+                    videoCompleted = true;
+                }
+
                 mp.stop();
             }
         });
 
-        task = new PlaybackTimerTask(vw);
-        timer.schedule(task, 0, 1000);
+        silentAutoPlayBeaconTask = new PlaybackTimerTask(vw);
+        timer.schedule(silentAutoPlayBeaconTask, 0, 1000);
 
         adView.setScreenListener( new IAdView.ScreenListener() {
             @Override
             public void onScreen() {
-                if (!vw.isPlaying()) {
-                    vw.start();
-                    timer.schedule(task, 0, 1000);
+                synchronized (lock) {
+                    if( videoCompleted || hasAdBeenClicked ){
+                        return;
+                    }
+                    if (!vw.isPlaying()) {
+                        vw.start();
+                        timer.schedule(silentAutoPlayBeaconTask, 0, 1000);
+                    }
                 }
             }
 
             @Override
             public void offScreen() {
-                if (vw.isPlaying() && vw.canPause()) {
-                    vw.pause();
-                    timer.cancel();
+                synchronized (lock) {
+                    if (vw.isPlaying() && vw.canPause()) {
+                        vw.pause();
+                        timer.cancel();
+                    }
                 }
             }
         } );
@@ -103,7 +129,10 @@ public class AutoPlayVideo extends Media {
         }
         @Override
         public void run() {
-            if (!beforeUserEngagement) return;
+            if (hasAdBeenClicked) {
+                return;
+            }
+
             if (videoView!= null) {
                 Logger.d("Danica %d", videoView.getCurrentPosition());
                 if (videoView.getCurrentPosition() >= 3000 && videoView.getCurrentPosition() < 4000) {
