@@ -104,7 +104,7 @@ public class RendererTest extends TestBase {
 
         verifyNoMoreInteractions(media);
         shadowLooper.runOneTask();
-        verify(media).overlayThumbnail(adView, thumbnailImageView);
+        verify(media).swapMedia(adView, thumbnailImageView);
     }
 
     @Test
@@ -265,6 +265,26 @@ public class RendererTest extends TestBase {
         @Override
         public ImageView getOptout() {
             return optout;
+        }
+
+        @Override
+        public ScreenVisibilityListener getScreenVisibilityListener() {
+            return null;
+        }
+
+        @Override
+        public void setScreenVisibilityListener(ScreenVisibilityListener screenListener) {
+
+        }
+
+        @Override
+        public void onScreen() {
+
+        }
+
+        @Override
+        public void offScreen() {
+
         }
     }
 
