@@ -50,9 +50,16 @@ public interface IAdView {
      */
     ViewGroup getAdView();
 
-    ScreenListener getScreenListener();
+    /**
+     * @return The visibility listener that listens for onScreen and offScreen events
+     */
+    ScreenVisibilityListener getScreenVisibilityListener();
 
-    void setScreenListener(ScreenListener screenListener);
+    /**
+     * Sets the visibility listener that listens for onScreen and offScreen events
+     * @param screenListener
+     */
+    void setScreenVisibilityListener(ScreenVisibilityListener screenListener);
 
     //when ad is visible this is called via the timertask
     void onScreen();
@@ -60,7 +67,7 @@ public interface IAdView {
     //when ad is not visible this is called via the timertask
     void offScreen();
 
-    interface ScreenListener{
+    interface ScreenVisibilityListener{
         public void onScreen();
         public void offScreen();
     }

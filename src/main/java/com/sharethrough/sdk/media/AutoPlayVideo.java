@@ -18,16 +18,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class AutoPlayVideo extends Media {
-    private String videoViewTag;
+    private String videoViewTag = "SharethroughAutoPlayVideoView";
     private final Creative creative;
 
-    private Object lock = new Object();
-    boolean hasAdBeenClicked = true;
-    boolean videoCompleted = false;
+    private Object videoCompletedLock = new Object();
+    private boolean isVideoPrepared = false;
 
-    Timer timer = new Timer();
+    Timer silentAutoPlayBeaconTimer;
     PlaybackTimerTask silentAutoPlayBeaconTask;
-
 
     public AutoPlayVideo(Creative creative) {
         this.creative = creative;
@@ -35,8 +33,7 @@ public class AutoPlayVideo extends Media {
 
     @Override
     public void wasClicked(View view, BeaconService beaconService, int feedPosition) {
-        hasAdBeenClicked = true;
-        timer.cancel();
+        silentAutoPlayBeaconTimer.cancel();
 
         VideoView videoView = (VideoView)view.findViewWithTag(videoViewTag);
         if (videoView.isPlaying() && videoView.canPause()) {
@@ -59,67 +56,75 @@ public class AutoPlayVideo extends Media {
 
         thumbnailImage.setVisibility(View.INVISIBLE);
 
+        final VideoView videoView = new VideoView(adView.getAdView().getContext().getApplicationContext());
+        videoView.setTag(videoViewTag);
+
         FrameLayout thumbnailContainer = adView.getThumbnail();
-
-        final VideoView vw = new VideoView(adView.getAdView().getContext().getApplicationContext());
-        videoViewTag = "SharethroughAutoPlayVideoView";
-        vw.setTag(videoViewTag);
-
-
+        thumbnailContainer.addView(videoView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
         Uri uri = Uri.parse(getCreative().getMediaUrl());
-        vw.setVideoURI(uri);
+        videoView.setVideoURI(uri);
 
-        vw.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
-            public void onPrepared(MediaPlayer mp) {
-                mp.setLooping(false);
-                mp.setVolume(0f, 0f);
-                mp.start();
-                //adView.getThumbnail().addView(vw, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
+            public void onPrepared(MediaPlayer mediaPlayer) {
+                if (((VideoCreative)creative).hasVideoCompleted || creative.wasClicked()) return;
+
+                mediaPlayer.setLooping(false);
+                mediaPlayer.setVolume(0f, 0f);
+                mediaPlayer.seekTo(((VideoCreative)creative).currentPosition);
+                mediaPlayer.start();
+                scheduleSilentAutoplayBeaconTask(videoView);
+                isVideoPrepared = true;
 
             }
         });
 
-        vw.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
-            public void onCompletion(MediaPlayer mp) {
-                synchronized (lock) {
-                    videoCompleted = true;
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                synchronized (videoCompletedLock) {
+                    ((VideoCreative)creative).hasVideoCompleted = true;
+                    silentAutoPlayBeaconTimer.cancel();
                 }
 
-                mp.stop();
+                mediaPlayer.stop();
             }
         });
 
-        silentAutoPlayBeaconTask = new PlaybackTimerTask(vw);
-        timer.schedule(silentAutoPlayBeaconTask, 0, 1000);
-
-        adView.setScreenListener( new IAdView.ScreenListener() {
+        adView.setScreenVisibilityListener(new IAdView.ScreenVisibilityListener() {
             @Override
             public void onScreen() {
-                synchronized (lock) {
-                    if( videoCompleted || hasAdBeenClicked ){
+                synchronized (videoCompletedLock) {
+                    if (!isVideoPrepared || ((VideoCreative)creative).hasVideoCompleted || creative.wasClicked()) {
                         return;
                     }
-                    if (!vw.isPlaying()) {
-                        vw.start();
-                        timer.schedule(silentAutoPlayBeaconTask, 0, 1000);
+                    if (!videoView.isPlaying()) {
+                        videoView.start();
+                        scheduleSilentAutoplayBeaconTask(videoView);
+                        Logger.d("video play");
                     }
                 }
             }
 
             @Override
             public void offScreen() {
-                synchronized (lock) {
-                    if (vw.isPlaying() && vw.canPause()) {
-                        vw.pause();
-                        timer.cancel();
-                    }
+                if (videoView.isPlaying() && videoView.canPause()) {
+                    ((VideoCreative)creative).currentPosition = videoView.getCurrentPosition();
+                    videoView.pause();
+                    silentAutoPlayBeaconTimer.cancel();
+                    Logger.d("video pause");
                 }
             }
         } );
+    }
 
-
+    private void scheduleSilentAutoplayBeaconTask(VideoView videoView) {
+        if (silentAutoPlayBeaconTimer != null) {
+            silentAutoPlayBeaconTimer.cancel();
+        }
+        silentAutoPlayBeaconTimer = new Timer();
+        silentAutoPlayBeaconTask = new PlaybackTimerTask(videoView);
+        silentAutoPlayBeaconTimer.schedule(silentAutoPlayBeaconTask, 0, 1000);
     }
 
     public class PlaybackTimerTask extends TimerTask {
@@ -129,12 +134,11 @@ public class AutoPlayVideo extends Media {
         }
         @Override
         public void run() {
-            if (hasAdBeenClicked) {
+            if (creative.wasClicked()) {
                 return;
             }
 
             if (videoView!= null) {
-                Logger.d("Danica %d", videoView.getCurrentPosition());
                 if (videoView.getCurrentPosition() >= 3000 && videoView.getCurrentPosition() < 4000) {
                     Logger.d("Danica 3 second");
                 }
