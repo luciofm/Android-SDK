@@ -18,14 +18,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class AutoPlayVideo extends Media {
-    private String videoViewTag = "SharethroughAutoPlayVideoView";
-    private final Creative creative;
+    protected String videoViewTag = "SharethroughAutoPlayVideoView";
+    protected final Creative creative;
 
-    private Object videoCompletedLock = new Object();
-    private boolean isVideoPrepared = false;
+    protected Object videoCompletedLock = new Object();
+    protected boolean isVideoPrepared = false;
 
-    Timer silentAutoPlayBeaconTimer;
-    PlaybackTimerTask silentAutoPlayBeaconTask;
+    protected Timer silentAutoPlayBeaconTimer;
+    protected PlaybackTimerTask silentAutoPlayBeaconTask;
 
     public AutoPlayVideo(Creative creative) {
         this.creative = creative;
@@ -33,14 +33,18 @@ public class AutoPlayVideo extends Media {
 
     @Override
     public void wasClicked(View view, BeaconService beaconService, int feedPosition) {
-        silentAutoPlayBeaconTimer.cancel();
-
-        VideoView videoView = (VideoView)view.findViewWithTag(videoViewTag);
-        if (videoView.isPlaying() && videoView.canPause()) {
-            videoView.pause();
+        if (silentAutoPlayBeaconTimer != null) {
+            silentAutoPlayBeaconTimer.cancel();
         }
 
-        new VideoDialog(view.getContext(), creative, beaconService, false, new Timer(), new VideoCompletionBeaconService(view.getContext(), creative, beaconService, feedPosition), feedPosition, videoView.getCurrentPosition()).show();
+        int currentPosition = 0;
+        VideoView videoView = (VideoView)view.findViewWithTag(videoViewTag);
+        if (videoView != null && videoView.isPlaying() && videoView.canPause()) {
+            videoView.pause();
+            currentPosition = videoView.getCurrentPosition();
+        }
+
+        new VideoDialog(view.getContext(), creative, beaconService, false, new Timer(), new VideoCompletionBeaconService(view.getContext(), creative, beaconService, feedPosition), feedPosition, currentPosition).show();
     }
 
     @Override
@@ -67,11 +71,11 @@ public class AutoPlayVideo extends Media {
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mediaPlayer) {
-                if (((VideoCreative)creative).hasVideoCompleted || creative.wasClicked()) return;
+                if (((VideoCreative)creative).isVideoCompleted() || creative.wasClicked()) return;
 
                 mediaPlayer.setLooping(false);
                 mediaPlayer.setVolume(0f, 0f);
-                mediaPlayer.seekTo(((VideoCreative)creative).currentPosition);
+                mediaPlayer.seekTo(((VideoCreative)creative).getCurrentPosition());
                 mediaPlayer.start();
                 scheduleSilentAutoplayBeaconTask(videoView);
                 isVideoPrepared = true;
@@ -83,7 +87,7 @@ public class AutoPlayVideo extends Media {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
                 synchronized (videoCompletedLock) {
-                    ((VideoCreative)creative).hasVideoCompleted = true;
+                    ((VideoCreative)creative).setVideoCompleted(true);
                     silentAutoPlayBeaconTimer.cancel();
                 }
 
@@ -95,7 +99,7 @@ public class AutoPlayVideo extends Media {
             @Override
             public void onScreen() {
                 synchronized (videoCompletedLock) {
-                    if (!isVideoPrepared || ((VideoCreative)creative).hasVideoCompleted || creative.wasClicked()) {
+                    if (!isVideoPrepared || ((VideoCreative)creative).isVideoCompleted() || creative.wasClicked()) {
                         return;
                     }
                     if (!videoView.isPlaying()) {
@@ -109,7 +113,7 @@ public class AutoPlayVideo extends Media {
             @Override
             public void offScreen() {
                 if (videoView.isPlaying() && videoView.canPause()) {
-                    ((VideoCreative)creative).currentPosition = videoView.getCurrentPosition();
+                    ((VideoCreative)creative).setCurrentPosition(videoView.getCurrentPosition());
                     videoView.pause();
                     silentAutoPlayBeaconTimer.cancel();
                     Logger.d("video pause");

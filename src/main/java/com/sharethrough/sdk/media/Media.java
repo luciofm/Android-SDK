@@ -42,8 +42,6 @@ public abstract class Media {
         thumbnail.addView(overlayIcon, new FrameLayout.LayoutParams(overlayMax, overlayMax, gravity));
 
         thumbnailImage.setTag(THUMBNAIL);
-
-
     }
 
     public boolean isThumbnailOverlayCentered() {
