@@ -185,21 +185,65 @@ public class AutoPlayVideoTest extends TestBase {
         verify(mockedMediaPlayer).stop();
     }
 
-    /*@Test
+    @Test
     public void whenVideoOnScreenBeforeClicked_videoPlays() {
         ImageView mockedImageView = mock(ImageView.class);
-        IAdView adView = new BasicAdView(Robolectric.application);
 
+        FrameLayout thumbnailContainer = new FrameLayout(Robolectric.application);
+
+        IAdView mockedIAdView = spy(new BasicAdView(Robolectric.application));
+        when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(Robolectric.application));
+        when(mockedIAdView.getThumbnail()).thenReturn(thumbnailContainer);
         when(mockedCreative.isVideoCompleted()).thenReturn(false);
         when(mockedCreative.wasClicked()).thenReturn(false);
-        when(mockedCreative.getCurrentPosition()).thenReturn(4000);
-        subject.swapMedia(adView, mockedImageView);
 
-        //adView.getScreenVisibilityListener().onScreen();
-        //verify()
+        subject.swapMedia(mockedIAdView, mockedImageView);
+        subject.setIsVideoPrepared(true);
 
+        mockedIAdView.getScreenVisibilityListener().onScreen();
+        VideoView videoView = (VideoView)thumbnailContainer.findViewWithTag("SharethroughAutoPlayVideoView");
+        assertThat(videoView.isPlaying()).isTrue();
+    }
 
-    }*/
+    @Test
+    public void whenVideoOnScreenAfterClicked_videoPaused() {
+        ImageView mockedImageView = mock(ImageView.class);
+        FrameLayout thumbnailContainer = new FrameLayout(Robolectric.application);
 
+        IAdView mockedIAdView = spy(new BasicAdView(Robolectric.application));
+        when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(Robolectric.application));
+        when(mockedIAdView.getThumbnail()).thenReturn(thumbnailContainer);
+        when(mockedCreative.isVideoCompleted()).thenReturn(false);
+        when(mockedCreative.wasClicked()).thenReturn(true);
+
+        subject.swapMedia(mockedIAdView, mockedImageView);
+        subject.setIsVideoPrepared(true);
+
+        mockedIAdView.getScreenVisibilityListener().onScreen();
+        VideoView videoView = (VideoView)thumbnailContainer.findViewWithTag("SharethroughAutoPlayVideoView");
+        assertThat(videoView.isPlaying()).isFalse();
+    }
+
+    @Test
+    public void whenVideoOffScreen_videoPauses() {
+        ImageView mockedImageView = mock(ImageView.class);
+        FrameLayout thumbnailContainer = new FrameLayout(Robolectric.application);
+
+        IAdView mockedIAdView = spy(new BasicAdView(Robolectric.application));
+        when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(Robolectric.application));
+        when(mockedIAdView.getThumbnail()).thenReturn(thumbnailContainer);
+
+        subject.swapMedia(mockedIAdView, mockedImageView);
+        subject.setIsVideoPrepared(true);
+
+        Timer mockedTimer = mock(Timer.class);
+        subject.setTimer(mockedTimer);
+
+        VideoView videoView = (VideoView)thumbnailContainer.findViewWithTag("SharethroughAutoPlayVideoView");
+        videoView.start();
+        mockedIAdView.getScreenVisibilityListener().offScreen();
+        assertThat(videoView.isPlaying()).isFalse();
+        verify(mockedTimer).cancel();
+        verify(mockedCreative).setCurrentPosition(any(Integer.class));
+    }
 }
-
