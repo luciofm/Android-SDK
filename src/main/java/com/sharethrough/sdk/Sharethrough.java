@@ -386,16 +386,14 @@ public class Sharethrough {
      /* @return how many articles should be between ads. This is set on the server side.
      */
     public int getArticlesBetweenAds() {
-        return 3;
-//        return placement.getArticlesBetweenAds();
+        return placement.getArticlesBetweenAds();
     }
 
     /**
      * @return how many articles to place before the first ad.
      */
     public int getArticlesBeforeFirstAd() {
-        return 2;
-  //      return placement.getArticlesBeforeFirstAd();
+        return placement.getArticlesBeforeFirstAd();
     }
 
     /**
