@@ -60,7 +60,7 @@ public class MediaTest extends TestBase {
 
         TestAdView adView = RendererTest.makeAdView();
 
-        subject.swapMedia(adView, thumbnailImageView);
+        subject.overLayIconOverThumbnail(adView, thumbnailImageView);
 
         ArgumentCaptor<ImageView> imageViewArgumentCaptor = ArgumentCaptor.forClass(ImageView.class);
         ArgumentCaptor<FrameLayout.LayoutParams> layoutParamsArgumentCaptor = ArgumentCaptor.forClass(FrameLayout.LayoutParams.class);
@@ -84,7 +84,7 @@ public class MediaTest extends TestBase {
 
         TestAdView adView = RendererTest.makeAdView();
 
-        subject.swapMedia(adView, thumbnailImageView);
+        subject.overLayIconOverThumbnail(adView, thumbnailImageView);
 
         ArgumentCaptor<ImageView> imageViewArgumentCaptor = ArgumentCaptor.forClass(ImageView.class);
         ArgumentCaptor<FrameLayout.LayoutParams> layoutParamsArgumentCaptor = ArgumentCaptor.forClass(FrameLayout.LayoutParams.class);
@@ -102,7 +102,7 @@ public class MediaTest extends TestBase {
 
         TestAdView adView = RendererTest.makeAdView();
 
-        subject.swapMedia(adView, thumbnailImageView);
+        subject.overLayIconOverThumbnail(adView, thumbnailImageView);
 
         verifyNoMoreInteractions(adView.getThumbnail());
     }

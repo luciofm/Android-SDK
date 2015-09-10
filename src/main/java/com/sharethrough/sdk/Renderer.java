@@ -54,7 +54,7 @@ public class Renderer {
 
                 ImageView brandLogoView = adView.getBrandLogo();
                 if (brandLogoView != null ){
-                    if(creative.getBrandLogoUrl() != null && false == creative.getBrandLogoUrl().isEmpty()) {
+                    if(creative.getBrandLogoUrl() != null && !creative.getBrandLogoUrl().isEmpty()) {
                         Picasso.with(container.getContext()).load(creative.getBrandLogoUrl()).fit().centerCrop().tag("STRBrandLogo").into(brandLogoView);
                         brandLogoView.setVisibility(View.VISIBLE);
                     }else{
@@ -65,7 +65,7 @@ public class Renderer {
                 FrameLayout thumbnailContainer = adView.getThumbnail();
                 thumbnailContainer.removeAllViews();
                 final AdImageView thumbnailImage = new AdImageView(container.getContext(), sharethrough, creative, adView, feedPosition, beaconService);
-                if (creative.getThumbnailUrl() != null)
+                if (creative.getThumbnailUrl() != null && !creative.getThumbnailUrl().isEmpty())
                     Picasso.with(container.getContext()).load(creative.getThumbnailUrl()).fit().centerCrop().tag("STRAdImage").into(thumbnailImage);
                 sharethrough.fetchAdsIfReadyForMore();
                 thumbnailContainer.addView(thumbnailImage,
@@ -75,7 +75,7 @@ public class Renderer {
                 handler.post(new Runnable() { // give thumbnailImage a chance to render so we can use its size
                     @Override
                     public void run() {
-                        media.swapMedia(adView, thumbnailImage);
+                        media.wasRendered(adView, thumbnailImage);
                     }
                 });
                 container.setOnClickListener(new View.OnClickListener() {

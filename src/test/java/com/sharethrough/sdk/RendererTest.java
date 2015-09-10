@@ -104,7 +104,7 @@ public class RendererTest extends TestBase {
 
         verifyNoMoreInteractions(media);
         shadowLooper.runOneTask();
-        verify(media).swapMedia(adView, thumbnailImageView);
+        verify(media).wasRendered(adView, thumbnailImageView);
     }
 
     @Test

@@ -55,11 +55,13 @@ public class AutoPlayVideo extends Media {
     }
 
     @Override
-    public void swapMedia(final IAdView adView, ImageView thumbnailImage) {
-        super.swapMedia(adView, thumbnailImage);
-
+    public void wasRendered(final IAdView adView, ImageView thumbnailImage) {
+        super.wasRendered(adView, thumbnailImage);
         thumbnailImage.setVisibility(View.INVISIBLE);
+        addVideoPlayerAndSetListeners(adView, thumbnailImage);
+    }
 
+    private void addVideoPlayerAndSetListeners(final IAdView adView, ImageView thumbnailImage) {
         final VideoView videoView = new VideoView(adView.getAdView().getContext().getApplicationContext());
         videoView.setTag(videoViewTag);
 
@@ -105,7 +107,7 @@ public class AutoPlayVideo extends Media {
                     if (!videoView.isPlaying()) {
                         videoView.start();
                         scheduleSilentAutoplayBeaconTask(videoView);
-                        Logger.d("video play");
+                        Logger.d("danica video play");
                     }
                 }
             }
@@ -116,7 +118,7 @@ public class AutoPlayVideo extends Media {
                     ((VideoCreative)creative).setCurrentPosition(videoView.getCurrentPosition());
                     videoView.pause();
                     silentAutoPlayBeaconTimer.cancel();
-                    Logger.d("video pause");
+                    Logger.d("danica video pause");
                 }
             }
         } );

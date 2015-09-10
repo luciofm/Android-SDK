@@ -107,7 +107,7 @@ public class AutoPlayVideoTest extends TestBase {
         when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(Robolectric.application));
         when(mockedIAdView.getThumbnail()).thenReturn(new FrameLayout(Robolectric.application));
 
-        subject.swapMedia(mockedIAdView, mockedImageView);
+        subject.wasRendered(mockedIAdView, mockedImageView);
         verify(mockedImageView).setVisibility(View.INVISIBLE);
     }
 
@@ -131,7 +131,7 @@ public class AutoPlayVideoTest extends TestBase {
         when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(Robolectric.application));
         when(mockedIAdView.getThumbnail()).thenReturn(mockedThumbnailContainer);
 
-        subject.swapMedia(mockedIAdView, mockedImageView);
+        subject.wasRendered(mockedIAdView, mockedImageView);
         verify(mockedIAdView).setScreenVisibilityListener(any(IAdView.ScreenVisibilityListener.class));
     }
 
@@ -146,7 +146,7 @@ public class AutoPlayVideoTest extends TestBase {
         when(mockedCreative.isVideoCompleted()).thenReturn(false);
         when(mockedCreative.wasClicked()).thenReturn(false);
         when(mockedCreative.getCurrentPosition()).thenReturn(4000);
-        subject.swapMedia(mockedIAdView, mockedImageView);
+        subject.wasRendered(mockedIAdView, mockedImageView);
         subject.setIsVideoPrepared(false);
         VideoView videoView = (VideoView)thumbnailContainer.findViewWithTag("SharethroughAutoPlayVideoView");
         MediaPlayer mockedMediaPlayer = mock(MediaPlayer.class);
@@ -171,7 +171,7 @@ public class AutoPlayVideoTest extends TestBase {
         when(mockedCreative.isVideoCompleted()).thenReturn(false);
         when(mockedCreative.wasClicked()).thenReturn(false);
         when(mockedCreative.getCurrentPosition()).thenReturn(4000);
-        subject.swapMedia(mockedIAdView, mockedImageView);
+        subject.wasRendered(mockedIAdView, mockedImageView);
         subject.setIsVideoPrepared(false);
         Timer mockedTimer = mock(Timer.class);
         subject.setTimer(mockedTimer);
@@ -197,7 +197,7 @@ public class AutoPlayVideoTest extends TestBase {
         when(mockedCreative.isVideoCompleted()).thenReturn(false);
         when(mockedCreative.wasClicked()).thenReturn(false);
 
-        subject.swapMedia(mockedIAdView, mockedImageView);
+        subject.wasRendered(mockedIAdView, mockedImageView);
         subject.setIsVideoPrepared(true);
 
         mockedIAdView.getScreenVisibilityListener().onScreen();
@@ -216,7 +216,7 @@ public class AutoPlayVideoTest extends TestBase {
         when(mockedCreative.isVideoCompleted()).thenReturn(false);
         when(mockedCreative.wasClicked()).thenReturn(true);
 
-        subject.swapMedia(mockedIAdView, mockedImageView);
+        subject.wasRendered(mockedIAdView, mockedImageView);
         subject.setIsVideoPrepared(true);
 
         mockedIAdView.getScreenVisibilityListener().onScreen();
@@ -233,7 +233,7 @@ public class AutoPlayVideoTest extends TestBase {
         when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(Robolectric.application));
         when(mockedIAdView.getThumbnail()).thenReturn(thumbnailContainer);
 
-        subject.swapMedia(mockedIAdView, mockedImageView);
+        subject.wasRendered(mockedIAdView, mockedImageView);
         subject.setIsVideoPrepared(true);
 
         Timer mockedTimer = mock(Timer.class);
