@@ -13,7 +13,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.sharethrough.android.sdk.R;
-import com.sharethrough.sdk.media.Media;
+import com.sharethrough.sdk.media.*;
 import com.sharethrough.STRPicasso.Picasso;
 
 
@@ -71,7 +71,7 @@ public class Renderer {
                 thumbnailContainer.addView(thumbnailImage,
                         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
 
-                final Media media = creative.getMedia();
+                final Media media = createMedia(creative, beaconService, feedPosition);
                 handler.post(new Runnable() { // give thumbnailImage a chance to render so we can use its size
                     @Override
                     public void run() {
@@ -90,6 +90,26 @@ public class Renderer {
                 placeOptoutIcon(adView);
             }
         });
+    }
+
+    protected Media createMedia(Creative creative, BeaconService beaconService, int feedPosition) {
+        if (creative.getType().equals(Creative.CreativeType.YOUTUBE)) {
+            return new Youtube(creative);
+        } else if (creative.getType().equals(Creative.CreativeType.VINE)) {
+            return new Vine(creative);
+        } else if (creative.getType().equals(Creative.CreativeType.HOSTEDVIDEO)) {
+            return new HostedVideo(creative);
+        } else if (creative.getType().equals(Creative.CreativeType.INSTAGRAM)) {
+            return new Instagram(creative);
+        } else if (creative.getType().equals(Creative.CreativeType.PINTEREST)) {
+            return new Pinterest(creative);
+        } else if (creative.getType().equals(Creative.CreativeType.ARTICLE)) {
+            return new Article(creative);
+        } else if (creative.getType().equals(Creative.CreativeType.AUTOPLAY)) {
+            return new AutoPlayVideo(creative, beaconService, feedPosition);
+        } else {
+            return new Clickout(creative);
+        }
     }
 
     private void placeOptoutIcon(final IAdView adView) {

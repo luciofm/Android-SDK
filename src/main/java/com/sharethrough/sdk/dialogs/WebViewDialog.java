@@ -36,7 +36,7 @@ public class WebViewDialog extends ShareableDialog {
     }
 
     private boolean isArticleType() {
-        return creative.getMedia() instanceof Article;
+        return creative.getType().equals(Creative.CreativeType.ARTICLE);
     }
 
     protected void fireTimeInViewBeacon(){

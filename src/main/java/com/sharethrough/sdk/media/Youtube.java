@@ -42,7 +42,7 @@ public class Youtube extends Media {
 
     @Override
     public void wasClicked(View v, BeaconService beaconService, int feedPosition) {
-        new YoutubeDialog(v.getContext(), creative, beaconService, feedPosition).show();
+        new YoutubeDialog(v.getContext(), creative, beaconService, feedPosition, getId()).show();
     }
 
     @Override

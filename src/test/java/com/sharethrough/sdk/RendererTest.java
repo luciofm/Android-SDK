@@ -45,16 +45,22 @@ import static org.robolectric.Robolectric.shadowOf;
 @RunWith(SharethroughTestRunner.class)
 public class RendererTest extends TestBase {
 
-    private Renderer subject;
+    private RendererStub subject;
     private Creative creative;
     private Bitmap bitmap;
-    private Media media;
     private MyTestAdView adView;
     private Timer timer;
     private BeaconService beaconService;
     private Sharethrough sharethrough;
     private int feedPosition;
     @Mock private Placement placement;
+    @Mock Media media;
+
+    public class RendererStub extends Renderer {
+        protected Media createMedia(Creative creative, BeaconService beaconService, int feedPosition) {
+            return media;
+        }
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -66,9 +72,7 @@ public class RendererTest extends TestBase {
         when(creative.getBrandLogoUrl()).thenReturn("logoBrandUrl");
         when(creative.getThumbnailUrl()).thenReturn("fake_image.jpg");
         bitmap = mock(Bitmap.class);
-        media = mock(Media.class);
         when(media.getCreative()).thenReturn(creative);
-        when(creative.getMedia()).thenReturn(media);
         feedPosition = 0;
 
         beaconService = mock(BeaconService.class);
@@ -78,7 +82,7 @@ public class RendererTest extends TestBase {
         sharethrough = mock(Sharethrough.class);
         sharethrough.placement = placement;
 
-        subject = new Renderer();
+        subject = new RendererStub();
     }
 
     @Test

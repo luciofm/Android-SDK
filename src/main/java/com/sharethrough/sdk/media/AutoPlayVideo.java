@@ -20,6 +20,8 @@ import java.util.TimerTask;
 public class AutoPlayVideo extends Media {
     protected String videoViewTag = "SharethroughAutoPlayVideoView";
     protected final Creative creative;
+    protected BeaconService beaconService;
+    protected int feedPosition;
 
     protected Object videoCompletedLock = new Object();
     protected boolean isVideoPrepared = false;
@@ -27,8 +29,10 @@ public class AutoPlayVideo extends Media {
     protected Timer silentAutoPlayBeaconTimer;
     protected PlaybackTimerTask silentAutoPlayBeaconTask;
 
-    public AutoPlayVideo(Creative creative) {
+    public AutoPlayVideo(Creative creative, BeaconService beaconService, int feedPosition) {
         this.creative = creative;
+        this.beaconService = beaconService;
+        this.feedPosition = feedPosition;
     }
 
     @Override
@@ -49,9 +53,14 @@ public class AutoPlayVideo extends Media {
 
     @Override
     public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition, Placement placement) {
-        //TODO: change this to auto play relevent beacon.
         beaconService.adClicked("videoPlay", creative, adView.getAdView(), feedPosition, placement);
 
+        int currentPosition = 0;
+        VideoView videoView = (VideoView)adView.getAdView().findViewWithTag(videoViewTag);
+        if (videoView != null) {
+            currentPosition = videoView.getCurrentPosition();
+        }
+        beaconService.autoplayVideoEngagement(adView.getAdView().getContext(), creative, currentPosition, feedPosition);
     }
 
     @Override
@@ -146,11 +155,12 @@ public class AutoPlayVideo extends Media {
 
             if (videoView!= null) {
                 if (videoView.getCurrentPosition() >= 3000 && videoView.getCurrentPosition() < 4000) {
+                    beaconService.silentAutoPlayDuration(videoView.getContext(), creative, 3000, feedPosition);
                     Logger.d("Danica 3 second");
                 }
                 else if (videoView.getCurrentPosition() >= 10000 && videoView.getCurrentPosition() <11000) {
+                    beaconService.silentAutoPlayDuration(videoView.getContext(), creative, 10000, feedPosition);
                     Logger.d("Danica 10 second");
-
                 }
                 else if (videoView.getCurrentPosition() >= 11000) {
                     this.cancel();

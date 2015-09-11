@@ -2,7 +2,6 @@ package com.sharethrough.sdk.media;
 
 import android.media.MediaPlayer;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.VideoView;
@@ -31,8 +30,8 @@ public class AutoPlayVideoTest extends TestBase {
     private Placement placement;
 
     class AutoPlayVideoStub extends AutoPlayVideo {
-        public AutoPlayVideoStub (Creative creative) {
-            super(creative);
+        public AutoPlayVideoStub (Creative creative, BeaconService beaconService, int feedPosition) {
+            super(creative, beaconService, feedPosition);
         }
 
         public void setTimer(Timer timer) {
@@ -59,14 +58,16 @@ public class AutoPlayVideoTest extends TestBase {
 
     private AutoPlayVideoStub subject;
     private VideoCreative mockedCreative;
+    private BeaconService mockedBeaconService;
     private int feedPosition;
 
     @Before
     public void setUp() throws Exception {
         mockedCreative = mock(VideoCreative.class);
-        when(mockedCreative.getMediaUrl()).thenReturn("http://ab.co");
-        subject = new AutoPlayVideoStub(mockedCreative);
+        mockedBeaconService = mock(BeaconService.class);
         feedPosition = 5;
+        when(mockedCreative.getMediaUrl()).thenReturn("http://ab.co");
+        subject = new AutoPlayVideoStub(mockedCreative, mockedBeaconService, feedPosition);
     }
 
     @Test
