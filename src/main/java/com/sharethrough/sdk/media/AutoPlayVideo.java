@@ -26,8 +26,8 @@ public class AutoPlayVideo extends Media {
     protected Object videoCompletedLock = new Object();
     protected boolean isVideoPrepared = false;
 
-    protected Timer silentAutoPlayBeaconTimer;
-    protected PlaybackTimerTask silentAutoPlayBeaconTask;
+    protected Timer silentAutoPlayBeaconTimer = new Timer();
+    protected SilentAutoplayBeaconTask silentAutoplayBeaconTask;
 
     public AutoPlayVideo(Creative creative, BeaconService beaconService, int feedPosition) {
         this.creative = creative;
@@ -67,10 +67,10 @@ public class AutoPlayVideo extends Media {
     public void wasRendered(final IAdView adView, ImageView thumbnailImage) {
         super.wasRendered(adView, thumbnailImage);
         thumbnailImage.setVisibility(View.INVISIBLE);
-        addVideoPlayerAndSetListeners(adView, thumbnailImage);
+        addVideoPlayerToAdViewAndSetListeners(adView);
     }
 
-    private void addVideoPlayerAndSetListeners(final IAdView adView, ImageView thumbnailImage) {
+    protected void addVideoPlayerToAdViewAndSetListeners(final IAdView adView) {
         final VideoView videoView = new VideoView(adView.getAdView().getContext().getApplicationContext());
         videoView.setTag(videoViewTag);
 
@@ -90,7 +90,6 @@ public class AutoPlayVideo extends Media {
                 mediaPlayer.start();
                 scheduleSilentAutoplayBeaconTask(videoView);
                 isVideoPrepared = true;
-
             }
         });
 
@@ -99,7 +98,9 @@ public class AutoPlayVideo extends Media {
             public void onCompletion(MediaPlayer mediaPlayer) {
                 synchronized (videoCompletedLock) {
                     ((VideoCreative)creative).setVideoCompleted(true);
-                    silentAutoPlayBeaconTimer.cancel();
+                    if (silentAutoPlayBeaconTimer != null) {
+                        silentAutoPlayBeaconTimer.cancel();
+                    }
                 }
 
                 mediaPlayer.stop();
@@ -133,18 +134,18 @@ public class AutoPlayVideo extends Media {
         } );
     }
 
-    private void scheduleSilentAutoplayBeaconTask(VideoView videoView) {
+    protected void scheduleSilentAutoplayBeaconTask(VideoView videoView) {
         if (silentAutoPlayBeaconTimer != null) {
             silentAutoPlayBeaconTimer.cancel();
         }
         silentAutoPlayBeaconTimer = new Timer();
-        silentAutoPlayBeaconTask = new PlaybackTimerTask(videoView);
-        silentAutoPlayBeaconTimer.schedule(silentAutoPlayBeaconTask, 0, 1000);
+        silentAutoplayBeaconTask = new SilentAutoplayBeaconTask(videoView);
+        silentAutoPlayBeaconTimer.schedule(silentAutoplayBeaconTask, 0, 1000);
     }
 
-    public class PlaybackTimerTask extends TimerTask {
+    public class SilentAutoplayBeaconTask extends TimerTask {
         private VideoView videoView;
-        public PlaybackTimerTask (VideoView videoView) {
+        public SilentAutoplayBeaconTask (VideoView videoView) {
             this.videoView = videoView;
         }
         @Override

@@ -13,7 +13,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.sharethrough.sdk.media.Media;
+import com.sharethrough.sdk.media.*;
 import com.sharethrough.sdk.test.SharethroughTestRunner;
 import com.sharethrough.test.util.TestAdView;
 import org.apache.tools.ant.taskdefs.Sleep;
@@ -47,14 +47,13 @@ public class RendererTest extends TestBase {
 
     private RendererStub subject;
     private Creative creative;
-    private Bitmap bitmap;
     private MyTestAdView adView;
     private Timer timer;
     private BeaconService beaconService;
     private Sharethrough sharethrough;
     private int feedPosition;
     @Mock private Placement placement;
-    @Mock Media media;
+    @Mock private Media media;
 
     public class RendererStub extends Renderer {
         protected Media createMedia(Creative creative, BeaconService beaconService, int feedPosition) {
@@ -71,12 +70,10 @@ public class RendererTest extends TestBase {
         when(creative.getTitle()).thenReturn("title");
         when(creative.getBrandLogoUrl()).thenReturn("logoBrandUrl");
         when(creative.getThumbnailUrl()).thenReturn("fake_image.jpg");
-        bitmap = mock(Bitmap.class);
         when(media.getCreative()).thenReturn(creative);
         feedPosition = 0;
 
         beaconService = mock(BeaconService.class);
-
         adView = makeAdView();
         timer = mock(Timer.class);
         sharethrough = mock(Sharethrough.class);
@@ -310,5 +307,47 @@ public class RendererTest extends TestBase {
     @Implements(ImageView.class)
     public static class MyImageViewShadow extends MyViewShadow {
 
+    }
+
+    @Test
+    public void getType_Youtube() throws Exception {
+        Renderer subject = new Renderer();
+        when(creative.getType()).thenReturn(Creative.CreativeType.YOUTUBE);
+        assertThat(subject.createMedia(creative, beaconService, feedPosition) instanceof Youtube).isTrue();
+    }
+
+    @Test
+    public void getType_Vine() throws Exception {
+        Renderer subject = new Renderer();
+        when(creative.getType()).thenReturn(Creative.CreativeType.VINE);
+        assertThat(subject.createMedia(creative, beaconService, feedPosition) instanceof Vine).isTrue();
+    }
+
+    @Test
+    public void getType_HostedVideo() throws Exception {
+        Renderer subject = new Renderer();
+        when(creative.getType()).thenReturn(Creative.CreativeType.HOSTEDVIDEO);
+        assertThat(subject.createMedia(creative, beaconService, feedPosition) instanceof HostedVideo).isTrue();
+    }
+
+    @Test
+    public void getType_Instagram() throws Exception {
+        Renderer subject = new Renderer();
+        when(creative.getType()).thenReturn(Creative.CreativeType.INSTAGRAM);
+        assertThat(subject.createMedia(creative, beaconService, feedPosition) instanceof Instagram).isTrue();
+    }
+
+    @Test
+    public void getType_Pinterest() throws Exception {
+        Renderer subject = new Renderer();
+        when(creative.getType()).thenReturn(Creative.CreativeType.PINTEREST);
+        assertThat(subject.createMedia(creative, beaconService, feedPosition) instanceof Pinterest).isTrue();
+    }
+
+    @Test
+    public void getType_Clickout() throws Exception {
+        Renderer subject = new Renderer();
+        when(creative.getType()).thenReturn(Creative.CreativeType.CLICKOUT);
+        assertThat(subject.createMedia(creative, beaconService, feedPosition) instanceof Clickout).isTrue();
     }
 }
