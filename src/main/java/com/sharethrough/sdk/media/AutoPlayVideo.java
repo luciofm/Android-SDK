@@ -107,6 +107,14 @@ public class AutoPlayVideo extends Media {
             }
         });
 
+        videoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mp, int what, int extra) {
+                Logger.d("Autoplay MediaPlayer error, error code: %d, extra: %d", what, extra);
+                return false;
+            }
+        });
+
         adView.setScreenVisibilityListener(new IAdView.ScreenVisibilityListener() {
             @Override
             public void onScreen() {
@@ -126,7 +134,7 @@ public class AutoPlayVideo extends Media {
             public void offScreen() {
                 if (videoView.isPlaying() && videoView.canPause()) {
                     ((VideoCreative)creative).setCurrentPosition(videoView.getCurrentPosition());
-                    videoView.pause();
+                    videoView.stopPlayback();
                     silentAutoPlayBeaconTimer.cancel();
                     Logger.d("danica video pause");
                 }
