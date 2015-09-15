@@ -6,6 +6,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.VideoView;
 import com.sharethrough.sdk.*;
+import com.sharethrough.sdk.beacons.VideoCompletionBeaconService;
 import com.sharethrough.sdk.dialogs.ShareableDialogTest;
 import com.sharethrough.sdk.dialogs.VideoDialog;
 import com.sharethrough.sdk.dialogs.WebViewDialogTest;
@@ -17,6 +18,7 @@ import org.robolectric.shadows.ShadowDialog;
 import static org.robolectric.Robolectric.shadowOf;
 
 import java.util.Timer;
+import java.util.TimerTask;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -27,24 +29,36 @@ import static org.mockito.Mockito.*;
 public class AutoPlayVideoTest extends TestBase {
 
     class AutoPlayVideoStub extends AutoPlayVideo {
-        public AutoPlayVideoStub (Creative creative, BeaconService beaconService, int feedPosition) {
-            super(creative, beaconService, feedPosition);
+        public AutoPlayVideoStub (Creative creative, BeaconService beaconService, VideoCompletionBeaconService videoCompletionBeaconService, int feedPosition) {
+            super(creative, beaconService, videoCompletionBeaconService, feedPosition);
         }
 
-        public void setTimer(Timer timer) {
+        public void setSilentAutoPlayBeaconTimer(Timer timer) {
             this.silentAutoPlayBeaconTimer = timer;
         }
 
-        public Timer getTimer() {
+        public Timer getSilentAutoPlayBeaconTimer() {
             return this.silentAutoPlayBeaconTimer;
         }
 
-        public SilentAutoplayBeaconTask getTask() {
+        public SilentAutoplayBeaconTask getSilentAutoplayBeaconTask() {
             return this.silentAutoplayBeaconTask;
         }
 
-        public void setTask(SilentAutoplayBeaconTask task) {
+        public void setSilentAutoplayBeaconTask(SilentAutoplayBeaconTask task) {
             this.silentAutoplayBeaconTask = task;
+        }
+
+        public void setVideoCompletionBeaconTimer(Timer timer) {
+            this.videoCompletionBeaconTimer = timer;
+        }
+
+        public Timer getVideoCompletionBeaconTimer() {
+            return this.videoCompletionBeaconTimer;
+        }
+
+        public VideoCompletionBeaconTask getVideoCompletionBeaconTask() {
+            return this.videoCompletionBeaconTask;
         }
 
         public void setIsVideoPrepared(boolean isVideoPrepared) {
@@ -58,6 +72,14 @@ public class AutoPlayVideoTest extends TestBase {
         public SilentAutoplayBeaconTask instantiateSilentPlaybackTimerTask(VideoView videoView) {
             return new SilentAutoplayBeaconTask(videoView);
         }
+
+        public VideoCompletionBeaconTask instantiateVideoCompletionBeaconTask(VideoView videoView) {
+            return new VideoCompletionBeaconTask(videoView);
+        }
+
+        protected Timer getTimer() {
+            return mockedTimer;
+        }
     }
 
     private AutoPlayVideoStub subject;
@@ -65,21 +87,34 @@ public class AutoPlayVideoTest extends TestBase {
     private BeaconService mockedBeaconService;
     private int feedPosition;
     private Placement mockedPlacement;
+    private VideoCompletionBeaconService mockedVideoCompletionBeaconService;
+    private Timer mockedTimer;
 
     @Before
     public void setUp() throws Exception {
         mockedCreative = mock(VideoCreative.class);
         mockedBeaconService = mock(BeaconService.class);
         mockedPlacement = mock(Placement.class);
+        mockedVideoCompletionBeaconService = mock(VideoCompletionBeaconService.class);
         feedPosition = 5;
+        mockedTimer = mock(Timer.class);
         when(mockedCreative.getMediaUrl()).thenReturn("http://ab.co");
-        subject = new AutoPlayVideoStub(mockedCreative, mockedBeaconService, feedPosition);
+        subject = new AutoPlayVideoStub(mockedCreative, mockedBeaconService, mockedVideoCompletionBeaconService, feedPosition);
     }
 
     @Test
     public void whenClicked_cancelSilentAutoPlayBeaconTimer() throws Exception {
         Timer mockedTimer = mock(Timer.class);
-        subject.setTimer(mockedTimer);
+        subject.setSilentAutoPlayBeaconTimer(mockedTimer);
+
+        subject.wasClicked(new View(Robolectric.application), mock(BeaconService.class), feedPosition);
+        verify(mockedTimer).cancel();
+    }
+
+    @Test
+    public void whenClicked_cancelVideoCompletionBeaconTimer() throws Exception {
+        Timer mockedTimer = mock(Timer.class);
+        subject.setVideoCompletionBeaconTimer(mockedTimer);
 
         subject.wasClicked(new View(Robolectric.application), mock(BeaconService.class), feedPosition);
         verify(mockedTimer).cancel();
@@ -128,7 +163,7 @@ public class AutoPlayVideoTest extends TestBase {
     }
 
     @Test
-    public void whenSwapMedia_setThumbnailImageInvisible() throws Exception {
+    public void whenRendered_setThumbnailImageInvisible() throws Exception {
         ImageView mockedImageView = mock(ImageView.class);
         IAdView mockedIAdView = mock(BasicAdView.class);
         when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(Robolectric.application));
@@ -151,7 +186,7 @@ public class AutoPlayVideoTest extends TestBase {
     }*/
 
     @Test
-    public void whenSwapMedia_setScreenVisiblityListenerOnAdView() throws Exception {
+    public void whenRendered_setScreenVisiblityListenerOnAdView() throws Exception {
         ImageView mockedImageView = mock(ImageView.class);
         IAdView mockedIAdView = mock(BasicAdView.class);
         FrameLayout mockedThumbnailContainer = mock(FrameLayout.class);
@@ -163,7 +198,7 @@ public class AutoPlayVideoTest extends TestBase {
     }
 
     @Test
-    public void whenSwapMedia_videoAutoPlays() throws Exception {
+    public void whenRendered_videoAutoPlays() throws Exception {
         ImageView mockedImageView = mock(ImageView.class);
         IAdView mockedIAdView = mock(BasicAdView.class);
         FrameLayout thumbnailContainer = new FrameLayout(Robolectric.application);
@@ -184,11 +219,13 @@ public class AutoPlayVideoTest extends TestBase {
         verify(mockedMediaPlayer).seekTo(4000);
         verify(mockedMediaPlayer).start();
         assertThat(subject.isVideoPrepared()).isTrue();
+        verify(mockedTimer).schedule(subject.getSilentAutoplayBeaconTask(), 0, 1000);
+        verify(mockedTimer).scheduleAtFixedRate(subject.getVideoCompletionBeaconTask(), 1000, 1000);
 
     }
 
     @Test
-    public void whenVideoCompleted_silentAutoPlayBeaconTimerCancelledAndMediaPlayStopped() {
+    public void whenVideoCompleted_beaconTimersCancelledAndMediaPlayStopped() {
         ImageView mockedImageView = mock(ImageView.class);
         IAdView mockedIAdView = mock(BasicAdView.class);
         FrameLayout thumbnailContainer = new FrameLayout(Robolectric.application);
@@ -200,14 +237,17 @@ public class AutoPlayVideoTest extends TestBase {
         when(mockedCreative.getCurrentPosition()).thenReturn(4000);
         subject.wasRendered(mockedIAdView, mockedImageView);
         subject.setIsVideoPrepared(false);
-        Timer mockedTimer = mock(Timer.class);
-        subject.setTimer(mockedTimer);
+        Timer mockedSilentAutoplayBeaconTimer = mock(Timer.class);
+        subject.setSilentAutoPlayBeaconTimer(mockedSilentAutoplayBeaconTimer);
+        Timer mockedVideoCompletionTimer = mock(Timer.class);
+        subject.setVideoCompletionBeaconTimer(mockedVideoCompletionTimer);
 
         VideoView videoView = (VideoView)thumbnailContainer.findViewWithTag("SharethroughAutoPlayVideoView");
         MediaPlayer mockedMediaPlayer = mock(MediaPlayer.class);
         shadowOf(videoView).getOnCompletionListener().onCompletion(mockedMediaPlayer);
 
-        verify(mockedTimer).cancel();
+        verify(mockedSilentAutoplayBeaconTimer).cancel();
+        verify(mockedVideoCompletionTimer).cancel();
         verify(mockedCreative).setVideoCompleted(true);
         verify(mockedMediaPlayer).stop();
     }
@@ -226,16 +266,22 @@ public class AutoPlayVideoTest extends TestBase {
 
         subject.wasRendered(mockedIAdView, mockedImageView);
         subject.setIsVideoPrepared(true);
-        Timer mockedTimer = mock(Timer.class);
-        subject.setTimer(mockedTimer);
-        subject.setTask(null);
+        Timer mockedSilentAutoplayBeaconTimer = mock(Timer.class);
+        subject.setSilentAutoPlayBeaconTimer(mockedSilentAutoplayBeaconTimer);
+        Timer mockedVideoCompletionBeaconTimer = mock(Timer.class);
+        subject.setVideoCompletionBeaconTimer(mockedVideoCompletionBeaconTimer);
+        subject.setSilentAutoplayBeaconTask(null);
 
         mockedIAdView.getScreenVisibilityListener().onScreen();
         VideoView videoView = (VideoView)thumbnailContainer.findViewWithTag("SharethroughAutoPlayVideoView");
         assertThat(videoView.isPlaying()).isTrue();
-        verify(mockedTimer).cancel();
-        assertThat(subject.getTimer()).isNotEqualTo(mockedTimer);
-        assertThat(subject.getTask()).isNotEqualTo(null);
+        verify(mockedSilentAutoplayBeaconTimer).cancel();
+        verify(mockedVideoCompletionBeaconTimer).cancel();
+        assertThat(subject.getSilentAutoPlayBeaconTimer()).isNotEqualTo(mockedSilentAutoplayBeaconTimer);
+        assertThat(subject.getSilentAutoplayBeaconTask()).isNotEqualTo(null);
+        assertThat(subject.getVideoCompletionBeaconTimer()).isNotEqualTo(null);
+        verify(mockedTimer).schedule(subject.getSilentAutoplayBeaconTask(), 0, 1000);
+        verify(mockedTimer).scheduleAtFixedRate(subject.getVideoCompletionBeaconTask(), 1000, 1000);
     }
 
     @Test
@@ -269,14 +315,17 @@ public class AutoPlayVideoTest extends TestBase {
         subject.wasRendered(mockedIAdView, mockedImageView);
         subject.setIsVideoPrepared(true);
 
-        Timer mockedTimer = mock(Timer.class);
-        subject.setTimer(mockedTimer);
+        Timer mockedSilentAutoplayBeaconTimer = mock(Timer.class);
+        subject.setSilentAutoPlayBeaconTimer(mockedSilentAutoplayBeaconTimer);
+        Timer mockedVideoCompletionBeaconTimer = mock(Timer.class);
+        subject.setVideoCompletionBeaconTimer(mockedVideoCompletionBeaconTimer);
 
         VideoView videoView = (VideoView)thumbnailContainer.findViewWithTag("SharethroughAutoPlayVideoView");
         videoView.start();
         mockedIAdView.getScreenVisibilityListener().offScreen();
         assertThat(videoView.isPlaying()).isFalse();
-        verify(mockedTimer).cancel();
+        verify(mockedSilentAutoplayBeaconTimer).cancel();
+        verify(mockedVideoCompletionBeaconTimer).cancel();
         verify(mockedCreative).setCurrentPosition(any(Integer.class));
     }
 
@@ -323,5 +372,15 @@ public class AutoPlayVideoTest extends TestBase {
         AutoPlayVideo.SilentAutoplayBeaconTask playbackTimerTask = subject.instantiateSilentPlaybackTimerTask(mockedVideoView);
         playbackTimerTask.run();
         verifyNoMoreInteractions(mockedBeaconService);
+    }
+
+    @Test
+    public void whenExecutingVideoCompletionBeacon_callsTimeUpdate() {
+        VideoView mockedVideoView = mock(VideoView.class);
+        when(mockedVideoView.getCurrentPosition()).thenReturn(1234);
+        when(mockedVideoView.getDuration()).thenReturn(20000);
+        AutoPlayVideo.VideoCompletionBeaconTask videoCompletionBeaconTask = subject.instantiateVideoCompletionBeaconTask(mockedVideoView);
+        videoCompletionBeaconTask.run();
+        verify(mockedVideoCompletionBeaconService).timeUpdate(1234, 20000);
     }
 }

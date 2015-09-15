@@ -56,7 +56,7 @@ public class RendererTest extends TestBase {
     @Mock private Media media;
 
     public class RendererStub extends Renderer {
-        protected Media createMedia(Creative creative, BeaconService beaconService, int feedPosition) {
+        protected Media createMedia(IAdView adView, Creative creative, BeaconService beaconService, int feedPosition) {
             return media;
         }
     }
@@ -311,43 +311,49 @@ public class RendererTest extends TestBase {
 
     @Test
     public void getType_Youtube() throws Exception {
+        IAdView mockedAdView = mock(IAdView.class);
         Renderer subject = new Renderer();
         when(creative.getType()).thenReturn(Creative.CreativeType.YOUTUBE);
-        assertThat(subject.createMedia(creative, beaconService, feedPosition) instanceof Youtube).isTrue();
+        assertThat(subject.createMedia(mockedAdView, creative, beaconService, feedPosition) instanceof Youtube).isTrue();
     }
 
     @Test
     public void getType_Vine() throws Exception {
+        IAdView mockedAdView = mock(IAdView.class);
         Renderer subject = new Renderer();
         when(creative.getType()).thenReturn(Creative.CreativeType.VINE);
-        assertThat(subject.createMedia(creative, beaconService, feedPosition) instanceof Vine).isTrue();
+        assertThat(subject.createMedia(mockedAdView, creative, beaconService, feedPosition) instanceof Vine).isTrue();
     }
 
     @Test
     public void getType_HostedVideo() throws Exception {
+        IAdView mockedAdView = mock(IAdView.class);
         Renderer subject = new Renderer();
         when(creative.getType()).thenReturn(Creative.CreativeType.HOSTEDVIDEO);
-        assertThat(subject.createMedia(creative, beaconService, feedPosition) instanceof HostedVideo).isTrue();
+        assertThat(subject.createMedia(mockedAdView, creative, beaconService, feedPosition) instanceof HostedVideo).isTrue();
     }
 
     @Test
     public void getType_Instagram() throws Exception {
+        IAdView mockedAdView = mock(IAdView.class);
         Renderer subject = new Renderer();
         when(creative.getType()).thenReturn(Creative.CreativeType.INSTAGRAM);
-        assertThat(subject.createMedia(creative, beaconService, feedPosition) instanceof Instagram).isTrue();
+        assertThat(subject.createMedia(mockedAdView, creative, beaconService, feedPosition) instanceof Instagram).isTrue();
     }
 
     @Test
     public void getType_Pinterest() throws Exception {
+        IAdView mockedAdView = mock(IAdView.class);
         Renderer subject = new Renderer();
         when(creative.getType()).thenReturn(Creative.CreativeType.PINTEREST);
-        assertThat(subject.createMedia(creative, beaconService, feedPosition) instanceof Pinterest).isTrue();
+        assertThat(subject.createMedia(mockedAdView, creative, beaconService, feedPosition) instanceof Pinterest).isTrue();
     }
 
     @Test
     public void getType_Clickout() throws Exception {
+        IAdView mockedAdView = mock(IAdView.class);
         Renderer subject = new Renderer();
         when(creative.getType()).thenReturn(Creative.CreativeType.CLICKOUT);
-        assertThat(subject.createMedia(creative, beaconService, feedPosition) instanceof Clickout).isTrue();
+        assertThat(subject.createMedia(mockedAdView, creative, beaconService, feedPosition) instanceof Clickout).isTrue();
     }
 }

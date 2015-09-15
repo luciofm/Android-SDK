@@ -21,6 +21,7 @@ public class AutoPlayVideo extends Media {
     protected String videoViewTag = "SharethroughAutoPlayVideoView";
     protected final Creative creative;
     protected BeaconService beaconService;
+    protected VideoCompletionBeaconService videoCompletionBeaconService;
     protected int feedPosition;
 
     protected Object videoCompletedLock = new Object();
@@ -28,18 +29,20 @@ public class AutoPlayVideo extends Media {
 
     protected Timer silentAutoPlayBeaconTimer = new Timer();
     protected SilentAutoplayBeaconTask silentAutoplayBeaconTask;
+    protected Timer videoCompletionBeaconTimer = new Timer();
+    protected VideoCompletionBeaconTask videoCompletionBeaconTask;
 
-    public AutoPlayVideo(Creative creative, BeaconService beaconService, int feedPosition) {
+    public AutoPlayVideo(Creative creative, BeaconService beaconService, VideoCompletionBeaconService videoCompletionBeaconService, int feedPosition) {
         this.creative = creative;
         this.beaconService = beaconService;
+        this.videoCompletionBeaconService = videoCompletionBeaconService;
         this.feedPosition = feedPosition;
     }
 
     @Override
     public void wasClicked(View view, BeaconService beaconService, int feedPosition) {
-        if (silentAutoPlayBeaconTimer != null) {
-            silentAutoPlayBeaconTimer.cancel();
-        }
+        if (silentAutoPlayBeaconTimer != null) silentAutoPlayBeaconTimer.cancel();
+        if (videoCompletionBeaconTimer != null) videoCompletionBeaconTimer.cancel();
 
         int currentPosition = 0;
         VideoView videoView = (VideoView)view.findViewWithTag(videoViewTag);
@@ -48,7 +51,7 @@ public class AutoPlayVideo extends Media {
             currentPosition = videoView.getCurrentPosition();
         }
 
-        new VideoDialog(view.getContext(), creative, beaconService, false, new Timer(), new VideoCompletionBeaconService(view.getContext(), creative, beaconService, feedPosition), feedPosition, currentPosition).show();
+        new VideoDialog(view.getContext(), creative, beaconService, false, new Timer(), videoCompletionBeaconService, feedPosition, currentPosition).show();
     }
 
     @Override
@@ -89,6 +92,7 @@ public class AutoPlayVideo extends Media {
                 mediaPlayer.seekTo(((VideoCreative)creative).getCurrentPosition());
                 mediaPlayer.start();
                 scheduleSilentAutoplayBeaconTask(videoView);
+                scheduleVideoCompletionBeaconTask(videoView);
                 isVideoPrepared = true;
             }
         });
@@ -97,10 +101,9 @@ public class AutoPlayVideo extends Media {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
                 synchronized (videoCompletedLock) {
-                    ((VideoCreative)creative).setVideoCompleted(true);
-                    if (silentAutoPlayBeaconTimer != null) {
-                        silentAutoPlayBeaconTimer.cancel();
-                    }
+                    ((VideoCreative) creative).setVideoCompleted(true);
+                    if (silentAutoPlayBeaconTimer != null) silentAutoPlayBeaconTimer.cancel();
+                    if (videoCompletionBeaconTimer != null) videoCompletionBeaconTimer.cancel();
                 }
 
                 mediaPlayer.stop();
@@ -119,13 +122,13 @@ public class AutoPlayVideo extends Media {
             @Override
             public void onScreen() {
                 synchronized (videoCompletedLock) {
-                    if (!isVideoPrepared || ((VideoCreative)creative).isVideoCompleted() || creative.wasClicked()) {
+                    if (!isVideoPrepared || ((VideoCreative) creative).isVideoCompleted() || creative.wasClicked()) {
                         return;
                     }
                     if (!videoView.isPlaying()) {
                         videoView.start();
                         scheduleSilentAutoplayBeaconTask(videoView);
-                        Logger.d("danica video play");
+                        scheduleVideoCompletionBeaconTask(videoView);
                     }
                 }
             }
@@ -133,22 +136,48 @@ public class AutoPlayVideo extends Media {
             @Override
             public void offScreen() {
                 if (videoView.isPlaying() && videoView.canPause()) {
-                    ((VideoCreative)creative).setCurrentPosition(videoView.getCurrentPosition());
+                    ((VideoCreative) creative).setCurrentPosition(videoView.getCurrentPosition());
                     videoView.stopPlayback();
-                    silentAutoPlayBeaconTimer.cancel();
-                    Logger.d("danica video pause");
+                    if (silentAutoPlayBeaconTimer != null) silentAutoPlayBeaconTimer.cancel();
+                    if (videoCompletionBeaconTimer != null) videoCompletionBeaconTimer.cancel();
                 }
             }
-        } );
+        });
+    }
+
+    protected void scheduleVideoCompletionBeaconTask(final VideoView videoView) {
+        if (videoCompletionBeaconTimer != null) {
+            videoCompletionBeaconTimer.cancel();
+        }
+
+        videoCompletionBeaconTimer = getTimer();
+        videoCompletionBeaconTask = new VideoCompletionBeaconTask(videoView);
+        videoCompletionBeaconTimer.scheduleAtFixedRate(videoCompletionBeaconTask, 1000, 1000);
     }
 
     protected void scheduleSilentAutoplayBeaconTask(VideoView videoView) {
         if (silentAutoPlayBeaconTimer != null) {
             silentAutoPlayBeaconTimer.cancel();
         }
-        silentAutoPlayBeaconTimer = new Timer();
+        silentAutoPlayBeaconTimer = getTimer();
         silentAutoplayBeaconTask = new SilentAutoplayBeaconTask(videoView);
         silentAutoPlayBeaconTimer.schedule(silentAutoplayBeaconTask, 0, 1000);
+    }
+
+    public class VideoCompletionBeaconTask extends TimerTask {
+        private VideoView videoView;
+        public VideoCompletionBeaconTask (VideoView videoView) {
+            this.videoView = videoView;
+        }
+
+        @Override
+        public void run() {
+            try {
+                if (videoView != null) videoCompletionBeaconService.timeUpdate(videoView.getCurrentPosition(), videoView.getDuration());
+            } catch (Throwable tx) {
+                Logger.w("Video percentage beacon error: %s", tx.toString());
+            }
+        }
     }
 
     public class SilentAutoplayBeaconTask extends TimerTask {
@@ -165,20 +194,20 @@ public class AutoPlayVideo extends Media {
             if (videoView!= null) {
                 if (videoView.getCurrentPosition() >= 3000 && videoView.getCurrentPosition() < 4000) {
                     beaconService.silentAutoPlayDuration(videoView.getContext(), creative, 3000, feedPosition);
-                    Logger.d("Danica 3 second");
                 }
                 else if (videoView.getCurrentPosition() >= 10000 && videoView.getCurrentPosition() <11000) {
                     beaconService.silentAutoPlayDuration(videoView.getContext(), creative, 10000, feedPosition);
-                    Logger.d("Danica 10 second");
                 }
                 else if (videoView.getCurrentPosition() >= 11000) {
                     this.cancel();
-                    Logger.d("Danica canceled");
                 }
             }
         }
     }
 
+    protected Timer getTimer() {
+        return new Timer();
+    }
 
     @Override
     public Creative getCreative() {

@@ -13,6 +13,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.sharethrough.android.sdk.R;
+import com.sharethrough.sdk.beacons.VideoCompletionBeaconService;
 import com.sharethrough.sdk.media.*;
 import com.sharethrough.STRPicasso.Picasso;
 
@@ -71,7 +72,7 @@ public class Renderer {
                 thumbnailContainer.addView(thumbnailImage,
                         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
 
-                final Media media = createMedia(creative, beaconService, feedPosition);
+                final Media media = createMedia(adView, creative, beaconService, feedPosition);
                 handler.post(new Runnable() { // give thumbnailImage a chance to render so we can use its size
                     @Override
                     public void run() {
@@ -92,7 +93,7 @@ public class Renderer {
         });
     }
 
-    protected Media createMedia(Creative creative, BeaconService beaconService, int feedPosition) {
+    protected Media createMedia(IAdView adview, Creative creative, BeaconService beaconService, int feedPosition) {
         if (creative.getType().equals(Creative.CreativeType.YOUTUBE)) {
             return new Youtube(creative);
         } else if (creative.getType().equals(Creative.CreativeType.VINE)) {
@@ -106,7 +107,8 @@ public class Renderer {
         } else if (creative.getType().equals(Creative.CreativeType.ARTICLE)) {
             return new Article(creative);
         } else if (creative.getType().equals(Creative.CreativeType.AUTOPLAY)) {
-            return new AutoPlayVideo(creative, beaconService, feedPosition);
+            VideoCompletionBeaconService videoCompletionBeaconService = new VideoCompletionBeaconService(adview.getAdView().getContext(), creative, beaconService, feedPosition);
+            return new AutoPlayVideo(creative, beaconService, videoCompletionBeaconService, feedPosition);
         } else {
             return new Clickout(creative);
         }
