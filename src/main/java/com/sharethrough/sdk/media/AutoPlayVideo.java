@@ -154,11 +154,9 @@ public class AutoPlayVideo extends Media {
     }
 
     protected void cancelVideoCompletionBeaconTask() {
-        if (videoCompletionBeaconTask != null) {
-            videoCompletionBeaconTask.cancel();
-        }
-        if (videoCompletionBeaconTimer != null) {
+        if (videoCompletionBeaconTimer != null && videoCompletionBeaconTask != null) {
             videoCompletionBeaconTimer.cancel();
+            videoCompletionBeaconTask.cancel();
             videoCompletionBeaconTimer.purge();
         }
     }
@@ -172,11 +170,9 @@ public class AutoPlayVideo extends Media {
     }
 
     protected void cancelSilentAutoplayBeaconTask() {
-        if (silentAutoplayBeaconTask != null) {
-            silentAutoplayBeaconTask.cancel();
-        }
-        if (silentAutoPlayBeaconTimer != null) {
+        if (silentAutoplayBeaconTask != null && silentAutoPlayBeaconTimer != null) {
             silentAutoPlayBeaconTimer.cancel();
+            silentAutoplayBeaconTask.cancel();
             silentAutoPlayBeaconTimer.purge();
         }
     }
