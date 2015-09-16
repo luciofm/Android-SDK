@@ -27,9 +27,9 @@ public class AutoPlayVideo extends Media {
     protected Object videoCompletedLock = new Object();
     protected boolean isVideoPrepared = false;
 
-    protected Timer silentAutoPlayBeaconTimer = new Timer();
+    protected Timer silentAutoPlayBeaconTimer;
     protected SilentAutoplayBeaconTask silentAutoplayBeaconTask;
-    protected Timer videoCompletionBeaconTimer = new Timer();
+    protected Timer videoCompletionBeaconTimer;
     protected VideoCompletionBeaconTask videoCompletionBeaconTask;
 
     public AutoPlayVideo(Creative creative, BeaconService beaconService, VideoCompletionBeaconService videoCompletionBeaconService, int feedPosition) {
@@ -41,8 +41,8 @@ public class AutoPlayVideo extends Media {
 
     @Override
     public void wasClicked(View view, BeaconService beaconService, int feedPosition) {
-        if (silentAutoPlayBeaconTimer != null) silentAutoPlayBeaconTimer.cancel();
-        if (videoCompletionBeaconTimer != null) videoCompletionBeaconTimer.cancel();
+        cancelSilentAutoplayBeaconTask();
+        cancelVideoCompletionBeaconTask();
 
         int currentPosition = 0;
         VideoView videoView = (VideoView)view.findViewWithTag(videoViewTag);
@@ -102,8 +102,8 @@ public class AutoPlayVideo extends Media {
             public void onCompletion(MediaPlayer mediaPlayer) {
                 synchronized (videoCompletedLock) {
                     ((VideoCreative) creative).setVideoCompleted(true);
-                    if (silentAutoPlayBeaconTimer != null) silentAutoPlayBeaconTimer.cancel();
-                    if (videoCompletionBeaconTimer != null) videoCompletionBeaconTimer.cancel();
+                    cancelSilentAutoplayBeaconTask();
+                    cancelVideoCompletionBeaconTask();
                 }
 
                 mediaPlayer.stop();
@@ -138,30 +138,47 @@ public class AutoPlayVideo extends Media {
                 if (videoView.isPlaying() && videoView.canPause()) {
                     ((VideoCreative) creative).setCurrentPosition(videoView.getCurrentPosition());
                     videoView.stopPlayback();
-                    if (silentAutoPlayBeaconTimer != null) silentAutoPlayBeaconTimer.cancel();
-                    if (videoCompletionBeaconTimer != null) videoCompletionBeaconTimer.cancel();
+                    cancelSilentAutoplayBeaconTask();
+                    cancelVideoCompletionBeaconTask();
                 }
             }
         });
     }
 
     protected void scheduleVideoCompletionBeaconTask(final VideoView videoView) {
-        if (videoCompletionBeaconTimer != null) {
-            videoCompletionBeaconTimer.cancel();
-        }
+        cancelVideoCompletionBeaconTask();
 
         videoCompletionBeaconTimer = getTimer();
         videoCompletionBeaconTask = new VideoCompletionBeaconTask(videoView);
         videoCompletionBeaconTimer.scheduleAtFixedRate(videoCompletionBeaconTask, 1000, 1000);
     }
 
-    protected void scheduleSilentAutoplayBeaconTask(VideoView videoView) {
-        if (silentAutoPlayBeaconTimer != null) {
-            silentAutoPlayBeaconTimer.cancel();
+    protected void cancelVideoCompletionBeaconTask() {
+        if (videoCompletionBeaconTask != null) {
+            videoCompletionBeaconTask.cancel();
         }
+        if (videoCompletionBeaconTimer != null) {
+            videoCompletionBeaconTimer.cancel();
+            videoCompletionBeaconTimer.purge();
+        }
+    }
+
+    protected void scheduleSilentAutoplayBeaconTask(VideoView videoView) {
+        cancelSilentAutoplayBeaconTask();;
+
         silentAutoPlayBeaconTimer = getTimer();
         silentAutoplayBeaconTask = new SilentAutoplayBeaconTask(videoView);
-        silentAutoPlayBeaconTimer.schedule(silentAutoplayBeaconTask, 0, 1000);
+        silentAutoPlayBeaconTimer.scheduleAtFixedRate(silentAutoplayBeaconTask, 0, 1000);
+    }
+
+    protected void cancelSilentAutoplayBeaconTask() {
+        if (silentAutoplayBeaconTask != null) {
+            silentAutoplayBeaconTask.cancel();
+        }
+        if (silentAutoPlayBeaconTimer != null) {
+            silentAutoPlayBeaconTimer.cancel();
+            silentAutoPlayBeaconTimer.purge();
+        }
     }
 
     public class VideoCompletionBeaconTask extends TimerTask {
@@ -169,14 +186,23 @@ public class AutoPlayVideo extends Media {
         public VideoCompletionBeaconTask (VideoView videoView) {
             this.videoView = videoView;
         }
+        private boolean isCancelled;
 
         @Override
         public void run() {
+            if (isCancelled) return;
+
             try {
                 if (videoView != null) videoCompletionBeaconService.timeUpdate(videoView.getCurrentPosition(), videoView.getDuration());
             } catch (Throwable tx) {
                 Logger.w("Video percentage beacon error: %s", tx.toString());
             }
+        }
+
+        @Override
+        public boolean cancel() {
+            isCancelled = true;
+            return super.cancel();
         }
     }
 
@@ -185,23 +211,33 @@ public class AutoPlayVideo extends Media {
         public SilentAutoplayBeaconTask (VideoView videoView) {
             this.videoView = videoView;
         }
+        private boolean isCancelled;
         @Override
         public void run() {
-            if (creative.wasClicked()) {
+            if (isCancelled) return;
+
+            if (creative.wasClicked()) return;
+
+            if (videoView == null) {
+                cancel();
                 return;
             }
 
-            if (videoView!= null) {
-                if (videoView.getCurrentPosition() >= 3000 && videoView.getCurrentPosition() < 4000) {
-                    beaconService.silentAutoPlayDuration(videoView.getContext(), creative, 3000, feedPosition);
-                }
-                else if (videoView.getCurrentPosition() >= 10000 && videoView.getCurrentPosition() <11000) {
-                    beaconService.silentAutoPlayDuration(videoView.getContext(), creative, 10000, feedPosition);
-                }
-                else if (videoView.getCurrentPosition() >= 11000) {
-                    this.cancel();
-                }
+            if (videoView.getCurrentPosition() >= 3000 && videoView.getCurrentPosition() < 4000) {
+                beaconService.silentAutoPlayDuration(videoView.getContext(), creative, 3000, feedPosition);
             }
+            else if (videoView.getCurrentPosition() >= 10000 && videoView.getCurrentPosition() <11000) {
+                beaconService.silentAutoPlayDuration(videoView.getContext(), creative, 10000, feedPosition);
+            }
+            else if (videoView.getCurrentPosition() >= 11000) {
+                cancel();
+            }
+        }
+
+        @Override
+        public boolean cancel() {
+            isCancelled = true;
+            return super.cancel();
         }
     }
 

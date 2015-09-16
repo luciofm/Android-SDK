@@ -99,6 +99,10 @@ public class Renderer {
         } else if (creative.getType().equals(Creative.CreativeType.VINE)) {
             return new Vine(creative);
         } else if (creative.getType().equals(Creative.CreativeType.HOSTEDVIDEO)) {
+            if (creative instanceof VideoCreative) {
+                VideoCompletionBeaconService videoCompletionBeaconService = new VideoCompletionBeaconService(adview.getAdView().getContext(), creative, beaconService, feedPosition);
+                return new AutoPlayVideo(creative, beaconService, videoCompletionBeaconService, feedPosition);
+            }
             return new HostedVideo(creative);
         } else if (creative.getType().equals(Creative.CreativeType.INSTAGRAM)) {
             return new Instagram(creative);
@@ -106,9 +110,6 @@ public class Renderer {
             return new Pinterest(creative);
         } else if (creative.getType().equals(Creative.CreativeType.ARTICLE)) {
             return new Article(creative);
-        } else if (creative.getType().equals(Creative.CreativeType.AUTOPLAY)) {
-            VideoCompletionBeaconService videoCompletionBeaconService = new VideoCompletionBeaconService(adview.getAdView().getContext(), creative, beaconService, feedPosition);
-            return new AutoPlayVideo(creative, beaconService, videoCompletionBeaconService, feedPosition);
         } else {
             return new Clickout(creative);
         }

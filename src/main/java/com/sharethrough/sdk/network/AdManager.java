@@ -69,7 +69,7 @@ public class AdManager {
         ArrayList<Creative> creatives = new ArrayList<Creative>();
         for (final Response.Creative responseCreative : response.creatives) {
             Creative creative;
-            if (responseCreative.creative.action.equals("autoplay")) {
+            if (responseCreative.creative.action.equals("hosted-video") && responseCreative.creative.instantPlay) {
                 creative = new VideoCreative(responseCreative);
             } else {
                 creative = new Creative(responseCreative);
