@@ -18,6 +18,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class AutoPlayVideo extends Media {
+    static int silentTimerCount = 0;
+    static int percentTimerCount = 0;
     protected String videoViewTag = "SharethroughAutoPlayVideoView";
     protected final Creative creative;
     protected BeaconService beaconService;
@@ -107,6 +109,7 @@ public class AutoPlayVideo extends Media {
                 }
 
                 mediaPlayer.stop();
+                isVideoPrepared = false;
             }
         });
 
@@ -140,6 +143,7 @@ public class AutoPlayVideo extends Media {
                     videoView.stopPlayback();
                     cancelSilentAutoplayBeaconTask();
                     cancelVideoCompletionBeaconTask();
+                    isVideoPrepared = false;
                 }
             }
         });
@@ -148,7 +152,7 @@ public class AutoPlayVideo extends Media {
     protected void scheduleVideoCompletionBeaconTask(final VideoView videoView) {
         cancelVideoCompletionBeaconTask();
 
-        videoCompletionBeaconTimer = getTimer();
+        videoCompletionBeaconTimer = getTimer("VideoCompletionBeaconTimer for " + creative);
         videoCompletionBeaconTask = new VideoCompletionBeaconTask(videoView);
         videoCompletionBeaconTimer.scheduleAtFixedRate(videoCompletionBeaconTask, 1000, 1000);
     }
@@ -162,11 +166,11 @@ public class AutoPlayVideo extends Media {
     }
 
     protected void scheduleSilentAutoplayBeaconTask(VideoView videoView) {
-        cancelSilentAutoplayBeaconTask();;
+        cancelSilentAutoplayBeaconTask();
 
-        silentAutoPlayBeaconTimer = getTimer();
+        silentAutoPlayBeaconTimer = getTimer("SilentAutoplayBeaconTimer for " + creative);
         silentAutoplayBeaconTask = new SilentAutoplayBeaconTask(videoView);
-        silentAutoPlayBeaconTimer.scheduleAtFixedRate(silentAutoplayBeaconTask, 0, 1000);
+        silentAutoPlayBeaconTimer.scheduleAtFixedRate(silentAutoplayBeaconTask, 1000, 1000);
     }
 
     protected void cancelSilentAutoplayBeaconTask() {
@@ -179,10 +183,10 @@ public class AutoPlayVideo extends Media {
 
     public class VideoCompletionBeaconTask extends TimerTask {
         private VideoView videoView;
+        private boolean isCancelled;
         public VideoCompletionBeaconTask (VideoView videoView) {
             this.videoView = videoView;
         }
-        private boolean isCancelled;
 
         @Override
         public void run() {
@@ -204,10 +208,11 @@ public class AutoPlayVideo extends Media {
 
     public class SilentAutoplayBeaconTask extends TimerTask {
         private VideoView videoView;
+        private boolean isCancelled;
+
         public SilentAutoplayBeaconTask (VideoView videoView) {
             this.videoView = videoView;
         }
-        private boolean isCancelled;
         @Override
         public void run() {
             if (isCancelled) return;
@@ -237,8 +242,8 @@ public class AutoPlayVideo extends Media {
         }
     }
 
-    protected Timer getTimer() {
-        return new Timer();
+    protected Timer getTimer(String timerName) {
+        return new Timer(timerName);
     }
 
     @Override
