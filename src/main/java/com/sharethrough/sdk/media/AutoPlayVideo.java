@@ -18,8 +18,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class AutoPlayVideo extends Media {
-    static int silentTimerCount = 0;
-    static int percentTimerCount = 0;
     protected String videoViewTag = "SharethroughAutoPlayVideoView";
     protected final Creative creative;
     protected BeaconService beaconService;
@@ -49,7 +47,7 @@ public class AutoPlayVideo extends Media {
         int currentPosition = 0;
         VideoView videoView = (VideoView)view.findViewWithTag(videoViewTag);
         if (videoView != null && videoView.isPlaying() && videoView.canPause()) {
-            videoView.pause();
+            videoView.stopPlayback();
             currentPosition = videoView.getCurrentPosition();
         }
 
