@@ -64,6 +64,7 @@ public class Renderer {
                 }
 
                 FrameLayout thumbnailContainer = adView.getThumbnail();
+
                 thumbnailContainer.removeAllViews();
                 final AdImageView thumbnailImage = new AdImageView(container.getContext(), sharethrough, creative, adView, feedPosition, beaconService);
                 if (creative.getThumbnailUrl() != null && !creative.getThumbnailUrl().isEmpty())

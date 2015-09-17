@@ -69,7 +69,6 @@ public class AutoPlayVideo extends Media {
 
     @Override
     public void wasRendered(final IAdView adView, ImageView thumbnailImage) {
-        super.wasRendered(adView, thumbnailImage);
         thumbnailImage.setVisibility(View.INVISIBLE);
         addVideoPlayerToAdViewAndSetListeners(adView);
     }
@@ -123,7 +122,7 @@ public class AutoPlayVideo extends Media {
         adView.setScreenVisibilityListener(new IAdView.ScreenVisibilityListener() {
             @Override
             public void onScreen() {
-                synchronized (videoCompletedLock) {
+                /*synchronized (videoCompletedLock) {
                     if (!isVideoPrepared || ((VideoCreative) creative).isVideoCompleted() || creative.wasClicked()) {
                         return;
                     }
@@ -132,7 +131,7 @@ public class AutoPlayVideo extends Media {
                         videoView.setVideoURI(uri);
                         videoView.start();
                     }
-                }
+                }*/
             }
 
             @Override
