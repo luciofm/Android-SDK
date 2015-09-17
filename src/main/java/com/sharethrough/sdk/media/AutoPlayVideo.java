@@ -48,6 +48,7 @@ public class AutoPlayVideo extends Media {
         VideoView videoView = (VideoView)view.findViewWithTag(videoViewTag);
         if (videoView != null && videoView.isPlaying() && videoView.canPause()) {
             videoView.stopPlayback();
+            isVideoPrepared = false;
             currentPosition = videoView.getCurrentPosition();
         }
 
@@ -127,20 +128,20 @@ public class AutoPlayVideo extends Media {
                         return;
                     }
                     if (!videoView.isPlaying()) {
+                        Uri uri = Uri.parse(getCreative().getMediaUrl());
+                        videoView.setVideoURI(uri);
                         videoView.start();
-                        scheduleSilentAutoplayBeaconTask(videoView);
-                        scheduleVideoCompletionBeaconTask(videoView);
                     }
                 }
             }
 
             @Override
             public void offScreen() {
-                if (videoView.isPlaying() && videoView.canPause()) {
+                if (isVideoPrepared && videoView.isPlaying() && videoView.canPause()) {
                     ((VideoCreative) creative).setCurrentPosition(videoView.getCurrentPosition());
-                    videoView.stopPlayback();
                     cancelSilentAutoplayBeaconTask();
                     cancelVideoCompletionBeaconTask();
+                    videoView.stopPlayback();
                     isVideoPrepared = false;
                 }
             }
@@ -191,7 +192,9 @@ public class AutoPlayVideo extends Media {
             if (isCancelled) return;
 
             try {
-                if (videoView != null) videoCompletionBeaconService.timeUpdate(videoView.getCurrentPosition(), videoView.getDuration());
+                if (videoView != null && videoView.isPlaying()) {
+                    videoCompletionBeaconService.timeUpdate(videoView.getCurrentPosition(), videoView.getDuration());
+                }
             } catch (Throwable tx) {
                 Logger.w("Video percentage beacon error: %s", tx.toString());
             }
@@ -222,14 +225,14 @@ public class AutoPlayVideo extends Media {
                 return;
             }
 
-            if (videoView.getCurrentPosition() >= 3000 && videoView.getCurrentPosition() < 4000) {
-                beaconService.silentAutoPlayDuration(videoView.getContext(), creative, 3000, feedPosition);
-            }
-            else if (videoView.getCurrentPosition() >= 10000 && videoView.getCurrentPosition() <11000) {
-                beaconService.silentAutoPlayDuration(videoView.getContext(), creative, 10000, feedPosition);
-            }
-            else if (videoView.getCurrentPosition() >= 11000) {
-                cancel();
+            if (videoView.isPlaying()) {
+                if (videoView.getCurrentPosition() >= 3000 && videoView.getCurrentPosition() < 4000) {
+                    beaconService.silentAutoPlayDuration(videoView.getContext(), creative, 3000, feedPosition);
+                } else if (videoView.getCurrentPosition() >= 10000 && videoView.getCurrentPosition() < 11000) {
+                    beaconService.silentAutoPlayDuration(videoView.getContext(), creative, 10000, feedPosition);
+                } else if (videoView.getCurrentPosition() >= 11000) {
+                    cancel();
+                }
             }
         }
 
