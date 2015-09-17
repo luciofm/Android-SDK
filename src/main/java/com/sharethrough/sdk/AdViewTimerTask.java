@@ -66,7 +66,8 @@ public class AdViewTimerTask extends TimerTask {
             adView.onScreen();
         }
         else {
-            adView.offScreen();
+            if (creative.wasVisible)
+                adView.offScreen();
         }
     }
 
@@ -96,6 +97,9 @@ public class AdViewTimerTask extends TimerTask {
 
         return false;
     }
+
+    /*private boolean isAdOffScreen(IAdView adView) {
+    }*/
 
     @Override
     public boolean cancel() {

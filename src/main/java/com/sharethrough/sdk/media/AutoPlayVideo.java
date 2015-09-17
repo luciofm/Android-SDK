@@ -1,6 +1,7 @@
 package com.sharethrough.sdk.media;
 
 import android.media.MediaPlayer;
+import android.media.session.MediaController;
 import android.net.Uri;
 import android.view.Gravity;
 import android.view.View;
@@ -46,6 +47,8 @@ public class AutoPlayVideo extends Media {
 
         int currentPosition = 0;
         VideoView videoView = (VideoView)view.findViewWithTag(videoViewTag);
+        //MediaController mediaController = new MediaController(videoView.getContext());
+
         if (videoView != null && videoView.isPlaying() && videoView.canPause()) {
             videoView.stopPlayback();
             isVideoPrepared = false;
@@ -86,11 +89,11 @@ public class AutoPlayVideo extends Media {
             @Override
             public void onPrepared(MediaPlayer mediaPlayer) {
                 if (((VideoCreative)creative).isVideoCompleted() || creative.wasClicked()) return;
-
+                videoView.seekTo(((VideoCreative)creative).getCurrentPosition());
+                videoView.start();
                 mediaPlayer.setLooping(false);
                 mediaPlayer.setVolume(0f, 0f);
-                mediaPlayer.seekTo(((VideoCreative)creative).getCurrentPosition());
-                mediaPlayer.start();
+                Logger.d("danica video view start: %s", creative.getTitle());
                 scheduleSilentAutoplayBeaconTask(videoView);
                 scheduleVideoCompletionBeaconTask(videoView);
                 isVideoPrepared = true;
@@ -104,10 +107,10 @@ public class AutoPlayVideo extends Media {
                     ((VideoCreative) creative).setVideoCompleted(true);
                     cancelSilentAutoplayBeaconTask();
                     cancelVideoCompletionBeaconTask();
+                    videoView.pause();
+                    Logger.d("danica video view pause: %s", creative.getTitle());
+                    isVideoPrepared = false;
                 }
-
-                mediaPlayer.stop();
-                isVideoPrepared = false;
             }
         });
 
@@ -136,12 +139,15 @@ public class AutoPlayVideo extends Media {
 
             @Override
             public void offScreen() {
-                if (isVideoPrepared && videoView.isPlaying() && videoView.canPause()) {
-                    ((VideoCreative) creative).setCurrentPosition(videoView.getCurrentPosition());
-                    cancelSilentAutoplayBeaconTask();
-                    cancelVideoCompletionBeaconTask();
-                    videoView.stopPlayback();
-                    isVideoPrepared = false;
+                synchronized (videoCompletedLock) {
+                    if (isVideoPrepared && videoView.isPlaying() && videoView.canPause()) {
+                        ((VideoCreative) creative).setCurrentPosition(videoView.getCurrentPosition());
+                        cancelSilentAutoplayBeaconTask();
+                        cancelVideoCompletionBeaconTask();
+                        videoView.stopPlayback();
+                        Logger.d("danica video view stop playback: %s", creative.getTitle());
+                        isVideoPrepared = false;
+                    }
                 }
             }
         });
