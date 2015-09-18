@@ -82,6 +82,7 @@ public class AdViewTimerTask extends TimerTask {
             setOnScreenStartTimeForAutoplay();
             if (hasAdBeenOnScreenForTimeThresholdForAutoplay()) {
                 adView.onScreen();
+                adViewHasBeenVisible = true;
             }
         } else {
             onScreenStartTimeForAutoPlayStart = null;
@@ -91,16 +92,8 @@ public class AdViewTimerTask extends TimerTask {
     private void checkIfOffScreen(IAdView adView) {
         if( adView == null ) return;
 
-        if (is50PercentOfAdIsOnScreen(adView)) {
-            if (!adViewHasBeenVisible) {
-                adViewHasBeenVisible = true;
-            }
-
-        } else {
-            if (adViewHasBeenVisible) {
-                adView.offScreen();
-                adViewHasBeenVisible = false;
-            }
+        if (is95PercentOfAdIsOffScreen(adView) && adViewHasBeenVisible) {
+            adView.offScreen();
         }
     }
 
@@ -115,6 +108,20 @@ public class AdViewTimerTask extends TimerTask {
 
         fireVisibleBeaconIfThresholdReached(adView);
         fireVisibilityEventsWhenAppropriate(adView);
+    }
+
+    private boolean is95PercentOfAdIsOffScreen(IAdView adView) {
+        Rect rect = new Rect();
+        if( adView.getAdView().isShown() && adView.getAdView().getGlobalVisibleRect(rect) ) {
+            int visibleArea = rect.width() * rect.height();
+            int viewArea = adView.getAdView().getHeight() * adView.getAdView().getWidth();
+
+            if (viewArea * .05 > visibleArea) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private boolean is50PercentOfAdIsOnScreen(IAdView adView) {

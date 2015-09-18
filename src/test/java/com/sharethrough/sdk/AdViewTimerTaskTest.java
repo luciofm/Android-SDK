@@ -167,40 +167,36 @@ public class AdViewTimerTaskTest extends TestBase {
         assertThat(subject.adViewHasBeenVisible).isFalse();
         verify(adView, never()).offScreen();
 
-        // view is now more than 50% (scrolling down)
+        // view is now more than 50% (scrolling down) less than 1 sec
         visibleWidth = adView.getWidth();
         visibleHeight = adView.getHeight() / 2 + 1;
         isVisible = true;
+        now += 900;
 
+        subject.run();
+        assertThat(subject.adViewHasBeenVisible).isFalse();
+        verify(adView, never()).offScreen();
+
+        // view is still more than 50% (scrolling down) more than 1 sec
+        now += 1100;
         subject.run();
         assertThat(subject.adViewHasBeenVisible).isTrue();
         verify(adView, never()).offScreen();
-
-        // view is still more than 50% (scrolling down)
-        subject.run();
-        assertThat(subject.adViewHasBeenVisible).isTrue();
-        verify(adView, never()).offScreen();
+        verify(adView, times(1)).onScreen();
 
         // view is now less than 50% (scrolling down)
         visibleWidth = adView.getWidth();
         visibleHeight = adView.getHeight() / 2 - 1;
         subject.run();
-        assertThat(subject.adViewHasBeenVisible).isFalse();
-        verify(adView, times(1)).offScreen();
-
-        //view more than 50% again (scrolling up)
-        visibleWidth = adView.getWidth();
-        visibleHeight = adView.getHeight() / 2 + 1;
-        subject.run();
         assertThat(subject.adViewHasBeenVisible).isTrue();
-        verify(adView, times(1)).offScreen();
+        verify(adView, never()).offScreen();
+        verify(adView, times(1)).onScreen();
 
-        // view is now less than 50% (scrolling down)
+        //view less than 95% (scrolling down)
         visibleWidth = adView.getWidth();
-        visibleHeight = adView.getHeight() / 2 - 1;
+        visibleHeight = adView.getHeight() * (4/100) ;
         subject.run();
-        assertThat(subject.adViewHasBeenVisible).isFalse();
-        verify(adView, times(2)).offScreen();
+        verify(adView, times(1)).offScreen();
 
     }
 }

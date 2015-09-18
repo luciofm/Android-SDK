@@ -1,7 +1,10 @@
 package com.sharethrough.sdk.media;
 
+import android.content.Context;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.View;
 
@@ -32,6 +35,8 @@ public class AutoPlayVideo extends Media {
     protected SilentAutoplayBeaconTask silentAutoplayBeaconTask;
     protected Timer videoCompletionBeaconTimer;
     protected VideoCompletionBeaconTask videoCompletionBeaconTask;
+
+    final Handler handler = new Handler(Looper.getMainLooper());
 
     public AutoPlayVideo(Creative creative, BeaconService beaconService, VideoCompletionBeaconService videoCompletionBeaconService, int feedPosition) {
         this.creative = creative;
@@ -75,14 +80,14 @@ public class AutoPlayVideo extends Media {
     @Override
     public void wasRendered(final IAdView adView, ImageView thumbnailImage) {
         thumbnailImage.setVisibility(View.INVISIBLE);
-        addVideoPlayerToAdViewAndSetListeners(adView);
+        addVideoPlayerToAdViewAndSetListeners(adView, thumbnailImage);
     }
 
-    protected void addVideoPlayerToAdViewAndSetListeners(final IAdView adView) {
-        final VideoView videoView = new VideoView(adView.getAdView().getContext().getApplicationContext());
+    protected void addVideoPlayerToAdViewAndSetListeners(final IAdView adView, final ImageView thumbnailImage) {
+        final VideoView videoView = getVideoView(adView.getAdView().getContext().getApplicationContext());
         videoView.setTag(videoViewTag);
 
-        FrameLayout thumbnailContainer = adView.getThumbnail();
+        final FrameLayout thumbnailContainer = adView.getThumbnail();
         thumbnailContainer.addView(videoView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
         Uri uri = Uri.parse(getCreative().getMediaUrl());
         videoView.setVideoURI(uri);
@@ -145,7 +150,13 @@ public class AutoPlayVideo extends Media {
                         ((VideoCreative) creative).setCurrentPosition(videoView.getCurrentPosition());
                         cancelSilentAutoplayBeaconTask();
                         cancelVideoCompletionBeaconTask();
-                        videoView.stopPlayback();
+                        videoView.pause();
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                thumbnailContainer.removeView(videoView);
+                            }
+                        });
                         Logger.d("VideoView stop playback: %s", creative.getTitle());
                         isVideoPrepared = false;
                         isVideoPlaying = false;
@@ -252,6 +263,10 @@ public class AutoPlayVideo extends Media {
 
     protected Timer getTimer(String timerName) {
         return new Timer(timerName);
+    }
+
+    protected VideoView getVideoView(Context context) {
+        return new VideoView(context);
     }
 
     @Override

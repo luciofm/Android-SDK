@@ -310,13 +310,23 @@ public class AutoPlayVideoTest extends TestBase {
 
         VideoView videoView = (VideoView)thumbnailContainer.findViewWithTag("SharethroughAutoPlayVideoView");
         videoView.start();
+
         mockedIAdView.getScreenVisibilityListener().offScreen();
-        assertThat(videoView.isPlaying()).isFalse();
+
+        //verify current position saved
+        verify(mockedCreative).setCurrentPosition(any(Integer.class));
+
+        //verify timers/tasks cancelled
         verify(mockedSilentAutoplayBeaconTimer).cancel();
         verify(mockedVideoCompletionBeaconTimer).cancel();
         verify(mockedSilentAutoplayBeaconTask).cancel();
         verify(mockedVideoCompletionBeaconTask).cancel();
-        verify(mockedCreative).setCurrentPosition(any(Integer.class));
+
+        //verify video paused and video view removed
+        assertThat(videoView.isPlaying()).isFalse();
+        assertThat((VideoView) thumbnailContainer.findViewWithTag("SharethroughAutoPlayVideoView")).isNull();
+
+        //verify video state set properly
         assertThat(subject.isVideoPrepared).isFalse();
         assertThat(subject.isVideoPlaying).isFalse();
     }
