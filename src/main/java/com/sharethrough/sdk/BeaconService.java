@@ -160,8 +160,9 @@ public class BeaconService {
 
     public void autoplayVideoEngagement(final Context context, final Creative creative, final int duration, int feedPosition) {
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
-        beaconParams.put("type", "autoplayVideoEngagement");
-        beaconParams.put("value", String.valueOf(duration));
+        beaconParams.put("type", "userEvent");
+        beaconParams.put("userEvent", "autoplayVideoEngagement");
+        beaconParams.put("videoDuration", String.valueOf(duration));
         beaconParams.put("placementIndex", String.valueOf(feedPosition));
         fireBeacon(beaconParams);
     }
