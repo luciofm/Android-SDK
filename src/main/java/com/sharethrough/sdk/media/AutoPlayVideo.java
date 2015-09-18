@@ -24,8 +24,9 @@ public class AutoPlayVideo extends Media {
     protected VideoCompletionBeaconService videoCompletionBeaconService;
     protected int feedPosition;
 
-    protected Object videoCompletedLock = new Object();
+    protected Object videoStateLock = new Object();
     protected boolean isVideoPrepared = false;
+    protected boolean isVideoPlaying = false;
 
     protected Timer silentAutoPlayBeaconTimer;
     protected SilentAutoplayBeaconTask silentAutoplayBeaconTask;
@@ -47,10 +48,13 @@ public class AutoPlayVideo extends Media {
         int currentPosition = 0;
         VideoView videoView = (VideoView)view.findViewWithTag(videoViewTag);
 
-        if (videoView != null && videoView.isPlaying() && videoView.canPause()) {
-            videoView.stopPlayback();
-            isVideoPrepared = false;
-            currentPosition = videoView.getCurrentPosition();
+        synchronized (videoStateLock) {
+            if (videoView != null && isVideoPrepared && videoView.isPlaying() && videoView.canPause()) {
+                videoView.stopPlayback();
+                currentPosition = videoView.getCurrentPosition();
+                isVideoPrepared = false;
+                isVideoPlaying = false;
+            }
         }
 
         new VideoDialog(view.getContext(), creative, beaconService, false, new Timer(), videoCompletionBeaconService, feedPosition, currentPosition).show();
@@ -89,12 +93,9 @@ public class AutoPlayVideo extends Media {
             public void onPrepared(MediaPlayer mediaPlayer) {
                 if (((VideoCreative)creative).isVideoCompleted() || creative.wasClicked()) return;
                 videoView.seekTo(((VideoCreative)creative).getCurrentPosition());
-                videoView.start();
                 mediaPlayer.setLooping(false);
                 mediaPlayer.setVolume(0f, 0f);
-                Logger.d("VideoView start: %s", creative.getTitle());
-                scheduleSilentAutoplayBeaconTask(videoView);
-                scheduleVideoCompletionBeaconTask(videoView);
+                Logger.d("VideoView prepared: %s", creative.getTitle());
                 isVideoPrepared = true;
             }
         });
@@ -102,13 +103,14 @@ public class AutoPlayVideo extends Media {
         videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
-                synchronized (videoCompletedLock) {
+                synchronized (videoStateLock) {
                     ((VideoCreative) creative).setVideoCompleted(true);
                     cancelSilentAutoplayBeaconTask();
                     cancelVideoCompletionBeaconTask();
                     videoView.pause();
                     Logger.d("VideoView pause: %s", creative.getTitle());
                     isVideoPrepared = false;
+                    isVideoPlaying = false;
                 }
             }
         });
@@ -124,11 +126,21 @@ public class AutoPlayVideo extends Media {
         adView.setScreenVisibilityListener(new IAdView.ScreenVisibilityListener() {
             @Override
             public void onScreen() {
+                synchronized (videoStateLock) {
+                    if (creative.wasClicked() || ((VideoCreative)creative).isVideoCompleted()) return;
+                    if (isVideoPrepared && !isVideoPlaying) {
+                        videoView.start();
+                        Logger.d("VideoView start: %s", creative.getTitle());
+                        isVideoPlaying = true;
+                        scheduleSilentAutoplayBeaconTask(videoView);
+                        scheduleVideoCompletionBeaconTask(videoView);
+                    }
+                }
             }
 
             @Override
             public void offScreen() {
-                synchronized (videoCompletedLock) {
+                synchronized (videoStateLock) {
                     if (isVideoPrepared && videoView.isPlaying() && videoView.canPause()) {
                         ((VideoCreative) creative).setCurrentPosition(videoView.getCurrentPosition());
                         cancelSilentAutoplayBeaconTask();
@@ -136,6 +148,7 @@ public class AutoPlayVideo extends Media {
                         videoView.stopPlayback();
                         Logger.d("VideoView stop playback: %s", creative.getTitle());
                         isVideoPrepared = false;
+                        isVideoPlaying = false;
                     }
                 }
             }
