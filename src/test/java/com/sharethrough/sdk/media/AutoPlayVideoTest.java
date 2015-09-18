@@ -225,8 +225,7 @@ public class AutoPlayVideoTest extends TestBase {
 
         verify(mockedMediaPlayer).setLooping(false);
         verify(mockedMediaPlayer).setVolume(0f, 0f);
-        verify(mockedMediaPlayer).seekTo(4000);
-        verify(mockedMediaPlayer).start();
+        assertThat(videoView.isPlaying()).isTrue();
         assertThat(subject.isVideoPrepared()).isTrue();
         verify(mockedTimer).scheduleAtFixedRate(subject.getSilentAutoplayBeaconTask(), 1000, 1000);
         verify(mockedTimer).scheduleAtFixedRate(subject.getVideoCompletionBeaconTask(), 1000, 1000);
@@ -264,7 +263,7 @@ public class AutoPlayVideoTest extends TestBase {
         verify(mockedSilentAutoplayBeaconTask).cancel();
         verify(mockedVideoCompletionBeaconTask).cancel();
         verify(mockedCreative).setVideoCompleted(true);
-        verify(mockedMediaPlayer).stop();
+        assertThat(videoView.isPlaying()).isFalse();
         assertThat(subject.isVideoPrepared()).isFalse();
     }
 

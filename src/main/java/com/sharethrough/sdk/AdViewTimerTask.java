@@ -17,6 +17,7 @@ public class AdViewTimerTask extends TimerTask {
     private final int feedPosition;
     private boolean isCancelled;
     private Date visibleStartTime;
+    protected boolean adViewHasBeenVisible = false;
 
     public AdViewTimerTask(IAdView adView, int feedPosition, Creative creative, BeaconService beaconService, Provider<Date> dateProvider,
                            Sharethrough sharethrough) {
@@ -62,13 +63,19 @@ public class AdViewTimerTask extends TimerTask {
 
     private void fireVisibilityEventsWhenAppropriate( IAdView adView ) {
         if( adView == null ) return;
+
         if (is50PercentOfAdIsOnScreen(adView)) {
-            adView.onScreen();
-        }
-        else {
-            if (creative.wasVisible)
+            if (!adViewHasBeenVisible) {
+                adViewHasBeenVisible = true;
+            }
+
+        } else {
+            if (adViewHasBeenVisible) {
                 adView.offScreen();
+                adViewHasBeenVisible = false;
+            }
         }
+
     }
 
     @Override
@@ -97,9 +104,6 @@ public class AdViewTimerTask extends TimerTask {
 
         return false;
     }
-
-    /*private boolean isAdOffScreen(IAdView adView) {
-    }*/
 
     @Override
     public boolean cancel() {

@@ -1,7 +1,6 @@
 package com.sharethrough.sdk.media;
 
 import android.media.MediaPlayer;
-import android.media.session.MediaController;
 import android.net.Uri;
 import android.view.Gravity;
 import android.view.View;
@@ -47,7 +46,6 @@ public class AutoPlayVideo extends Media {
 
         int currentPosition = 0;
         VideoView videoView = (VideoView)view.findViewWithTag(videoViewTag);
-        //MediaController mediaController = new MediaController(videoView.getContext());
 
         if (videoView != null && videoView.isPlaying() && videoView.canPause()) {
             videoView.stopPlayback();
@@ -84,6 +82,7 @@ public class AutoPlayVideo extends Media {
         thumbnailContainer.addView(videoView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
         Uri uri = Uri.parse(getCreative().getMediaUrl());
         videoView.setVideoURI(uri);
+        videoView.setBackgroundResource(android.R.color.transparent);
 
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
@@ -93,7 +92,7 @@ public class AutoPlayVideo extends Media {
                 videoView.start();
                 mediaPlayer.setLooping(false);
                 mediaPlayer.setVolume(0f, 0f);
-                Logger.d("danica video view start: %s", creative.getTitle());
+                Logger.d("VideoView start: %s", creative.getTitle());
                 scheduleSilentAutoplayBeaconTask(videoView);
                 scheduleVideoCompletionBeaconTask(videoView);
                 isVideoPrepared = true;
@@ -108,7 +107,7 @@ public class AutoPlayVideo extends Media {
                     cancelSilentAutoplayBeaconTask();
                     cancelVideoCompletionBeaconTask();
                     videoView.pause();
-                    Logger.d("danica video view pause: %s", creative.getTitle());
+                    Logger.d("VideoView pause: %s", creative.getTitle());
                     isVideoPrepared = false;
                 }
             }
@@ -125,16 +124,6 @@ public class AutoPlayVideo extends Media {
         adView.setScreenVisibilityListener(new IAdView.ScreenVisibilityListener() {
             @Override
             public void onScreen() {
-                /*synchronized (videoCompletedLock) {
-                    if (!isVideoPrepared || ((VideoCreative) creative).isVideoCompleted() || creative.wasClicked()) {
-                        return;
-                    }
-                    if (!videoView.isPlaying()) {
-                        Uri uri = Uri.parse(getCreative().getMediaUrl());
-                        videoView.setVideoURI(uri);
-                        videoView.start();
-                    }
-                }*/
             }
 
             @Override
@@ -145,7 +134,7 @@ public class AutoPlayVideo extends Media {
                         cancelSilentAutoplayBeaconTask();
                         cancelVideoCompletionBeaconTask();
                         videoView.stopPlayback();
-                        Logger.d("danica video view stop playback: %s", creative.getTitle());
+                        Logger.d("VideoView stop playback: %s", creative.getTitle());
                         isVideoPrepared = false;
                     }
                 }

@@ -145,4 +145,62 @@ public class AdViewTimerTaskTest extends TestBase {
         subject.run();
         verify(beaconService).adVisible(adView, creative, feedPosition, placement);
     }
+
+    @Test
+    public void whenAdViewGoesInAndOutofView_offScreenCalledAppropriately() {
+        // view is onscreen less than 50%, has never been visible
+        subject.adViewHasBeenVisible = false;
+        when(adView.isShown()).thenReturn(true);
+        when(adView.getGlobalVisibleRect(any(Rect.class))).then(new Answer<Boolean>() {
+            @Override
+            public Boolean answer(InvocationOnMock invocationOnMock) throws Throwable {
+                Rect r = (Rect) invocationOnMock.getArguments()[0];
+                r.set(0, 0, visibleWidth, visibleHeight);
+                return isVisible;
+            }
+        });
+        visibleWidth = adView.getWidth();
+        visibleHeight = adView.getHeight() / 2 - 1;
+        isVisible = true;
+
+        subject.run();
+        assertThat(subject.adViewHasBeenVisible).isFalse();
+        verify(adView, never()).offScreen();
+
+        // view is now more than 50% (scrolling down)
+        visibleWidth = adView.getWidth();
+        visibleHeight = adView.getHeight() / 2 + 1;
+        isVisible = true;
+
+        subject.run();
+        assertThat(subject.adViewHasBeenVisible).isTrue();
+        verify(adView, never()).offScreen();
+
+        // view is still more than 50% (scrolling down)
+        subject.run();
+        assertThat(subject.adViewHasBeenVisible).isTrue();
+        verify(adView, never()).offScreen();
+
+        // view is now less than 50% (scrolling down)
+        visibleWidth = adView.getWidth();
+        visibleHeight = adView.getHeight() / 2 - 1;
+        subject.run();
+        assertThat(subject.adViewHasBeenVisible).isFalse();
+        verify(adView, times(1)).offScreen();
+
+        //view more than 50% again (scrolling up)
+        visibleWidth = adView.getWidth();
+        visibleHeight = adView.getHeight() / 2 + 1;
+        subject.run();
+        assertThat(subject.adViewHasBeenVisible).isTrue();
+        verify(adView, times(1)).offScreen();
+
+        // view is now less than 50% (scrolling down)
+        visibleWidth = adView.getWidth();
+        visibleHeight = adView.getHeight() / 2 - 1;
+        subject.run();
+        assertThat(subject.adViewHasBeenVisible).isFalse();
+        verify(adView, times(2)).offScreen();
+
+    }
 }
