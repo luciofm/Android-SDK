@@ -194,7 +194,7 @@ public class AdViewTimerTaskTest extends TestBase {
 
         //view less than 95% (scrolling down)
         visibleWidth = adView.getWidth();
-        visibleHeight = adView.getHeight() * (4/100) ;
+        visibleHeight = adView.getHeight() * (19/100) ;
         subject.run();
         verify(adView, times(1)).offScreen();
 

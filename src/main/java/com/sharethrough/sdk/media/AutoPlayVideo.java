@@ -55,8 +55,8 @@ public class AutoPlayVideo extends Media {
 
         synchronized (videoStateLock) {
             if (videoView != null && isVideoPrepared && videoView.isPlaying() && videoView.canPause()) {
-                videoView.stopPlayback();
                 currentPosition = videoView.getCurrentPosition();
+                videoView.stopPlayback();
                 isVideoPrepared = false;
                 isVideoPlaying = false;
             }

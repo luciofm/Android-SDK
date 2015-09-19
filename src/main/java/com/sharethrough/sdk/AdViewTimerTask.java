@@ -116,7 +116,7 @@ public class AdViewTimerTask extends TimerTask {
             int visibleArea = rect.width() * rect.height();
             int viewArea = adView.getAdView().getHeight() * adView.getAdView().getWidth();
 
-            if (viewArea * .05 > visibleArea) {
+            if (viewArea * .20 > visibleArea) {
                 return true;
             }
         }
