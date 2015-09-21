@@ -62,8 +62,6 @@ public class Creative {
                 return CreativeType.PINTEREST;
             case "article":
                 return CreativeType.ARTICLE;
-            case "autoplay":
-                return CreativeType.AUTOPLAY;
             case "clickout":
             default:
                 return CreativeType.CLICKOUT;

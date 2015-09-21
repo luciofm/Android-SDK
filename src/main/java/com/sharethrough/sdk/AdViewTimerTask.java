@@ -92,7 +92,7 @@ public class AdViewTimerTask extends TimerTask {
     private void checkIfOffScreen(IAdView adView) {
         if( adView == null ) return;
 
-        if (is95PercentOfAdIsOffScreen(adView) && adViewHasBeenVisible) {
+        if (is80PercentOfAdIsOffScreen(adView) && adViewHasBeenVisible) {
             adView.offScreen();
         }
     }
@@ -110,7 +110,7 @@ public class AdViewTimerTask extends TimerTask {
         fireVisibilityEventsWhenAppropriate(adView);
     }
 
-    private boolean is95PercentOfAdIsOffScreen(IAdView adView) {
+    private boolean is80PercentOfAdIsOffScreen(IAdView adView) {
         Rect rect = new Rect();
         if( adView.getAdView().isShown() && adView.getAdView().getGlobalVisibleRect(rect) ) {
             int visibleArea = rect.width() * rect.height();
