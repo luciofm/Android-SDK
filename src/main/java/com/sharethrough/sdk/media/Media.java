@@ -25,12 +25,17 @@ public abstract class Media {
 
     public abstract void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition, Placement placement);
 
+    public void wasRendered(IAdView adView, ImageView thumbnailImage) {
+        overLayIconOverThumbnail(adView, thumbnailImage);
+    }
+
     /*
     Puts the Media icon over where the thumbnail image will be (ie. red youtube icon)
      */
-    public final void overlayThumbnail(IAdView adView, ImageView thumbnailImage) {
+    public void overLayIconOverThumbnail(IAdView adView, ImageView thumbnailImage) {
         int overlayImageResourceId = getOverlayImageResourceId();
         if (overlayImageResourceId < 0) return;
+
         FrameLayout thumbnail = adView.getThumbnail();
         OverlayImage overlayIcon = new OverlayImage(adView.getAdView().getContext());
         overlayIcon.setImageResource(overlayImageResourceId);

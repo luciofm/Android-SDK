@@ -49,4 +49,26 @@ public interface IAdView {
      * implementation will be a subclass of <code>ViewGroup</code> and you should return <code>this</code>.
      */
     ViewGroup getAdView();
+
+    /**
+     * @return The visibility listener that listens for onScreen and offScreen events
+     */
+    ScreenVisibilityListener getScreenVisibilityListener();
+
+    /**
+     * Sets the visibility listener that listens for onScreen and offScreen events
+     * @param screenListener
+     */
+    void setScreenVisibilityListener(ScreenVisibilityListener screenListener);
+
+    //when ad is visible this is called via the timertask
+    void onScreen();
+
+    //when ad is not visible this is called via the timertask
+    void offScreen();
+
+    interface ScreenVisibilityListener{
+        public void onScreen();
+        public void offScreen();
+    }
 }

@@ -27,18 +27,18 @@ public class YoutubeDialogTest extends TestBase {
     private Youtube youtube;
     private BeaconService beaconService;
     private int feedPosition;
+    private String youtubeId;
 
     @Before
     public void setUp() throws Exception {
         youtube = mock(Youtube.class);
-        when(youtube.getId()).thenReturn("ABC");
         creative = mock(Creative.class);
-        when(creative.getMedia()).thenReturn(youtube);
         feedPosition = 5;
+        youtubeId = "youtubeId";
 
         beaconService = mock(BeaconService.class);
 
-        subject = new YoutubeDialog(Robolectric.application, creative, beaconService, feedPosition);
+        subject = new YoutubeDialog(Robolectric.application, creative, beaconService, feedPosition, youtubeId);
         subject.show();
     }
 
@@ -61,7 +61,7 @@ public class YoutubeDialogTest extends TestBase {
         ShadowWebView shadowWebView = shadowOf(webView);
         ShadowWebView.LoadDataWithBaseURL loadedWebData = shadowWebView.getLastLoadDataWithBaseURL();
 
-        assertThat(loadedWebData.data).isEqualTo(Robolectric.application.getString(R.string.youtube_html).replace("YOUTUBE_ID", "ABC"));
+        assertThat(loadedWebData.data).isEqualTo(Robolectric.application.getString(R.string.youtube_html).replace("YOUTUBE_ID", "youtubeId"));
         assertThat(loadedWebData.baseUrl).startsWith("https://www.youtube.com/");
         assertThat(loadedWebData.historyUrl).startsWith("https://www.youtube.com/");
         assertThat(loadedWebData.mimeType).isEqualTo("text/html");

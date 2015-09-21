@@ -2,10 +2,7 @@ package com.sharethrough.sdk.network;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import com.sharethrough.sdk.Creative;
-import com.sharethrough.sdk.Logger;
-import com.sharethrough.sdk.Placement;
-import com.sharethrough.sdk.Response;
+import com.sharethrough.sdk.*;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
@@ -71,7 +68,12 @@ public class AdManager {
     private List<Creative> convertToCreatives(Response response) {
         ArrayList<Creative> creatives = new ArrayList<Creative>();
         for (final Response.Creative responseCreative : response.creatives) {
-            Creative creative = new Creative(responseCreative);
+            Creative creative;
+            if (responseCreative.creative.action.equals("hosted-video") && responseCreative.creative.instantPlay) {
+                creative = new VideoCreative(responseCreative);
+            } else {
+                creative = new Creative(responseCreative);
+            }
             creatives.add(creative);
         }
         return creatives;

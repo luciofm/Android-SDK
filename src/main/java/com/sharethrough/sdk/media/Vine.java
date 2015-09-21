@@ -21,7 +21,7 @@ public class Vine extends Media {
 
     @Override
     public void wasClicked(View v, BeaconService beaconService, int feedPosition) {
-        new VideoDialog(v.getContext(), creative, beaconService, true, new Timer(), new VideoCompletionBeaconService(v.getContext(), creative, beaconService, feedPosition), feedPosition).show();
+        new VideoDialog(v.getContext(), creative, beaconService, true, new Timer(), new VideoCompletionBeaconService(v.getContext(), creative, beaconService, feedPosition), feedPosition, 0).show();
     }
 
     @Override

@@ -34,7 +34,7 @@ public class ArticleTest extends TestBase {
     @Test
     public void overlayThumbnail_doesNothing() throws Exception {
         TestAdView adView = mock(TestAdView.class);
-        subject.overlayThumbnail(adView, mock(ImageView.class));
+        subject.overLayIconOverThumbnail(adView, mock(ImageView.class));
         verifyNoMoreInteractions(adView);
     }
 

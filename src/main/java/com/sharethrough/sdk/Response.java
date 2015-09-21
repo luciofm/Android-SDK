@@ -68,6 +68,8 @@ public class Response {
             public String customEngagementLabel;
             @JsonProperty("deal_id")
             public String dealId;
+            @JsonProperty("instant_play")
+            public Boolean instantPlay;
 
             public static class Beacon {
                 @JsonProperty("impression")

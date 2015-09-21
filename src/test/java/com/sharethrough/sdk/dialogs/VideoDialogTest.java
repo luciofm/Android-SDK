@@ -39,16 +39,18 @@ public class VideoDialogTest extends TestBase {
     private Timer timer;
     private VideoCompletionBeaconService videoBeacons;
     private int feedPosition;
+    private int currentPosition;
 
     @Before
     public void setUp() throws Exception {
         creative = mock(Creative.class);
         feedPosition = 5;
+        currentPosition = 0;
         videoUrl = "http://ab.co/video.mp4";
         when(creative.getMediaUrl()).thenReturn(videoUrl);
         timer = mock(Timer.class);
         videoBeacons = mock(VideoCompletionBeaconService.class);
-        subject = new VideoDialog(Robolectric.application, creative, mock(BeaconService.class), false, timer, videoBeacons, feedPosition);
+        subject = new VideoDialog(Robolectric.application, creative, mock(BeaconService.class), false, timer, videoBeacons, feedPosition, currentPosition);
         subject.show();
         videoView = findViewOfType(VideoView.class, (ViewGroup) subject.getWindow().getDecorView());
     }
@@ -91,7 +93,7 @@ public class VideoDialogTest extends TestBase {
         shadowOf(videoView).getOnPreparedListener().onPrepared(mediaPlayer);
         verify(mediaPlayer).setLooping(false);
 
-        subject = new VideoDialog(Robolectric.application, creative, mock(BeaconService.class), true, timer, videoBeacons, feedPosition);
+        subject = new VideoDialog(Robolectric.application, creative, mock(BeaconService.class), true, timer, videoBeacons, feedPosition, currentPosition);
         subject.show();
 
         videoView = findViewOfType(VideoView.class, (ViewGroup) subject.getWindow().getDecorView());

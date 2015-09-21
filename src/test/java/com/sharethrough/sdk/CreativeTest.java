@@ -24,45 +24,45 @@ public class CreativeTest extends TestBase {
     }
 
     @Test
-    public void getMedia_Youtube() throws Exception {
+    public void getType_Youtube() throws Exception {
         responseCreative.creative.action = "video";
-        assertThat(subject.getMedia()).isInstanceOf(Youtube.class);
+        assertThat(subject.getType()).isEqualTo(Creative.CreativeType.YOUTUBE);
     }
 
     @Test
-    public void getMedia_Vine() throws Exception {
+    public void getType_Vine() throws Exception {
         responseCreative.creative.action = "vine";
-        assertThat(subject.getMedia()).isInstanceOf(Vine.class);
+        assertThat(subject.getType()).isEqualTo(Creative.CreativeType.VINE);
     }
 
     @Test
-    public void getMedia_HostedVideo() throws Exception {
+    public void getType_HostedVideo() throws Exception {
         responseCreative.creative.action = "hosted-video";
-        assertThat(subject.getMedia()).isInstanceOf(HostedVideo.class);
+        assertThat(subject.getType()).isEqualTo(Creative.CreativeType.HOSTEDVIDEO);
     }
 
     @Test
-    public void getMedia_Instagram() throws Exception {
+    public void getType_Instagram() throws Exception {
         responseCreative.creative.action = "instagram";
-        assertThat(subject.getMedia()).isInstanceOf(Instagram.class);
+        assertThat(subject.getType()).isEqualTo(Creative.CreativeType.INSTAGRAM);
     }
 
     @Test
-    public void getMedia_Pinterest() throws Exception {
+    public void getType_Pinterest() throws Exception {
         responseCreative.creative.action = "pinterest";
-        assertThat(subject.getMedia()).isInstanceOf(Pinterest.class);
+        assertThat(subject.getType()).isEqualTo(Creative.CreativeType.PINTEREST);
     }
 
     @Test
-    public void getMedia_Clickout() throws Exception {
+    public void getType_Clickout() throws Exception {
         responseCreative.creative.action = "clickout";
-        assertThat(subject.getMedia()).isInstanceOf(Clickout.class);
+        assertThat(subject.getType()).isEqualTo(Creative.CreativeType.CLICKOUT);
     }
 
     @Test
     public void getMedia_EverythingElse() throws Exception {
         responseCreative.creative.action = "something else";
-        assertThat(subject.getMedia()).isInstanceOf(Clickout.class);
+        assertThat(subject.getType()).isEqualTo(Creative.CreativeType.CLICKOUT);
     }
 
     @Test

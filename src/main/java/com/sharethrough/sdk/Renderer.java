@@ -13,7 +13,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.sharethrough.android.sdk.R;
-import com.sharethrough.sdk.media.Media;
+import com.sharethrough.sdk.beacons.VideoCompletionBeaconService;
+import com.sharethrough.sdk.media.*;
 import com.sharethrough.STRPicasso.Picasso;
 
 
@@ -54,7 +55,7 @@ public class Renderer {
 
                 ImageView brandLogoView = adView.getBrandLogo();
                 if (brandLogoView != null ){
-                    if(creative.getBrandLogoUrl() != null && false == creative.getBrandLogoUrl().isEmpty()) {
+                    if(creative.getBrandLogoUrl() != null && !creative.getBrandLogoUrl().isEmpty()) {
                         Picasso.with(container.getContext()).load(creative.getBrandLogoUrl()).fit().centerCrop().tag("STRBrandLogo").into(brandLogoView);
                         brandLogoView.setVisibility(View.VISIBLE);
                     }else{
@@ -63,18 +64,20 @@ public class Renderer {
                 }
 
                 FrameLayout thumbnailContainer = adView.getThumbnail();
+
                 thumbnailContainer.removeAllViews();
                 final AdImageView thumbnailImage = new AdImageView(container.getContext(), sharethrough, creative, adView, feedPosition, beaconService);
-                Picasso.with(container.getContext()).load(creative.getThumbnailUrl()).fit().centerCrop().tag("STRAdImage").into(thumbnailImage);
+                if (creative.getThumbnailUrl() != null && !creative.getThumbnailUrl().isEmpty())
+                    Picasso.with(container.getContext()).load(creative.getThumbnailUrl()).fit().centerCrop().tag("STRAdImage").into(thumbnailImage);
                 sharethrough.fetchAdsIfReadyForMore();
                 thumbnailContainer.addView(thumbnailImage,
                         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
 
-                final Media media = creative.getMedia();
+                final Media media = createMedia(adView, creative, beaconService, feedPosition);
                 handler.post(new Runnable() { // give thumbnailImage a chance to render so we can use its size
                     @Override
                     public void run() {
-                        media.overlayThumbnail(adView, thumbnailImage);
+                        media.wasRendered(adView, thumbnailImage);
                     }
                 });
                 container.setOnClickListener(new View.OnClickListener() {
@@ -89,6 +92,28 @@ public class Renderer {
                 placeOptoutIcon(adView);
             }
         });
+    }
+
+    protected Media createMedia(IAdView adview, Creative creative, BeaconService beaconService, int feedPosition) {
+        if (creative.getType().equals(Creative.CreativeType.YOUTUBE)) {
+            return new Youtube(creative);
+        } else if (creative.getType().equals(Creative.CreativeType.VINE)) {
+            return new Vine(creative);
+        } else if (creative.getType().equals(Creative.CreativeType.HOSTEDVIDEO)) {
+            if (creative instanceof VideoCreative) {
+                VideoCompletionBeaconService videoCompletionBeaconService = new VideoCompletionBeaconService(adview.getAdView().getContext(), creative, beaconService, feedPosition);
+                return new AutoPlayVideo(creative, beaconService, videoCompletionBeaconService, feedPosition);
+            }
+            return new HostedVideo(creative);
+        } else if (creative.getType().equals(Creative.CreativeType.INSTAGRAM)) {
+            return new Instagram(creative);
+        } else if (creative.getType().equals(Creative.CreativeType.PINTEREST)) {
+            return new Pinterest(creative);
+        } else if (creative.getType().equals(Creative.CreativeType.ARTICLE)) {
+            return new Article(creative);
+        } else {
+            return new Clickout(creative);
+        }
     }
 
     private void placeOptoutIcon(final IAdView adView) {

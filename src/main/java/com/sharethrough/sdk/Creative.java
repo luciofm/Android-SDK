@@ -8,14 +8,21 @@ import com.sharethrough.sdk.media.*;
 import java.util.List;
 
 public class Creative {
+    public enum CreativeType {
+        AUTOPLAY,
+        HOSTEDVIDEO,
+        CLICKOUT,
+        INSTAGRAM,
+        PINTEREST,
+        VINE,
+        YOUTUBE,
+        ARTICLE
+    }
     private final Response.Creative responseCreative;
-    //private final byte[] imageBytes;
-    //private final byte[] logoBytes;
     public boolean wasRendered;
     public long renderedTime = Long.MAX_VALUE;
     private boolean wasClicked = false;
     public boolean wasVisible = false;
-
 
     public Creative(Response.Creative responseCreative) {
         this.responseCreative = responseCreative;
@@ -41,41 +48,23 @@ public class Creative {
         return convertToAbsoluteUrl(responseCreative.creative.brandLogoUrl);
     }
 
-    /*public Bitmap makeThumbnailImage() {
-        return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-    }*/
-
-    /*public Bitmap makeThumbnailImage(int height, int width) {
-        BitmapFactory.Options opts = new BitmapFactory.Options();
-        opts.outHeight = height;
-        opts.outWidth = width;
-        return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, opts);
-    }
-
-    public Bitmap makeBrandLogo() {
-        if (logoBytes != null && logoBytes.length > 0) {
-            return BitmapFactory.decodeByteArray(logoBytes, 0, logoBytes.length);
-        }
-        return null;
-    }*/
-
-    public Media getMedia() {
+    public CreativeType getType() {
         switch (responseCreative.creative.action) {
             case "video":
-                return new Youtube(this);
+                return CreativeType.YOUTUBE;
             case "vine":
-                return new Vine(this);
+                return CreativeType.VINE;
             case "hosted-video":
-                return new HostedVideo(this);
+                return CreativeType.HOSTEDVIDEO;
             case "instagram":
-                return new Instagram(this);
+                return CreativeType.INSTAGRAM;
             case "pinterest":
-                return new Pinterest(this);
+                return CreativeType.PINTEREST;
             case "article":
-                return new Article(this);
+                return CreativeType.ARTICLE;
             case "clickout":
             default:
-                return new Clickout(this);
+                return CreativeType.CLICKOUT;
         }
     }
 

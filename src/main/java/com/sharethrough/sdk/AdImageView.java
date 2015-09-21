@@ -35,6 +35,7 @@ class AdImageView extends ImageView {
         }
 
         scheduleVisibleBeaconTask();
+
     }
 
     @Override

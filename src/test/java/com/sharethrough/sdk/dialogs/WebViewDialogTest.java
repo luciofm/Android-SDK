@@ -12,9 +12,6 @@ import android.webkit.WebView;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.TestBase;
-import com.sharethrough.sdk.media.Article;
-import com.sharethrough.sdk.media.Media;
-import com.sharethrough.sdk.media.Youtube;
 import com.sharethrough.test.util.Misc;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,8 +63,7 @@ public class WebViewDialogTest extends TestBase {
 
     @Test
     public void whenMediaIsArticle_fireTimeInViewBeacon_fires_once() throws Exception{
-        Article media = mock(Article.class);
-        when(creative.getMedia()).thenReturn(media);
+        when(creative.getType()).thenReturn(Creative.CreativeType.ARTICLE);
         subject.fireTimeInViewBeacon();
         verify(beaconService).fireArticleDurationForAd(any(Context.class), any(Creative.class), anyLong());
         reset(beaconService);
@@ -77,40 +73,35 @@ public class WebViewDialogTest extends TestBase {
 
     @Test
     public void whenMediaIsNotAnArticle_fireTimeInViewBeacon_does_not_fire() throws Exception{
-        Youtube media = mock(Youtube.class);
-        when(creative.getMedia()).thenReturn(media);
+        when(creative.getType()).thenReturn(Creative.CreativeType.YOUTUBE);
         subject.fireTimeInViewBeacon();
         verifyNoMoreInteractions(beaconService);
     }
 
     @Test
     public void whenMediaIsArticle_navigate_different_domain_fire_timeinviewbeacon() throws Exception{
-        Article media = mock(Article.class);
-        when(creative.getMedia()).thenReturn(media);
+        when(creative.getType()).thenReturn(Creative.CreativeType.ARTICLE);
         shadowWebView.getWebViewClient().shouldOverrideUrlLoading(webView, "http://www.different.com/sharethrough");
         verify(beaconService).fireArticleDurationForAd(any(Context.class), any(Creative.class), anyLong());
     }
 
     @Test
     public void whenMediaIsArticle_navigate_same_domain_does_not_fire_timeinviewbeacon() throws Exception{
-        Article media = mock(Article.class);
-        when(creative.getMedia()).thenReturn(media);
+        when(creative.getType()).thenReturn(Creative.CreativeType.ARTICLE);
         shadowWebView.getWebViewClient().shouldOverrideUrlLoading(webView, "http://www.ads.com/different");
         verifyNoMoreInteractions(beaconService);
     }
 
     @Test
     public void whenMediaIsNotArticle_navigate_different_domain_does_not_fire_timeinviewbeacon() throws Exception{
-        Youtube media = mock(Youtube.class);
-        when(creative.getMedia()).thenReturn(media);
+        when(creative.getType()).thenReturn(Creative.CreativeType.YOUTUBE);
         shadowWebView.getWebViewClient().shouldOverrideUrlLoading(webView, "http://www.different.com/sharethrough");
         verifyNoMoreInteractions(beaconService);
     }
 
     @Test
     public void whenMediaIsArticle_back_button_to_main_content_fire_timeinviewbeacon() throws Exception{
-        Article media = mock(Article.class);
-        when(creative.getMedia()).thenReturn(media);
+        when(creative.getType()).thenReturn(Creative.CreativeType.ARTICLE);
 
         shadowWebView.setCanGoBack(false);
         subject.onKeyDown(KeyEvent.KEYCODE_BACK, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK));
@@ -119,8 +110,7 @@ public class WebViewDialogTest extends TestBase {
 
     @Test
     public void whenMediaIsArticle_back_button_to_article_does_not_fire_timeinviewbeacon() throws Exception{
-        Article media = mock(Article.class);
-        when(creative.getMedia()).thenReturn(media);
+        when(creative.getType()).thenReturn(Creative.CreativeType.ARTICLE);
 
         shadowWebView.setCanGoBack(true);
         subject.onKeyDown(KeyEvent.KEYCODE_BACK, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK));
@@ -129,8 +119,7 @@ public class WebViewDialogTest extends TestBase {
 
     @Test
     public void whenMediaIsArticle_staying_in_article_for_10s_causes_timeinviewbeacon_to_fire_with_10s() throws Exception{
-        Article media = mock(Article.class);
-        when(creative.getMedia()).thenReturn(media);
+        when(creative.getType()).thenReturn(Creative.CreativeType.ARTICLE);
 
         subject.startTimeInArticle = 0;
         subject.fireTimeInViewBeacon(10000);
@@ -156,6 +145,7 @@ public class WebViewDialogTest extends TestBase {
 
     @Test
     public void applicationPause_causesWebViewPause_soTheMusicStops() throws Exception {
+        when(creative.getType()).thenReturn(Creative.CreativeType.ARTICLE);
         assertThat(shadowWebView.wasOnPauseCalled()).isFalse();
         activityController.pause();
         assertThat(shadowWebView.wasOnPauseCalled()).isTrue();
@@ -183,12 +173,14 @@ public class WebViewDialogTest extends TestBase {
 
     @Test
     public void upButtonCancelsTheDialog() throws Exception {
+        when(creative.getType()).thenReturn(Creative.CreativeType.ARTICLE);
         subject.onMenuItemSelected(-1, new TestMenuItem(android.R.id.home));
         assertThat(subject.isShowing()).isFalse();
     }
 
     @Test
     public void backButtonWhenWebViewCannotGoBack_cancels() throws Exception {
+        when(creative.getType()).thenReturn(Creative.CreativeType.ARTICLE);
         subject.onKeyDown(KeyEvent.KEYCODE_BACK, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK));
         assertThat(subject.isShowing()).isFalse();
     }
@@ -233,6 +225,16 @@ public class WebViewDialogTest extends TestBase {
         @Override
         public synchronized PluginState getPluginState() {
             return pluginState;
+        }
+
+        @Override
+        public void setMixedContentMode(int mode) {
+
+        }
+
+        @Override
+        public int getMixedContentMode() {
+            return 0;
         }
 
     }

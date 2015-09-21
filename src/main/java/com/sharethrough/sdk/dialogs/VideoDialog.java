@@ -25,13 +25,15 @@ public class VideoDialog extends ShareableDialog {
     private final VideoCompletionBeaconService videoBeacons;
     private Creative creative;
     private VideoView videoView;
+    private int videoStartPosition = 0;
 
-    public VideoDialog(Context context, Creative creative, BeaconService beaconService, boolean isLooping, Timer timer, VideoCompletionBeaconService videoBeacons, int feedPosition) {
+    public VideoDialog(Context context, Creative creative, BeaconService beaconService, boolean isLooping, Timer timer, VideoCompletionBeaconService videoBeacons, int feedPosition, int videoStartPosition) {
         super(context, android.R.style.Theme_Black, beaconService, feedPosition);
         this.creative = creative;
         this.isLooping = isLooping;
         this.timer = timer;
         this.videoBeacons = videoBeacons;
+        this.videoStartPosition = videoStartPosition;
     }
 
     @Override
@@ -48,6 +50,10 @@ public class VideoDialog extends ShareableDialog {
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(final MediaPlayer mediaPlayer) {
+                if( videoView.canSeekForward() && videoStartPosition > 0 )
+                {
+                    videoView.seekTo(videoStartPosition);
+                }
                 videoView.start();
                 mediaPlayer.setLooping(isLooping);
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
