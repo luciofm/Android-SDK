@@ -9,7 +9,6 @@ import java.util.List;
 
 public class Creative {
     public enum CreativeType {
-        AUTOPLAY,
         HOSTEDVIDEO,
         CLICKOUT,
         INSTAGRAM,

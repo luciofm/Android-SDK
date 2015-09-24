@@ -65,12 +65,16 @@ public class AdManager {
         });
     }
 
-    private List<Creative> convertToCreatives(Response response) {
+    protected List<Creative> convertToCreatives(Response response) {
         ArrayList<Creative> creatives = new ArrayList<Creative>();
         for (final Response.Creative responseCreative : response.creatives) {
             Creative creative;
-            if (responseCreative.creative.action.equals("hosted-video") && responseCreative.creative.instantPlay) {
-                creative = new VideoCreative(responseCreative);
+            if (responseCreative.creative.action.equals("hosted-video")) {
+                if (!responseCreative.creative.forceClickToPlay && response.placement.allowInstantPlay) {
+                    creative = new InstantPlayCreative(responseCreative);
+                } else {
+                    creative = new Creative(responseCreative);
+                }
             } else {
                 creative = new Creative(responseCreative);
             }

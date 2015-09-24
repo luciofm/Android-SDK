@@ -3,7 +3,7 @@ package com.sharethrough.sdk;
 /**
  * Created by engineer on 9/4/15.
  */
-public class VideoCreative extends Creative {
+public class InstantPlayCreative extends Creative {
     private int currentPosition = 0;
     private boolean isVideoCompleted = false;
 
@@ -22,7 +22,7 @@ public class VideoCreative extends Creative {
     public void setCurrentPosition(int currentPosition) {
         this.currentPosition = currentPosition;
     }
-    public VideoCreative (Response.Creative responseCreative) {
+    public InstantPlayCreative(Response.Creative responseCreative) {
         super(responseCreative);
     }
 }

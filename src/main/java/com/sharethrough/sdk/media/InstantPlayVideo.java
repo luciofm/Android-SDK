@@ -20,7 +20,7 @@ import com.sharethrough.sdk.dialogs.VideoDialog;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class AutoPlayVideo extends Media {
+public class InstantPlayVideo extends Media {
     protected String videoViewTag = "SharethroughAutoPlayVideoView";
     protected final Creative creative;
     protected BeaconService beaconService;
@@ -38,7 +38,7 @@ public class AutoPlayVideo extends Media {
 
     final Handler handler = new Handler(Looper.getMainLooper());
 
-    public AutoPlayVideo(Creative creative, BeaconService beaconService, VideoCompletionBeaconService videoCompletionBeaconService, int feedPosition) {
+    public InstantPlayVideo(Creative creative, BeaconService beaconService, VideoCompletionBeaconService videoCompletionBeaconService, int feedPosition) {
         this.creative = creative;
         this.beaconService = beaconService;
         this.videoCompletionBeaconService = videoCompletionBeaconService;
@@ -96,8 +96,8 @@ public class AutoPlayVideo extends Media {
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mediaPlayer) {
-                if (((VideoCreative)creative).isVideoCompleted() || creative.wasClicked()) return;
-                videoView.seekTo(((VideoCreative)creative).getCurrentPosition());
+                if (((InstantPlayCreative)creative).isVideoCompleted() || creative.wasClicked()) return;
+                videoView.seekTo(((InstantPlayCreative)creative).getCurrentPosition());
                 mediaPlayer.setLooping(false);
                 mediaPlayer.setVolume(0f, 0f);
                 Logger.d("VideoView prepared: %s", creative.getTitle());
@@ -109,7 +109,7 @@ public class AutoPlayVideo extends Media {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
                 synchronized (videoStateLock) {
-                    ((VideoCreative) creative).setVideoCompleted(true);
+                    ((InstantPlayCreative) creative).setVideoCompleted(true);
                     cancelSilentAutoplayBeaconTask();
                     cancelVideoCompletionBeaconTask();
                     videoView.pause();
@@ -132,7 +132,7 @@ public class AutoPlayVideo extends Media {
             @Override
             public void onScreen() {
                 synchronized (videoStateLock) {
-                    if (creative.wasClicked() || ((VideoCreative)creative).isVideoCompleted()) return;
+                    if (creative.wasClicked() || ((InstantPlayCreative)creative).isVideoCompleted()) return;
                     if (isVideoPrepared && !isVideoPlaying) {
                         videoView.start();
                         Logger.d("VideoView start: %s", creative.getTitle());
@@ -147,7 +147,7 @@ public class AutoPlayVideo extends Media {
             public void offScreen() {
                 synchronized (videoStateLock) {
                     if (isVideoPrepared && videoView.isPlaying() && videoView.canPause()) {
-                        ((VideoCreative) creative).setCurrentPosition(videoView.getCurrentPosition());
+                        ((InstantPlayCreative) creative).setCurrentPosition(videoView.getCurrentPosition());
                         cancelSilentAutoplayBeaconTask();
                         cancelVideoCompletionBeaconTask();
                         videoView.pause();
