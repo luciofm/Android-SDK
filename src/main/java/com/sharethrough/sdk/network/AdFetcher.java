@@ -86,6 +86,7 @@ public class AdFetcher {
         placement.articlesBeforeFirstAd = jsonPlacement.optInt("articlesBeforeFirstAd", Integer.MAX_VALUE);
         placement.articlesBetweenAds = jsonPlacement.optInt("articlesBetweenAds", Integer.MAX_VALUE);
         placement.status = jsonPlacement.getString("status");
+        placement.allowInstantPlay = jsonPlacement.optBoolean("allowInstantPlay", false);
         response.placement = placement;
 
         JSONArray creatives = jsonResponse.getJSONArray("creatives");
@@ -112,7 +113,7 @@ public class AdFetcher {
             creative.creative.customEngagementUrl = jsonCreativeInner.optString("custom_engagement_url");
             creative.creative.customEngagementLabel = jsonCreativeInner.optString("custom_engagement_label");
             creative.creative.dealId = jsonCreativeInner.optString("deal_id");
-            creative.creative.instantPlay = jsonCreativeInner.optBoolean("instant_play");
+            creative.creative.forceClickToPlay = jsonCreativeInner.optBoolean("force_click_to_play", false);
 
             creative.creative.creativeKey = jsonCreativeInner.getString("creative_key");
             creative.creative.campaignKey = jsonCreativeInner.getString("campaign_key");

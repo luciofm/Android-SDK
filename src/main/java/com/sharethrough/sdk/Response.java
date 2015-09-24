@@ -15,6 +15,8 @@ public class Response {
         public int articlesBetweenAds;
         @JsonProperty("status")
         public String status;
+        @JsonProperty("allowInstantPlay")
+        public Boolean allowInstantPlay;
     }
 
     @JsonProperty("creatives")
@@ -68,8 +70,8 @@ public class Response {
             public String customEngagementLabel;
             @JsonProperty("deal_id")
             public String dealId;
-            @JsonProperty("instant_play")
-            public Boolean instantPlay;
+            @JsonProperty("force_click_to_play")
+            public Boolean forceClickToPlay;
 
             public static class Beacon {
                 @JsonProperty("impression")

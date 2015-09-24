@@ -1,0 +1,91 @@
+{
+  "placement": {
+    "layout": "multiple",
+    "status": "pre-live",
+    "articlesBeforeFirstAd": 2,
+    "articlesBetweenAds": 0,
+    "allowInstantPlay": false,
+    "placementAttributes": {
+      "template": "&lt;article class=&quot;post has-thumbnail related-article&quot; style=&quot;background-color: rgb(238, 238, 238);&quot;&gt; &lt;img src=&quot;{{thumbnail_url}}&quot; style=&quot;max-width:600px; width: 100%; min-width: 300px;&quot; class=&quot;str-thumbnail&quot;&gt; &lt;div style=&quot;margin: 10px&quot;&gt; &lt;h3 class=&quot;headline&quot;&gt; &lt;a name=&quot;&amp;amp;lpos=EarthBox&quot; class=&quot;ui-link&quot; id=&quot;{{creative_key}}-1&quot;&gt;{{title}}&lt;/a&gt; &lt;/h3&gt; &lt;div class=&quot;dek&quot;&gt;Promoted by {{advertiser}}&lt;/div&gt; &lt;/div&gt; &lt;/article&gt;",
+      "promoted_by_text": "Promoted by",
+      "backfillTag": "&lt;h1&gt;Backfill tag payload!&lt;/h1&gt;&lt;div&gt;Some other stuff of lesser importance&lt;/div&gt;",
+      "dfp_path": "",
+      "featured_content": [
+        {
+          "creative": {
+            "advertiser": "The Atlantic",
+            "title": "Introducing: The Atlantic's Science Section",
+            "description": "The Atlantic has been covering science - and covering it well - for some time now. But until today, we have hosted most of our science coverage here at TheAtlantic.com in our Technology and Health sections. From today on, Science will have its own section.",
+            "thumbnail_url": "https://cdn.theatlantic.com/assets/media/img/mt/2015/09/Earthrise2/lead_960.jpg?1442234751",
+            "thumbnail_styles": [
+              "thumb_320",
+              "thumb_1000",
+              "original"
+            ],
+            "content_url": "https://www.theatlantic.com/science/archive/2015/09/introducing-the-atlantics-new-science-section/405088/",
+            "media_url": "https://www.theatlantic.com/science/archive/2015/09/introducing-the-atlantics-new-science-section/405088/",
+            "share_url": "https://www.theatlantic.com/science/archive/2015/09/introducing-the-atlantics-new-science-section/405088/",
+            "action": "clickout"
+          }
+        }
+      ]
+    },
+    "metadata": {
+      "cardExperience": true,
+      "strOptOutIcon": true,
+      "experiment": {
+        "script_url": null,
+        "block_rendering": false
+      }
+    }
+  },
+  "creatives": [
+    {
+      "price": 1200,
+      "signature": "cd40e0c5f0fe8a1b47610a410fb1e2aaf09de4abbbd5ea923cabebf891b820d7",
+      "priceType": "vCPM",
+      "adserverRequestId": "fake-adserver-request-id",
+      "auctionWinId": "fake-auction-win-id",
+      "creative": {
+        "creative_key": "fake-creative-key",
+        "campaign_key": "fake-campaign-key",
+        "variant_key": "fake-variant-key",
+        "beaconMetaData": {
+          "cpeBid": "900"
+        },
+        "beacons": {
+          "impression": [
+            "//example.com/impression"
+          ],
+          "visible": [
+            "//example.com/visible1?qs=asdf",
+            "//example.com/visible2"
+          ],
+          "click": [
+            "//example.com/click"
+          ],
+          "play": [
+            "//example.com/play"
+          ]
+        },
+        "advertiser": "NESTLE Toll House",
+        "title": "Cookies don't get any easier. Or more delicious.",
+        "description": "Our frozen cookie dough is oven ready right from the freezer, watch and see!",
+        "thumbnail_url": "https://dumb-waiter.s3.amazonaws.com/nag/thumbnails/nestle-thumbnail.jpg",
+        "thumbnail_styles": [
+          "thumb_320",
+          "thumb_1000",
+          "original"
+        ],
+        "media_url": "http://brightcove.vo.llnwd.net/v1/uds/pd/2630830861001/201502/434/2630830861001_4084786462001_FCD15.mp4",
+        "share_url": "https://bs.serving-sys.com/BurstingPipe/adServer.bs?cn=tf&c=20&mc=click&pli=10826755&PluID=0&ord=[timestamp]",
+        "action": "hosted-video",
+        "custom_engagement_url": "https://bs.serving-sys.com/BurstingPipe/adServer.bs?cn=tf&c=20&mc=click&pli=10826755&PluID=0&ord=[timestamp]",
+        "custom_engagement_label": "Find Out More",
+        "brand_logo_url": "https://s3.amazonaws.com/dumb-waiter/brand-logos/nestle.jpeg",
+        "instant_play_mobile_url": "https://s3.amazonaws.com/dumb-waiter/cards/nestle/cookies2.json",
+        "force_click_to_play": false
+      }
+    }
+  ]
+}
