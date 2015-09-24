@@ -1,42 +1,28 @@
 package com.sharethrough.sdk.network;
 
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import com.sharethrough.sdk.*;
-import com.sharethrough.sdk.Misc;
 import com.sharethrough.test.Fixtures;
-import com.sharethrough.test.util.*;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
-import org.robolectric.annotation.Config;
-import org.robolectric.annotation.Implementation;
-import org.robolectric.annotation.Implements;
-import org.robolectric.shadows.ShadowLog;
 import org.robolectric.tester.org.apache.http.TestHttpResponse;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
 
 import static org.robolectric.Robolectric.shadowOf;
 
@@ -215,7 +201,7 @@ public class AdManagerTest extends TestBase {
         }
 
         List<Creative> creativesList = subject.convertToCreatives(response);
-        assertThat(creativesList.get(0) instanceof VideoCreative).isFalse();
+        assertThat(creativesList.get(0) instanceof InstantPlayCreative).isFalse();
     }
 
     @Test
@@ -240,7 +226,7 @@ public class AdManagerTest extends TestBase {
         }
 
         List<Creative> creativesList = subject.convertToCreatives(response);
-        assertThat(creativesList.get(0) instanceof VideoCreative).isTrue();
+        assertThat(creativesList.get(0) instanceof InstantPlayCreative).isTrue();
     }
 
     @Test
@@ -265,7 +251,7 @@ public class AdManagerTest extends TestBase {
         }
 
         List<Creative> creativesList = subject.convertToCreatives(response);
-        assertThat(creativesList.get(0) instanceof VideoCreative).isFalse();
+        assertThat(creativesList.get(0) instanceof InstantPlayCreative).isFalse();
     }
 
     @Test
@@ -290,7 +276,7 @@ public class AdManagerTest extends TestBase {
         }
 
         List<Creative> creativesList = subject.convertToCreatives(response);
-        assertThat(creativesList.get(0) instanceof VideoCreative).isFalse();
+        assertThat(creativesList.get(0) instanceof InstantPlayCreative).isFalse();
     }
 
 

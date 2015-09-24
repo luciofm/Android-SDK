@@ -71,7 +71,7 @@ public class AdManager {
             Creative creative;
             if (responseCreative.creative.action.equals("hosted-video")) {
                 if (!responseCreative.creative.forceClickToPlay && response.placement.allowInstantPlay) {
-                    creative = new VideoCreative(responseCreative);
+                    creative = new InstantPlayCreative(responseCreative);
                 } else {
                     creative = new Creative(responseCreative);
                 }
