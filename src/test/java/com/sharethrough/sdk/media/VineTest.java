@@ -25,7 +25,6 @@ public class VineTest extends TestBase {
     private BeaconService beaconService;
     private Vine subject;
     private int feedPosition;
-    @Mock private Placement placement;
 
     @Before
     public void setUp() throws Exception {
@@ -46,8 +45,8 @@ public class VineTest extends TestBase {
     @Test
     public void firesPlayBeacon() throws Exception {
         TestAdView adView = RendererTest.makeAdView();
-        subject.fireAdClickBeacon(creative, adView, beaconService, feedPosition, placement);
-        verify(beaconService).adClicked("vinePlay", creative, adView.getAdView(), feedPosition, placement);
+        subject.fireAdClickBeacon(creative, adView, beaconService, feedPosition);
+        verify(beaconService).adClicked("vinePlay", creative, adView.getAdView(), feedPosition);
     }
 
     @Config(emulateSdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})

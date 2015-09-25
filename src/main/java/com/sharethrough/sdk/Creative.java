@@ -133,6 +133,8 @@ public class Creative {
 
     public List<String> getImpressionBeacons() { return responseCreative.creative.beacon.impression; }
 
+    public List<String> getSilentPlayBeacons() { return responseCreative.creative.beacon.silentPlay; }
+
     public boolean wasClicked(){
         return wasClicked;
     }

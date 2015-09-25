@@ -44,7 +44,7 @@ public class AdViewTimerTask extends TimerTask {
     private void fireBeacon(IAdView adView) {
         creative.renderedTime = onScreenStartTimeForVisibleBeacon.getTime();
         creative.wasVisible = true;
-        beaconService.adVisible(adView.getAdView(), creative, feedPosition, sharethrough.placement);
+        beaconService.adVisible(adView.getAdView(), creative, feedPosition);
     }
 
     private boolean hasAdBeenOnScreenForTimeThreshold() {

@@ -82,6 +82,8 @@ public class Response {
                 public List<String> click;
                 @JsonProperty("play")
                 public List<String> play;
+                @JsonProperty("silent_play")
+                public List<String> silentPlay;
             }
         }
     }

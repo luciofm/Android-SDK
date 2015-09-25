@@ -111,7 +111,7 @@ public class RendererTest extends TestBase {
     @Test
     public void firesImpressionBeaconOnlyOnce() throws Exception {
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
-        verify(beaconService).adReceived(any(Context.class), eq(creative), eq(feedPosition), eq(placement));
+        verify(beaconService).adReceived(any(Context.class), eq(creative), eq(feedPosition));
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
         verifyNoMoreInteractions(beaconService);
     }
@@ -123,7 +123,7 @@ public class RendererTest extends TestBase {
         adView.performClick();
 
         verify(media).wasClicked(adView, beaconService, feedPosition);
-        verify(media).fireAdClickBeaconOnFirstClick(creative, adView, beaconService, feedPosition, placement);
+        verify(media).fireAdClickBeaconOnFirstClick(creative, adView, beaconService, feedPosition);
     }
 
     @Test

@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.shadows.ShadowLog;
 import org.robolectric.tester.org.apache.http.HttpRequestInfo;
 import org.robolectric.tester.org.apache.http.RequestMatcher;
@@ -81,6 +82,7 @@ public class BeaconServiceTest extends TestBase {
         beacon.play = new ArrayList<>();
         beacon.visible = new ArrayList<>();
         beacon.impression = new ArrayList<>();
+        beacon.silentPlay = new ArrayList<>();
 
         responseCreative.creative.beacon = beacon;
         creative = new Creative(responseCreative);
@@ -169,7 +171,7 @@ public class BeaconServiceTest extends TestBase {
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
             public void run() {
-                subject.adClicked("fake user event", creative, RendererTest.makeAdView().getAdView(), feedPosition, placement);
+                subject.adClicked("fake user event", creative, RendererTest.makeAdView().getAdView(), feedPosition);
             }
         });
     }
@@ -196,7 +198,7 @@ public class BeaconServiceTest extends TestBase {
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
             public void run() {
-                subject.adReceived(Robolectric.application, creative, feedPosition, placement);
+                subject.adReceived(Robolectric.application, creative, feedPosition);
             }
         });
     }
@@ -208,7 +210,7 @@ public class BeaconServiceTest extends TestBase {
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
             public void run() {
-                subject.adVisible(RendererTest.makeAdView(), creative, feedPosition, placement);
+                subject.adVisible(RendererTest.makeAdView(), creative, feedPosition);
             }
         });
     }
@@ -238,7 +240,7 @@ public class BeaconServiceTest extends TestBase {
 
         Creative testCreative = new Creative(responseCreative);
 
-        subject.adReceived(Robolectric.application, testCreative, feedPosition, placement);
+        subject.adReceived(Robolectric.application, testCreative, feedPosition);
 
         Robolectric.addHttpResponseRule(new RequestMatcher() {
             @Override
@@ -268,7 +270,7 @@ public class BeaconServiceTest extends TestBase {
 
         Creative testCreative = new Creative(responseCreative);
 
-        subject.adVisible(RendererTest.makeAdView(), testCreative, feedPosition, placement);
+        subject.adVisible(RendererTest.makeAdView(), testCreative, feedPosition);
 
         Robolectric.addHttpResponseRule(new RequestMatcher() {
             @Override
@@ -300,7 +302,7 @@ public class BeaconServiceTest extends TestBase {
 
         Creative testCreative = new Creative(responseCreative);
 
-        subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition, placement);
+        subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition);
 
         Robolectric.addHttpResponseRule(new RequestMatcher() {
             @Override
@@ -321,20 +323,46 @@ public class BeaconServiceTest extends TestBase {
     }
 
     @Test
-    public void whenPlacementStatusIsPreLiveAndAdClickCalled_doesNotFireClickAndVideoThirdPartyBeacons() throws Exception {
-        String[] initialUrls = {"//third-party/one", "//third-party/two", "//third-party/three", "//third-party/four"};
+    public void whenSilentAutoplayDuration3SecondsCalled_fireSilentPlayThirdPartyBeacons() throws Exception {
+        String[] initialUrls = {"//silentPlay/EndOne", "//silentPlay/End[Two]?cacheBuster=[timestamp]"};
 
-        ArrayList<String> clickEndoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
-        ArrayList<String> playEndoints = new ArrayList<>(Arrays.asList(initialUrls[2], initialUrls[3]));
+        ArrayList<String> silentPlayEndpoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
 
-        when(placement.getStatus()).thenReturn("pre-live");
-
-        responseCreative.creative.beacon.click = clickEndoints;
-        responseCreative.creative.beacon.play = playEndoints;
+        responseCreative.creative.beacon.silentPlay = silentPlayEndpoints;
 
         Creative testCreative = new Creative(responseCreative);
 
-        subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition, placement);
+        subject.silentAutoPlayDuration(Robolectric.application, testCreative, 3000, feedPosition);
+
+        Robolectric.addHttpResponseRule(new RequestMatcher() {
+            @Override
+            public boolean matches(HttpRequest request) {
+                return true;
+            }
+        }, new TestHttpResponse(200, ""));
+
+        Misc.runAll(executorService);
+
+        List<HttpRequestInfo> info = Robolectric.getFakeHttpLayer().getSentHttpRequestInfos();
+        assertThat(info.size()).isEqualTo(3);
+        for (int i = 0; i < info.size() - 1; i++) {
+            String cacheBustedUrl = initialUrls[i].replaceAll("\\[timestamp\\]", String.valueOf(now.getTime()));
+            String expectedUrl = "http:" + cacheBustedUrl.replace("[", "%5B").replace("]", "%5D");
+            assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
+        }
+    }
+
+    @Test
+    public void whenThirdPartyBeaconsIsEmpty_DoesNotFireThirdPartyBeacons() throws Exception{
+        responseCreative.creative.beacon.click = new ArrayList<>();
+        responseCreative.creative.beacon.play = new ArrayList<>();
+        responseCreative.creative.beacon.silentPlay = new ArrayList<>();
+        responseCreative.creative.beacon.impression = new ArrayList<>();
+        responseCreative.creative.beacon.visible = new ArrayList<>();
+
+        Creative testCreative = new Creative(responseCreative);
+
+        subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition);
 
         Robolectric.addHttpResponseRule(new RequestMatcher() {
             @Override
@@ -361,7 +389,7 @@ public class BeaconServiceTest extends TestBase {
 
         Creative testCreative = new Creative(responseCreative);
 
-        subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition, placement);
+        subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition);
 
         Robolectric.addHttpResponseRule(new RequestMatcher() {
             @Override

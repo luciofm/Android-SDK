@@ -17,7 +17,6 @@ public class YoutubeTest extends TestBase {
     private Creative creative;
     private BeaconService beaconService;
     private int feedPosition;
-    @Mock private Placement placement;
 
     @Before
     public void setUp() throws Exception {
@@ -66,7 +65,7 @@ public class YoutubeTest extends TestBase {
         Youtube subject = new Youtube(creative);
 
         TestAdView adView = RendererTest.makeAdView();
-        subject.fireAdClickBeacon(creative, adView, beaconService, feedPosition, placement);
-        verify(beaconService).adClicked("youtubePlay", creative, adView.getAdView(), feedPosition, placement);
+        subject.fireAdClickBeacon(creative, adView, beaconService, feedPosition);
+        verify(beaconService).adClicked("youtubePlay", creative, adView.getAdView(), feedPosition);
     }
 }

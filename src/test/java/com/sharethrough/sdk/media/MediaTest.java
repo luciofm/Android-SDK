@@ -21,7 +21,6 @@ public class MediaTest extends TestBase {
     private int overlayImageResourceId;
     @Mock private ImageView thumbnailImageView;
     @Mock private Creative creative;
-    @Mock private Placement placement;
     @Mock private IAdView adView;
     @Mock private BeaconService beaconService;
 
@@ -37,7 +36,7 @@ public class MediaTest extends TestBase {
     public void whenCreativeHasNotBeenClicked_doesFireBeaconAndSetClickedOnCreative() throws Exception {
         when(creative.wasClicked()).thenReturn(false);
         Media subject = new TestMedia();
-        subject.fireAdClickBeaconOnFirstClick(creative, adView, beaconService, 0, placement);
+        subject.fireAdClickBeaconOnFirstClick(creative, adView, beaconService, 0);
 
         verify(creative).setClicked();
         assertThat(((TestMedia)subject).isBeaconFired()).isTrue();
@@ -47,7 +46,7 @@ public class MediaTest extends TestBase {
     public void whenCreativeHasBeenClicked_doesNotFireBeacon() throws Exception {
         when(creative.wasClicked()).thenReturn(true);
         Media subject = new TestMedia();
-        subject.fireAdClickBeaconOnFirstClick(creative, adView, beaconService, 0, placement);
+        subject.fireAdClickBeaconOnFirstClick(creative, adView, beaconService, 0);
 
         assertThat(((TestMedia)subject).isBeaconFired()).isFalse();
     }
@@ -130,7 +129,7 @@ public class MediaTest extends TestBase {
         }
 
         @Override
-        public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition, Placement placement) {
+        public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition) {
             beaconFired = true;
         }
 

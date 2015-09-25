@@ -49,7 +49,6 @@ public class InstantPlayVideoTest extends TestBase {
     private InstantPlayCreative mockedCreative;
     private BeaconService mockedBeaconService;
     private int feedPosition;
-    private Placement mockedPlacement;
     private VideoCompletionBeaconService mockedVideoCompletionBeaconService;
     private Timer mockedTimer;
 
@@ -57,7 +56,6 @@ public class InstantPlayVideoTest extends TestBase {
     public void setUp() throws Exception {
         mockedCreative = mock(InstantPlayCreative.class);
         mockedBeaconService = mock(BeaconService.class);
-        mockedPlacement = mock(Placement.class);
         mockedVideoCompletionBeaconService = mock(VideoCompletionBeaconService.class);
         feedPosition = 5;
         mockedTimer = mock(Timer.class);
@@ -129,8 +127,8 @@ public class InstantPlayVideoTest extends TestBase {
         IAdView mockedAdView = mock(IAdView.class);
         when(mockedAdView.getAdView()).thenReturn(viewContainer);
 
-        subject.fireAdClickBeacon(creative, mockedAdView, beaconService, feedPosition, mockedPlacement);
-        verify(beaconService).adClicked("videoPlay", creative, mockedAdView.getAdView(), feedPosition, mockedPlacement);
+        subject.fireAdClickBeacon(creative, mockedAdView, beaconService, feedPosition);
+        verify(beaconService).adClicked("videoPlay", creative, mockedAdView.getAdView(), feedPosition);
         verify(beaconService).autoplayVideoEngagement(viewContainer.getContext(), creative, 3000, feedPosition);
     }
 

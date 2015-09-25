@@ -14,16 +14,16 @@ import java.lang.String;
 public abstract class Media {
     public final static String THUMBNAIL = "ThumbnailImageView";
 
-    public void fireAdClickBeaconOnFirstClick(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition, Placement placement) {
+    public void fireAdClickBeaconOnFirstClick(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition) {
         if (!getCreative().wasClicked()) {
-            fireAdClickBeacon(creative, adView, beaconService, feedPosition, placement);
+            fireAdClickBeacon(creative, adView, beaconService, feedPosition);
             getCreative().setClicked();
         }
     }
 
     public abstract void wasClicked(View view, BeaconService beaconService, int feedPosition);
 
-    public abstract void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition, Placement placement);
+    public abstract void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition);
 
     public void wasRendered(IAdView adView, ImageView thumbnailImage) {
         overLayIconOverThumbnail(adView, thumbnailImage);

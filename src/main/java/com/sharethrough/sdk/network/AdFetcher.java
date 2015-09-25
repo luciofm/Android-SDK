@@ -77,7 +77,7 @@ public class AdFetcher {
     }
 
 
-    private Response getResponse(String json) throws JSONException {
+    protected Response getResponse(String json) throws JSONException {
         JSONObject jsonResponse = new JSONObject(json);
         Response response = new Response();
         JSONObject jsonPlacement = jsonResponse.getJSONObject("placement");
@@ -124,18 +124,24 @@ public class AdFetcher {
 
             JSONObject beacons = jsonCreativeInner.getJSONObject("beacons");
             creative.creative.beacon = new Response.Creative.CreativeInner.Beacon();
-            parseBeacons(creative, beacons);
+            parseBeacons(placement, creative, beacons);
 
             response.creatives.add(creative);
         }
         return response;
     }
 
-    private void parseBeacons(Response.Creative creative, JSONObject beacons) throws JSONException {
+    private void parseBeacons(Response.Placement placement, Response.Creative creative, JSONObject beacons) throws JSONException {
         creative.creative.beacon.impression = new ArrayList<>();
         creative.creative.beacon.visible = new ArrayList<>();
         creative.creative.beacon.play = new ArrayList<>();
         creative.creative.beacon.click = new ArrayList<>();
+        creative.creative.beacon.silentPlay = new ArrayList<>();
+
+        //we don't parse third party beacons when placement is pre live ( won't fire third party beacons)
+        if (placement.status.equals("pre-live") ){
+            return;
+        }
 
         JSONArray impressionBeacons = beacons.getJSONArray("impression");
         for (int k = 0; k < impressionBeacons.length(); k++) {
@@ -156,6 +162,11 @@ public class AdFetcher {
         for (int k = 0; k < playBeacons.length(); k++) {
             String s = playBeacons.getString(k);
             creative.creative.beacon.play.add(s);
+        }
+        JSONArray silentPlayBeacons = beacons.getJSONArray("silent_play");
+        for (int k = 0; k < silentPlayBeacons.length(); k++) {
+            String s = silentPlayBeacons.getString(k);
+            creative.creative.beacon.silentPlay.add(s);
         }
     }
 

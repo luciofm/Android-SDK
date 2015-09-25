@@ -94,7 +94,7 @@ public class BeaconService {
         fireBeacon(beaconParams);
     }
 
-    public void adClicked(final String userEvent, final Creative creative, View view, int feedPosition, Placement placement) {
+    public void adClicked(final String userEvent, final Creative creative, View view, int feedPosition) {
         Map<String, String> beaconParams = commonParamsWithCreative(view.getContext(), creative);
         beaconParams.put("pheight", "" + view.getHeight());
         beaconParams.put("pwidth", "" + view.getWidth());
@@ -104,17 +104,15 @@ public class BeaconService {
         beaconParams.put("placementIndex", String.valueOf(feedPosition));
 
 
-        fireThirdPartyBeacons(creative.getClickBeacons(), placement.getStatus());
-        fireThirdPartyBeacons(creative.getPlayBeacons(), placement.getStatus());
+        fireThirdPartyBeacons(creative.getClickBeacons());
+        fireThirdPartyBeacons(creative.getPlayBeacons());
         fireBeacon(beaconParams);
     }
 
-    private void fireThirdPartyBeacons(List<String> thirdPartyBeacons, String status) {
-        if (!status.equals("pre-live")) {
-            for (String uri : thirdPartyBeacons) {
-                String cachedBustedUri = replaceCacheBusterParam(uri);
-                fireBeacon(new HashMap<String, String>(), "http:" + cachedBustedUri);
-            }
+    private void fireThirdPartyBeacons(List<String> thirdPartyBeacons) {
+        for (String uri : thirdPartyBeacons) {
+            String cachedBustedUri = replaceCacheBusterParam(uri);
+            fireBeacon(new HashMap<String, String>(), "http:" + cachedBustedUri);
         }
     }
 
@@ -126,16 +124,16 @@ public class BeaconService {
         fireBeacon(beaconParams);
     }
 
-    public void adReceived(final Context context, final Creative creative, int feedPosition, final Placement placement) {
+    public void adReceived(final Context context, final Creative creative, int feedPosition) {
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("type", "impression");
         beaconParams.put("placementIndex", String.valueOf(feedPosition));
 
-        fireThirdPartyBeacons(creative.getImpressionBeacons(), placement.getStatus());
+        fireThirdPartyBeacons(creative.getImpressionBeacons());
         fireBeacon(beaconParams);
     }
 
-    public void adVisible(final View adView, final Creative creative, int feedPosition, Placement placement) {
+    public void adVisible(final View adView, final Creative creative, int feedPosition) {
         Context context = adView.getContext();
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("pheight", "" + adView.getHeight());
@@ -143,7 +141,7 @@ public class BeaconService {
         beaconParams.put("type", "visible");
         beaconParams.put("placementIndex", String.valueOf(feedPosition));
 
-        fireThirdPartyBeacons(creative.getVisibleBeacons(), placement.getStatus());
+        fireThirdPartyBeacons(creative.getVisibleBeacons());
         fireBeacon(beaconParams);
     }
 
@@ -172,6 +170,9 @@ public class BeaconService {
         beaconParams.put("type", "silentAutoPlayDuration");
         beaconParams.put("duration", String.valueOf(duration));
         beaconParams.put("placementIndex", String.valueOf(feedPosition));
+        if( duration == 3000 ) {
+            fireThirdPartyBeacons(creative.getSilentPlayBeacons());
+        }
         fireBeacon(beaconParams);
     }
 

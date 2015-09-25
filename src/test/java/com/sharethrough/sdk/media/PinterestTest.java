@@ -22,7 +22,6 @@ public class PinterestTest extends TestBase {
     private BeaconService beaconService;
     private Pinterest subject;
     private int feedPosition;
-    @Mock private Placement placement;
 
     @Before
     public void setUp() throws Exception {
@@ -50,7 +49,7 @@ public class PinterestTest extends TestBase {
     @Test
     public void firesClickoutBeacon() throws Exception {
         TestAdView adView = RendererTest.makeAdView();
-        subject.fireAdClickBeacon(creative, adView, beaconService, feedPosition, placement);
-        verify(beaconService).adClicked("clickout", creative, adView.getAdView(), feedPosition, placement);
+        subject.fireAdClickBeacon(creative, adView, beaconService, feedPosition);
+        verify(beaconService).adClicked("clickout", creative, adView.getAdView(), feedPosition);
     }
 }
