@@ -66,8 +66,8 @@ public class InstantPlayVideo extends Media {
     }
 
     @Override
-    public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition, Placement placement) {
-        beaconService.adClicked("videoPlay", creative, adView.getAdView(), feedPosition, placement);
+    public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition) {
+        beaconService.adClicked("videoPlay", creative, adView.getAdView(), feedPosition);
 
         int currentPosition = 0;
         VideoView videoView = (VideoView)adView.getAdView().findViewWithTag(videoViewTag);

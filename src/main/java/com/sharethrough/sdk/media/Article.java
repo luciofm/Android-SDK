@@ -10,7 +10,7 @@ public class Article extends Clickout {
         super(creative);
     }
 
-    public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition, Placement placement) {
-        beaconService.adClicked("articleView", creative, adView.getAdView(), feedPosition, placement);
+    public void fireAdClickBeacon(Creative creative, IAdView adView, BeaconService beaconService, int feedPosition) {
+        beaconService.adClicked("articleView", creative, adView.getAdView(), feedPosition);
     }
 }

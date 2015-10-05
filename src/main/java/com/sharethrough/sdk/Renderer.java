@@ -31,7 +31,7 @@ public class Renderer {
                                       final Sharethrough sharethrough, final int feedPosition, final Timer timer) {
         final ViewGroup container = adView.getAdView();
         if (!creative.wasRendered) {
-            beaconService.adReceived(container.getContext(), creative, feedPosition, sharethrough.placement);
+            beaconService.adReceived(container.getContext(), creative, feedPosition);
             creative.wasRendered = true;
         }
         final Handler handler = new Handler(Looper.getMainLooper());
@@ -83,7 +83,7 @@ public class Renderer {
                 container.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        media.fireAdClickBeaconOnFirstClick(creative, adView, beaconService, feedPosition, sharethrough.placement);
+                        media.fireAdClickBeaconOnFirstClick(creative, adView, beaconService, feedPosition);
                         media.wasClicked(v, beaconService, feedPosition);
                     }
                   }

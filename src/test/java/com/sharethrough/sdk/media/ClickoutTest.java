@@ -22,7 +22,6 @@ public class ClickoutTest extends TestBase {
     private Creative creative;
     private Clickout subject;
     private int feedPosition;
-    @Mock private Placement placement;
 
     @Before
     public void setUp() throws Exception {
@@ -48,7 +47,7 @@ public class ClickoutTest extends TestBase {
     @Test
     public void fireAdClickBeacon() throws Exception {
         TestAdView adView = RendererTest.makeAdView();
-        subject.fireAdClickBeacon(creative, adView, beaconService, feedPosition, placement);
-        verify(beaconService).adClicked("clickout", creative, adView.getAdView(), feedPosition, placement);
+        subject.fireAdClickBeacon(creative, adView, beaconService, feedPosition);
+        verify(beaconService).adClicked("clickout", creative, adView.getAdView(), feedPosition);
     }
 }

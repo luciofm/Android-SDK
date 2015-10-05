@@ -107,7 +107,7 @@ public class AdViewTimerTaskTest extends TestBase {
         // visible for a continuous second yet
         now += 1000;
         subject.run();
-        verify(beaconService).adVisible(adView, creative, feedPosition, placement);
+        verify(beaconService).adVisible(adView, creative, feedPosition);
 
         // still visible, still over a second, but no need for a duplicate beacon
         subject.run();
@@ -143,7 +143,7 @@ public class AdViewTimerTaskTest extends TestBase {
         subject.run();
         now += TimeUnit.SECONDS.toMillis(1);
         subject.run();
-        verify(beaconService).adVisible(adView, creative, feedPosition, placement);
+        verify(beaconService).adVisible(adView, creative, feedPosition);
     }
 
     @Test

@@ -22,7 +22,6 @@ public class ArticleTest extends TestBase {
     private Creative creative;
     private Article subject;
     private int feedPosition;
-    @Mock private Placement placement;
 
     @Before
     public void setUp() throws Exception {
@@ -49,7 +48,7 @@ public class ArticleTest extends TestBase {
     @Test
     public void fireAdClickBeacon() throws Exception {
         TestAdView adView = RendererTest.makeAdView();
-        subject.fireAdClickBeacon(creative, adView, beaconService, feedPosition, placement);
-        verify(beaconService).adClicked("articleView", creative, adView.getAdView(), feedPosition, placement);
+        subject.fireAdClickBeacon(creative, adView, beaconService, feedPosition);
+        verify(beaconService).adClicked("articleView", creative, adView.getAdView(), feedPosition);
     }
 }

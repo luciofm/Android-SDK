@@ -30,6 +30,7 @@ import static org.mockito.Mockito.*;
 public class AdFetcherTest extends TestBase {
     private static final String SINGLE_LAYOUT_FIXTURE = Fixtures.getFile("assets/str_single_ad_youtube.json");
     private static final String NO_CREATIVE_FIXTURE = Fixtures.getFile("assets/str_no_creatives.json");
+    private static final String PRE_LIVE_PLACEMENT_FIXTURE = Fixtures.getFile("assets/str_prelive_placement.json");
     @Mock private AdFetcher.AdFetcherListener adfetcherlistener;
     private AdFetcherStub subject;
     private String apiUri;
@@ -117,5 +118,25 @@ public class AdFetcherTest extends TestBase {
         Robolectric.addHttpResponseRule("GET", expectedUri, new TestHttpResponse(200, NO_CREATIVE_FIXTURE));
         subject.fetchAds(expectedUri);
         verify(adfetcherlistener).onAdResponseLoaded((Response) anyObject());
+    }
+
+    @Test
+    public void getResponse_willNotParseBeacons_ifPlacementIsPreLive() throws Exception {
+        Response response = subject.getResponse(PRE_LIVE_PLACEMENT_FIXTURE);
+        assertThat(response.creatives.get(0).creative.beacon.impression).isEmpty();
+        assertThat(response.creatives.get(0).creative.beacon.visible).isEmpty();
+        assertThat(response.creatives.get(0).creative.beacon.play).isEmpty();
+        assertThat(response.creatives.get(0).creative.beacon.click).isEmpty();
+        assertThat(response.creatives.get(0).creative.beacon.silentPlay).isEmpty();
+    }
+
+    @Test
+    public void getResponse_willParseBeacons_ifPlacementIsLive() throws Exception {
+        Response response = subject.getResponse(SINGLE_LAYOUT_FIXTURE);
+        assertThat(response.creatives.get(0).creative.beacon.impression).isEmpty();
+        assertThat(response.creatives.get(0).creative.beacon.visible).isEmpty();
+        assertThat(response.creatives.get(0).creative.beacon.play.size()).isEqualTo(2);
+        assertThat(response.creatives.get(0).creative.beacon.click.size()).isEqualTo(2);
+        assertThat(response.creatives.get(0).creative.beacon.silentPlay.size()).isEqualTo(2);
     }
 }

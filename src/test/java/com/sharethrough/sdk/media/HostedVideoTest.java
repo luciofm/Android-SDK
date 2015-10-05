@@ -20,7 +20,6 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 public class HostedVideoTest extends TestBase {
-    @Mock private Placement placement;
 
     @Test
     public void overlaysImage() throws Exception {
@@ -48,8 +47,8 @@ public class HostedVideoTest extends TestBase {
 
         BeaconService beaconService = mock(BeaconService.class);
         TestAdView adView = mock(TestAdView.class);
-        subject.fireAdClickBeacon(creative, adView, beaconService, feedPosition, placement);
+        subject.fireAdClickBeacon(creative, adView, beaconService, feedPosition);
 
-        verify(beaconService).adClicked("videoPlay", creative, adView.getAdView(), feedPosition, placement);
+        verify(beaconService).adClicked("videoPlay", creative, adView.getAdView(), feedPosition);
     }
 }
