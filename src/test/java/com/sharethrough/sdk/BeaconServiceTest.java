@@ -435,12 +435,26 @@ public class BeaconServiceTest extends TestBase {
     public void autoplayVideoEngagement() throws Exception {
         Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(Robolectric.application, creative);
         expectedBeaconParams.put("type", "userEvent");
-        expectedBeaconParams.put("duration", "4567");
+        expectedBeaconParams.put("videoDuration", "4567");
         expectedBeaconParams.put("userEvent", "autoplayVideoEngagement");
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
             public void run() {
                 subject.autoplayVideoEngagement(Robolectric.application, creative, 4567, feedPosition);
+            }
+        });
+    }
+
+    @Test
+    public void videoViewDuration() throws Exception {
+        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(Robolectric.application, creative);
+        expectedBeaconParams.put("duration", "4567");
+        expectedBeaconParams.put("type", "videoViewDuration");
+        expectedBeaconParams.put("silent", "false");
+        assertBeaconFired(expectedBeaconParams, new Runnable() {
+            @Override
+            public void run() {
+                subject.videoViewDuration(Robolectric.application, creative, 4567, false, feedPosition);
             }
         });
     }

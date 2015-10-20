@@ -109,6 +109,7 @@ public class InstantPlayVideo extends Media {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
                 synchronized (videoStateLock) {
+                    beaconService.videoViewDuration(videoView.getContext(), creative, videoView.getCurrentPosition(), true, feedPosition);
                     ((InstantPlayCreative) creative).setVideoCompleted(true);
                     cancelSilentAutoplayBeaconTask();
                     cancelVideoCompletionBeaconTask();
@@ -147,6 +148,7 @@ public class InstantPlayVideo extends Media {
             public void offScreen() {
                 synchronized (videoStateLock) {
                     if (isVideoPrepared && videoView.isPlaying() && videoView.canPause()) {
+                        beaconService.videoViewDuration(videoView.getContext(), creative, videoView.getCurrentPosition(), true, feedPosition);
                         ((InstantPlayCreative) creative).setCurrentPosition(videoView.getCurrentPosition());
                         cancelSilentAutoplayBeaconTask();
                         cancelVideoCompletionBeaconTask();

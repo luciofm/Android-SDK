@@ -2,12 +2,14 @@ package com.sharethrough.sdk.dialogs;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.VideoView;
 
@@ -86,6 +88,7 @@ public class VideoDialog extends ShareableDialog {
             public void onClick(View v) {
                 if (videoView.isPlaying()) {
                     videoView.pause();
+                    beaconService.videoViewDuration(videoView.getContext(), creative, videoView.getCurrentPosition(), false, feedPosition);
                     playButton.setVisibility(View.VISIBLE);
                 } else {
                     videoView.start(); // oddly, resume and start do the opposite of what we'd expect
@@ -93,6 +96,14 @@ public class VideoDialog extends ShareableDialog {
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            beaconService.videoViewDuration(videoView.getContext(), creative, videoView.getCurrentPosition(), false, feedPosition);
+        }
+        return super.onMenuItemSelected(featureId, item);
     }
 
     @Override

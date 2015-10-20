@@ -1,8 +1,9 @@
 package com.sharethrough.sdk.dialogs;
 
+import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.FrameLayout;
 import android.widget.VideoView;
 
@@ -38,6 +39,7 @@ public class VideoDialogTest extends TestBase {
     private VideoView videoView;
     private Timer timer;
     private VideoCompletionBeaconService videoBeacons;
+    private BeaconService beaconService;
     private int feedPosition;
     private int currentPosition;
 
@@ -50,7 +52,8 @@ public class VideoDialogTest extends TestBase {
         when(creative.getMediaUrl()).thenReturn(videoUrl);
         timer = mock(Timer.class);
         videoBeacons = mock(VideoCompletionBeaconService.class);
-        subject = new VideoDialog(Robolectric.application, creative, mock(BeaconService.class), false, timer, videoBeacons, feedPosition, currentPosition);
+        beaconService = mock(BeaconService.class);
+        subject = new VideoDialog(Robolectric.application, creative, beaconService, false, timer, videoBeacons, feedPosition, currentPosition);
         subject.show();
         videoView = findViewOfType(VideoView.class, (ViewGroup) subject.getWindow().getDecorView());
     }
@@ -85,6 +88,24 @@ public class VideoDialogTest extends TestBase {
 
         ((View) videoView.getParent()).performClick();
         assertThat(videoView.isPlaying()).isTrue();
+    }
+
+    @Test
+    public void whenPausedSendsVideoViewDurationBeacon() throws Exception {
+        shadowOf(videoView).getOnPreparedListener().onPrepared(mock(MediaPlayer.class));
+
+        ((View) videoView.getParent()).performClick();
+        assertThat(videoView.isPlaying()).isFalse();
+        verify(beaconService).videoViewDuration(videoView.getContext(), creative, videoView.getCurrentPosition(), false, feedPosition);
+    }
+
+    @Test
+    public void whenDialogDismissedSendsVideoViewDurationBeacon() throws Exception {
+        MenuItem mockedMenuItem = mock(MenuItem.class);
+        when(mockedMenuItem.getItemId()).thenReturn(android.R.id.home);
+        subject.onMenuItemSelected(0, mockedMenuItem);
+
+        verify(beaconService).videoViewDuration(videoView.getContext(), creative, videoView.getCurrentPosition(), false, feedPosition);
     }
 
     @Test

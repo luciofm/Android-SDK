@@ -224,6 +224,10 @@ public class InstantPlayVideoTest extends TestBase {
         verify(mockedCreative).setVideoCompleted(true);
         assertThat(videoView.isPlaying()).isFalse();
         assertThat(subject.isVideoPrepared).isFalse();
+
+        //verify videoViewDuration beacon sent
+        verify(mockedBeaconService).videoViewDuration(Robolectric.application, mockedCreative, videoView.getCurrentPosition(), true, feedPosition);
+        verifyNoMoreInteractions(mockedBeaconService);
     }
 
     @Test
@@ -309,6 +313,10 @@ public class InstantPlayVideoTest extends TestBase {
         videoView.start();
 
         mockedIAdView.getScreenVisibilityListener().offScreen();
+
+        //verify videoViewDuration beacon sent
+        verify(mockedBeaconService).videoViewDuration(Robolectric.application, mockedCreative, videoView.getCurrentPosition(), true, feedPosition);
+        verifyNoMoreInteractions(mockedBeaconService);
 
         //verify current position saved
         verify(mockedCreative).setCurrentPosition(any(Integer.class));

@@ -160,7 +160,7 @@ public class BeaconService {
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("type", "userEvent");
         beaconParams.put("userEvent", "autoplayVideoEngagement");
-        beaconParams.put("duration", String.valueOf(duration));
+        beaconParams.put("videoDuration", String.valueOf(duration));
         beaconParams.put("placementIndex", String.valueOf(feedPosition));
         fireBeacon(beaconParams);
     }
@@ -176,6 +176,14 @@ public class BeaconService {
         fireBeacon(beaconParams);
     }
 
+    public void videoViewDuration(final Context context, final Creative creative, final int duration, final boolean isSilent, int feedPosition) {
+        Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
+        beaconParams.put("type", "videoViewDuration");
+        beaconParams.put("duration", String.valueOf(duration));
+        beaconParams.put("silent", String.valueOf(isSilent));
+        beaconParams.put("placementIndex", String.valueOf(feedPosition));
+        fireBeacon(beaconParams);
+    }
 
     public void videoPlayed(final Context context, final Creative creative, final int percent, int feedPosition) {
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
