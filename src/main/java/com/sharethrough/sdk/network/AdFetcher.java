@@ -58,7 +58,7 @@ public class AdFetcher {
                 int code = httpResponse.getStatusLine().getStatusCode();
 
                 if (code == 200) {
-                    InputStream content = client.execute(request).getEntity().getContent();
+                    InputStream content = httpResponse.getEntity().getContent();
                     json = Misc.convertStreamToString(content);
                     Response response = getResponse(json);
 
