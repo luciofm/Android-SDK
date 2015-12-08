@@ -8,6 +8,7 @@ PROGUARD
 
 If you are using proguard, you will need to add the following lines
 
+```
 -keep public class com.sharethrough.sdk.** {
    public *;
 }
@@ -23,7 +24,7 @@ If you are using proguard, you will need to add the following lines
 } //this is only required for DFP
 
 -dontwarn com.squareup.okhttp.**
-
+```
 
 ##Documentation
 Documentation for Sharethrough's Android SDK can be found at http://developers.sharethrough.com/android/
