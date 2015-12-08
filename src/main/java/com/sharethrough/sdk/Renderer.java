@@ -15,7 +15,7 @@ import android.widget.TextView;
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.beacons.VideoCompletionBeaconService;
 import com.sharethrough.sdk.media.*;
-import com.sharethrough.STRPicasso.Picasso;
+import com.squareup.picasso.Picasso;
 
 
 import java.util.Timer;

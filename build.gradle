@@ -174,7 +174,7 @@ dependencies {
     }
 
     compile 'com.google.android.gms:play-services:6.+'
-    compile files("lib/STRPicasso.jar")
+    compile 'com.squareup.picasso:picasso:2.5.2'
     // Espresso
     androidTestCompile('junit:junit:4.11') {
         exclude module: 'hamcrest-core'
