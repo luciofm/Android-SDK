@@ -12,12 +12,12 @@ If you are using proguard, you will need to add the following lines
    public *;
 }
 
-#this is only required for DFP
+*this is only required for DFP
 -keep public class com.google.android.gms.ads.** {
    public *;
 }
 
-#this is only required for DFP
+*this is only required for DFP
 -keep public class com.google.ads.** {
    public *;
 }
