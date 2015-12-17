@@ -170,7 +170,7 @@ public class BeaconService {
         beaconParams.put("type", "silentAutoPlayDuration");
         beaconParams.put("duration", String.valueOf(duration));
         beaconParams.put("placementIndex", String.valueOf(feedPosition));
-        if( duration == 3000 ) {
+        if( duration == 3000 || duration == 10000 ) {
             fireThirdPartyBeacons(creative.getSilentPlayBeacons());
         }
         fireBeacon(beaconParams);

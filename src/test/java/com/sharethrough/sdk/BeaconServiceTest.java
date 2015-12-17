@@ -353,6 +353,36 @@ public class BeaconServiceTest extends TestBase {
     }
 
     @Test
+    public void whenSilentAutoplayDuration10SecondsCalled_fireSilentPlayThirdPartyBeacons() throws Exception {
+        String[] initialUrls = {"//silentPlay/EndOne", "//silentPlay/End[Two]?cacheBuster=[timestamp]"};
+
+        ArrayList<String> silentPlayEndpoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
+
+        responseCreative.creative.beacon.silentPlay = silentPlayEndpoints;
+
+        Creative testCreative = new Creative(responseCreative);
+
+        subject.silentAutoPlayDuration(Robolectric.application, testCreative, 10000, feedPosition);
+
+        Robolectric.addHttpResponseRule(new RequestMatcher() {
+            @Override
+            public boolean matches(HttpRequest request) {
+                return true;
+            }
+        }, new TestHttpResponse(200, ""));
+
+        Misc.runAll(executorService);
+
+        List<HttpRequestInfo> info = Robolectric.getFakeHttpLayer().getSentHttpRequestInfos();
+        assertThat(info.size()).isEqualTo(3);
+        for (int i = 0; i < info.size() - 1; i++) {
+            String cacheBustedUrl = initialUrls[i].replaceAll("\\[timestamp\\]", String.valueOf(now.getTime()));
+            String expectedUrl = "http:" + cacheBustedUrl.replace("[", "%5B").replace("]", "%5D");
+            assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
+        }
+    }
+
+    @Test
     public void whenThirdPartyBeaconsIsEmpty_DoesNotFireThirdPartyBeacons() throws Exception{
         responseCreative.creative.beacon.click = new ArrayList<>();
         responseCreative.creative.beacon.play = new ArrayList<>();
