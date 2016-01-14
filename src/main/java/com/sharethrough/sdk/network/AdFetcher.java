@@ -137,6 +137,10 @@ public class AdFetcher {
         creative.creative.beacon.play = new ArrayList<>();
         creative.creative.beacon.click = new ArrayList<>();
         creative.creative.beacon.silentPlay = new ArrayList<>();
+        creative.creative.beacon.tenSecondSilentPlay = new ArrayList<>();
+        creative.creative.beacon.fifteenSecondSilentPlay = new ArrayList<>();
+        creative.creative.beacon.thirtySecondSilentPlay = new ArrayList<>();
+        creative.creative.beacon.completedSilentPlay = new ArrayList<>();
 
         //we don't parse third party beacons when placement is pre live ( won't fire third party beacons)
         if (placement.status.equals("pre-live") ){
@@ -163,11 +167,33 @@ public class AdFetcher {
             String s = playBeacons.getString(k);
             creative.creative.beacon.play.add(s);
         }
-        JSONArray silentPlayBeacons = beacons.getJSONArray("silent_play");
-        for (int k = 0; k < silentPlayBeacons.length(); k++) {
+        JSONArray silentPlayBeacons = beacons.optJSONArray("silent_play");
+        for (int k = 0; silentPlayBeacons != null && k < silentPlayBeacons.length() ; k++) {
             String s = silentPlayBeacons.getString(k);
             creative.creative.beacon.silentPlay.add(s);
         }
+        JSONArray tenSecondSilentPlayBeacons = beacons.optJSONArray("ten_second_silent_play");
+        for (int k = 0; tenSecondSilentPlayBeacons != null && k < tenSecondSilentPlayBeacons.length(); k++) {
+            String s = tenSecondSilentPlayBeacons.getString(k);
+            creative.creative.beacon.tenSecondSilentPlay.add(s);
+        }
+        JSONArray fifteenSecondSilentPlayBeacons = beacons.optJSONArray("fifteen_second_silent_play");
+        for (int k = 0; fifteenSecondSilentPlayBeacons != null && k < fifteenSecondSilentPlayBeacons.length(); k++) {
+            String s = fifteenSecondSilentPlayBeacons.getString(k);
+            creative.creative.beacon.fifteenSecondSilentPlay.add(s);
+        }
+        JSONArray thirtySecondSilentPlayBeacons = beacons.optJSONArray("thirty_second_silent_play");
+        for (int k = 0; thirtySecondSilentPlayBeacons != null && k < thirtySecondSilentPlayBeacons.length(); k++) {
+            String s = thirtySecondSilentPlayBeacons.getString(k);
+            creative.creative.beacon.thirtySecondSilentPlay.add(s);
+        }
+        JSONArray completedSilentPlayBeacons = beacons.optJSONArray("completed_silent_play");
+        for (int k = 0; completedSilentPlayBeacons != null && k < completedSilentPlayBeacons.length(); k++) {
+            String s = completedSilentPlayBeacons.getString(k);
+            creative.creative.beacon.completedSilentPlay.add(s);
+        }
+
+
     }
 
 }
