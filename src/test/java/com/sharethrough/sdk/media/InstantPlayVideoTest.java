@@ -227,6 +227,7 @@ public class InstantPlayVideoTest extends TestBase {
 
         //verify videoViewDuration beacon sent
         verify(mockedBeaconService).videoViewDuration(Robolectric.application, mockedCreative, videoView.getCurrentPosition(), true, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, videoView.getCurrentPosition(), feedPosition, true);
         verifyNoMoreInteractions(mockedBeaconService);
     }
 
@@ -355,7 +356,22 @@ public class InstantPlayVideoTest extends TestBase {
 
         InstantPlayVideo.SilentAutoplayBeaconTask playbackTimerTask = subject.instantiateSilentPlaybackTimerTask(mockedVideoView);
         playbackTimerTask.run();
-        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition, false);
+    }
+
+    @Test
+    public void whenExecutingSilentAutoplayTimerTaskAndCurrentPositionIs7Seconds_fire3SecondBeacon() {
+        VideoView mockedVideoView = mock(VideoView.class);
+        when(mockedCreative.wasClicked()).thenReturn(false);
+        when(mockedVideoView.isPlaying()).thenReturn(true);
+        when(mockedVideoView.getCurrentPosition()).thenReturn(7012);
+        when(mockedVideoView.getDuration()).thenReturn(10000);
+        when(mockedVideoView.getContext()).thenReturn(Robolectric.application);
+
+        InstantPlayVideo.SilentAutoplayBeaconTask playbackTimerTask = subject.instantiateSilentPlaybackTimerTask(mockedVideoView);
+        playbackTimerTask.run();
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition, false);
+        verifyNoMoreInteractions(mockedBeaconService);
     }
 
     @Test
@@ -364,25 +380,51 @@ public class InstantPlayVideoTest extends TestBase {
         when(mockedCreative.wasClicked()).thenReturn(false);
         when(mockedVideoView.isPlaying()).thenReturn(true);
         when(mockedVideoView.getCurrentPosition()).thenReturn(10012);
+        when(mockedVideoView.getDuration()).thenReturn(30000);
         when(mockedVideoView.getContext()).thenReturn(Robolectric.application);
 
         InstantPlayVideo.SilentAutoplayBeaconTask playbackTimerTask = subject.instantiateSilentPlaybackTimerTask(mockedVideoView);
         playbackTimerTask.run();
-        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 10000, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition, false);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 10000, feedPosition, false);
+        verifyNoMoreInteractions(mockedBeaconService);
     }
 
     @Test
-    public void whenExecutingSilentAutoplayTimerTaskAndCurrentPositionIs7Seconds_doNothing() {
+    public void whenExecutingSilentAutoplayTimerTaskAndCurrentPositionIs15Seconds_fire15SecondBeacon() {
         VideoView mockedVideoView = mock(VideoView.class);
         when(mockedCreative.wasClicked()).thenReturn(false);
         when(mockedVideoView.isPlaying()).thenReturn(true);
-        when(mockedVideoView.getCurrentPosition()).thenReturn(7012);
+        when(mockedVideoView.getCurrentPosition()).thenReturn(15012);
+        when(mockedVideoView.getDuration()).thenReturn(30000);
         when(mockedVideoView.getContext()).thenReturn(Robolectric.application);
 
         InstantPlayVideo.SilentAutoplayBeaconTask playbackTimerTask = subject.instantiateSilentPlaybackTimerTask(mockedVideoView);
         playbackTimerTask.run();
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition, false);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 10000, feedPosition, false);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 15000, feedPosition, false);
         verifyNoMoreInteractions(mockedBeaconService);
     }
+
+    @Test
+    public void whenExecutingSilentAutoplayTimerTaskAndCurrentPositionIs30Seconds_fire30SecondBeacon() {
+        VideoView mockedVideoView = mock(VideoView.class);
+        when(mockedCreative.wasClicked()).thenReturn(false);
+        when(mockedVideoView.isPlaying()).thenReturn(true);
+        when(mockedVideoView.getCurrentPosition()).thenReturn(30012);
+        when(mockedVideoView.getDuration()).thenReturn(40000);
+        when(mockedVideoView.getContext()).thenReturn(Robolectric.application);
+
+        InstantPlayVideo.SilentAutoplayBeaconTask playbackTimerTask = subject.instantiateSilentPlaybackTimerTask(mockedVideoView);
+        playbackTimerTask.run();
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition, false);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 10000, feedPosition, false);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 15000, feedPosition, false);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 30000, feedPosition, false);
+        verifyNoMoreInteractions(mockedBeaconService);
+    }
+
 
     @Test
     public void whenExecutingVideoCompletionBeacon_callsTimeUpdate() {

@@ -89,7 +89,7 @@ public class BeaconService {
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("type","userEvent");
         beaconParams.put("userEvent","articleViewDuration");
-        beaconParams.put("duration",String.valueOf(timeSpentInView));
+        beaconParams.put("duration", String.valueOf(timeSpentInView));
         beaconParams.put("engagement", "true");
         fireBeacon(beaconParams);
     }
@@ -165,15 +165,35 @@ public class BeaconService {
         fireBeacon(beaconParams);
     }
 
-    public void silentAutoPlayDuration(final Context context, final Creative creative, final int duration, int feedPosition) {
+    public void silentAutoPlayDuration(final Context context, final Creative creative, final int duration, int feedPosition, boolean videoCompleted) {
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("type", "silentAutoPlayDuration");
         beaconParams.put("duration", String.valueOf(duration));
         beaconParams.put("placementIndex", String.valueOf(feedPosition));
-        if( duration == 3000 || duration == 10000 ) {
+        beaconParams.put("completed", String.valueOf(videoCompleted));
+
+        silentThirdPartyAutoDuration(creative, duration, videoCompleted);
+        fireBeacon(beaconParams);
+
+    }
+
+    public void silentThirdPartyAutoDuration(final Creative creative, final int duration, boolean videoCompleted) {
+        if( duration == 3000 ) {
             fireThirdPartyBeacons(creative.getSilentPlayBeacons());
         }
-        fireBeacon(beaconParams);
+        else if( duration == 10000) {
+            fireThirdPartyBeacons(creative.getTenSecondSilentPlayBeacons());
+        }
+        else if( duration == 15000) {
+            fireThirdPartyBeacons(creative.getFifteenSecondSilentPlayBeacons());
+        }
+        else if( duration == 30000) {
+            fireThirdPartyBeacons(creative.getThirtySecondSilentPlayBeacons());
+        }
+
+        if(videoCompleted ){
+            fireThirdPartyBeacons(creative.getCompletedSilentPlayBeacons());
+        }
     }
 
     public void videoViewDuration(final Context context, final Creative creative, final int duration, final boolean isSilent, int feedPosition) {

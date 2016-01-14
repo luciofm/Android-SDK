@@ -135,6 +135,14 @@ public class Creative {
 
     public List<String> getSilentPlayBeacons() { return responseCreative.creative.beacon.silentPlay; }
 
+    public List<String> getTenSecondSilentPlayBeacons() { return responseCreative.creative.beacon.tenSecondSilentPlay; }
+
+    public List<String> getFifteenSecondSilentPlayBeacons() { return responseCreative.creative.beacon.fifteenSecondSilentPlay; }
+
+    public List<String> getThirtySecondSilentPlayBeacons() { return responseCreative.creative.beacon.thirtySecondSilentPlay; }
+
+    public List<String> getCompletedSilentPlayBeacons() { return responseCreative.creative.beacon.completedSilentPlay; }
+
     public boolean wasClicked(){
         return wasClicked;
     }

@@ -84,6 +84,14 @@ public class Response {
                 public List<String> play;
                 @JsonProperty("silent_play")
                 public List<String> silentPlay;
+                @JsonProperty("ten_second_silent_play")
+                public List<String> tenSecondSilentPlay;
+                @JsonProperty("fifteen_second_silent_play")
+                public List<String> fifteenSecondSilentPlay;
+                @JsonProperty("thirty_second_silent_play")
+                public List<String> thirtySecondSilentPlay;
+                @JsonProperty("completed_silent_play")
+                public List<String> completedSilentPlay;
             }
         }
     }
