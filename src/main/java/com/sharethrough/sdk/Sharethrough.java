@@ -54,7 +54,7 @@ public class Sharethrough {
         }
     };
     private Handler handler = new Handler(Looper.getMainLooper());
-    private final LruCache<Integer, Creative> creativesBySlot = new LruCache<>(10);
+    private LruCache<Integer, Creative> creativesBySlot = new LruCache<>(10);
     public Set<Integer> creativeIndices = new HashSet<>(); //contains history of all indices for creatives, whereas creativesBySlot only caches the last 10
 
 
@@ -125,6 +125,39 @@ public class Sharethrough {
 
     protected AdvertisingIdProvider getAdvertisingIdProvider(Context context){
         return new AdvertisingIdProvider(context.getApplicationContext());
+    }
+
+    /**
+     *
+     * @param context Android context
+     * @param placementKey Sharethrough placementkey key that you will receive from Sharethrough
+     * @param serializedSharethrough serialized Sharethrough object used to initialize Sharethough to previous state
+     */
+    public Sharethrough(Context context, String placementKey, String serializedSharethrough) {
+        this(context, placementKey, false, serializedSharethrough);
+    }
+
+    /**
+     *
+     * @param context Android context
+     * @param placementKey Sharethrough placementkey key that you will receive from Sharethrough
+     * @param dfpEnabled boolean indicating use of Sharethrough's Direct Sell functionality via DFP
+     * @param serializedSharethrough serialized Sharethrough object used to initialize Sharethough to previous state
+     */
+    public Sharethrough(Context context, String placementKey, boolean dfpEnabled, String serializedSharethrough) {
+        this(context, placementKey,
+                DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS,
+                new Renderer(),
+                SharethroughSerializer.getCreativesQueue(serializedSharethrough),
+                new BeaconService(new DateProvider(), UUID.randomUUID(), new AdvertisingIdProvider(context), context, placementKey),
+                dfpEnabled ? new DFPNetworking() : null);
+
+        creativesBySlot = SharethroughSerializer.getSlot(serializedSharethrough);
+
+        Response.Placement responsePlacement = new Response.Placement();
+        responsePlacement.articlesBetweenAds = SharethroughSerializer.getArticlesBetween(serializedSharethrough);
+        responsePlacement.articlesBeforeFirstAd = SharethroughSerializer.getArticlesBefore(serializedSharethrough);
+        placement = new Placement(responsePlacement);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
@@ -511,5 +544,9 @@ public class Sharethrough {
 
     public static Map<String, String> popDFPKeys(String dfpPath) {
         return dfpAdGroupIds.remove(dfpPath);
+    }
+
+    public String serialize() {
+        return SharethroughSerializer.serialize(availableCreatives, creativesBySlot, getArticlesBeforeFirstAd(), getArticlesBetweenAds());
     }
 }
