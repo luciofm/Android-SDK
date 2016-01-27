@@ -227,7 +227,6 @@ public class InstantPlayVideoTest extends TestBase {
 
         //verify videoViewDuration beacon sent
         verify(mockedBeaconService).videoViewDuration(Robolectric.application, mockedCreative, videoView.getCurrentPosition(), true, feedPosition);
-        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, videoView.getCurrentPosition(), feedPosition, true);
         verifyNoMoreInteractions(mockedBeaconService);
     }
 
@@ -356,7 +355,7 @@ public class InstantPlayVideoTest extends TestBase {
 
         InstantPlayVideo.SilentAutoplayBeaconTask playbackTimerTask = subject.instantiateSilentPlaybackTimerTask(mockedVideoView);
         playbackTimerTask.run();
-        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition, false);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition);
     }
 
     @Test
@@ -370,7 +369,7 @@ public class InstantPlayVideoTest extends TestBase {
 
         InstantPlayVideo.SilentAutoplayBeaconTask playbackTimerTask = subject.instantiateSilentPlaybackTimerTask(mockedVideoView);
         playbackTimerTask.run();
-        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition, false);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition);
         verifyNoMoreInteractions(mockedBeaconService);
     }
 
@@ -385,8 +384,8 @@ public class InstantPlayVideoTest extends TestBase {
 
         InstantPlayVideo.SilentAutoplayBeaconTask playbackTimerTask = subject.instantiateSilentPlaybackTimerTask(mockedVideoView);
         playbackTimerTask.run();
-        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition, false);
-        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 10000, feedPosition, false);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 10000, feedPosition);
         verifyNoMoreInteractions(mockedBeaconService);
     }
 
@@ -401,9 +400,9 @@ public class InstantPlayVideoTest extends TestBase {
 
         InstantPlayVideo.SilentAutoplayBeaconTask playbackTimerTask = subject.instantiateSilentPlaybackTimerTask(mockedVideoView);
         playbackTimerTask.run();
-        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition, false);
-        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 10000, feedPosition, false);
-        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 15000, feedPosition, false);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 10000, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 15000, feedPosition);
         verifyNoMoreInteractions(mockedBeaconService);
     }
 
@@ -418,10 +417,10 @@ public class InstantPlayVideoTest extends TestBase {
 
         InstantPlayVideo.SilentAutoplayBeaconTask playbackTimerTask = subject.instantiateSilentPlaybackTimerTask(mockedVideoView);
         playbackTimerTask.run();
-        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition, false);
-        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 10000, feedPosition, false);
-        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 15000, feedPosition, false);
-        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 30000, feedPosition, false);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 10000, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 15000, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 30000, feedPosition);
         verifyNoMoreInteractions(mockedBeaconService);
     }
 
@@ -434,6 +433,6 @@ public class InstantPlayVideoTest extends TestBase {
         when(mockedVideoView.getDuration()).thenReturn(20000);
         InstantPlayVideo.VideoCompletionBeaconTask videoCompletionBeaconTask = subject.instantiateVideoCompletionBeaconTask(mockedVideoView);
         videoCompletionBeaconTask.run();
-        verify(mockedVideoCompletionBeaconService).timeUpdate(1234, 20000);
+        verify(mockedVideoCompletionBeaconService).timeUpdate(1234, 20000, true);
     }
 }

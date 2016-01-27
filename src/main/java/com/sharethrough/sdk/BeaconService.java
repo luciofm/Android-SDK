@@ -165,19 +165,17 @@ public class BeaconService {
         fireBeacon(beaconParams);
     }
 
-    public void silentAutoPlayDuration(final Context context, final Creative creative, final int duration, int feedPosition, boolean videoCompleted) {
+    public void silentAutoPlayDuration(final Context context, final Creative creative, final int duration, int feedPosition) {
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("type", "silentAutoPlayDuration");
         beaconParams.put("duration", String.valueOf(duration));
         beaconParams.put("placementIndex", String.valueOf(feedPosition));
-        beaconParams.put("completed", String.valueOf(videoCompleted));
-
-        silentThirdPartyAutoDuration(creative, duration, videoCompleted);
+        silentThirdPartyAutoDuration(creative, duration);
         fireBeacon(beaconParams);
 
     }
 
-    public void silentThirdPartyAutoDuration(final Creative creative, final int duration, boolean videoCompleted) {
+    public void silentThirdPartyAutoDuration(final Creative creative, final int duration) {
         if( duration == 3000 ) {
             fireThirdPartyBeacons(creative.getSilentPlayBeacons());
         }
@@ -190,10 +188,6 @@ public class BeaconService {
         else if( duration == 30000) {
             fireThirdPartyBeacons(creative.getThirtySecondSilentPlayBeacons());
         }
-
-        if(videoCompleted ){
-            fireThirdPartyBeacons(creative.getCompletedSilentPlayBeacons());
-        }
     }
 
     public void videoViewDuration(final Context context, final Creative creative, final int duration, final boolean isSilent, int feedPosition) {
@@ -205,10 +199,15 @@ public class BeaconService {
         fireBeacon(beaconParams);
     }
 
-    public void videoPlayed(final Context context, final Creative creative, final int percent, int feedPosition) {
+    public void videoPlayed(final Context context, final Creative creative, final int percent, final boolean isSilent, int feedPosition) {
+        if( percent >= 95 && creative.getCompletedSilentPlayBeacons()!= null ){
+            fireThirdPartyBeacons(creative.getCompletedSilentPlayBeacons());
+        }
+
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("type", "completionPercent");
         beaconParams.put("value", String.valueOf(percent));
+        beaconParams.put("isSilentPlay", String.valueOf(isSilent));
         beaconParams.put("placementIndex", String.valueOf(feedPosition));
         fireBeacon(beaconParams);
     }
