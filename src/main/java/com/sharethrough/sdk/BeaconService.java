@@ -165,19 +165,17 @@ public class BeaconService {
         fireBeacon(beaconParams);
     }
 
-    public void silentAutoPlayDuration(final Context context, final Creative creative, final int duration, int feedPosition, boolean videoCompleted) {
+    public void silentAutoPlayDuration(final Context context, final Creative creative, final int duration, int feedPosition) {
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("type", "silentAutoPlayDuration");
         beaconParams.put("duration", String.valueOf(duration));
         beaconParams.put("placementIndex", String.valueOf(feedPosition));
-        beaconParams.put("completed", String.valueOf(videoCompleted));
-
-        silentThirdPartyAutoDuration(creative, duration, videoCompleted);
+        silentThirdPartyAutoDuration(creative, duration);
         fireBeacon(beaconParams);
 
     }
 
-    public void silentThirdPartyAutoDuration(final Creative creative, final int duration, boolean videoCompleted) {
+    public void silentThirdPartyAutoDuration(final Creative creative, final int duration) {
         if( duration == 3000 ) {
             fireThirdPartyBeacons(creative.getSilentPlayBeacons());
         }
@@ -189,10 +187,6 @@ public class BeaconService {
         }
         else if( duration == 30000) {
             fireThirdPartyBeacons(creative.getThirtySecondSilentPlayBeacons());
-        }
-
-        if(videoCompleted ){
-            fireThirdPartyBeacons(creative.getCompletedSilentPlayBeacons());
         }
     }
 

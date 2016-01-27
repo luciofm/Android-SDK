@@ -333,7 +333,7 @@ public class BeaconServiceTest extends TestBase {
 
         Creative testCreative = new Creative(responseCreative);
 
-        subject.silentAutoPlayDuration(Robolectric.application, testCreative, seconds, feedPosition, false);
+        subject.silentAutoPlayDuration(Robolectric.application, testCreative, seconds, feedPosition);
 
         Robolectric.addHttpResponseRule(new RequestMatcher() {
             @Override
@@ -357,7 +357,6 @@ public class BeaconServiceTest extends TestBase {
         assertThat(returnedUrl).contains("type=silentAutoPlayDuration");
         assertThat(returnedUrl).contains("duration=" + seconds);
         assertThat(returnedUrl).contains("placementIndex=" + feedPosition);
-        assertThat(returnedUrl).contains("completed=false");
     }
 
     @Test
@@ -371,7 +370,7 @@ public class BeaconServiceTest extends TestBase {
 
         Creative testCreative = new Creative(responseCreative);
 
-        subject.silentAutoPlayDuration(Robolectric.application, testCreative, seconds, feedPosition, false);
+        subject.silentAutoPlayDuration(Robolectric.application, testCreative, seconds, feedPosition);
 
         Robolectric.addHttpResponseRule(new RequestMatcher() {
             @Override
@@ -395,7 +394,6 @@ public class BeaconServiceTest extends TestBase {
         assertThat(returnedUrl).contains("type=silentAutoPlayDuration");
         assertThat(returnedUrl).contains("duration=" + seconds);
         assertThat(returnedUrl).contains("placementIndex="+ feedPosition);
-        assertThat(returnedUrl).contains("completed=false");
     }
 
     @Test
@@ -409,7 +407,7 @@ public class BeaconServiceTest extends TestBase {
 
         Creative testCreative = new Creative(responseCreative);
 
-        subject.silentAutoPlayDuration(Robolectric.application, testCreative, seconds, feedPosition, false);
+        subject.silentAutoPlayDuration(Robolectric.application, testCreative, seconds, feedPosition);
 
         Robolectric.addHttpResponseRule(new RequestMatcher() {
             @Override
@@ -433,7 +431,6 @@ public class BeaconServiceTest extends TestBase {
         assertThat(returnedUrl).contains("type=silentAutoPlayDuration");
         assertThat(returnedUrl).contains("duration=" + seconds);
         assertThat(returnedUrl).contains("placementIndex="+ feedPosition);
-        assertThat(returnedUrl).contains("completed=false");
     }
 
     @Test
@@ -447,7 +444,7 @@ public class BeaconServiceTest extends TestBase {
 
         Creative testCreative = new Creative(responseCreative);
 
-        subject.silentAutoPlayDuration(Robolectric.application, testCreative, seconds, feedPosition, false);
+        subject.silentAutoPlayDuration(Robolectric.application, testCreative, seconds, feedPosition);
 
         Robolectric.addHttpResponseRule(new RequestMatcher() {
             @Override
@@ -471,45 +468,11 @@ public class BeaconServiceTest extends TestBase {
         assertThat(returnedUrl).contains("type=silentAutoPlayDuration");
         assertThat(returnedUrl).contains("duration=" + seconds);
         assertThat(returnedUrl).contains("placementIndex="+ feedPosition);
-        assertThat(returnedUrl).contains("completed=false");
     }
 
     @Test
     public void whenSilentAutoplayDurationCalledWithVideoComplete_fireVideoCompleteBeacons() throws Exception {
-        int seconds = 60000;
-        String[] initialUrls = {"//silentPlay/EndOne", "//silentPlay/End[Two]?cacheBuster=[timestamp]"};
-
-        ArrayList<String> silentPlayEndpoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
-
-        responseCreative.creative.beacon.completedSilentPlay = silentPlayEndpoints;
-
-        Creative testCreative = new Creative(responseCreative);
-
-        subject.silentAutoPlayDuration(Robolectric.application, testCreative, seconds, feedPosition, true);
-
-        Robolectric.addHttpResponseRule(new RequestMatcher() {
-            @Override
-            public boolean matches(HttpRequest request) {
-                return true;
-            }
-        }, new TestHttpResponse(200, ""));
-
-        Misc.runAll(executorService);
-
-        List<HttpRequestInfo> info = Robolectric.getFakeHttpLayer().getSentHttpRequestInfos();
-        assertThat(info.size()).isEqualTo(3);
-        for (int i = 0; i < info.size() - 1; i++) {
-            String cacheBustedUrl = initialUrls[i].replaceAll("\\[timestamp\\]", String.valueOf(now.getTime()));
-            String expectedUrl = "http:" + cacheBustedUrl.replace("[", "%5B").replace("]", "%5D");
-            assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
-        }
-
-        //first party beacon
-        String returnedUrl = info.get(2).getHttpRequest().getRequestLine().getUri();
-        assertThat(returnedUrl).contains("type=silentAutoPlayDuration");
-        assertThat(returnedUrl).contains("duration=" + seconds);
-        assertThat(returnedUrl).contains("placementIndex="+ feedPosition);
-        assertThat(returnedUrl).contains("completed=true");
+        //write test for complete silent play beacon.
     }
 
 
@@ -587,7 +550,7 @@ public class BeaconServiceTest extends TestBase {
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
             public void run() {
-                subject.silentAutoPlayDuration(Robolectric.application, creative, 3000, feedPosition, false);
+                subject.silentAutoPlayDuration(Robolectric.application, creative, 3000, feedPosition);
             }
         });
     }
