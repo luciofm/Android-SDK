@@ -34,40 +34,40 @@ public class VideoCompletionBeaconServiceTest extends TestBase {
     @Test
     public void firesBeaconWhenFirstQuarterHasPlayed_onlyOnce() throws Exception {
         subject.timeUpdate(1.1, 4.0);
-        verify(beaconService).videoPlayed(Robolectric.application, creative, 25, feedPosition);
+        verify(beaconService).videoPlayed(Robolectric.application, creative, 25, false, feedPosition);
         verifyNoMoreInteractions(beaconService);
     }
 
     @Test
     public void timeUpdate_whenHalfPlayed_firesCorrectBeacons() throws Exception {
         subject.timeUpdate(1.9, 4.0);
-        verify(beaconService).videoPlayed(Robolectric.application, creative, 25, feedPosition);
+        verify(beaconService).videoPlayed(Robolectric.application, creative, 25, false, feedPosition);
         verifyNoMoreInteractions(beaconService);
         subject.timeUpdate(2.0, 4.0);
-        verify(beaconService).videoPlayed(Robolectric.application, creative, 50, feedPosition);
+        verify(beaconService).videoPlayed(Robolectric.application, creative, 50, false, feedPosition);
         verifyNoMoreInteractions(beaconService);
     }
 
     @Test
     public void timeUpdate_when75PercentPlayed_firesCorrectBeacons() throws Exception {
         subject.timeUpdate(2.99, 4.0);
-        verify(beaconService).videoPlayed(Robolectric.application, creative, 25, feedPosition);
-        verify(beaconService).videoPlayed(Robolectric.application, creative, 50, feedPosition);
+        verify(beaconService).videoPlayed(Robolectric.application, creative, 25, false, feedPosition);
+        verify(beaconService).videoPlayed(Robolectric.application, creative, 50, false, feedPosition);
         verifyNoMoreInteractions(beaconService);
         subject.timeUpdate(3.00, 4.0);
-        verify(beaconService).videoPlayed(Robolectric.application, creative, 75, feedPosition);
+        verify(beaconService).videoPlayed(Robolectric.application, creative, 75, false, feedPosition);
         verifyNoMoreInteractions(beaconService);
     }
 
     @Test
     public void timeUpdate_when95PercentPlayed_firesCorrectBeacons() throws Exception {
         subject.timeUpdate(9.49, 10.0);
-        verify(beaconService).videoPlayed(Robolectric.application, creative, 25, feedPosition);
-        verify(beaconService).videoPlayed(Robolectric.application, creative, 50, feedPosition);
-        verify(beaconService).videoPlayed(Robolectric.application, creative, 75, feedPosition);
+        verify(beaconService).videoPlayed(Robolectric.application, creative, 25, false, feedPosition);
+        verify(beaconService).videoPlayed(Robolectric.application, creative, 50, false, feedPosition);
+        verify(beaconService).videoPlayed(Robolectric.application, creative, 75, false, feedPosition);
         verifyNoMoreInteractions(beaconService);
         subject.timeUpdate(9.5, 10.0);
-        verify(beaconService).videoPlayed(Robolectric.application, creative, 95, feedPosition);
+        verify(beaconService).videoPlayed(Robolectric.application, creative, 95, false, feedPosition);
         verifyNoMoreInteractions(beaconService);
     }
 
@@ -75,10 +75,10 @@ public class VideoCompletionBeaconServiceTest extends TestBase {
     public void timeUpdate_onlyFiresBeaconsOnce() throws Exception {
         subject.timeUpdate(3.99, 4.0);
         subject.timeUpdate(3.99, 4.0);
-        verify(beaconService).videoPlayed(Robolectric.application, creative, 25, feedPosition);
-        verify(beaconService).videoPlayed(Robolectric.application, creative, 50, feedPosition);
-        verify(beaconService).videoPlayed(Robolectric.application, creative, 75, feedPosition);
-        verify(beaconService).videoPlayed(Robolectric.application, creative, 95, feedPosition);
+        verify(beaconService).videoPlayed(Robolectric.application, creative, 25, false, feedPosition);
+        verify(beaconService).videoPlayed(Robolectric.application, creative, 50, false, feedPosition);
+        verify(beaconService).videoPlayed(Robolectric.application, creative, 75, false, feedPosition);
+        verify(beaconService).videoPlayed(Robolectric.application, creative, 95, false, feedPosition);
         verifyNoMoreInteractions(beaconService);
     }
 }

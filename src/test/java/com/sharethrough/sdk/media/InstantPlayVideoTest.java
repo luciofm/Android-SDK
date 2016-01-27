@@ -433,6 +433,6 @@ public class InstantPlayVideoTest extends TestBase {
         when(mockedVideoView.getDuration()).thenReturn(20000);
         InstantPlayVideo.VideoCompletionBeaconTask videoCompletionBeaconTask = subject.instantiateVideoCompletionBeaconTask(mockedVideoView);
         videoCompletionBeaconTask.run();
-        verify(mockedVideoCompletionBeaconService).timeUpdate(1234, 20000);
+        verify(mockedVideoCompletionBeaconService).timeUpdate(1234, 20000, true);
     }
 }

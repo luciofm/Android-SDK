@@ -471,10 +471,34 @@ public class BeaconServiceTest extends TestBase {
     }
 
     @Test
-    public void whenSilentAutoplayDurationCalledWithVideoComplete_fireVideoCompleteBeacons() throws Exception {
-        //write test for complete silent play beacon.
-    }
+    public void whenSilentAutoplayDurationPlayedFor95Percent_fireCompletedThirdPartyBeacons() throws Exception {
+        String[] initialUrls = {"//silentPlay/EndOne", "//silentPlay/End[Two]?cacheBuster=[timestamp]"};
 
+        ArrayList<String> silentPlayEndpoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
+
+        responseCreative.creative.beacon.completedSilentPlay = silentPlayEndpoints;
+
+        Creative testCreative = new Creative(responseCreative);
+
+        subject.videoPlayed(Robolectric.application, testCreative, 95, true, feedPosition);
+
+        Robolectric.addHttpResponseRule(new RequestMatcher() {
+            @Override
+            public boolean matches(HttpRequest request) {
+                return true;
+            }
+        }, new TestHttpResponse(200, ""));
+
+        Misc.runAll(executorService);
+
+        List<HttpRequestInfo> info = Robolectric.getFakeHttpLayer().getSentHttpRequestInfos();
+        assertThat(info.size()).isEqualTo(3);
+        for (int i = 0; i < 2; i++) {
+            String cacheBustedUrl = initialUrls[i].replaceAll("\\[timestamp\\]", String.valueOf(now.getTime()));
+            String expectedUrl = "http:" + cacheBustedUrl.replace("[", "%5B").replace("]", "%5D");
+            assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
+        }
+    }
 
     @Test
     public void whenThirdPartyBeaconsIsEmpty_DoesNotFireThirdPartyBeacons() throws Exception{
@@ -534,10 +558,12 @@ public class BeaconServiceTest extends TestBase {
         Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(Robolectric.application, creative);
         expectedBeaconParams.put("type", "completionPercent");
         expectedBeaconParams.put("value", "123");
+        expectedBeaconParams.put("isSilentPlay", "false");
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
             public void run() {
-                subject.videoPlayed(Robolectric.application, creative, 123, feedPosition);
+                subject.videoPlayed(Robolectric.application, creative, 123, false, feedPosition);
+
             }
         });
     }

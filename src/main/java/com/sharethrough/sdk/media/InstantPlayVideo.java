@@ -218,7 +218,7 @@ public class InstantPlayVideo extends Media {
 
             try {
                 if (videoView != null && videoView.isPlaying()) {
-                    videoCompletionBeaconService.timeUpdate(videoView.getCurrentPosition(), videoView.getDuration());
+                    videoCompletionBeaconService.timeUpdate(videoView.getCurrentPosition(), videoView.getDuration(), true);
                 }
             } catch (Throwable tx) {
                 Logger.w("Video percentage beacon error: %s", tx.toString());

@@ -199,10 +199,15 @@ public class BeaconService {
         fireBeacon(beaconParams);
     }
 
-    public void videoPlayed(final Context context, final Creative creative, final int percent, int feedPosition) {
+    public void videoPlayed(final Context context, final Creative creative, final int percent, final boolean isSilent, int feedPosition) {
+        if( percent >= 95 && creative.getCompletedSilentPlayBeacons()!= null ){
+            fireThirdPartyBeacons(creative.getCompletedSilentPlayBeacons());
+        }
+
         Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
         beaconParams.put("type", "completionPercent");
         beaconParams.put("value", String.valueOf(percent));
+        beaconParams.put("isSilentPlay", String.valueOf(isSilent));
         beaconParams.put("placementIndex", String.valueOf(feedPosition));
         fireBeacon(beaconParams);
     }
