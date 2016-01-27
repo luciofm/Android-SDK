@@ -1,6 +1,9 @@
 language: android
 script:   ./gradlew test assembleRelease createEclipseZip
 
+notifications:
+  email: false
+
 after_success: ./scripts/build-artifacts
 after_failure: find build/test-report/debug -type f | xargs cat
 
