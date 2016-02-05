@@ -67,7 +67,7 @@ public class DFPNetworking {
 
                 PublisherAdView adView = new PublisherAdView(context);
                 adView.setAdUnitId(dfpPath);
-                adView.setAdSizes(AdSize.SMART_BANNER);
+                adView.setAdSizes(AdSize.BANNER);
                 adView.setAdListener(new AdListener() {
                     @Override
                     public void onAdFailedToLoad(int errorCode) {
