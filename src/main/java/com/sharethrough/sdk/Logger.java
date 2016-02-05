@@ -62,6 +62,7 @@ public class Logger {
         Throwable stack = new Throwable().fillInStackTrace();
         StackTraceElement[] trace = stack.getStackTrace();
         StringBuilder logStatement = new StringBuilder("");
+        logStatement.append("STRLOG/");
         logStatement.append(trace[stackLevel].getClassName());
         logStatement.append(".");
         logStatement.append(trace[stackLevel].getMethodName());

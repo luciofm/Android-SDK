@@ -154,6 +154,7 @@ public class Sharethrough {
 
         creativesBySlot = SharethroughSerializer.getSlot(serializedSharethrough);
 
+        Logger.d("deserializing Sharethrough: queue count - " + availableCreatives.size() + ", slot snapshot: " + creativesBySlot.snapshot());
         Response.Placement responsePlacement = new Response.Placement();
         responsePlacement.articlesBetweenAds = SharethroughSerializer.getArticlesBetween(serializedSharethrough);
         responsePlacement.articlesBeforeFirstAd = SharethroughSerializer.getArticlesBefore(serializedSharethrough);
@@ -547,6 +548,7 @@ public class Sharethrough {
     }
 
     public String serialize() {
+        Logger.d("serializing Sharethrough: queue count - " + availableCreatives.size() + ", slot snapshot: " + creativesBySlot.snapshot());
         return SharethroughSerializer.serialize(availableCreatives, creativesBySlot, getArticlesBeforeFirstAd(), getArticlesBetweenAds());
     }
 }
