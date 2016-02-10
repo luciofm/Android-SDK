@@ -1,6 +1,7 @@
 package com.sharethrough.sdk.media;
 
 import android.content.Context;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
@@ -11,7 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.VideoView;
+import com.sharethrough.sdk.media.MutedVideoView;
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.*;
 import com.sharethrough.sdk.beacons.VideoCompletionBeaconService;
@@ -56,7 +57,7 @@ public class InstantPlayVideo extends Media {
         cancelVideoCompletionBeaconTask();
 
         int currentPosition = 0;
-        VideoView videoView = (VideoView)view.findViewWithTag(videoViewTag);
+        MutedVideoView videoView = (MutedVideoView)view.findViewWithTag(videoViewTag);
 
         synchronized (videoStateLock) {
             if (videoView != null && isVideoPrepared && videoView.isPlaying() && videoView.canPause()) {
@@ -75,7 +76,7 @@ public class InstantPlayVideo extends Media {
         beaconService.adClicked("videoPlay", creative, adView.getAdView(), feedPosition);
 
         int currentPosition = 0;
-        VideoView videoView = (VideoView)adView.getAdView().findViewWithTag(videoViewTag);
+        MutedVideoView videoView = (MutedVideoView)adView.getAdView().findViewWithTag(videoViewTag);
         if (videoView != null) {
             currentPosition = videoView.getCurrentPosition();
         }
@@ -89,7 +90,7 @@ public class InstantPlayVideo extends Media {
     }
 
     protected void addVideoPlayerToAdViewAndSetListeners(final IAdView adView, final ImageView thumbnailImage) {
-        final VideoView videoView = getVideoView(adView.getAdView().getContext().getApplicationContext());
+        final MutedVideoView videoView = getVideoView(adView.getAdView().getContext().getApplicationContext());
         videoView.setTag(videoViewTag);
 
         final FrameLayout thumbnailContainer = adView.getThumbnail();
@@ -173,7 +174,7 @@ public class InstantPlayVideo extends Media {
         });
     }
 
-    protected void scheduleVideoCompletionBeaconTask(final VideoView videoView) {
+    protected void scheduleVideoCompletionBeaconTask(final MutedVideoView videoView) {
         cancelVideoCompletionBeaconTask();
 
         videoCompletionBeaconTimer = getTimer("VideoCompletionBeaconTimer for " + creative);
@@ -189,7 +190,7 @@ public class InstantPlayVideo extends Media {
         }
     }
 
-    protected void scheduleSilentAutoplayBeaconTask(VideoView videoView) {
+    protected void scheduleSilentAutoplayBeaconTask(MutedVideoView videoView) {
         cancelSilentAutoplayBeaconTask();
 
         silentAutoPlayBeaconTimer = getTimer("SilentAutoplayBeaconTimer for " + creative);
@@ -206,9 +207,9 @@ public class InstantPlayVideo extends Media {
     }
 
     public class VideoCompletionBeaconTask extends TimerTask {
-        private VideoView videoView;
+        private MutedVideoView videoView;
         private boolean isCancelled;
-        public VideoCompletionBeaconTask (VideoView videoView) {
+        public VideoCompletionBeaconTask (MutedVideoView videoView) {
             this.videoView = videoView;
         }
 
@@ -233,10 +234,10 @@ public class InstantPlayVideo extends Media {
     }
 
     public class SilentAutoplayBeaconTask extends TimerTask {
-        private VideoView videoView;
+        private MutedVideoView videoView;
         private boolean isCancelled;
 
-        public SilentAutoplayBeaconTask (VideoView videoView) {
+        public SilentAutoplayBeaconTask (MutedVideoView videoView) {
             this.videoView = videoView;
         }
         @Override
@@ -280,8 +281,8 @@ public class InstantPlayVideo extends Media {
         return new Timer(timerName);
     }
 
-    protected VideoView getVideoView(Context context) {
-        return new VideoView(context);
+    protected MutedVideoView getVideoView(Context context) {
+        return new MutedVideoView(context);
     }
 
     @Override
