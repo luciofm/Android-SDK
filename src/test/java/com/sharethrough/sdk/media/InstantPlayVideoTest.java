@@ -1,5 +1,6 @@
 package com.sharethrough.sdk.media;
 
+import android.content.Context;
 import android.media.MediaPlayer;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -15,7 +16,6 @@ import org.junit.Test;
 import org.robolectric.Robolectric;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowDialog;
-import static org.robolectric.Robolectric.shadowOf;
 
 import java.util.Timer;
 
@@ -43,6 +43,10 @@ public class InstantPlayVideoTest extends TestBase {
         protected Timer getTimer(String timerName) {
             return mockedTimer;
         }
+
+        protected MutedVideoView getVideoView(Context context) {
+            return mockedMutedVideoView;
+        }
     }
 
     private InstantPlayVideoStub subject;
@@ -51,12 +55,14 @@ public class InstantPlayVideoTest extends TestBase {
     private int feedPosition;
     private VideoCompletionBeaconService mockedVideoCompletionBeaconService;
     private Timer mockedTimer;
+    private MutedVideoView mockedMutedVideoView;
 
     @Before
     public void setUp() throws Exception {
         mockedCreative = mock(InstantPlayCreative.class);
         mockedBeaconService = mock(BeaconService.class);
         mockedVideoCompletionBeaconService = mock(VideoCompletionBeaconService.class);
+        mockedMutedVideoView = spy(new MutedVideoView(Robolectric.application));
         feedPosition = 5;
         mockedTimer = mock(Timer.class);
         when(mockedCreative.getMediaUrl()).thenReturn("http://ab.co");
@@ -180,13 +186,13 @@ public class InstantPlayVideoTest extends TestBase {
         when(mockedCreative.getCurrentPosition()).thenReturn(4000);
         subject.wasRendered(mockedIAdView, mockedImageView);
         subject.isVideoPrepared = false;
-        MutedVideoView videoView = (MutedVideoView)thumbnailContainer.findViewWithTag("SharethroughAutoPlayVideoView");
         MediaPlayer mockedMediaPlayer = mock(MediaPlayer.class);
-        videoView.getOnPreparedListener().onPrepared(mockedMediaPlayer);
+        mockedMutedVideoView.getOnPreparedListener().onPrepared(mockedMediaPlayer);
 
+        verify(mockedMutedVideoView).seekTo(4000);
         verify(mockedMediaPlayer).setLooping(false);
         verify(mockedMediaPlayer).setVolume(0f, 0f);
-        assertThat(videoView.isPlaying()).isFalse();
+        assertThat(mockedMutedVideoView.isPlaying()).isFalse();
         assertThat(subject.isVideoPrepared).isTrue();
 
     }
@@ -213,20 +219,20 @@ public class InstantPlayVideoTest extends TestBase {
         InstantPlayVideo.VideoCompletionBeaconTask mockedVideoCompletionBeaconTask = mock(InstantPlayVideo.VideoCompletionBeaconTask.class);
         subject.videoCompletionBeaconTask = mockedVideoCompletionBeaconTask;
 
-        MutedVideoView videoView = (MutedVideoView)thumbnailContainer.findViewWithTag("SharethroughAutoPlayVideoView");
         MediaPlayer mockedMediaPlayer = mock(MediaPlayer.class);
-        videoView.getOnCompletionListener().onCompletion(mockedMediaPlayer);
+        mockedMutedVideoView.getOnCompletionListener().onCompletion(mockedMediaPlayer);
 
+        verify(mockedMutedVideoView).pause();
         verify(mockedSilentAutoplayBeaconTimer).cancel();
         verify(mockedVideoCompletionTimer).cancel();
         verify(mockedSilentAutoplayBeaconTask).cancel();
         verify(mockedVideoCompletionBeaconTask).cancel();
         verify(mockedCreative).setVideoCompleted(true);
-        assertThat(videoView.isPlaying()).isFalse();
+        assertThat(mockedMutedVideoView.isPlaying()).isFalse();
         assertThat(subject.isVideoPrepared).isFalse();
 
         //verify videoViewDuration beacon sent
-        verify(mockedBeaconService).videoViewDuration(Robolectric.application, mockedCreative, videoView.getCurrentPosition(), true, feedPosition);
+        verify(mockedBeaconService).videoViewDuration(Robolectric.application, mockedCreative, mockedMutedVideoView.getCurrentPosition(), true, feedPosition);
         verifyNoMoreInteractions(mockedBeaconService);
     }
 
@@ -254,8 +260,7 @@ public class InstantPlayVideoTest extends TestBase {
         subject.videoCompletionBeaconTask = mockedVideoCompletionBeaconTask;
 
         mockedIAdView.getScreenVisibilityListener().onScreen();
-        MutedVideoView videoView = (MutedVideoView)thumbnailContainer.findViewWithTag("SharethroughAutoPlayVideoView");
-        assertThat(videoView.isPlaying()).isTrue();
+        verify(mockedMutedVideoView).start();
         verify(mockedSilentAutoplayBeaconTimer).cancel();
         verify(mockedVideoCompletionBeaconTimer).cancel();
         verify(mockedVideoCompletionBeaconTask).cancel();
@@ -284,8 +289,7 @@ public class InstantPlayVideoTest extends TestBase {
         subject.isVideoPlaying = false;
 
         mockedIAdView.getScreenVisibilityListener().onScreen();
-        MutedVideoView videoView = (MutedVideoView)thumbnailContainer.findViewWithTag("SharethroughAutoPlayVideoView");
-        assertThat(videoView.isPlaying()).isFalse();
+        verify(mockedMutedVideoView, never()).start();
     }
 
     @Test
@@ -309,13 +313,14 @@ public class InstantPlayVideoTest extends TestBase {
         InstantPlayVideo.VideoCompletionBeaconTask mockedVideoCompletionBeaconTask = mock(InstantPlayVideo.VideoCompletionBeaconTask.class);
         subject.videoCompletionBeaconTask = mockedVideoCompletionBeaconTask;
 
-        MutedVideoView videoView = (MutedVideoView)thumbnailContainer.findViewWithTag("SharethroughAutoPlayVideoView");
-        videoView.start();
-
+        when(mockedMutedVideoView.isPlaying()).thenReturn(true);
+        when(mockedMutedVideoView.canPause()).thenReturn(true);
+        int currentPosition = 10;
+        when(mockedMutedVideoView.getCurrentPosition()).thenReturn(currentPosition);
         mockedIAdView.getScreenVisibilityListener().offScreen();
 
         //verify videoViewDuration beacon sent
-        verify(mockedBeaconService).videoViewDuration(Robolectric.application, mockedCreative, videoView.getCurrentPosition(), true, feedPosition);
+        verify(mockedBeaconService).videoViewDuration(Robolectric.application, mockedCreative, currentPosition, true, feedPosition);
         verifyNoMoreInteractions(mockedBeaconService);
 
         //verify current position saved
@@ -328,7 +333,7 @@ public class InstantPlayVideoTest extends TestBase {
         verify(mockedVideoCompletionBeaconTask).cancel();
 
         //verify video paused and video view removed
-        assertThat(videoView.isPlaying()).isFalse();
+        verify(mockedMutedVideoView).pause();
         assertThat((VideoView) thumbnailContainer.findViewWithTag("SharethroughAutoPlayVideoView")).isNull();
 
         //verify video state set properly
