@@ -249,6 +249,7 @@ public class Sharethrough {
 
     private void fireNoAdsToShow() {
         firedNewAdsToShow = false;
+        if( availableCreatives.size() != 0 ) return;
         handler.post(new Runnable() {
             @Override
             public void run() {
