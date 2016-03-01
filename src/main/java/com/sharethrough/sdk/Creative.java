@@ -17,7 +17,7 @@ public class Creative {
         YOUTUBE,
         ARTICLE
     }
-    private final Response.Creative responseCreative;
+    protected final Response.Creative responseCreative;
     public boolean wasRendered;
     public long renderedTime = Long.MAX_VALUE;
     private boolean wasClicked = false;

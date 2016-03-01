@@ -25,6 +25,7 @@ public class STRDFPMediator implements CustomEventBanner, com.google.android.gms
                                 Object o) {
         Set<String> keywords = mediationAdRequest.getKeywords();
         Sharethrough.addDFPKeys(keywords.iterator().next(), serverParameter);
+        STRSdk.addDFPKeys(keywords.iterator().next(), serverParameter);
         customEventBannerListener.onReceivedAd(new View(activity));
     }
 
@@ -43,6 +44,7 @@ public class STRDFPMediator implements CustomEventBanner, com.google.android.gms
                                 Bundle bundle) {
         Set<String> keywords = mediationAdRequest.getKeywords();
         Sharethrough.addDFPKeys(keywords.iterator().next(), serverParameter);
+        STRSdk.addDFPKeys(keywords.iterator().next(), serverParameter);
         customEventBannerListener.onAdLoaded(new View(context));
     }
 
