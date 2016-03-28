@@ -60,9 +60,7 @@ public class AdManagerTest extends TestBase {
 
     @Before
     public void setUp() throws Exception {
-        //Mockito.doNothing().when(adManagerListener).onAdsReady((List<Creative>) anyObject(), (Placement)anyObject());
-        AdManager.setAdManagerInstance(null);
-        subject = AdManager.getInstance(Robolectric.application.getApplicationContext());
+        subject = new AdManager(Robolectric.application.getApplicationContext());
         subject.setAdManagerListener(adManagerListener);
 
         adFetcherStub = new AdFetcherStub();

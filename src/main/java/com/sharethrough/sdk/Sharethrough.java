@@ -41,6 +41,7 @@ public class Sharethrough {
     private String apiUrlPrefix = "http://btlr.sharethrough.com/v3";
     private final CreativesQueue availableCreatives;
     private AdvertisingIdProvider advertisingIdProvider;
+    private AdManager adManager;
 
     private OnStatusChangeListener onStatusChangeListener = new OnStatusChangeListener() {
         @Override
@@ -120,7 +121,7 @@ public class Sharethrough {
 
     Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds, AdvertisingIdProvider advertisingIdProvider, boolean dfpEnabled) {
         this(context, placementKey, adCacheTimeInMilliseconds, new Renderer(), new CreativesQueue(),
-                new BeaconService(new DateProvider(), UUID.randomUUID(), advertisingIdProvider, context, placementKey), dfpEnabled ? new DFPNetworking() : null);
+                new BeaconService(new DateProvider(), UUID.randomUUID(), advertisingIdProvider, context, placementKey), dfpEnabled ? new DFPNetworking() : null, new AdManager(context));
     }
 
     protected AdvertisingIdProvider getAdvertisingIdProvider(Context context){
@@ -150,7 +151,8 @@ public class Sharethrough {
                 new Renderer(),
                 SharethroughSerializer.getCreativesQueue(serializedSharethrough),
                 new BeaconService(new DateProvider(), UUID.randomUUID(), new AdvertisingIdProvider(context), context, placementKey),
-                dfpEnabled ? new DFPNetworking() : null);
+                dfpEnabled ? new DFPNetworking() : null,
+                new AdManager(context));
 
         creativesBySlot = SharethroughSerializer.getSlot(serializedSharethrough);
 
@@ -162,7 +164,7 @@ public class Sharethrough {
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-    Sharethrough(final Context context, final String placementKey, int adCacheTimeInMilliseconds, final Renderer renderer, final CreativesQueue availableCreatives, final BeaconService beaconService, DFPNetworking dfpNetworking) {
+    Sharethrough(final Context context, final String placementKey, int adCacheTimeInMilliseconds, final Renderer renderer, final CreativesQueue availableCreatives, final BeaconService beaconService, DFPNetworking dfpNetworking, AdManager adManager) {
         Logger.setContext(context); //initialize logger with context
         Logger.enabled = true;
         this.context = context;
@@ -174,6 +176,8 @@ public class Sharethrough {
         this.advertisingIdProvider = getAdvertisingIdProvider(context);
         this.waitingAdViews = new SynchronizedWeakOrderedSet<AdViewFeedPositionPair>();
         this.dfpNetworking = dfpNetworking;
+        this.adManager = adManager;
+        adManager.setAdManagerListener(adManagerListener);
 
         Response.Placement responsePlacement = new Response.Placement();
         responsePlacement.articlesBetweenAds = Integer.MAX_VALUE;
@@ -194,8 +198,6 @@ public class Sharethrough {
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
-
-        AdManager.getInstance(context).setAdManagerListener(adManagerListener);
 
         fetchAds();
     }
@@ -280,7 +282,7 @@ public class Sharethrough {
     }
 
     private void invokeAdFetcher(String url, ArrayList<NameValuePair> queryStringParams) {
-        AdManager.getInstance(context).fetchAds(url, queryStringParams, advertisingIdProvider.getAdvertisingId());
+        adManager.fetchAds(url, queryStringParams, advertisingIdProvider.getAdvertisingId());
     }
 
     private void fetchDfpAds() {

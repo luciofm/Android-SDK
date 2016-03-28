@@ -53,14 +53,13 @@ public class SharethroughTest extends TestBase {
     private String advertisingId;
 
     class SharethroughStub extends Sharethrough{
-        SharethroughStub(final Context context, final String placementKey, int adCacheTimeInMilliseconds, final Renderer renderer, final CreativesQueue availableCreatives, final BeaconService beaconService, DFPNetworking dfpNetworking){
-            super(context,placementKey,adCacheTimeInMilliseconds,renderer,availableCreatives,beaconService,dfpNetworking);
+        SharethroughStub(final Context context, final String placementKey, int adCacheTimeInMilliseconds, final Renderer renderer, final CreativesQueue availableCreatives, final BeaconService beaconService, DFPNetworking dfpNetworking, AdManager adManager){
+            super(context,placementKey,adCacheTimeInMilliseconds,renderer,availableCreatives,beaconService,dfpNetworking, adManager);
         }
 
         SharethroughStub(final Context context, final String placementKey, int adCacheTimeInMilliseconds){
             super(context, placementKey, adCacheTimeInMilliseconds);
         }
-
 
         @Override
         protected AdvertisingIdProvider getAdvertisingIdProvider(Context context) {
@@ -84,9 +83,8 @@ public class SharethroughTest extends TestBase {
     }
 
     private void createSubject(String key) {
-        AdManager.setAdManagerInstance(adManager);
         subject = new SharethroughStub(Robolectric.application, key, adCacheTimeInMilliseconds, renderer,
-                availableCreatives, beaconService, null);
+                availableCreatives, beaconService, null, adManager);
         subject.setOnStatusChangeListener(onStatusChangeListener);
     }
 
@@ -354,7 +352,7 @@ public class SharethroughTest extends TestBase {
 
 
     private void createDfpSubject(String key) {
-        subject = new SharethroughStub(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, availableCreatives, beaconService, dfpNetworking);
+        subject = new SharethroughStub(Robolectric.application, key, adCacheTimeInMilliseconds, renderer, availableCreatives, beaconService, dfpNetworking, adManager);
         subject.setOnStatusChangeListener(onStatusChangeListener);
     }
 
