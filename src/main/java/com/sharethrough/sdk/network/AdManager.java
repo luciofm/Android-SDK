@@ -13,8 +13,7 @@ import java.util.List;
 
 public class AdManager {
 
-    private static AdManager instance;
-    private static Context applicationContext;
+    private Context applicationContext;
     private AdManagerListener adManagerListener;
     protected AdFetcher adFetcher = new AdFetcher();
 
@@ -27,15 +26,8 @@ public class AdManager {
         void onAdsFailedToLoad();
     }
 
-    public static AdManager getInstance(Context context){
-        if (instance == null && context != null) {
-            applicationContext = context;
-            instance = new AdManager();
-        }
-        return instance;
-    }
-
-    private AdManager() {
+    public AdManager(Context context) {
+        this.applicationContext = context;
         setAdFetcherListener();
     }
 
@@ -118,15 +110,4 @@ public class AdManager {
         String result = url + "?" + formattedQueryStringParams;
         return result;
     }
-
-    public static void setAdManagerInstance(AdManager adManager) {
-        instance = adManager;
-    }
-
-
-
-
-
-
-
 }

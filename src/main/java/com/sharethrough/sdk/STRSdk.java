@@ -40,6 +40,7 @@ public class STRSdk {
     private String apiUrlPrefix = "http://btlr.sharethrough.com/v3";
     private final CreativesQueue availableCreatives;
     private AdvertisingIdProvider advertisingIdProvider;
+    private AdManager adManager;
 
     private OnStatusChangeListener onStatusChangeListener = new OnStatusChangeListener() {
         @Override
@@ -87,6 +88,8 @@ public class STRSdk {
         responsePlacement.articlesBeforeFirstAd = Integer.MAX_VALUE;
         responsePlacement.status = "";
         placement = new Placement(responsePlacement);
+        this.adManager = new AdManager(context);
+        adManager.setAdManagerListener(adManagerListener);
 
         if (placementKey == null) throw new KeyRequiredException("placement_key is required");
 
@@ -99,8 +102,6 @@ public class STRSdk {
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
-
-        AdManager.getInstance(context).setAdManagerListener(adManagerListener);
 
         fetchAds();
     }
@@ -178,7 +179,7 @@ public class STRSdk {
     }
 
     private void invokeAdFetcher(String url, ArrayList<NameValuePair> queryStringParams) {
-        AdManager.getInstance(context).fetchAds(url, queryStringParams, advertisingIdProvider.getAdvertisingId());
+        adManager.fetchAds(url, queryStringParams, advertisingIdProvider.getAdvertisingId());
     }
 
     private void fetchDfpAds() {
