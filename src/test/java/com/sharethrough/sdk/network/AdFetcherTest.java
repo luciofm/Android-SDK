@@ -138,5 +138,12 @@ public class AdFetcherTest extends TestBase {
         assertThat(response.creatives.get(0).creative.beacon.play.size()).isEqualTo(2);
         assertThat(response.creatives.get(0).creative.beacon.click.size()).isEqualTo(2);
         assertThat(response.creatives.get(0).creative.beacon.silentPlay.size()).isEqualTo(2);
+        assertThat(response.creatives.get(0).creative.optOutText.isEmpty());
+        assertThat(response.creatives.get(0).creative.optOutUrl.isEmpty());
+
+        assertThat(response.creatives.get(1).creative.optOutUrl).isEqualTo("http://www.example.com/opt-out");
+        assertThat(response.creatives.get(1).creative.optOutText).isEqualTo("don't click this link");
     }
+
+
 }
