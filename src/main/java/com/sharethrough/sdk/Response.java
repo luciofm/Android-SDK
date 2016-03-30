@@ -41,12 +41,16 @@ public class Response {
         public int version;
 
         public static class CreativeInner {
+            @JsonProperty("opt_out_text")
+            public String optOutText;
             @JsonProperty("creative_key")
             public String creativeKey;
             @JsonProperty("campaign_key")
             public String campaignKey;
             @JsonProperty("description")
             public String description;
+            @JsonProperty("opt_out_url")
+            public String optOutUrl;
             @JsonProperty("media_url")
             public String mediaUrl;
             @JsonProperty("share_url")

@@ -164,4 +164,12 @@ public class Creative {
     public String getDealId(){
         return responseCreative.creative.dealId;
     }
+
+    public String getOptOutText() {
+        return responseCreative.creative.optOutText;
+    }
+
+    public String getOptOutUrl() {
+        return responseCreative.creative.optOutUrl;
+    }
 }
