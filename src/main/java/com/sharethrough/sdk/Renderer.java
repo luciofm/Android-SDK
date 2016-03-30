@@ -89,7 +89,7 @@ public class Renderer {
                   }
                 );
 
-                placeOptoutIcon(adView);
+                placeOptoutIcon(adView, creative.getOptOutUrl(), creative.getOptOutText());
             }
         });
     }
@@ -116,13 +116,20 @@ public class Renderer {
         }
     }
 
-    private void placeOptoutIcon(final IAdView adView) {
+    private void placeOptoutIcon(final IAdView adView, final String optOutUrl, final String optOutText) {
         final ImageView optout = adView.getOptout();
         optout.setImageResource(R.drawable.optout);
         optout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent privacyIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Sharethrough.PRIVACY_POLICY_ENDPOINT));
+                String privacyPolicyUrl = Sharethrough.PRIVACY_POLICY_ENDPOINT;
+                if(optOutText != null && !optOutText.isEmpty() && optOutUrl != null && !optOutUrl.isEmpty()) {
+                    privacyPolicyUrl = privacyPolicyUrl.replace("{OPT_OUT_URL}", Uri.encode(optOutUrl));
+                    privacyPolicyUrl = privacyPolicyUrl.replace("{OPT_OUT_TEXT}",Uri.encode(optOutText));
+                }else{
+                    privacyPolicyUrl = privacyPolicyUrl.replace("?opt_out_url={OPT_OUT_URL}&opt_out_text={OPT_OUT_TEXT}", "");
+                }
+                Intent privacyIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(privacyPolicyUrl));
                 v.getContext().startActivity(privacyIntent);
             }
         });
