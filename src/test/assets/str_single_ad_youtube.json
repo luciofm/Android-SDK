@@ -47,9 +47,11 @@
       "auctionWinId": "fake-auction-win-id",
       "signature": "c19",
       "creative": {
+        "opt_out_text": "don't click this link",
         "creative_key": "ckey2",
         "campaign_key": "campkey2",
         "description": "Description.",
+        "opt_out_url": "http://www.example.com/opt-out",
         "media_url": "mediaURL",
         "share_url": "shareURL",
         "variant_key": "12345",

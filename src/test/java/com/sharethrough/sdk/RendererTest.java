@@ -205,8 +205,71 @@ public class RendererTest extends TestBase {
         assertThat(optout.getMinimumHeight()).isEqualTo(20);
         assertThat(optout.getMinimumWidth()).isEqualTo(20);
         optout.performClick();
-        ANDROID.assertThat(shadowOf(Robolectric.application).getNextStartedActivity()).isEqualTo(new Intent(Intent.ACTION_VIEW, Uri.parse(Sharethrough.PRIVACY_POLICY_ENDPOINT)));
+        String expectedString = "http://platform-cdn.sharethrough.com/privacy-policy.html";
+        ANDROID.assertThat(shadowOf(Robolectric.application).getNextStartedActivity()).isEqualTo(new Intent(Intent.ACTION_VIEW, Uri.parse(expectedString)));
     }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    @Test
+    public void whenOptoutInfoIsProvided_addsOptOutParamsToUrl() throws Exception {
+        when(creative.getOptOutText()).thenReturn("New Opt Out Text");
+        when(creative.getOptOutUrl()).thenReturn("http://example.com");
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
+
+        ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
+        shadowLooper.runOneTask();
+        shadowLooper.runOneTask();
+
+        View optout = adView.getOptout();
+        assertThat(optout.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(optout.getMinimumHeight()).isEqualTo(20);
+        assertThat(optout.getMinimumWidth()).isEqualTo(20);
+        optout.performClick();
+        String expectedString = "http://platform-cdn.sharethrough.com/privacy-policy.html?opt_out_url=http%3A%2F%2Fexample.com&opt_out_text=New%20Opt%20Out%20Text";
+        ANDROID.assertThat(shadowOf(Robolectric.application).getNextStartedActivity()).isEqualTo(new Intent(Intent.ACTION_VIEW, Uri.parse(expectedString)));
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    @Test
+    public void whenOptoutMissingText_BlankOptoutParam() throws Exception {
+        when(creative.getOptOutText()).thenReturn("");
+        when(creative.getOptOutUrl()).thenReturn("http://example.com");
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
+
+        ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
+        shadowLooper.runOneTask();
+        shadowLooper.runOneTask();
+
+        View optout = adView.getOptout();
+        assertThat(optout.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(optout.getMinimumHeight()).isEqualTo(20);
+        assertThat(optout.getMinimumWidth()).isEqualTo(20);
+        optout.performClick();
+        String expectedString = "http://platform-cdn.sharethrough.com/privacy-policy.html";
+        ANDROID.assertThat(shadowOf(Robolectric.application).getNextStartedActivity()).isEqualTo(new Intent(Intent.ACTION_VIEW, Uri.parse(expectedString)));
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    @Test
+    public void whenOptoutMissingUrl_BlankOptoutParam() throws Exception {
+        when(creative.getOptOutText()).thenReturn("OptOutText");
+        when(creative.getOptOutUrl()).thenReturn("");
+        subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
+
+        ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
+        shadowLooper.runOneTask();
+        shadowLooper.runOneTask();
+
+        View optout = adView.getOptout();
+        assertThat(optout.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(optout.getMinimumHeight()).isEqualTo(20);
+        assertThat(optout.getMinimumWidth()).isEqualTo(20);
+        optout.performClick();
+        String expectedString = "http://platform-cdn.sharethrough.com/privacy-policy.html";
+        ANDROID.assertThat(shadowOf(Robolectric.application).getNextStartedActivity()).isEqualTo(new Intent(Intent.ACTION_VIEW, Uri.parse(expectedString)));
+    }
+
+
 
     public static MyTestAdView makeAdView() {
         return new MyTestAdView(Robolectric.application);

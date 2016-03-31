@@ -101,6 +101,8 @@ public class AdFetcher {
             JSONObject jsonCreativeInner = jsonCreative.getJSONObject("creative");
 
             creative.creative = new Response.Creative.CreativeInner();
+            creative.creative.optOutText = jsonCreativeInner.optString("opt_out_text");
+            creative.creative.optOutUrl = jsonCreativeInner.optString("opt_out_url");
             creative.creative.action = jsonCreativeInner.getString("action");
             creative.creative.mediaUrl = jsonCreativeInner.getString("media_url");
             creative.creative.shareUrl = jsonCreativeInner.getString("share_url");
