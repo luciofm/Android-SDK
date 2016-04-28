@@ -12,6 +12,7 @@ import android.util.LruCache;
 
 import com.sharethrough.android.sdk.BuildConfig;
 import com.sharethrough.sdk.network.AdManager;
+import com.sharethrough.sdk.network.DFPNetworking;
 
 
 import org.apache.http.NameValuePair;
@@ -30,9 +31,12 @@ public class Sharethrough {
     public static final String SDK_VERSION_NUMBER = BuildConfig.VERSION_NAME;
     public static String USER_AGENT = System.getProperty("http.agent") + "; STR " + SDK_VERSION_NUMBER;
     public static final String PRIVACY_POLICY_ENDPOINT = "http://platform-cdn.sharethrough.com/privacy-policy.html?opt_out_url={OPT_OUT_URL}&opt_out_text={OPT_OUT_TEXT}";
+    private static final String DFP_CREATIVE_KEY = "creative_key";
+    private static final String DFP_CAMPAIGN_KEY = "campaign_key";
     private final Renderer renderer;
     private final BeaconService beaconService;
     private final int adCacheTimeInMilliseconds;
+    private final DFPNetworking dfpNetworking;
     private String placementKey;
     private String apiUrlPrefix = "http://btlr.sharethrough.com/v3";
     private final CreativesQueue availableCreatives;
@@ -54,7 +58,10 @@ public class Sharethrough {
     private LruCache<Integer, Creative> creativesBySlot = new LruCache<>(10);
     public Set<Integer> creativeIndices = new HashSet<>(); //contains history of all indices for creatives, whereas creativesBySlot only caches the last 10
 
+
+    private static final Map<String, Map<String, String>> dfpAdGroupIds = new HashMap<>();
     private final Context context; //TODO decide whether this is needed
+    private String dfpPath;
     public boolean firedNewAdsToShow;
     Placement placement;
     public boolean placementSet;
@@ -114,7 +121,7 @@ public class Sharethrough {
 
     Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds, AdvertisingIdProvider advertisingIdProvider, boolean dfpEnabled) {
         this(context, placementKey, adCacheTimeInMilliseconds, new Renderer(), new CreativesQueue(),
-                new BeaconService(new DateProvider(), UUID.randomUUID(), advertisingIdProvider, context, placementKey), null, new AdManager(context));
+                new BeaconService(new DateProvider(), UUID.randomUUID(), advertisingIdProvider, context, placementKey), dfpEnabled ? new DFPNetworking() : null, new AdManager(context));
     }
 
     protected AdvertisingIdProvider getAdvertisingIdProvider(Context context){
@@ -144,7 +151,7 @@ public class Sharethrough {
                 new Renderer(),
                 SharethroughSerializer.getCreativesQueue(serializedSharethrough),
                 new BeaconService(new DateProvider(), UUID.randomUUID(), new AdvertisingIdProvider(context), context, placementKey),
-                null,
+                dfpEnabled ? new DFPNetworking() : null,
                 new AdManager(context));
 
         creativesBySlot = SharethroughSerializer.getSlot(serializedSharethrough);
@@ -157,7 +164,7 @@ public class Sharethrough {
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-    Sharethrough(final Context context, final String placementKey, int adCacheTimeInMilliseconds, final Renderer renderer, final CreativesQueue availableCreatives, final BeaconService beaconService, Object dfpNetworking, AdManager adManager) {
+    Sharethrough(final Context context, final String placementKey, int adCacheTimeInMilliseconds, final Renderer renderer, final CreativesQueue availableCreatives, final BeaconService beaconService, DFPNetworking dfpNetworking, AdManager adManager) {
         Logger.setContext(context); //initialize logger with context
         Logger.enabled = true;
         this.context = context;
@@ -168,6 +175,7 @@ public class Sharethrough {
         this.availableCreatives = availableCreatives;
         this.advertisingIdProvider = getAdvertisingIdProvider(context);
         this.waitingAdViews = new SynchronizedWeakOrderedSet<AdViewFeedPositionPair>();
+        this.dfpNetworking = dfpNetworking;
         this.adManager = adManager;
         adManager.setAdManagerListener(adManagerListener);
 
@@ -264,11 +272,70 @@ public class Sharethrough {
     }
 
     private void fetchAds() {
-        //TODO:replace with new asap manager code
+        if (dfpNetworking != null) {
+            fetchDfpAds();
+        } else {
+            ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>(1);
+            queryStringParams.add(new BasicNameValuePair("placement_key", placementKey));
+            invokeAdFetcher(apiUrlPrefix, queryStringParams);
+        }
     }
 
     private void invokeAdFetcher(String url, ArrayList<NameValuePair> queryStringParams) {
         adManager.fetchAds(url, queryStringParams, advertisingIdProvider.getAdvertisingId());
+    }
+
+    private void fetchDfpAds() {
+        Map<String, String> DFPKeys = popDFPKeys(dfpPath);
+        if (DFPKeys == null) {
+            fetchDfpPath();
+        } else {
+            ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>(2);
+            queryStringParams.add(new BasicNameValuePair("placement_key", placementKey));
+
+            if (DFPKeys.containsKey(DFP_CREATIVE_KEY)) {
+                String creativeKey = DFPKeys.get(DFP_CREATIVE_KEY);
+                if (!creativeKey.equals("STX_MONETIZE")){
+                    queryStringParams.add(new BasicNameValuePair("creative_key", creativeKey));
+                }
+            } else if (DFPKeys.containsKey(DFP_CAMPAIGN_KEY)) {
+                String campaignKey = DFPKeys.get(DFP_CAMPAIGN_KEY);
+                if (!campaignKey.equals("STX_MONETIZE")) {
+                    queryStringParams.add(new BasicNameValuePair("campaign_key", campaignKey));
+                }
+            }
+
+            invokeAdFetcher(apiUrlPrefix, queryStringParams);
+        }
+    }
+
+    private void fetchDfpPath() {
+        final DFPNetworking.DFPCreativeKeyCallback creativeKeyCallback = new DFPNetworking.DFPCreativeKeyCallback() {
+            @Override
+            public void receivedCreativeKey() {
+                fetchAds();
+            }
+
+            @Override
+            public void DFPKeyError(String errorMessage) {
+                Log.e("DFP", "received Error message: " + errorMessage);
+            }
+        };
+
+        final DFPNetworking.DFPPathFetcherCallback pathFetcherCallback = new DFPNetworking.DFPPathFetcherCallback() {
+            @Override
+            public void receivedURL(final String receivedDFPPath) {
+                dfpPath = receivedDFPPath;
+                dfpNetworking.fetchCreativeKey(context, dfpPath, creativeKeyCallback);
+            }
+
+            @Override
+            public void DFPError(String errorMessage) {
+                Log.e("DFP", "Error fetching DFP path: " + errorMessage);
+            }
+        };
+
+        dfpNetworking.fetchDFPPath(placementKey, pathFetcherCallback);
     }
 
     /**
@@ -463,6 +530,24 @@ public class Sharethrough {
          * This method is invoked when there are no ads to be shown.
          */
         void noAdsToShow();
+    }
+
+    public static void addDFPKeys(final String dfpPath, final String adGroupString) {
+        HashMap<String, String> dfpKeys= new HashMap<String, String>();
+        if (adGroupString.contains(DFP_CREATIVE_KEY)) {
+            String[] tokens = adGroupString.split("=");
+            dfpKeys.put(DFP_CREATIVE_KEY, tokens[1]);
+        } else if (adGroupString.contains(DFP_CAMPAIGN_KEY)) {
+            String[] tokens = adGroupString.split("=");
+            dfpKeys.put(DFP_CAMPAIGN_KEY, tokens[1]);
+        } else {
+            dfpKeys.put(DFP_CREATIVE_KEY, adGroupString);
+        }
+        dfpAdGroupIds.put(dfpPath, dfpKeys);
+    }
+
+    public static Map<String, String> popDFPKeys(String dfpPath) {
+        return dfpAdGroupIds.remove(dfpPath);
     }
 
     public String serialize() {
