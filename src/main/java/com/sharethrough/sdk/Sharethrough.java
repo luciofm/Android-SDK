@@ -2,31 +2,20 @@ package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.util.LruCache;
-
 import com.sharethrough.android.sdk.BuildConfig;
 import com.sharethrough.sdk.network.AdManager;
-
-
 import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Methods to handle configuration for Sharethrough's Android SDK.
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
 public class Sharethrough {
-    public static final int DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(300);
-    private static final int MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS = (int) TimeUnit.SECONDS.toMillis(20);
     public static final String SDK_VERSION_NUMBER = BuildConfig.VERSION_NAME;
     public static String USER_AGENT = System.getProperty("http.agent") + "; STR " + SDK_VERSION_NUMBER;
     public static final String PRIVACY_POLICY_ENDPOINT = "http://platform-cdn.sharethrough.com/privacy-policy.html?opt_out_url={OPT_OUT_URL}&opt_out_text={OPT_OUT_TEXT}";
@@ -54,7 +43,6 @@ public class Sharethrough {
     private LruCache<Integer, Creative> creativesBySlot = new LruCache<>(10);
     public Set<Integer> creativeIndices = new HashSet<>(); //contains history of all indices for creatives, whereas creativesBySlot only caches the last 10
 
-    private final Context context; //TODO decide whether this is needed
     public boolean firedNewAdsToShow;
     Placement placement;
     public boolean placementSet;
@@ -63,132 +51,32 @@ public class Sharethrough {
         public void call(Placement result) {
         }
     };
-    private SynchronizedWeakOrderedSet<AdViewFeedPositionPair> waitingAdViews;
-
-    //TODO make the constructors cleaner
-
-    /**
-     * Returns an instance of the Sharethrough object which is used to fetch and display native ads within your mobile app.
-     * <p/>
-     * A default ad cache time of 20 seconds will be used.
-     *
-     * @param context      The Android context.
-     * @param placementKey Your Sharethrough placement key that you will receive from Sharethrough.
-     */
-    public Sharethrough(Context context, String placementKey) {
-        this(context, placementKey, DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS);
-    }
-
-    /**
-     * @param context                   The Android context.
-     * @param placementKey              Your Sharethrough placement key that you will receive from Sharethrough.
-     * @param adCacheTimeInMilliseconds The ad cache time in milliseconds. e.g. a value of 100,000 will result in ads being refreshed every 100 seconds.
-     */
-    public Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds) {
-        this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context), false);
-    }
-
-    /**
-     * Returns an instance of the Sharethrough object which is used to fetch and display native ads within your mobile app.
-     * <p/>
-     * A default ad cache time of 20 seconds will be used.
-     *
-     * @param context   The Android context.
-     * @param placementKey  Your Sharethrough placement key that you will receive from Sharethrough.
-     * @param dfpEnabled    A boolean flag indicating if you would like to use Sharethrough's Direct Sell functionality via DFP.
-     */
-    public Sharethrough(Context context, String placementKey, boolean dfpEnabled) {
-        this(context, placementKey, DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS, dfpEnabled);
-    }
-
-    /**
-     *
-     * @param context   The Android context.
-     * @param placementKey  Your Sharethrough placement key that you will receive from Sharethrough.
-     * @param adCacheTimeInMilliseconds     The ad cache time in milliseconds. e.g. a value of 100,000 will result in ads being refreshed every 100 seconds.
-     * @param dfpEnabled    A boolean flag indicating if you would like to use Sharethrough's Direct Sell functionality via DFP.
-     */
-    public Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds, boolean dfpEnabled) {
-        this(context, placementKey, adCacheTimeInMilliseconds, new AdvertisingIdProvider(context), dfpEnabled);
-    }
-
-    Sharethrough(Context context, String placementKey, int adCacheTimeInMilliseconds, AdvertisingIdProvider advertisingIdProvider, boolean dfpEnabled) {
-        this(context, placementKey, adCacheTimeInMilliseconds, new Renderer(), new CreativesQueue(),
-                new BeaconService(new DateProvider(), UUID.randomUUID(), advertisingIdProvider, context, placementKey), null, new AdManager(context));
-    }
-
-    protected AdvertisingIdProvider getAdvertisingIdProvider(Context context){
-        return new AdvertisingIdProvider(context.getApplicationContext());
-    }
-
-    /**
-     *
-     * @param context Android context
-     * @param placementKey Sharethrough placementkey key that you will receive from Sharethrough
-     * @param serializedSharethrough serialized Sharethrough object used to initialize Sharethough to previous state
-     */
-    public Sharethrough(Context context, String placementKey, String serializedSharethrough) {
-        this(context, placementKey, false, serializedSharethrough);
-    }
-
-    /**
-     *
-     * @param context Android context
-     * @param placementKey Sharethrough placementkey key that you will receive from Sharethrough
-     * @param dfpEnabled boolean indicating use of Sharethrough's Direct Sell functionality via DFP
-     * @param serializedSharethrough serialized Sharethrough object used to initialize Sharethough to previous state
-     */
-    public Sharethrough(Context context, String placementKey, boolean dfpEnabled, String serializedSharethrough) {
-        this(context, placementKey,
-                DEFAULT_AD_CACHE_TIME_IN_MILLISECONDS,
-                new Renderer(),
-                SharethroughSerializer.getCreativesQueue(serializedSharethrough),
-                new BeaconService(new DateProvider(), UUID.randomUUID(), new AdvertisingIdProvider(context), context, placementKey),
-                null,
-                new AdManager(context));
-
-        creativesBySlot = SharethroughSerializer.getSlot(serializedSharethrough);
-
-        Logger.d("deserializing Sharethrough: queue count - " + availableCreatives.size() + ", slot snapshot: " + creativesBySlot.snapshot());
-        Response.Placement responsePlacement = new Response.Placement();
-        responsePlacement.articlesBetweenAds = SharethroughSerializer.getArticlesBetween(serializedSharethrough);
-        responsePlacement.articlesBeforeFirstAd = SharethroughSerializer.getArticlesBefore(serializedSharethrough);
-        placement = new Placement(responsePlacement);
-    }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-    Sharethrough(final Context context, final String placementKey, int adCacheTimeInMilliseconds, final Renderer renderer, final CreativesQueue availableCreatives, final BeaconService beaconService, Object dfpNetworking, AdManager adManager) {
-        Logger.setContext(context); //initialize logger with context
-        Logger.enabled = true;
-        this.context = context;
-        this.placementKey = placementKey;
-        this.renderer = renderer;
-        this.beaconService = beaconService;
-        this.adCacheTimeInMilliseconds = Math.max(adCacheTimeInMilliseconds, MINIMUM_AD_CACHE_TIME_IN_MILLISECONDS);
-        this.availableCreatives = availableCreatives;
-        this.advertisingIdProvider = getAdvertisingIdProvider(context);
-        this.waitingAdViews = new SynchronizedWeakOrderedSet<AdViewFeedPositionPair>();
-        this.adManager = adManager;
-        adManager.setAdManagerListener(adManagerListener);
+    Sharethrough(STRSdkConfig config) {
+        this.placementKey = config.placementKey;
+        this.renderer = config.renderer;
+        this.beaconService = config.beaconService;
+        this.adCacheTimeInMilliseconds = 5000;
+        this.availableCreatives = config.creativeQueue;
+        this.advertisingIdProvider = config.advertisingIdProvider;
+        //his.waitingAdViews = new SynchronizedWeakOrderedSet<AdViewFeedPositionPair>();
+        this.adManager = config.adManager;
+        this.adManager.setAdManagerListener(adManagerListener);
 
         Response.Placement responsePlacement = new Response.Placement();
         responsePlacement.articlesBetweenAds = Integer.MAX_VALUE;
         responsePlacement.articlesBeforeFirstAd = Integer.MAX_VALUE;
         responsePlacement.status = "";
-        placement = new Placement(responsePlacement);
+        this.placement = new Placement(responsePlacement);
 
-        // TODO build Picasso instance with STRExecutorService
-
-        if (placementKey == null) throw new KeyRequiredException("placement_key is required");
-
-        try {
-            Bundle bundle = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA).metaData;
-            if (bundle != null) {
-                String adServerApi = bundle.getString("STR_ADSERVER_API");
-                if (adServerApi != null) apiUrlPrefix = adServerApi;
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+        if (config.serializedSharethrough != null && !config.serializedSharethrough.isEmpty()) {
+            this.creativesBySlot = SharethroughSerializer.getSlot(config.serializedSharethrough);
+            Logger.d("deserializing Sharethrough: queue count - " + availableCreatives.size() + ", slot snapshot: " + creativesBySlot.snapshot());
+            responsePlacement = new Response.Placement();
+            responsePlacement.articlesBetweenAds = SharethroughSerializer.getArticlesBetween(config.serializedSharethrough);
+            responsePlacement.articlesBeforeFirstAd = SharethroughSerializer.getArticlesBefore(config.serializedSharethrough);
+            this.placement = new Placement(responsePlacement);
         }
 
         fetchAds();
@@ -204,22 +92,11 @@ public class Sharethrough {
             }
 
             for(Creative creative : listOfCreativesReadyForShow) {
-                if (waitingAdViews.size() == 0) {
-                    availableCreatives.add(creative);
-                    if (creative != null) {
-                        Logger.d("insert creative ckey: %s, creative cache size %d", creative.getCreativeKey(), availableCreatives.size());
-                    }
-                    fireNewAdsToShow();
-                } else {
-                    AdViewFeedPositionPair adViewFeedPositionPair = waitingAdViews.popNext();
-                    if (adViewFeedPositionPair != null) {
-                        IAdView adView = (IAdView) adViewFeedPositionPair.adView;
-                        int feedPosition = (int) adViewFeedPositionPair.feedPosition;
-                        insertCreativeIntoSlot(feedPosition, creative);
-                        renderer.putCreativeIntoAdView(adView, creative, beaconService, Sharethrough.this, feedPosition, new Timer("AdView timer for " + creative));
-                        fireNewAdsToShow();
-                    }
+                availableCreatives.add(creative);
+                if (creative != null) {
+                    Logger.d("insert creative ckey: %s, creative cache size %d", creative.getCreativeKey(), availableCreatives.size());
                 }
+                fireNewAdsToShow();
             }
         }
 
@@ -317,6 +194,8 @@ public class Sharethrough {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public void putCreativeIntoAdView(final IAdView adView, final int feedPosition) {
+
+        //prevent pubs from calling this before we fire new ads to show
         boolean[] isAdRenewed = new boolean[1];
         isAdRenewed[0] = false;
 
@@ -327,11 +206,6 @@ public class Sharethrough {
                 fireNewAdsToShow();
             }
         }
-        else{
-            Logger.d("there are no ads to show at position: " + feedPosition);
-            AdViewFeedPositionPair<IAdView, Integer> adViewFeedPositionPair = new AdViewFeedPositionPair<IAdView, Integer>(adView, feedPosition);
-            waitingAdViews.put(adViewFeedPositionPair);
-        }
 
         //grab more ads if appropriate
         synchronized (availableCreatives) {
@@ -339,10 +213,6 @@ public class Sharethrough {
                 fetchAds();
             }
         }
-    }
-
-    public int getAdCacheTimeInMilliseconds() {
-        return adCacheTimeInMilliseconds;
     }
 
     public void setOrCallPlacementCallback(Callback<Placement> placementCallback) {
@@ -353,7 +223,7 @@ public class Sharethrough {
         }
     }
 
-     /* @return how many articles should be between ads. This is set on the server side.
+     /** @return how many articles should be between ads. This is set on the server side.
      */
     public int getArticlesBetweenAds() {
         return placement.getArticlesBetweenAds();
@@ -448,6 +318,10 @@ public class Sharethrough {
         }
         putCreativeIntoAdView(view, feedPosition);
         return view;
+    }
+
+    public long getAdCacheTimeInMilliseconds() {
+        return adCacheTimeInMilliseconds;
     }
 
     /**
