@@ -6,7 +6,9 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.LruCache;
+import com.android.volley.RequestQueue;
 import com.sharethrough.android.sdk.BuildConfig;
+import com.sharethrough.sdk.network.ASAPManager;
 import com.sharethrough.sdk.network.AdManager;
 import org.apache.http.NameValuePair;
 import java.util.*;
@@ -27,7 +29,19 @@ public class Sharethrough {
     private final CreativesQueue availableCreatives;
     private AdvertisingIdProvider advertisingIdProvider;
     private AdManager adManager;
+    private Handler handler = new Handler(Looper.getMainLooper());
+    private LruCache<Integer, Creative> creativesBySlot = new LruCache<>(10);
+    public Set<Integer> creativeIndices = new HashSet<>(); //contains history of all indices for creatives, whereas creativesBySlot only caches the last 10
+    public boolean firedNewAdsToShow;
+    Placement placement;
+    public boolean placementSet;
+    public RequestQueue requestQueue;
 
+    private Callback<Placement> placementCallback = new Callback<Placement>() {
+        @Override
+        public void call(Placement result) {
+        }
+    };
     private OnStatusChangeListener onStatusChangeListener = new OnStatusChangeListener() {
         @Override
         public void newAdsToShow() {
@@ -39,30 +53,18 @@ public class Sharethrough {
 
         }
     };
-    private Handler handler = new Handler(Looper.getMainLooper());
-    private LruCache<Integer, Creative> creativesBySlot = new LruCache<>(10);
-    public Set<Integer> creativeIndices = new HashSet<>(); //contains history of all indices for creatives, whereas creativesBySlot only caches the last 10
-
-    public boolean firedNewAdsToShow;
-    Placement placement;
-    public boolean placementSet;
-    private Callback<Placement> placementCallback = new Callback<Placement>() {
-        @Override
-        public void call(Placement result) {
-        }
-    };
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-    Sharethrough(STRSdkConfig config) {
+    public Sharethrough(STRSdkConfig config) {
         this.placementKey = config.placementKey;
         this.renderer = config.renderer;
         this.beaconService = config.beaconService;
         this.adCacheTimeInMilliseconds = 5000;
         this.availableCreatives = config.creativeQueue;
         this.advertisingIdProvider = config.advertisingIdProvider;
-        //his.waitingAdViews = new SynchronizedWeakOrderedSet<AdViewFeedPositionPair>();
         this.adManager = config.adManager;
         this.adManager.setAdManagerListener(adManagerListener);
+        this.requestQueue = config.requestQueue;
 
         Response.Placement responsePlacement = new Response.Placement();
         responsePlacement.articlesBetweenAds = Integer.MAX_VALUE;
@@ -141,7 +143,18 @@ public class Sharethrough {
     }
 
     private void fetchAds() {
-        //TODO:replace with new asap manager code
+        ASAPManager asapManager = new ASAPManager(placementKey, requestQueue);
+        asapManager.callASAP(new ASAPManager.ASAPManagerListener() {
+            @Override
+            public void onSuccess(ArrayList<NameValuePair> queryStringParams) {
+                invokeAdFetcher(apiUrlPrefix, queryStringParams);
+            }
+
+            @Override
+            public void onError(String error) {
+                Logger.d("ASAP error: " + error);
+            }
+        });
     }
 
     private void invokeAdFetcher(String url, ArrayList<NameValuePair> queryStringParams) {

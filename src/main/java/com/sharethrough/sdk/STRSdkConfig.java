@@ -1,6 +1,8 @@
 package com.sharethrough.sdk;
 
 import android.content.Context;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.sharethrough.sdk.network.AdManager;
 
 import java.util.UUID;
@@ -13,17 +15,9 @@ public class STRSdkConfig {
     protected Renderer renderer;
     protected CreativesQueue creativeQueue;
     protected AdvertisingIdProvider advertisingIdProvider;
+    protected RequestQueue requestQueue;
 
-    public STRSdkConfig(Context context, String placementKey) throws Exception {
-
-        if (placementKey == null || placementKey.isEmpty()) {
-            throw new Exception("Placement key is required");
-        }
-
-        if (context == null){
-            throw new Exception("Context is required");
-        }
-
+    public STRSdkConfig(Context context, String placementKey){
         Logger.setContext(context);
         Logger.enabled = true;
 
@@ -33,6 +27,7 @@ public class STRSdkConfig {
         this.adManager = new AdManager(context);
         this.renderer = new Renderer();
         this.creativeQueue = new CreativesQueue();
+        this.requestQueue = Volley.newRequestQueue(context);
     }
 
     public void setSerializedSharethrough( String serializedSharethrough ){
