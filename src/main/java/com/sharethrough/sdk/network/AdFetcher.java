@@ -24,7 +24,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AdFetcher {
     protected AdFetcherListener adFetcherListener;
@@ -43,8 +45,20 @@ public class AdFetcher {
         this.adFetcherListener = adFetcherListener;
     }
 
+    public class STRStringRequest extends StringRequest {
+        public STRStringRequest(int method, String url, com.android.volley.Response.Listener<String> listener, com.android.volley.Response.ErrorListener errorListener) {
+            super(method, url, listener, errorListener);
+        }
+
+        @Override
+        public Map<String, String> getHeaders(){
+            Map<String, String> headers = new HashMap<String, String>();
+            headers.put("User-Agent", Sharethrough.USER_AGENT);
+            return headers;
+        }
+    }
     public void fetchAds(String adRequestUrl) {
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, adRequestUrl,
+        STRStringRequest stringRequest = new STRStringRequest(Request.Method.GET, adRequestUrl,
                 new com.android.volley.Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -62,6 +76,8 @@ public class AdFetcher {
                 adFetcherListener.onAdResponseFailed();
             }
         });
+
+
 
         // Add the request to the RequestQueue.
         requestQueue.add(stringRequest);

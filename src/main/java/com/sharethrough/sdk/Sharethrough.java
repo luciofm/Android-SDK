@@ -36,6 +36,7 @@ public class Sharethrough {
     Placement placement;
     public boolean placementSet;
     public RequestQueue requestQueue;
+    public ASAPManager asapManager;
 
     private Callback<Placement> placementCallback = new Callback<Placement>() {
         @Override
@@ -65,6 +66,7 @@ public class Sharethrough {
         this.adManager = config.adManager;
         this.adManager.setAdManagerListener(adManagerListener);
         this.requestQueue = config.requestQueue;
+        this.asapManager = config.asapManager;
 
         Response.Placement responsePlacement = new Response.Placement();
         responsePlacement.articlesBetweenAds = Integer.MAX_VALUE;
@@ -142,7 +144,6 @@ public class Sharethrough {
     }
 
     private void fetchAds() {
-        ASAPManager asapManager = new ASAPManager(placementKey, requestQueue);
         asapManager.callASAP(new ASAPManager.ASAPManagerListener() {
             @Override
             public void onSuccess(ArrayList<NameValuePair> queryStringParams) {
@@ -151,7 +152,7 @@ public class Sharethrough {
 
             @Override
             public void onError(String error) {
-                Logger.d("ASAP error: " + error);
+                Logger.e("ASAP error: " + error, null);
             }
         });
     }

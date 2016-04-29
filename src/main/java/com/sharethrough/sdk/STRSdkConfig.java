@@ -3,6 +3,7 @@ package com.sharethrough.sdk;
 import android.content.Context;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.sharethrough.sdk.network.ASAPManager;
 import com.sharethrough.sdk.network.AdManager;
 
 import java.util.UUID;
@@ -16,6 +17,7 @@ public class STRSdkConfig {
     protected CreativesQueue creativeQueue;
     protected AdvertisingIdProvider advertisingIdProvider;
     protected RequestQueue requestQueue;
+    protected ASAPManager asapManager;
 
     public STRSdkConfig(Context context, String placementKey){
         Logger.setContext(context);
@@ -28,6 +30,7 @@ public class STRSdkConfig {
         this.renderer = new Renderer();
         this.creativeQueue = new CreativesQueue();
         this.requestQueue = Volley.newRequestQueue(context);
+        this.asapManager = new ASAPManager(placementKey, requestQueue);
     }
 
     public void setSerializedSharethrough( String serializedSharethrough ){
