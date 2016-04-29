@@ -109,7 +109,6 @@ public class Sharethrough {
 
         @Override
         public void onAdsFailedToLoad() {
-
         }
     };
 

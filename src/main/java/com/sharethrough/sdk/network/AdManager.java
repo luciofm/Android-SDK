@@ -15,7 +15,7 @@ public class AdManager {
 
     private Context applicationContext;
     private AdManagerListener adManagerListener;
-    protected AdFetcher adFetcher = new AdFetcher();
+    protected AdFetcher adFetcher;
 
     private boolean isRunning = false;
 
@@ -28,6 +28,7 @@ public class AdManager {
 
     public AdManager(Context context) {
         this.applicationContext = context;
+        adFetcher = new AdFetcher(context);
         setAdFetcherListener();
     }
 

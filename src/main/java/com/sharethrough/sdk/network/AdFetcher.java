@@ -3,7 +3,11 @@ package com.sharethrough.sdk.network;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import com.android.volley.*;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.sharethrough.sdk.*;
+import com.sharethrough.sdk.Response;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -24,58 +28,44 @@ import java.util.List;
 
 public class AdFetcher {
     protected AdFetcherListener adFetcherListener;
+    protected RequestQueue requestQueue;
 
     public interface AdFetcherListener{
         void onAdResponseLoaded(Response response);
         void onAdResponseFailed();
     }
 
+    public AdFetcher(Context context) {
+        requestQueue = Volley.newRequestQueue(context);
+    }
+
     public void setAdFetcherListener(AdFetcherListener adFetcherListener) {
         this.adFetcherListener = adFetcherListener;
     }
 
-    public void fetchAds(String adRequestUrl){
-        SendHttpRequestTask sendHttpRequestTask = new SendHttpRequestTask();
-        sendHttpRequestTask.execute(adRequestUrl);
-    }
-
-    protected class SendHttpRequestTask extends AsyncTask<String, Void, String> {
-
-        @Override
-        protected String doInBackground(String... params) {
-
-            if( params[0] == null || params[0].isEmpty()){
-                return null;
-            }
-
-            String json;
-            try {
-
-                DefaultHttpClient client = new DefaultHttpClient();
-                HttpGet request = new HttpGet(params[0]);
-                request.addHeader("User-Agent", Sharethrough.USER_AGENT);
-                HttpResponse httpResponse = client.execute(request);
-                int code = httpResponse.getStatusLine().getStatusCode();
-
-                if (code == 200) {
-                    InputStream content = httpResponse.getEntity().getContent();
-                    json = Misc.convertStreamToString(content);
-                    Response response = getResponse(json);
-
-                    // notify adFetcherListener
-                    adFetcherListener.onAdResponseLoaded(response);
-                } else {
-                    throw new HttpException("Status code is not 200");
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
+    public void fetchAds(String adRequestUrl) {
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, adRequestUrl,
+                new com.android.volley.Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            adFetcherListener.onAdResponseLoaded(getResponse(response));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            adFetcherListener.onAdResponseFailed();
+                        }
+                    }
+                }, new com.android.volley.Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Logger.i("Ad request error: " + error.toString());
                 adFetcherListener.onAdResponseFailed();
             }
-            return null;
-        }
-    }
+        });
 
+        // Add the request to the RequestQueue.
+        requestQueue.add(stringRequest);
+    }
 
     protected Response getResponse(String json) throws JSONException {
         JSONObject jsonResponse = new JSONObject(json);
