@@ -62,12 +62,7 @@ public class AdFetcher {
                 new com.android.volley.Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        try {
-                            adFetcherListener.onAdResponseLoaded(getResponse(response));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            adFetcherListener.onAdResponseFailed();
-                        }
+                        handleResponse(response);
                     }
                 }, new com.android.volley.Response.ErrorListener() {
             @Override
@@ -81,6 +76,15 @@ public class AdFetcher {
 
         // Add the request to the RequestQueue.
         requestQueue.add(stringRequest);
+    }
+
+    protected void handleResponse(String response) {
+        try {
+            adFetcherListener.onAdResponseLoaded(getResponse(response));
+        } catch (JSONException e) {
+            e.printStackTrace();
+            adFetcherListener.onAdResponseFailed();
+        }
     }
 
     protected Response getResponse(String json) throws JSONException {

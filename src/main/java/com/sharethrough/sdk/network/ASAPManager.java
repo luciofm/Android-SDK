@@ -96,7 +96,26 @@ public class ASAPManager {
         int[] errorRange;
     }
 
-    /*public void callASAP(final ASAPManagerListener asapManagerListener) {
+    protected void handleResponse(String response, ASAPManagerListener asapManagerListener) {
+        Gson gson = new Gson();
+        try {
+            AdResponse adResponse = gson.fromJson(response, AdResponse.class);
+            if (Arrays.asList(adResponse.errorRange).contains(adResponse.responseCode)) {
+                asapManagerListener.onError(adResponse.responseError);
+            } else {
+                ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
+                queryStringParams.add(new BasicNameValuePair("placement_key", placementKey));
+                if (adResponse.requestTypeName != null && adResponse.requestTypeValue != null) {
+                    queryStringParams.add(new BasicNameValuePair(adResponse.requestTypeName, adResponse.requestTypeValue));
+                }
+                asapManagerListener.onSuccess(queryStringParams);
+            }
+        } catch (JsonParseException e) {
+            asapManagerListener.onError(e.toString());
+        }
+    }
+
+    public void callASAP2(final ASAPManagerListener asapManagerListener) {
         if (isRunning) {
             return;
         }
@@ -109,22 +128,7 @@ public class ASAPManager {
                     @Override
                     public void onResponse(String response) {
                         isRunning = false;
-                        Gson gson = new Gson();
-                        try {
-                            AdResponse adResponse = gson.fromJson(response, AdResponse.class);
-                            if (Arrays.asList(adResponse.errorRange).contains(adResponse.responseCode)) {
-                                asapManagerListener.onError(adResponse.responseError);
-                            } else {
-                                ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
-                                queryStringParams.add(new BasicNameValuePair("placement_key", placementKey));
-                                if (adResponse.requestTypeName != null && adResponse.requestTypeValue != null) {
-                                    queryStringParams.add(new BasicNameValuePair(adResponse.requestTypeName, adResponse.requestTypeValue));
-                                }
-                                asapManagerListener.onSuccess(queryStringParams);
-                            }
-                        } catch (JsonParseException e) {
-                            asapManagerListener.onError(e.toString());
-                        }
+                        handleResponse(response, asapManagerListener);
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -135,5 +139,5 @@ public class ASAPManager {
         });
 
         requestQueue.add(stringRequest);
-    }*/
+    }
 }

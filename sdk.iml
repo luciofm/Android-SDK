@@ -120,5 +120,6 @@
     <orderEntry type="library" exported="" scope="TEST" name="robolectric-2.4" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="fest-assert-core-2.0M10" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-21.0.0" level="project" />
+    <orderEntry type="library" name="guava-14.0.1" level="project" />
   </component>
 </module>
