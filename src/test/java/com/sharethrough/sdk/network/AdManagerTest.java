@@ -1,5 +1,6 @@
 package com.sharethrough.sdk.network;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
 import com.sharethrough.sdk.*;
 import com.sharethrough.test.Fixtures;
@@ -51,9 +52,13 @@ public class AdManagerTest extends TestBase {
     class AdFetcherStub extends AdFetcher{
         public int fetchedAdsCount = 0;
 
+        public AdFetcherStub(Context context) {
+            super(context);
+        }
+
         public void fetchAds(String adRequestUrl){
-            SendHttpRequestTask sendHttpRequestTask = new SendHttpRequestTask();
-            sendHttpRequestTask.execute(adRequestUrl);
+            //SendHttpRequestTask sendHttpRequestTask = new SendHttpRequestTask();
+            //sendHttpRequestTask.execute(adRequestUrl);
             fetchedAdsCount ++;
         }
     }
@@ -63,7 +68,7 @@ public class AdManagerTest extends TestBase {
         subject = new AdManager(Robolectric.application.getApplicationContext());
         subject.setAdManagerListener(adManagerListener);
 
-        adFetcherStub = new AdFetcherStub();
+        adFetcherStub = new AdFetcherStub(Robolectric.application);
         subject.adFetcher = adFetcherStub;
         subject.setAdFetcherListener();
 

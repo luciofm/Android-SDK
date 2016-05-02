@@ -1,5 +1,6 @@
 package com.sharethrough.sdk.network;
 
+import android.content.Context;
 import com.sharethrough.sdk.*;
 import com.sharethrough.test.Fixtures;
 import com.sharethrough.test.util.Misc;
@@ -41,15 +42,19 @@ public class AdFetcherTest extends TestBase {
     private ArrayList<NameValuePair> expectedStringParams;
 
     class AdFetcherStub extends  AdFetcher{
+        public AdFetcherStub(Context context) {
+            super(context);
+        }
+
         public void fetchAds(String adRequestUrl){
-            SendHttpRequestTask sendHttpRequestTask = new SendHttpRequestTask();
+            /*SendHttpRequestTask sendHttpRequestTask = new SendHttpRequestTask();
             try {
                 sendHttpRequestTask.execute(adRequestUrl).get();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
                 e.printStackTrace();
-            }
+            }*/
         }
     }
 
@@ -57,7 +62,7 @@ public class AdFetcherTest extends TestBase {
     @Before
     public void setUp() throws Exception {
         Logger.enabled = true;
-        subject = new AdFetcherStub();
+        subject = new AdFetcherStub(Robolectric.application);
         apiUri = "http://api";
         key = "key";
         queryStringParams = new ArrayList<NameValuePair>(1);
