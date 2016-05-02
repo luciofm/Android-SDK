@@ -88,25 +88,27 @@ public class ASAPManager {
     }
 
     public class AdResponse {
-        String placementKey;
-        String requestTypeName;
-        String requestTypeValue;
-        int responseCode;
-        String responseError;
-        int[] errorRange;
+        String pkey;
+        String adServer;
+        String keyType;
+        String keyValue;
+        String status;
     }
 
     protected void handleResponse(String response, ASAPManagerListener asapManagerListener) {
         Gson gson = new Gson();
         try {
             AdResponse adResponse = gson.fromJson(response, AdResponse.class);
-            if (Arrays.asList(adResponse.errorRange).contains(adResponse.responseCode)) {
-                asapManagerListener.onError(adResponse.responseError);
+            if (adResponse.pkey == "null" || adResponse.adServer == "null"
+                    || adResponse.keyType == null || adResponse.keyValue == null || adResponse.status == null) {
+                asapManagerListener.onError("ASAP response does not have correct key values");
+            } else if (!adResponse.status.equals("OK")) {
+                asapManagerListener.onError(adResponse.status);
             } else {
                 ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
                 queryStringParams.add(new BasicNameValuePair("placement_key", placementKey));
-                if (adResponse.requestTypeName != null && adResponse.requestTypeValue != null) {
-                    queryStringParams.add(new BasicNameValuePair(adResponse.requestTypeName, adResponse.requestTypeValue));
+                if (!adResponse.keyType.equals("STX_MONETIZE") && !adResponse.keyType.equals("undefined") && !adResponse.keyValue.equals("undefined")) {
+                    queryStringParams.add(new BasicNameValuePair(adResponse.keyType, adResponse.keyValue));
                 }
                 asapManagerListener.onSuccess(queryStringParams);
             }
