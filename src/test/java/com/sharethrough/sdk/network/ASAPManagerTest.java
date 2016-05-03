@@ -38,8 +38,8 @@ public class ASAPManagerTest extends TestBase  {
     }
     @Test
     public void handleResponse_callsSuccessWithCorrectParamsForDirectSell() {
-        String responseStatusNotOK = "{ 'pkey': 'c1a0a591', 'adServer': 'DFP', 'keyType': 'creative_key', 'keyValue': 'fakeckey', 'status': 'OK'}";
-        subject.handleResponse(responseStatusNotOK, asapManagerListener);
+        String responseForDirectSell = "{ 'pkey': 'c1a0a591', 'adServer': 'DFP', 'keyType': 'creative_key', 'keyValue': 'fakeckey', 'status': 'OK'}";
+        subject.handleResponse(responseForDirectSell, asapManagerListener);
 
         ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
         queryStringParams.add(new BasicNameValuePair("placement_key", "fakePkey"));
@@ -48,8 +48,8 @@ public class ASAPManagerTest extends TestBase  {
     }
     @Test
     public void handleResponse_callsSuccessWithCorrectParamsForProgrammatic() {
-        String responseStatusNotOK = "{ 'pkey': 'c1a0a591', 'adServer': 'DFP', 'keyType': 'STX_MONETIZE', 'keyValue': 'undefined', 'status': 'OK'}";
-        subject.handleResponse(responseStatusNotOK, asapManagerListener);
+        String responseForProgrammatic = "{ 'pkey': 'c1a0a591', 'adServer': 'DFP', 'keyType': 'stx_monetize', 'keyValue': 'undefined', 'status': 'OK'}";
+        subject.handleResponse(responseForProgrammatic, asapManagerListener);
 
         ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
         queryStringParams.add(new BasicNameValuePair("placement_key", "fakePkey"));
@@ -58,8 +58,8 @@ public class ASAPManagerTest extends TestBase  {
 
     @Test
     public void handleResponse_callsSuccessWithCorrectParamsNoAdServerSetup() {
-        String responseStatusNotOK = "{ 'pkey': 'c1a0a591', 'adServer': 'DFP', 'keyType': 'undefined', 'keyValue': 'undefined', 'status': 'OK'}";
-        subject.handleResponse(responseStatusNotOK, asapManagerListener);
+        String responseForNoAdServer = "{ 'pkey': 'c1a0a591', 'adServer': 'DFP', 'keyType': 'undefined', 'keyValue': 'undefined', 'status': 'OK'}";
+        subject.handleResponse(responseForNoAdServer, asapManagerListener);
 
         ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
         queryStringParams.add(new BasicNameValuePair("placement_key", "fakePkey"));
@@ -67,15 +67,15 @@ public class ASAPManagerTest extends TestBase  {
     }
     @Test
     public void handleResponse_callsOnErrorWithInCorrectParams() {
-        String responseStatusNotOK = "{'pkey': 'c1a0a591'}";
-        subject.handleResponse(responseStatusNotOK, asapManagerListener);
+        String responseForIncorrectResponse = "{'pkey': 'c1a0a591'}";
+        subject.handleResponse(responseForIncorrectResponse, asapManagerListener);
         verify(asapManagerListener).onError(anyString());
     }
 
     @Test
     public void handleResponse_callsOnErrorWithInCorrectJson() {
-        String responseStatusNotOK = "{'pkey'l;}";
-        subject.handleResponse(responseStatusNotOK, asapManagerListener);
+        String responseIncorrectJson = "{'pkey'l;}";
+        subject.handleResponse(responseIncorrectJson, asapManagerListener);
         verify(asapManagerListener).onError(anyString());
     }
 }

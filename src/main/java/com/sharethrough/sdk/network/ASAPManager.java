@@ -22,6 +22,7 @@ import java.util.HashMap;
 public class ASAPManager {
     private static final String DFP_CREATIVE_KEY = "creative_key";
     private static final String DFP_CAMPAIGN_KEY = "campaign_key";
+    private static final String PROGRAMMATIC = "stx_monetize";
     private static final String ASAP_ENDPOINT = "https://asap-staging.sharethrough.com/v1";
     private String placementKey;
     private RequestQueue requestQueue;
@@ -70,12 +71,12 @@ public class ASAPManager {
         queryStringParams.add(new BasicNameValuePair("placement_key", placementKey));
         if (asapKeys.containsKey(DFP_CREATIVE_KEY)) {
             String creativeKey = asapKeys.get(DFP_CREATIVE_KEY);
-            if (!creativeKey.equals("STX_MONETIZE")){
+            if (!creativeKey.equals(PROGRAMMATIC)){
                 queryStringParams.add(new BasicNameValuePair("creative_key", creativeKey));
             }
         } else if (asapKeys.containsKey(DFP_CAMPAIGN_KEY)) {
             String campaignKey = asapKeys.get(DFP_CAMPAIGN_KEY);
-            if (!campaignKey.equals("STX_MONETIZE")) {
+            if (!campaignKey.equals(PROGRAMMATIC)) {
                 queryStringParams.add(new BasicNameValuePair("campaign_key", campaignKey));
             }
         }
@@ -107,7 +108,7 @@ public class ASAPManager {
             } else {
                 ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
                 queryStringParams.add(new BasicNameValuePair("placement_key", placementKey));
-                if (!adResponse.keyType.equals("STX_MONETIZE") && !adResponse.keyType.equals("undefined") && !adResponse.keyValue.equals("undefined")) {
+                if (!adResponse.keyType.equals(PROGRAMMATIC) && !adResponse.keyType.equals("undefined") && !adResponse.keyValue.equals("undefined")) {
                     queryStringParams.add(new BasicNameValuePair(adResponse.keyType, adResponse.keyValue));
                 }
                 asapManagerListener.onSuccess(queryStringParams);
