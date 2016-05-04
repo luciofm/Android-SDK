@@ -40,9 +40,10 @@ public class SharethroughTest extends TestBase {
     @Mock private RequestQueue requestQueue;
     @Mock private ASAPManager asapManager;
 
+    @Mock private Creative creative;
+    @Mock private Placement placement;
+    @Mock private Sharethrough.OnStatusChangeListener onStatusChangeListener;
 
-
-    //old
     @Captor
     private ArgumentCaptor<Function<Placement, Void>> placementHandler;
     private String key = "abc";
@@ -50,9 +51,6 @@ public class SharethroughTest extends TestBase {
     private ArrayList<NameValuePair> queryStringParams;
     private TestAdView adView;
     private String apiUri;
-    @Mock private Creative creative;
-    @Mock private Placement placement;
-    @Mock private Sharethrough.OnStatusChangeListener onStatusChangeListener;
 
     @Before
     public void setUp() throws Exception {
@@ -121,16 +119,6 @@ public class SharethroughTest extends TestBase {
         verify(asapManager, atLeastOnce()).callASAP((ASAPManager.ASAPManagerListener)anyObject());
     }
 
-//    @Test
-//    public void settingKey_loadsAdsFromServer() throws Exception {
-//        verify(adManager).fetchAds(apiUri, queryStringParams, advertisingId);
-//    }
-//
-//    @Test(expected = KeyRequiredException.class)
-//    public void notSettingKey_throwsExceptionWhenAdIsRequested() {
-//        createSubject(null);
-//    }
-
     @Test
     public void adManagerListener_whenACreativeIsReady_addCreativeToQueue() throws Exception {
         List<Creative> creatives = new ArrayList<>();
@@ -139,13 +127,39 @@ public class SharethroughTest extends TestBase {
         verify(creativeQueue).add(creative);
     }
 
-//    @Test
-//    public void fireNoAdsToShow_callsListenerNoAdsToShow_whenCreativeQueueIsEmpty() throws Exception {
-//        when(creativeQueue.size()).thenReturn(0);
-//        subject.fireNoAdsToShow();
-//
-//        verify(handler).noAdsToShow();
-//    }
+    @Test
+    public void fireNoAdsToShow_callsListenerNoAdsToShow_whenCreativeQueueIsEmpty() throws Exception {
+        when(creativeQueue.size()).thenReturn(0);
+        subject.fireNoAdsToShow();
+
+        verify(onStatusChangeListener).noAdsToShow();
+        assertThat(subject.firedNewAdsToShow).isEqualTo(false);
+    }
+
+    @Test
+    public void fireNoAdsToShow_doesNotCallNoAdsToShow_whenCreativeQueueHasCreatives() throws Exception {
+        when(creativeQueue.size()).thenReturn(1);
+        subject.fireNoAdsToShow();
+
+        verify(onStatusChangeListener, never()).noAdsToShow();
+        assertThat(subject.firedNewAdsToShow).isEqualTo(false);
+    }
+
+    @Test
+    public void fireNewAdsToShow_callsNewAdsToShow_whenFireNewAdsToShowBooleanIsFalse() throws Exception {
+        subject.firedNewAdsToShow = false;
+        subject.fireNewAdsToShow();
+
+        verify(onStatusChangeListener).newAdsToShow();
+    }
+
+    @Test
+    public void fireNewAdsToShow_doesNotCallNewAdsToShow_whenFireNewAdsToShowBooleanIsTrue() throws Exception {
+        subject.firedNewAdsToShow = true;
+        subject.fireNewAdsToShow();
+
+        verify(onStatusChangeListener, never()).newAdsToShow();
+    }
 
     @Test
     public void putCreativeIntoAdView_whenQueueWantsMore_fetchesMoreAds() throws Exception {
@@ -170,8 +184,7 @@ public class SharethroughTest extends TestBase {
 //        String serverPrefix = "http://dumb-waiter.sharethrough.com/";
 //        Robolectric.application.getApplicationInfo().metaData.putString("STR_ADSERVER_API", serverPrefix);
 //       // createSubject(key);
-//        verify(adManager, atLeastOnce()).fetchAds(eq(apiUri), eq(queryStringParams), eq(advertisingId));
-//
+//        verify(asapManager, atLeastOnce()).callASAP(eq(apiUri), eq(queryStringParams), eq(advertisingId));
 //    }
 
     @Test
@@ -320,11 +333,6 @@ public class SharethroughTest extends TestBase {
         assertThat(subject.getNumberOfAdsBeforePosition(21)).isEqualTo(7);
         assertThat(subject.getNumberOfAdsBeforePosition(50)).isEqualTo(11);
     }
-//
-//    @Test
-//    public void getNumberOfAdsBeforePosition() throws Exception {
-//        when(strSdkConfig).get
-//    }
 
     @Test
     public void ifSlotNOTEmptyAndCreativeNOTExpired_fireNewAdsIsNOTCalled() {
