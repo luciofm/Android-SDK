@@ -20,10 +20,11 @@ import java.util.HashMap;
  * Created by engineers on 4/26/16.
  */
 public class ASAPManager {
-    private static final String DFP_CREATIVE_KEY = "creative_key";
-    private static final String DFP_CAMPAIGN_KEY = "campaign_key";
     private static final String PROGRAMMATIC = "stx_monetize";
     private static final String ASAP_ENDPOINT = "https://asap-staging.sharethrough.com/v1";
+    private static final String PLACEMENT_KEY = "placement_key";
+    private static final String ASAP_UNDEFINED = "undefined";
+    private static final String ASAP_OK = "OK";
     private String placementKey;
     private RequestQueue requestQueue;
     private boolean isRunning = false;
@@ -33,56 +34,6 @@ public class ASAPManager {
         this.requestQueue = requestQueue;
     }
 
-    public void callASAP(final ASAPManagerListener asapManagerListener) {
-        // Instantiate the RequestQueue.
-        String url = ASAP_ENDPOINT + "?pkey=" + placementKey;
-
-        // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        asapManagerListener.onSuccess(parseAsapResponse(response));
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                asapManagerListener.onError(error.toString());
-            }
-        });
-
-        // Add the request to the RequestQueue.
-        requestQueue.add(stringRequest);
-    }
-
-    public ArrayList<NameValuePair> parseAsapResponse(String asapResponseString) {
-        HashMap<String, String> asapKeys= new HashMap<String, String>();
-        if (asapResponseString.contains(DFP_CREATIVE_KEY)) {
-            String[] tokens = asapResponseString.split("=");
-            asapKeys.put(DFP_CREATIVE_KEY, tokens[1]);
-        } else if (asapResponseString.contains(DFP_CAMPAIGN_KEY)) {
-            String[] tokens = asapResponseString.split("=");
-            asapKeys.put(DFP_CAMPAIGN_KEY, tokens[1]);
-        } else {
-            asapKeys.put(DFP_CREATIVE_KEY, asapResponseString);
-        }
-
-        ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>(2);
-        queryStringParams.add(new BasicNameValuePair("placement_key", placementKey));
-        if (asapKeys.containsKey(DFP_CREATIVE_KEY)) {
-            String creativeKey = asapKeys.get(DFP_CREATIVE_KEY);
-            if (!creativeKey.equals(PROGRAMMATIC)){
-                queryStringParams.add(new BasicNameValuePair("creative_key", creativeKey));
-            }
-        } else if (asapKeys.containsKey(DFP_CAMPAIGN_KEY)) {
-            String campaignKey = asapKeys.get(DFP_CAMPAIGN_KEY);
-            if (!campaignKey.equals(PROGRAMMATIC)) {
-                queryStringParams.add(new BasicNameValuePair("campaign_key", campaignKey));
-            }
-        }
-
-        return queryStringParams;
-    }
     public interface ASAPManagerListener {
         void onSuccess(ArrayList<NameValuePair> queryStringParams);
         void onError(String error);
@@ -103,12 +54,12 @@ public class ASAPManager {
             if (adResponse.pkey == null || adResponse.adServer == null
                     || adResponse.keyType == null || adResponse.keyValue == null || adResponse.status == null) {
                 asapManagerListener.onError("ASAP response does not have correct key values");
-            } else if (!adResponse.status.equals("OK")) {
+            } else if (!adResponse.status.equals(ASAP_OK)) {
                 asapManagerListener.onError(adResponse.status);
             } else {
                 ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
-                queryStringParams.add(new BasicNameValuePair("placement_key", placementKey));
-                if (!adResponse.keyType.equals(PROGRAMMATIC) && !adResponse.keyType.equals("undefined") && !adResponse.keyValue.equals("undefined")) {
+                queryStringParams.add(new BasicNameValuePair(PLACEMENT_KEY, placementKey));
+                if (!adResponse.keyType.equals(PROGRAMMATIC) && !adResponse.keyType.equals(ASAP_UNDEFINED) && !adResponse.keyValue.equals(ASAP_UNDEFINED)) {
                     queryStringParams.add(new BasicNameValuePair(adResponse.keyType, adResponse.keyValue));
                 }
                 asapManagerListener.onSuccess(queryStringParams);
@@ -118,7 +69,7 @@ public class ASAPManager {
         }
     }
 
-    public void callASAP2(final ASAPManagerListener asapManagerListener) {
+    public void callASAP(final ASAPManagerListener asapManagerListener) {
         if (isRunning) {
             return;
         }

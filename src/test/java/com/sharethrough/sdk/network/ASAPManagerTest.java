@@ -26,8 +26,8 @@ public class ASAPManagerTest extends TestBase  {
         subject = new ASAPManager(pkey, requestQueue);
     }
     @Test
-    public void callASAP2_triggersAdRequest() {
-        subject.callASAP2(asapManagerListener);
+    public void callASAP_triggersAdRequest() {
+        subject.callASAP(asapManagerListener);
         verify(requestQueue).add((Request)anyObject());
     }
     @Test
