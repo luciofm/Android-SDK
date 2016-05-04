@@ -5,8 +5,6 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.LruCache;
-import com.android.volley.RequestQueue;
 import com.sharethrough.android.sdk.BuildConfig;
 import com.sharethrough.sdk.network.ASAPManager;
 import com.sharethrough.sdk.network.AdManager;
@@ -19,24 +17,17 @@ import java.util.*;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
 public class Sharethrough {
     public static final String SDK_VERSION_NUMBER = BuildConfig.VERSION_NAME;
-    public static String USER_AGENT = System.getProperty("http.agent") + "; STR " + SDK_VERSION_NUMBER;
     public static final String PRIVACY_POLICY_ENDPOINT = "http://platform-cdn.sharethrough.com/privacy-policy.html?opt_out_url={OPT_OUT_URL}&opt_out_text={OPT_OUT_TEXT}";
-    private final Renderer renderer;
-    private final BeaconService beaconService;
-    private final int adCacheTimeInMilliseconds;
-    private String placementKey;
+    public static String USER_AGENT = System.getProperty("http.agent") + "; STR " + SDK_VERSION_NUMBER;
+    protected boolean firedNewAdsToShow;
+
     private String apiUrlPrefix = "http://btlr.sharethrough.com/v3";
-    private final CreativesQueue availableCreatives;
-    private AdvertisingIdProvider advertisingIdProvider;
-    private AdManager adManager;
     private Handler handler = new Handler(Looper.getMainLooper());
-    private LruCache<Integer, Creative> creativesBySlot = new LruCache<>(10);
-    public Set<Integer> creativeIndices = new HashSet<>(); //contains history of all indices for creatives, whereas creativesBySlot only caches the last 10
-    public boolean firedNewAdsToShow;
-    Placement placement;
-    public boolean placementSet;
-    public RequestQueue requestQueue;
-    public ASAPManager asapManager;
+
+    protected Placement placement;
+    protected boolean placementSet;
+    protected STRSdkConfig strSdkConfig;
+    protected final int adCacheTimeInMilliseconds = 300000;
 
     private Callback<Placement> placementCallback = new Callback<Placement>() {
         @Override
@@ -57,33 +48,41 @@ public class Sharethrough {
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public Sharethrough(STRSdkConfig config) {
-        this.placementKey = config.placementKey;
-        this.renderer = config.renderer;
-        this.beaconService = config.beaconService;
-        this.adCacheTimeInMilliseconds = 5000;
-        this.availableCreatives = config.creativeQueue;
-        this.advertisingIdProvider = config.advertisingIdProvider;
-        this.adManager = config.adManager;
-        this.adManager.setAdManagerListener(adManagerListener);
-        this.requestQueue = config.requestQueue;
-        this.asapManager = config.asapManager;
+        this.strSdkConfig = config;
+        this.placement = createPlacement(Integer.MAX_VALUE, Integer.MAX_VALUE);
 
-        Response.Placement responsePlacement = new Response.Placement();
-        responsePlacement.articlesBetweenAds = Integer.MAX_VALUE;
-        responsePlacement.articlesBeforeFirstAd = Integer.MAX_VALUE;
-        responsePlacement.status = "";
-        this.placement = new Placement(responsePlacement);
-
-        if (config.serializedSharethrough != null && !config.serializedSharethrough.isEmpty()) {
-            this.creativesBySlot = SharethroughSerializer.getSlot(config.serializedSharethrough);
-            Logger.d("deserializing Sharethrough: queue count - " + availableCreatives.size() + ", slot snapshot: " + creativesBySlot.snapshot());
-            responsePlacement = new Response.Placement();
-            responsePlacement.articlesBetweenAds = SharethroughSerializer.getArticlesBetween(config.serializedSharethrough);
-            responsePlacement.articlesBeforeFirstAd = SharethroughSerializer.getArticlesBefore(config.serializedSharethrough);
-            this.placement = new Placement(responsePlacement);
+        if (strSdkConfig.getSerializedSharethrough() != null && !strSdkConfig.getSerializedSharethrough().isEmpty()) {
+            Logger.d("deserializing Sharethrough: queue count - " + strSdkConfig.getCreativeQueue().size() + ", slot snapshot: " + strSdkConfig.getCreativesBySlot().snapshot());
+            int articlesBetweenAds = SharethroughSerializer.getArticlesBetween(strSdkConfig.getSerializedSharethrough());
+            int articlesBeforeFirstAd = SharethroughSerializer.getArticlesBefore(strSdkConfig.getSerializedSharethrough());
+            this.placement = createPlacement(articlesBetweenAds, articlesBeforeFirstAd);
         }
 
+        strSdkConfig.getAdManager().setAdManagerListener(adManagerListener);
         fetchAds();
+    }
+
+    protected Placement createPlacement(int articlesBetweenAds, int articlesBeforeFirstAd) {
+        Response.Placement responsePlacement = new Response.Placement();
+        responsePlacement.articlesBetweenAds = articlesBetweenAds;
+        responsePlacement.articlesBeforeFirstAd = articlesBeforeFirstAd;
+        responsePlacement.status = "";
+        return new Placement(responsePlacement);
+    }
+
+    protected void fetchAds() {
+        ASAPManager asapManager = strSdkConfig.getAsapManager();
+        asapManager.callASAP(new ASAPManager.ASAPManagerListener() {
+            @Override
+            public void onSuccess(ArrayList<NameValuePair> queryStringParams) {
+                invokeAdFetcher(apiUrlPrefix, queryStringParams);
+            }
+
+            @Override
+            public void onError(String error) {
+                Logger.e("ASAP error: " + error, null);
+            }
+        });
     }
 
     protected AdManager.AdManagerListener adManagerListener = new AdManager.AdManagerListener() {
@@ -96,9 +95,9 @@ public class Sharethrough {
             }
 
             for(Creative creative : listOfCreativesReadyForShow) {
-                availableCreatives.add(creative);
+                strSdkConfig.getCreativeQueue().add(creative);
                 if (creative != null) {
-                    Logger.d("insert creative ckey: %s, creative cache size %d", creative.getCreativeKey(), availableCreatives.size());
+                    Logger.d("insert creative ckey: %s, creative cache size %d", creative.getCreativeKey(), strSdkConfig.getCreativeQueue().size());
                 }
                 fireNewAdsToShow();
             }
@@ -116,14 +115,14 @@ public class Sharethrough {
 
     private void insertCreativeIntoSlot(int feedPosition, Creative creative) {
         if( creative != null ) {
-            creativesBySlot.put(feedPosition, creative);
-            creativeIndices.add(feedPosition);
+            strSdkConfig.getCreativesBySlot().put(feedPosition, creative);
+            strSdkConfig.getCreativeIndices().add(feedPosition);
         }
     }
 
-    private void fireNoAdsToShow() {
+    protected void fireNoAdsToShow() {
         firedNewAdsToShow = false;
-        if( availableCreatives.size() != 0 ) return;
+        if( strSdkConfig.getCreativeQueue().size() != 0 ) return;
         handler.post(new Runnable() {
             @Override
             public void run() {
@@ -132,7 +131,7 @@ public class Sharethrough {
         });
     }
 
-    private void fireNewAdsToShow() {
+    protected void fireNewAdsToShow() {
         if (firedNewAdsToShow) return;
         firedNewAdsToShow = true;
         handler.post(new Runnable() {
@@ -143,22 +142,8 @@ public class Sharethrough {
         });
     }
 
-    private void fetchAds() {
-        asapManager.callASAP(new ASAPManager.ASAPManagerListener() {
-            @Override
-            public void onSuccess(ArrayList<NameValuePair> queryStringParams) {
-                invokeAdFetcher(apiUrlPrefix, queryStringParams);
-            }
-
-            @Override
-            public void onError(String error) {
-                Logger.e("ASAP error: " + error, null);
-            }
-        });
-    }
-
     private void invokeAdFetcher(String url, ArrayList<NameValuePair> queryStringParams) {
-        adManager.fetchAds(url, queryStringParams, advertisingIdProvider.getAdvertisingId());
+        strSdkConfig.getAdManager().fetchAds(url, queryStringParams, strSdkConfig.getAdvertisingIdProvider().getAdvertisingId());
     }
 
     /**
@@ -177,12 +162,12 @@ public class Sharethrough {
      * there is a new creative to show
      */
     private Creative getCreativeToShow(int feedPosition, boolean[] isAdRenewed) {
-        Creative creative = creativesBySlot.get(feedPosition);
+        Creative creative = strSdkConfig.getCreativesBySlot().get(feedPosition);
         if (creative == null || creative.hasExpired(adCacheTimeInMilliseconds)) {
 
-            if (availableCreatives.size() != 0) {
-                synchronized (availableCreatives) {
-                    creative = availableCreatives.getNext();
+            if (strSdkConfig.getCreativeQueue().size() != 0) {
+                synchronized (strSdkConfig.getCreativeQueue()) {
+                    creative = strSdkConfig.getCreativeQueue().getNext();
                 }
                 insertCreativeIntoSlot(feedPosition, creative);
                 (isAdRenewed[0]) = true;
@@ -191,7 +176,7 @@ public class Sharethrough {
 
         if (creative != null) {
             if (isAdRenewed[0]) {
-                Logger.d("pop creative ckey: %s at position %d , creative cache size: %d ", creative.getCreativeKey() ,feedPosition , availableCreatives.size());
+                Logger.d("pop creative ckey: %s at position %d , creative cache size: %d ", creative.getCreativeKey() ,feedPosition , strSdkConfig.getCreativeQueue().size());
             } else {
                 Logger.d("get creative ckey: %s from creative slot at position %d",creative.getCreativeKey(), feedPosition);
             }
@@ -214,15 +199,15 @@ public class Sharethrough {
 
         Creative creative = getCreativeToShow(feedPosition, isAdRenewed);
         if (creative != null) {
-            renderer.putCreativeIntoAdView(adView, creative, beaconService, this, feedPosition, new Timer("AdView timer for " + creative));
+            strSdkConfig.getRenderer().putCreativeIntoAdView(adView, creative, strSdkConfig.getBeaconService(), this, feedPosition, new Timer("AdView timer for " + creative));
             if( isAdRenewed[0] ){
                 fireNewAdsToShow();
             }
         }
 
         //grab more ads if appropriate
-        synchronized (availableCreatives) {
-            if (availableCreatives.readyForMore()) {
+        synchronized (strSdkConfig.getCreativeQueue()) {
+            if (strSdkConfig.getCreativeQueue().readyForMore()) {
                 fetchAds();
             }
         }
@@ -253,7 +238,7 @@ public class Sharethrough {
      * Fetches more ads if running low on ads.
      */
     public void fetchAdsIfReadyForMore() {
-        if (availableCreatives.readyForMore()) {
+        if (strSdkConfig.getCreativeQueue().readyForMore()) {
             fetchAds();
         }
     }
@@ -263,21 +248,21 @@ public class Sharethrough {
      * @return whether there is an ad to be displayed at the current position.
      */
     public boolean isAdAtPosition(int position) {
-        return creativesBySlot.get(position) != null;
+        return strSdkConfig.getCreativesBySlot().get(position) != null;
     }
 
     /**
      * @return the number of prefetched ads available to show.
      */
     public int getNumberOfAdsReadyToShow() {
-        return availableCreatives.size();
+        return strSdkConfig.getCreativeQueue().size();
     }
 
     /**
      * @return a set containing all of the positions currently filled by ads
      */
     public Set<Integer> getPositionsFilledByAds(){
-        return creativesBySlot.snapshot().keySet();
+        return strSdkConfig.getCreativesBySlot().snapshot().keySet();
     }
 
     /**
@@ -285,7 +270,7 @@ public class Sharethrough {
      * @return the number of ads currently placed.
      */
     public int getNumberOfPlacedAds() {
-        return creativeIndices.size();
+        return strSdkConfig.getCreativeIndices().size();
     }
 
     /**
@@ -295,7 +280,7 @@ public class Sharethrough {
      */
     public int getNumberOfAdsBeforePosition(int position){
         int numberOfAdsBeforePosition = 0;
-        Set<Integer> filledPositions = creativeIndices;
+        Set<Integer> filledPositions = strSdkConfig.getCreativeIndices();
         for (Integer filledPosition : filledPositions) {
             if(filledPosition < position) numberOfAdsBeforePosition++;
         }
@@ -353,7 +338,7 @@ public class Sharethrough {
     }
 
     public String serialize() {
-        Logger.d("serializing Sharethrough: queue count - " + availableCreatives.size() + ", slot snapshot: " + creativesBySlot.snapshot());
-        return SharethroughSerializer.serialize(availableCreatives, creativesBySlot, getArticlesBeforeFirstAd(), getArticlesBetweenAds());
+        Logger.d("serializing Sharethrough: queue count - " + strSdkConfig.getCreativeQueue().size() + ", slot snapshot: " + strSdkConfig.getCreativesBySlot().snapshot());
+        return SharethroughSerializer.serialize(strSdkConfig.getCreativeQueue(), strSdkConfig.getCreativesBySlot(), getArticlesBeforeFirstAd(), getArticlesBetweenAds());
     }
 }

@@ -145,8 +145,8 @@ public class SharethroughListAdapter extends BaseAdapter {
 
         //if position is an ad but there are no ads available
         if(isAd(position)){
-            if(mSharethrough.creativeIndices.contains(position)) {
-                mSharethrough.creativeIndices.remove(position);
+            if(mSharethrough.strSdkConfig.getCreativeIndices().contains(position)) {
+                mSharethrough.strSdkConfig.getCreativeIndices().remove(position);
                 //force redraw of articles below this position
                 notifyDataSetChanged();
             }
