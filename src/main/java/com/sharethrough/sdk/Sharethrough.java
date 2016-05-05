@@ -59,7 +59,6 @@ public class Sharethrough {
         }
 
         strSdkConfig.getAdManager().setAdManagerListener(adManagerListener);
-        fetchAds();
     }
 
     protected Placement createPlacement(int articlesBetweenAds, int articlesBeforeFirstAd) {
@@ -70,9 +69,12 @@ public class Sharethrough {
         return new Placement(responsePlacement);
     }
 
-    protected void fetchAds() {
-        ASAPManager asapManager = strSdkConfig.getAsapManager();
-        asapManager.callASAP(new ASAPManager.ASAPManagerListener() {
+    public void fetchAds(Map<String, String> ... customKeyValues) {
+        if (customKeyValues.length > 0) {
+            strSdkConfig.getAsapManager().updateAsapEndpoint(customKeyValues[0]);
+        }
+
+        strSdkConfig.getAsapManager().callASAP(new ASAPManager.ASAPManagerListener() {
             @Override
             public void onSuccess(ArrayList<NameValuePair> queryStringParams) {
                 invokeAdFetcher(apiUrlPrefix, queryStringParams);

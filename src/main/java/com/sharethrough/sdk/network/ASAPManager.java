@@ -9,11 +9,15 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.sharethrough.sdk.Logger;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -21,17 +25,19 @@ import java.util.HashMap;
  */
 public class ASAPManager {
     private static final String PROGRAMMATIC = "stx_monetize";
-    private static final String ASAP_ENDPOINT = "https://asap-staging.sharethrough.com/v1";
+    public static final String ASAP_ENDPOINT_PREFIX = "https://asap-staging.sharethrough.com/v1";
     private static final String PLACEMENT_KEY = "placement_key";
     private static final String ASAP_UNDEFINED = "undefined";
     private static final String ASAP_OK = "OK";
     private String placementKey;
     private RequestQueue requestQueue;
     private boolean isRunning = false;
+    private String asapEndpoint;
 
     public ASAPManager(String placementKey, RequestQueue requestQueue) {
         this.placementKey = placementKey;
         this.requestQueue = requestQueue;
+        this.asapEndpoint = ASAP_ENDPOINT_PREFIX + "?pkey=" + placementKey;
     }
 
     public interface ASAPManagerListener {
@@ -45,6 +51,25 @@ public class ASAPManager {
         String keyType;
         String keyValue;
         String status;
+    }
+
+    public void updateAsapEndpoint(Map<String, String> customKeyValues) {
+        this.asapEndpoint = generateEndpointWithCustomKeyValues(customKeyValues);
+    }
+
+    protected String generateEndpointWithCustomKeyValues(Map<String, String> customKeyValues) {
+        String result = "";
+        try {
+            StringBuilder builder = new StringBuilder();
+            builder.append(ASAP_ENDPOINT_PREFIX).append("?pkey=").append(placementKey);
+            for (Map.Entry<String, String> entry : customKeyValues.entrySet()) {
+                builder.append("&customKeys" + "%5B" + URLEncoder.encode(entry.getKey(), "UTF-8") + "%5D" + "=" + URLEncoder.encode(entry.getValue(), "UTF-8"));
+            }
+            result = builder.toString();
+        } catch (UnsupportedEncodingException e) {
+            Logger.e("Error encoding key value pairs", e);
+        }
+        return result;
     }
 
     protected void handleResponse(String response, ASAPManagerListener asapManagerListener) {
@@ -74,10 +99,9 @@ public class ASAPManager {
             return;
         }
         isRunning = true;
-        String url = ASAP_ENDPOINT + "?pkey=" + placementKey;
-        Logger.d("Making ASAP Request: " + url);
+        Logger.d("Making ASAP Request: " + asapEndpoint);
 
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, asapEndpoint,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -94,4 +118,5 @@ public class ASAPManager {
 
         requestQueue.add(stringRequest);
     }
+
 }

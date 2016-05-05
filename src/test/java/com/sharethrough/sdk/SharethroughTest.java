@@ -385,12 +385,12 @@ public class SharethroughTest extends TestBase {
                 callbackWasInvoked[0] = true;
             }
         });
-
         subject.placementSet = true;
-        subject.putCreativeIntoAdView(adView);
-        verify(asapManager).callASAP((ASAPManager.ASAPManagerListener)anyObject());
+        when(creativeQueue.readyForMore()).thenReturn(true);
 
-        //placementHandler.getValue().apply(placement);
+        subject.putCreativeIntoAdView(adView);
+
+        verify(asapManager).callASAP((ASAPManager.ASAPManagerListener)anyObject());
         assertThat(subject.placement).isNotEqualTo(placement);
         assertThat(callbackWasInvoked[0]).isFalse();
     }

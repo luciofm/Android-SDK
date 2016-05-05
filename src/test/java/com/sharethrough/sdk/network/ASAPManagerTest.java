@@ -9,7 +9,10 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.*;
 /**
@@ -30,6 +33,18 @@ public class ASAPManagerTest extends TestBase  {
         subject.callASAP(asapManagerListener);
         verify(requestQueue).add((Request)anyObject());
     }
+
+    @Test
+    public void generateCustomKeyValues_setsCustomKeyValueQueryString() {
+        Map<String, String> keyValues = new HashMap<String,String>();
+        keyValues.put("key1", "value1");
+        keyValues.put("key2", "value2");
+
+        String expectedResult = ASAPManager.ASAP_ENDPOINT_PREFIX + "?pkey=" + pkey
+                + "&customKeys%5Bkey1%5D=value1&customKeys%5Bkey2%5D=value2";
+        assertThat(subject.generateEndpointWithCustomKeyValues(keyValues)).isEqualTo(expectedResult);
+    }
+
     @Test
     public void handleResponse_callsOnErrorIfResponseStatusIsNotOK() {
         String responseStatusNotOK = "{ 'pkey': 'c1a0a591', 'adServer': 'DFP', 'keyType': 'undefined', 'keyValue': 'undefined', 'status': 'Error'}";
