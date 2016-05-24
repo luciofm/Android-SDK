@@ -21,7 +21,7 @@ public class Sharethrough {
     public static String USER_AGENT = System.getProperty("http.agent") + "; STR " + SDK_VERSION_NUMBER;
     protected boolean firedNewAdsToShow;
 
-    private String apiUrlPrefix = "http://btlr.sharethrough.com/v3";
+    private String apiUrlPrefix = "http://btlr.sharethrough.com/v4";
     private Handler handler = new Handler(Looper.getMainLooper());
 
     protected Placement placement;

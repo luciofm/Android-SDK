@@ -118,9 +118,6 @@ public class BeaconServiceTest extends TestBase {
         expectedCommonParams.put("vkey", "variant key");
         expectedCommonParams.put("ckey", "creative key");
         expectedCommonParams.put("campkey", "campaign key");
-        expectedCommonParams.put("as", "signature");
-        expectedCommonParams.put("at", "price type");
-        expectedCommonParams.put("ap", "1000");
         expectedCommonParams.put("arid", "fake-adserver-request-id");
         expectedCommonParams.put("awid", "fake-auction-win-id");
 
@@ -137,10 +134,6 @@ public class BeaconServiceTest extends TestBase {
         responseCreativeWithDealId.creative.variantKey = "variant key";
         responseCreativeWithDealId.creative.creativeKey = "creative key";
         responseCreativeWithDealId.creative.campaignKey= "campaign key";
-        responseCreativeWithDealId.creative.dealId = "";
-        responseCreativeWithDealId.signature = "signature";
-        responseCreativeWithDealId.priceType = "price type";
-        responseCreativeWithDealId.price = 1000;
         responseCreativeWithDealId.creative.dealId = "fake_deal_id";
 
         creative = new Creative(responseCreativeWithDealId);
@@ -149,9 +142,6 @@ public class BeaconServiceTest extends TestBase {
         expectedCommonParams.put("vkey", "variant key");
         expectedCommonParams.put("ckey", "creative key");
         expectedCommonParams.put("campkey", "campaign key");
-        expectedCommonParams.put("as", "signature");
-        expectedCommonParams.put("at", "price type");
-        expectedCommonParams.put("ap", "1000");
         expectedCommonParams.put("arid", "fake-adserver-request-id");
         expectedCommonParams.put("awid", "fake-auction-win-id");
         expectedCommonParams.put("deal_id", "fake_deal_id");

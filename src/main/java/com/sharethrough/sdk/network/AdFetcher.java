@@ -1,31 +1,17 @@
 package com.sharethrough.sdk.network;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import com.android.volley.*;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.sharethrough.sdk.*;
 import com.sharethrough.sdk.Response;
-import org.apache.http.HttpException;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class AdFetcher {
@@ -90,6 +76,7 @@ public class AdFetcher {
     protected Response getResponse(String json) throws JSONException {
         JSONObject jsonResponse = new JSONObject(json);
         Response response = new Response();
+
         JSONObject jsonPlacement = jsonResponse.getJSONObject("placement");
         Response.Placement placement = new Response.Placement();
         placement.layout = jsonPlacement.getString("layout");
@@ -101,11 +88,11 @@ public class AdFetcher {
 
         JSONArray creatives = jsonResponse.getJSONArray("creatives");
         response.creatives = new ArrayList<>(creatives.length());
+        String adserverRequestId = jsonResponse.getString("adserverRequestId");
         for (int i = 0; i < creatives.length(); i++) {
             JSONObject jsonCreative = creatives.getJSONObject(i);
             Response.Creative creative = new Response.Creative();
-            creative.price = jsonCreative.getInt("price");
-            creative.adserverRequestId = jsonCreative.getString("adserverRequestId");
+            creative.adserverRequestId = adserverRequestId;
             creative.auctionWinId = jsonCreative.getString("auctionWinId");
 
             JSONObject jsonCreativeInner = jsonCreative.getJSONObject("creative");
@@ -130,9 +117,6 @@ public class AdFetcher {
             creative.creative.creativeKey = jsonCreativeInner.getString("creative_key");
             creative.creative.campaignKey = jsonCreativeInner.getString("campaign_key");
             creative.creative.variantKey = jsonCreativeInner.getString("variant_key");
-            creative.price = jsonCreative.getInt("price");
-            creative.priceType = jsonCreative.getString("priceType");
-            creative.signature = jsonCreative.getString("signature");
 
             JSONObject beacons = jsonCreativeInner.getJSONObject("beacons");
             creative.creative.beacon = new Response.Creative.CreativeInner.Beacon();
