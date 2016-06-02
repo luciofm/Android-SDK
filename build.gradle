@@ -171,6 +171,7 @@ robolectric {
 dependencies {
     repositories {
         mavenCentral()
+        jcenter()
     }
     compile 'com.google.android.gms:play-services:6.+'
     compile 'com.squareup.picasso:picasso:2.5.2'
