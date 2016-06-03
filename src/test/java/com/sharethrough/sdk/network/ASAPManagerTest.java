@@ -2,6 +2,7 @@ package com.sharethrough.sdk.network;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.sharethrough.sdk.TestBase;
+import junit.framework.Assert;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.junit.Before;
@@ -42,7 +43,8 @@ public class ASAPManagerTest extends TestBase  {
 
         String expectedResult = ASAPManager.ASAP_ENDPOINT_PREFIX + "?pkey=" + pkey
                 + "&customKeys%5Bkey1%5D=value1&customKeys%5Bkey2%5D=value2";
-        assertThat(subject.generateEndpointWithCustomKeyValues(keyValues)).isEqualTo(expectedResult);
+        Assert.assertTrue(subject.generateEndpointWithCustomKeyValues(keyValues).contains("&customKeys%5Bkey1%5D=value1"));
+        Assert.assertTrue(subject.generateEndpointWithCustomKeyValues(keyValues).contains("&customKeys%5Bkey2%5D=value2"));
     }
 
     @Test
