@@ -99,18 +99,6 @@ public class Creative {
         return responseCreative.creative.campaignKey;
     }
 
-    public String getSignature() {
-        return responseCreative.signature;
-    }
-
-    public String getAuctionType() {
-        return responseCreative.priceType;
-    }
-
-    public String getAuctionPrice() {
-        return String.valueOf(responseCreative.price);
-    }
-
     public String getCustomEngagementUrl() {
         return convertToAbsoluteUrl(responseCreative.creative.customEngagementUrl);
     }

@@ -45,7 +45,7 @@ public class AdViewTimerTaskTest extends TestBase {
             }
         };
         sharethrough = mock(Sharethrough.class);
-        when(sharethrough.getAdCacheTimeInMilliseconds()).thenReturn((int) TimeUnit.SECONDS.toMillis(20));
+        when(sharethrough.getAdCacheTimeInMilliseconds()).thenReturn((long) TimeUnit.SECONDS.toMillis(20));
         sharethrough.placement = placement;
 
         subject = new AdViewTimerTask(adView, feedPosition, creative, beaconService, dateProvider, sharethrough);

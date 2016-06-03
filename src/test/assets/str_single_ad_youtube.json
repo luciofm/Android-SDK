@@ -1,4 +1,5 @@
 {
+  "adserverRequestId": "fake-adserver-request-id",
   "placement": {
     "template": "<div/>",
     "layout": "single",
@@ -6,10 +7,7 @@
   },
   "creatives": [
     {
-      "price": 125167,
-      "adserverRequestId": "fake-adserver-request-id",
       "auctionWinId": "fake-auction-win-id",
-      "signature": "c19",
       "creative": {
         "creative_key": "ckey1",
         "campaign_key": "campkey1",
@@ -38,14 +36,10 @@
         "title": "Title",
         "action": "clickout"
       },
-      "priceType": "CPE",
       "version": 1
     },
     {
-      "price": 12567,
-      "adserverRequestId": "fake-adserver-request-id",
       "auctionWinId": "fake-auction-win-id",
-      "signature": "c19",
       "creative": {
         "opt_out_text": "don't click this link",
         "creative_key": "ckey2",
@@ -67,7 +61,6 @@
         "title": "Title",
         "action": "clickout"
       },
-      "priceType": "CPE",
       "version": 1
     }
   ]

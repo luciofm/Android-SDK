@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
 
 public class BeaconService {
     public static String TRACKING_URL = "http://b.sharethrough.com/butler";
@@ -74,9 +73,6 @@ public class BeaconService {
         result.put("vkey", creative.getVariantKey());
         result.put("ckey", creative.getCreativeKey());
         result.put("campkey", creative.getCampaignKey());
-        result.put("as", creative.getSignature());
-        result.put("at", creative.getAuctionType());
-        result.put("ap", creative.getAuctionPrice());
         result.put("arid", creative.getAdserverRequestId());
         result.put("awid", creative.getAuctionWinId());
         if(false == creative.getDealId().isEmpty()) {

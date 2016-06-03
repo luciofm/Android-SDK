@@ -15,7 +15,7 @@ public class AdManager {
 
     private Context applicationContext;
     private AdManagerListener adManagerListener;
-    protected AdFetcher adFetcher = new AdFetcher();
+    protected AdFetcher adFetcher;
 
     private boolean isRunning = false;
 
@@ -28,6 +28,7 @@ public class AdManager {
 
     public AdManager(Context context) {
         this.applicationContext = context;
+        adFetcher = new AdFetcher(context);
         setAdFetcherListener();
     }
 
@@ -39,22 +40,30 @@ public class AdManager {
         adFetcher.setAdFetcherListener(new AdFetcher.AdFetcherListener() {
             @Override
             public void onAdResponseLoaded(Response response) {
-                List<Creative> creatives = convertToCreatives(response);
-                Logger.d("ad request returned %d creatives ", creatives.size());
-                if(creatives.isEmpty()){
-                    adManagerListener.onNoAdsToShow();
-                }else {
-                    adManagerListener.onAdsReady(creatives, new Placement(response.placement));
-                }
-                isRunning = false;
+                handleAdResponseLoaded(response);
             }
 
             @Override
             public void onAdResponseFailed() {
-                adManagerListener.onAdsFailedToLoad();
-                isRunning = false;
+                handleAdResponseFailed();
             }
         });
+    }
+
+    public void handleAdResponseLoaded(Response response) {
+        List<Creative> creatives = convertToCreatives(response);
+        Logger.d("ad request returned %d creatives ", creatives.size());
+        if(creatives.isEmpty()){
+            adManagerListener.onNoAdsToShow();
+        }else {
+            adManagerListener.onAdsReady(creatives, new Placement(response.placement));
+        }
+        isRunning = false;
+    }
+
+    public void handleAdResponseFailed() {
+        adManagerListener.onAdsFailedToLoad();
+        isRunning = false;
     }
 
     protected List<Creative> convertToCreatives(Response response) {

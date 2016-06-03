@@ -1,10 +1,10 @@
 package com.sharethrough.sdk.dialogs;
 
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
+import android.content.Context;
 import android.media.MediaPlayer;
 import android.view.*;
 import android.widget.FrameLayout;
+import android.widget.ShareActionProvider;
 import android.widget.VideoView;
 
 import com.sharethrough.android.sdk.R;
@@ -16,21 +16,23 @@ import com.sharethrough.sdk.beacons.VideoCompletionBeaconService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowLooper;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.sharethrough.sdk.dialogs.ShareableDialogTest.*;
 import static com.sharethrough.test.util.Misc.findViewOfType;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.robolectric.Robolectric.shadowOf;
+import static org.robolectric.Shadows.shadowOf;
 
-@Config(shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
+@Config(shadows = {WebViewDialogTest.WebViewShadow.class, MenuInflaterShadow.class})
 public class VideoDialogTest extends TestBase {
 
     private VideoDialog subject;
@@ -53,7 +55,7 @@ public class VideoDialogTest extends TestBase {
         timer = mock(Timer.class);
         videoBeacons = mock(VideoCompletionBeaconService.class);
         beaconService = mock(BeaconService.class);
-        subject = new VideoDialog(Robolectric.application, creative, beaconService, false, timer, videoBeacons, feedPosition, currentPosition);
+        subject = new VideoDialog(RuntimeEnvironment.application, creative, beaconService, false, timer, videoBeacons, feedPosition, currentPosition);
         subject.show();
         videoView = findViewOfType(VideoView.class, (ViewGroup) subject.getWindow().getDecorView());
     }
@@ -114,7 +116,7 @@ public class VideoDialogTest extends TestBase {
         shadowOf(videoView).getOnPreparedListener().onPrepared(mediaPlayer);
         verify(mediaPlayer).setLooping(false);
 
-        subject = new VideoDialog(Robolectric.application, creative, mock(BeaconService.class), true, timer, videoBeacons, feedPosition, currentPosition);
+        subject = new VideoDialog(RuntimeEnvironment.application, creative, mock(BeaconService.class), true, timer, videoBeacons, feedPosition, currentPosition);
         subject.show();
 
         videoView = findViewOfType(VideoView.class, (ViewGroup) subject.getWindow().getDecorView());
@@ -138,14 +140,14 @@ public class VideoDialogTest extends TestBase {
 
     @Test
     public void bringsVideoViewAndPlayButtonToFrontWhenVideoIsPrepared_butNotImmediately_toAllowVideoToStartPlayingFirst() {
-        Robolectric.pauseMainLooper();
+        ShadowLooper.pauseMainLooper();
         shadowOf(videoView).getOnPreparedListener().onPrepared(mock(MediaPlayer.class));
 
         FrameLayout container = (FrameLayout) subject.findViewById(R.id.container);
         assertThat(container.getChildAt(0).getId()).isEqualTo(R.id.video);
         assertThat(container.getChildAt(1).getId()).isEqualTo(R.id.progress_spinner);
 
-        Robolectric.unPauseMainLooper();
+        ShadowLooper.unPauseMainLooper();
 
         assertThat(container.getChildAt(0).getId()).isEqualTo(R.id.progress_spinner);
         assertThat(container.getChildAt(1).getId()).isEqualTo(R.id.video);
