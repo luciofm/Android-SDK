@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import java.util.Date;
 import java.util.Timer;
@@ -40,7 +41,7 @@ public class AdImageViewTest extends TestBase {
         adView = mock(TestAdView.class);
         when(adView.getAdView()).thenReturn(adView);
         when(adView.isShown()).thenReturn(true);
-        subject = new AdImageViewStub(Robolectric.application, sharethrough, creative, adView, feedPosition, beaconService);
+        subject = new AdImageViewStub(RuntimeEnvironment.application, sharethrough, creative, adView, feedPosition, beaconService);
 
     }
 

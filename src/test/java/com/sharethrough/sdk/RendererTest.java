@@ -3,8 +3,6 @@ package com.sharethrough.sdk;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Looper;
@@ -16,30 +14,24 @@ import android.widget.TextView;
 import com.sharethrough.sdk.media.*;
 import com.sharethrough.sdk.test.SharethroughTestRunner;
 import com.sharethrough.test.util.TestAdView;
-import org.apache.tools.ant.taskdefs.Sleep;
 import org.fest.assertions.api.ANDROID;
-import org.fest.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
-import org.robolectric.annotation.Config;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowView;
 
-import java.util.List;
 import java.util.Timer;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
-import static org.robolectric.Robolectric.shadowOf;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
 @RunWith(SharethroughTestRunner.class)
@@ -84,13 +76,13 @@ public class RendererTest extends TestBase {
 
     @Test
     public void onUIthread_callsCallback_andShowsTitleDescriptionAdvertiserAndThumbnailWithOverlay() throws Exception {
-        Robolectric.pauseMainLooper();
+        ShadowLooper.pauseMainLooper();
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
 
         verifyNoMoreInteractions(adView.getTitle());
         assertThat(adView.adReady_wasCalled).isFalse();
 
-        ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
+        ShadowLooper shadowLooper = Shadows.shadowOf(Looper.getMainLooper());
         shadowLooper.runOneTask();
 
         assertThat(adView.adReady_wasCalled).isTrue();
@@ -134,7 +126,7 @@ public class RendererTest extends TestBase {
 
     @Test
     public void whenHandlerPosts_ifOriginalAdViewHasBeenRecycled_doesNothing() throws Exception {
-        Robolectric.pauseMainLooper();
+        ShadowLooper.pauseMainLooper();
 
         Creative creative1 = mock(Creative.class);
         subject.putCreativeIntoAdView(adView, creative1, beaconService, sharethrough, timer);
@@ -143,7 +135,7 @@ public class RendererTest extends TestBase {
         verifyNoMoreInteractions(creative1);
         verifyNoMoreInteractions(creative);
 
-        Robolectric.unPauseMainLooper();
+        ShadowLooper.unPauseMainLooper();
 
         verifyNoMoreInteractions(creative1);
         verify(creative).getTitle();
@@ -154,7 +146,7 @@ public class RendererTest extends TestBase {
         ImageView brandLogo = adView.getBrandLogo();
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
 
-        ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
+        ShadowLooper shadowLooper = Shadows.shadowOf(Looper.getMainLooper());
         shadowLooper.runOneTask();
         shadowLooper.runOneTask();
 
@@ -166,7 +158,7 @@ public class RendererTest extends TestBase {
         when(creative.getBrandLogoUrl()).thenReturn("");
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
 
-        ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
+        ShadowLooper shadowLooper = Shadows.shadowOf(Looper.getMainLooper());
         shadowLooper.runOneTask();
         shadowLooper.runOneTask();
 
@@ -179,7 +171,7 @@ public class RendererTest extends TestBase {
         adView.brandLogo = null;
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
 
-        ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
+        ShadowLooper shadowLooper = Shadows.shadowOf(Looper.getMainLooper());
         shadowLooper.runOneTask();
         shadowLooper.runOneTask();
     }
@@ -196,7 +188,7 @@ public class RendererTest extends TestBase {
     public void onceAdIsReady_showsProportionalOptoutButton_thatLinksToPrivacyInformation() throws Exception {
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
 
-        ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
+        ShadowLooper shadowLooper = Shadows.shadowOf(Looper.getMainLooper());
         shadowLooper.runOneTask();
         shadowLooper.runOneTask();
 
@@ -206,7 +198,7 @@ public class RendererTest extends TestBase {
         assertThat(optout.getMinimumWidth()).isEqualTo(20);
         optout.performClick();
         String expectedString = "http://platform-cdn.sharethrough.com/privacy-policy.html";
-        ANDROID.assertThat(shadowOf(Robolectric.application).getNextStartedActivity()).isEqualTo(new Intent(Intent.ACTION_VIEW, Uri.parse(expectedString)));
+        ANDROID.assertThat(Shadows.shadowOf(RuntimeEnvironment.application).getNextStartedActivity()).isEqualTo(new Intent(Intent.ACTION_VIEW, Uri.parse(expectedString)));
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -216,7 +208,7 @@ public class RendererTest extends TestBase {
         when(creative.getOptOutUrl()).thenReturn("http://example.com");
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
 
-        ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
+        ShadowLooper shadowLooper = Shadows.shadowOf(Looper.getMainLooper());
         shadowLooper.runOneTask();
         shadowLooper.runOneTask();
 
@@ -226,7 +218,7 @@ public class RendererTest extends TestBase {
         assertThat(optout.getMinimumWidth()).isEqualTo(20);
         optout.performClick();
         String expectedString = "http://platform-cdn.sharethrough.com/privacy-policy.html?opt_out_url=http%3A%2F%2Fexample.com&opt_out_text=New%20Opt%20Out%20Text";
-        ANDROID.assertThat(shadowOf(Robolectric.application).getNextStartedActivity()).isEqualTo(new Intent(Intent.ACTION_VIEW, Uri.parse(expectedString)));
+        ANDROID.assertThat(Shadows.shadowOf(RuntimeEnvironment.application).getNextStartedActivity()).isEqualTo(new Intent(Intent.ACTION_VIEW, Uri.parse(expectedString)));
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -236,7 +228,7 @@ public class RendererTest extends TestBase {
         when(creative.getOptOutUrl()).thenReturn("http://example.com");
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
 
-        ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
+        ShadowLooper shadowLooper = Shadows.shadowOf(Looper.getMainLooper());
         shadowLooper.runOneTask();
         shadowLooper.runOneTask();
 
@@ -246,7 +238,7 @@ public class RendererTest extends TestBase {
         assertThat(optout.getMinimumWidth()).isEqualTo(20);
         optout.performClick();
         String expectedString = "http://platform-cdn.sharethrough.com/privacy-policy.html";
-        ANDROID.assertThat(shadowOf(Robolectric.application).getNextStartedActivity()).isEqualTo(new Intent(Intent.ACTION_VIEW, Uri.parse(expectedString)));
+        ANDROID.assertThat(Shadows.shadowOf(RuntimeEnvironment.application).getNextStartedActivity()).isEqualTo(new Intent(Intent.ACTION_VIEW, Uri.parse(expectedString)));
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -256,7 +248,7 @@ public class RendererTest extends TestBase {
         when(creative.getOptOutUrl()).thenReturn("");
         subject.putCreativeIntoAdView(adView, creative, beaconService, sharethrough, timer);
 
-        ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
+        ShadowLooper shadowLooper = Shadows.shadowOf(Looper.getMainLooper());
         shadowLooper.runOneTask();
         shadowLooper.runOneTask();
 
@@ -266,13 +258,13 @@ public class RendererTest extends TestBase {
         assertThat(optout.getMinimumWidth()).isEqualTo(20);
         optout.performClick();
         String expectedString = "http://platform-cdn.sharethrough.com/privacy-policy.html";
-        ANDROID.assertThat(shadowOf(Robolectric.application).getNextStartedActivity()).isEqualTo(new Intent(Intent.ACTION_VIEW, Uri.parse(expectedString)));
+        ANDROID.assertThat(Shadows.shadowOf(RuntimeEnvironment.application).getNextStartedActivity()).isEqualTo(new Intent(Intent.ACTION_VIEW, Uri.parse(expectedString)));
     }
 
 
 
     public static MyTestAdView makeAdView() {
-        return new MyTestAdView(Robolectric.application);
+        return new MyTestAdView(RuntimeEnvironment.application);
     }
 
     public static class MyTestAdView extends TestAdView {
@@ -280,8 +272,8 @@ public class RendererTest extends TestBase {
         TextView advertiser = mock(TextView.class);
         TextView description = mock(TextView.class);
         TextView title = mock(TextView.class);
-        ImageView brandLogo = new ImageView(Robolectric.application);
-        ImageView optout = new ImageView(Robolectric.application);
+        ImageView brandLogo = new ImageView(RuntimeEnvironment.application);
+        ImageView optout = new ImageView(RuntimeEnvironment.application);
         public boolean adReady_wasCalled;
 
         public MyTestAdView(Context context) {

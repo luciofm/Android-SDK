@@ -61,13 +61,17 @@ public abstract class ShareableDialog extends Dialog implements DialogInterface.
         activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
     }
 
+    protected void menuInflater(Menu menu) {
+        new MenuInflater(getContext()).inflate(R.menu.share_menu, menu);
+    }
+
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
-        new MenuInflater(getContext()).inflate(R.menu.share_menu, menu);
+        menuInflater(menu);
 
         Creative creative = getCreative();
 

@@ -11,6 +11,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
+
 import java.util.ArrayList;
 import java.util.List;
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -43,10 +45,10 @@ public class AdManagerTest extends TestBase {
 
     @Before
     public void setUp() throws Exception {
-        subject = new AdManager(Robolectric.application.getApplicationContext());
+        subject = new AdManager(RuntimeEnvironment.application.getApplicationContext());
         subject.setAdManagerListener(adManagerListener);
 
-        adFetcherStub = new AdFetcherStub(Robolectric.application);
+        adFetcherStub = new AdFetcherStub(RuntimeEnvironment.application);
         subject.adFetcher = adFetcherStub;
         subject.setAdFetcherListener();
     }

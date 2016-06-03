@@ -15,6 +15,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import java.util.*;
 
@@ -77,12 +78,12 @@ public class SharethroughTest extends TestBase {
 
     private TestAdView makeMockAdView() {
         TestAdView result = mock(TestAdView.class);
-        when(result.getContext()).thenReturn(Robolectric.application);
+        when(result.getContext()).thenReturn(RuntimeEnvironment.application);
         when(result.getTitle()).thenReturn(mock(TextView.class));
         when(result.getDescription()).thenReturn(mock(TextView.class));
         when(result.getAdvertiser()).thenReturn(mock(TextView.class));
         when(result.getThumbnail()).thenReturn(mock(FrameLayout.class));
-        when(result.getThumbnail().getContext()).thenReturn(Robolectric.application);
+        when(result.getThumbnail().getContext()).thenReturn(RuntimeEnvironment.application);
         verify(result).getThumbnail(); // clear it out for verifyNoInteractions
         return result;
     }
@@ -182,7 +183,7 @@ public class SharethroughTest extends TestBase {
 //    @Test
 //    public void xwhenAndroidManifestHasCustomApiServer_usesThatServer() throws Exception {
 //        String serverPrefix = "http://dumb-waiter.sharethrough.com/";
-//        Robolectric.application.getApplicationInfo().metaData.putString("STR_ADSERVER_API", serverPrefix);
+//        RuntimeEnvironment.application.getApplicationInfo().metaData.putString("STR_ADSERVER_API", serverPrefix);
 //       // createSubject(key);
 //        verify(asapManager, atLeastOnce()).callASAP(eq(apiUri), eq(queryStringParams), eq(advertisingId));
 //    }
@@ -237,8 +238,8 @@ public class SharethroughTest extends TestBase {
         int adSlot = 2;
         when(creativeQueue.size()).thenReturn(1);
         when(creativeQueue.getNext()).thenReturn(creative);
-        IAdView generatedAdView = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
-        IAdView generatedAdView2 = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView = subject.getAdView(RuntimeEnvironment.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView2 = subject.getAdView(RuntimeEnvironment.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
 
         verify(renderer).putCreativeIntoAdView(same(generatedAdView), same(creative), same(beaconService), same(subject), eq(adSlot), any(Timer.class));
         verify(renderer).putCreativeIntoAdView(same(generatedAdView2), same(creative), same(beaconService), same(subject), eq(adSlot), any(Timer.class));
@@ -249,8 +250,8 @@ public class SharethroughTest extends TestBase {
         int adSlot = 2;
         when(creativeQueue.size()).thenReturn(1);
         when(creativeQueue.getNext()).thenReturn(creative);
-        IAdView generatedAdView = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
-        IAdView generatedAdView2 = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView);
+        IAdView generatedAdView = subject.getAdView(RuntimeEnvironment.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView2 = subject.getAdView(RuntimeEnvironment.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView);
 
         assertThat(generatedAdView).isSameAs(generatedAdView2);
 
@@ -262,8 +263,8 @@ public class SharethroughTest extends TestBase {
         Creative creative2 = mock(Creative.class);
         when(creativeQueue.size()).thenReturn(2);
         when(creativeQueue.getNext()).thenReturn(creative).thenReturn(creative2).thenThrow(new RuntimeException("Too many calls"));
-        IAdView generatedAdView = subject.getAdView(Robolectric.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
-        IAdView generatedAdView2 = subject.getAdView(Robolectric.application, 2, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView);
+        IAdView generatedAdView = subject.getAdView(RuntimeEnvironment.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView2 = subject.getAdView(RuntimeEnvironment.application, 2, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView);
 
         assertThat(generatedAdView).isSameAs(generatedAdView2);
         verify(renderer).putCreativeIntoAdView(same(generatedAdView), same(creative), same(beaconService), same(subject), eq(1), any(Timer.class));
@@ -272,9 +273,9 @@ public class SharethroughTest extends TestBase {
 
     @Test
     public void getAdView_whenAdViewsBySlotDoesNotContainAdviewForPosition_returnsNewAdview() {
-        IAdView generatedAdView = subject.getAdView(Robolectric.application, 2, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView = subject.getAdView(RuntimeEnvironment.application, 2, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
         assertThat(generatedAdView).isNotNull();
-        IAdView generatedAdView2 = subject.getAdView(Robolectric.application, 12, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView2 = subject.getAdView(RuntimeEnvironment.application, 12, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
         assertThat(generatedAdView).isNotSameAs(generatedAdView2);
     }
 
@@ -283,7 +284,7 @@ public class SharethroughTest extends TestBase {
         int adSlot = 2;
         when(creativeQueue.size()).thenReturn(1);
         when(creativeQueue.getNext()).thenReturn(creative);
-        IAdView generatedAdView = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView = subject.getAdView(RuntimeEnvironment.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
 
         assertThat(subject.firedNewAdsToShow);
     }
@@ -293,10 +294,10 @@ public class SharethroughTest extends TestBase {
         Creative creative2 = mock(Creative.class);
         when(creativeQueue.size()).thenReturn(2);
         when(creativeQueue.getNext()).thenReturn(creative).thenReturn(creative2).thenThrow(new RuntimeException("Too many calls"));
-        IAdView generatedAdView = subject.getAdView(Robolectric.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView = subject.getAdView(RuntimeEnvironment.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
         when(creative.hasExpired(anyInt())).thenReturn(true);
         subject.firedNewAdsToShow = false;
-        IAdView generatedAdView2 = subject.getAdView(Robolectric.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView);
+        IAdView generatedAdView2 = subject.getAdView(RuntimeEnvironment.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView);
         assertThat(generatedAdView).isSameAs(generatedAdView2);
 
         assertThat(subject.firedNewAdsToShow);
@@ -312,19 +313,19 @@ public class SharethroughTest extends TestBase {
         when(creativeQueue.getNext()).thenReturn(creative).thenReturn(creative).thenReturn(creative).thenReturn(creative).thenReturn(creative).thenReturn(creative).thenReturn(creative)
                 .thenReturn(creative).thenReturn(creative).thenReturn(creative).thenReturn(creative).thenReturn(creative);
 
-        IAdView generatedAdView1 = subject.getAdView(Robolectric.application, 2, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
-        IAdView generatedAdView2 = subject.getAdView(Robolectric.application, 5, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
-        IAdView generatedAdView3 = subject.getAdView(Robolectric.application, 8, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
-        IAdView generatedAdView4 = subject.getAdView(Robolectric.application, 11, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
-        IAdView generatedAdView5 = subject.getAdView(Robolectric.application, 14, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
-        IAdView generatedAdView6 = subject.getAdView(Robolectric.application, 17, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
-        IAdView generatedAdView7 = subject.getAdView(Robolectric.application, 20, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
-        IAdView generatedAdView8 = subject.getAdView(Robolectric.application, 23, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
-        IAdView generatedAdView9 = subject.getAdView(Robolectric.application, 26, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
-        IAdView generatedAdView10 = subject.getAdView(Robolectric.application, 29, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
-        IAdView generatedAdView11 = subject.getAdView(Robolectric.application, 32, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView1 = subject.getAdView(RuntimeEnvironment.application, 2, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView2 = subject.getAdView(RuntimeEnvironment.application, 5, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView3 = subject.getAdView(RuntimeEnvironment.application, 8, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView4 = subject.getAdView(RuntimeEnvironment.application, 11, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView5 = subject.getAdView(RuntimeEnvironment.application, 14, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView6 = subject.getAdView(RuntimeEnvironment.application, 17, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView7 = subject.getAdView(RuntimeEnvironment.application, 20, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView8 = subject.getAdView(RuntimeEnvironment.application, 23, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView9 = subject.getAdView(RuntimeEnvironment.application, 26, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView10 = subject.getAdView(RuntimeEnvironment.application, 29, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView11 = subject.getAdView(RuntimeEnvironment.application, 32, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
 
-        IAdView generatedAdView12 = subject.getAdView(Robolectric.application, 8, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView3);
+        IAdView generatedAdView12 = subject.getAdView(RuntimeEnvironment.application, 8, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView3);
 
         assertThat(slot.snapshot().keySet().size()).isEqualTo(10);
         assertThat(creativeIndices.size()).isEqualTo(11);
@@ -339,10 +340,10 @@ public class SharethroughTest extends TestBase {
         Creative creative2 = mock(Creative.class);
         when(creativeQueue.size()).thenReturn(2);
         when(creativeQueue.getNext()).thenReturn(creative).thenReturn(creative2).thenThrow(new RuntimeException("Too many calls"));
-        IAdView generatedAdView = subject.getAdView(Robolectric.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView = subject.getAdView(RuntimeEnvironment.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
         when(creative.hasExpired(anyInt())).thenReturn(false);
         subject.firedNewAdsToShow = false;
-        IAdView generatedAdView2 = subject.getAdView(Robolectric.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView);
+        IAdView generatedAdView2 = subject.getAdView(RuntimeEnvironment.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView);
         assertThat(generatedAdView).isSameAs(generatedAdView2);
 
         assertThat(false == subject.firedNewAdsToShow);
@@ -352,7 +353,7 @@ public class SharethroughTest extends TestBase {
     public void ifSlotEmptyAndNoAdsAvailable_fireNewAdsIsNOTCalled() {
         int adSlot = 2;
         when(creativeQueue.size()).thenReturn(0);
-        IAdView generatedAdView = subject.getAdView(Robolectric.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
+        IAdView generatedAdView = subject.getAdView(RuntimeEnvironment.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
 
         assertThat(false == subject.firedNewAdsToShow);
     }

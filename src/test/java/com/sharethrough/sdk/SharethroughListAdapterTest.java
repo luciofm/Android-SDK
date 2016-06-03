@@ -14,6 +14,8 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.shadows.ShadowLooper;
 
 import java.util.HashSet;
 
@@ -49,7 +51,7 @@ public class SharethroughListAdapterTest extends TestBase {
         when(sharethrough.getNumberOfAdsReadyToShow()).thenReturn(0);
 
         sharethrough.placement = placement;
-        subject = new SharethroughListAdapter(Robolectric.application, adapter, sharethrough, R.layout.ad, R.id.title, R.id.description, R.id.advertiser, R.id.thumbnail, R.id.optout, R.id.brand_logo);
+        subject = new SharethroughListAdapter(RuntimeEnvironment.application, adapter, sharethrough, R.layout.ad, R.id.title, R.id.description, R.id.advertiser, R.id.thumbnail, R.id.optout, R.id.brand_logo);
         verify(adapter).registerDataSetObserver(any(DataSetObserver.class));
 
         placementCallbackArgumentCaptor = ArgumentCaptor.forClass(Callback.class);
@@ -104,7 +106,7 @@ public class SharethroughListAdapterTest extends TestBase {
         when(sharethrough.getNumberOfAdsReadyToShow()).thenReturn(1);
 
         int adPosition = 2;
-        View articleView = new View(Robolectric.application.getApplicationContext());
+        View articleView = new View(RuntimeEnvironment.application.getApplicationContext());
         View view = subject.getView(adPosition, articleView, null);
         assertThat(view instanceof IAdView).isTrue();
     }
@@ -117,7 +119,7 @@ public class SharethroughListAdapterTest extends TestBase {
         when(sharethrough.getNumberOfAdsReadyToShow()).thenReturn(0);
 
         int articlePosition = 4;
-        View articleView = new View(Robolectric.application.getApplicationContext());
+        View articleView = new View(RuntimeEnvironment.application.getApplicationContext());
         View view = subject.getView(articlePosition, articleView, null);
         assertThat(view instanceof IAdView).isFalse();
     }
@@ -383,7 +385,7 @@ public class SharethroughListAdapterTest extends TestBase {
             }
         });
 
-        Robolectric.pauseMainLooper();
+        ShadowLooper.pauseMainLooper();
 
         when(sharethrough.getArticlesBeforeFirstAd()).thenReturn(2);
         when(sharethrough.getArticlesBetweenAds()).thenReturn(1);
@@ -391,7 +393,7 @@ public class SharethroughListAdapterTest extends TestBase {
         placementCallbackArgumentCaptor.getValue().call(sharethrough.placement);
 
         assertThat(wasChanged[0]).isFalse();
-        Robolectric.unPauseMainLooper();
+        ShadowLooper.unPauseMainLooper();
         assertThat(wasChanged[0]).isTrue();
     }
 
@@ -448,7 +450,7 @@ public class SharethroughListAdapterTest extends TestBase {
         when(sharethrough.getArticlesBetweenAds()).thenReturn(Integer.MAX_VALUE);
         when(sharethrough.getArticlesBeforeFirstAd()).thenReturn(Integer.MAX_VALUE);
         when(sharethrough.getNumberOfPlacedAds()).thenReturn(0);
-        subject = new SharethroughListAdapter(Robolectric.application, adapter, sharethrough, R.layout.ad, R.id.title, R.id.description, R.id.advertiser, R.id.thumbnail, R.id.optout, R.id.brand_logo);
+        subject = new SharethroughListAdapter(RuntimeEnvironment.application, adapter, sharethrough, R.layout.ad, R.id.title, R.id.description, R.id.advertiser, R.id.thumbnail, R.id.optout, R.id.brand_logo);
 
         assertThat(subject.getCount()).isEqualTo(views.length);
         for (int i = 0; i < views.length; i++) {

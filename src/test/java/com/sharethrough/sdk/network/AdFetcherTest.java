@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -35,7 +36,7 @@ public class AdFetcherTest extends TestBase {
     @Before
     public void setUp() throws Exception {
         Logger.enabled = true;
-        subject = new AdFetcherStub(Robolectric.application);
+        subject = new AdFetcherStub(RuntimeEnvironment.application);
         subject.setRequestQueue(requestQueue);
         subject.setAdFetcherListener(adfetcherlistener);
     }

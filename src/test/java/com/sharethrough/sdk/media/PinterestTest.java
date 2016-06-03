@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowDialog;
 
@@ -40,9 +41,9 @@ public class PinterestTest extends TestBase {
     }
 
     @Test
-    @Config(emulateSdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
+    @Config(sdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
     public void clickingOpensPinterestDialog() throws Exception {
-        subject.wasClicked(new View(Robolectric.application), beaconService, feedPosition);
+        subject.wasClicked(new View(RuntimeEnvironment.application), beaconService, feedPosition);
         assertThat(ShadowDialog.getLatestDialog()).isInstanceOf(PinterestDialog.class);
     }
 

@@ -6,6 +6,7 @@ import com.sharethrough.android.sdk.R;
 import org.junit.Before;
 import org.junit.Test;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import static com.sharethrough.test.util.Misc.findViewOfType;
 import static org.fest.assertions.api.ANDROID.assertThat;
@@ -17,7 +18,7 @@ public class BasicAdViewTest extends TestBase {
 
     @Before
     public void setUp() throws Exception {
-        subject = new BasicAdView(Robolectric.application);
+        subject = new BasicAdView(RuntimeEnvironment.application);
         subject.layout(0, 0, 1000, 100);
         subject.prepareWithResourceIds(R.layout.ad, R.id.title, R.id.description, R.id.advertiser, R.id.thumbnail, R.id.optout, R.id.brand_logo);
     }

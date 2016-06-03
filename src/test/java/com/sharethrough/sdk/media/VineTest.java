@@ -10,8 +10,7 @@ import com.sharethrough.sdk.dialogs.WebViewDialogTest;
 import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowDialog;
 
@@ -49,10 +48,10 @@ public class VineTest extends TestBase {
         verify(beaconService).adClicked("vinePlay", creative, adView.getAdView(), feedPosition);
     }
 
-    @Config(emulateSdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
+    @Config(sdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
     @Test
     public void clickingLoadsVideoDialog() throws Exception {
-        subject.wasClicked(new View(Robolectric.application), beaconService, feedPosition);
+        subject.wasClicked(new View(RuntimeEnvironment.application), beaconService, feedPosition);
         assertThat(ShadowDialog.getLatestDialog()).isInstanceOf(VideoDialog.class);
     }
 }
