@@ -23,8 +23,10 @@ public class Creative {
     private boolean wasClicked = false;
     public boolean wasVisible = false;
 
-    public Creative(Response.Creative responseCreative) {
+    public Creative(Response.Creative responseCreative, String mediationRequestId) {
         this.responseCreative = responseCreative;
+        // To remove for asap v2
+        this.responseCreative.mediationRequestId = mediationRequestId;
     }
 
     public String getTitle() {
@@ -73,6 +75,10 @@ public class Creative {
 
     public String getAdserverRequestId() {
         return responseCreative.adserverRequestId;
+    }
+
+    public String getMediationRequestId() {
+        return responseCreative.mediationRequestId;
     }
 
     public String getAuctionWinId() {

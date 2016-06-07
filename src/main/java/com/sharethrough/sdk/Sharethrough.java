@@ -76,8 +76,8 @@ public class Sharethrough {
 
         strSdkConfig.getAsapManager().callASAP(new ASAPManager.ASAPManagerListener() {
             @Override
-            public void onSuccess(ArrayList<NameValuePair> queryStringParams) {
-                invokeAdFetcher(apiUrlPrefix, queryStringParams);
+            public void onSuccess(ArrayList<NameValuePair> queryStringParams, String mediationRequestId) {
+                invokeAdFetcher(apiUrlPrefix, queryStringParams, mediationRequestId);
             }
 
             @Override
@@ -144,8 +144,8 @@ public class Sharethrough {
         });
     }
 
-    private void invokeAdFetcher(String url, ArrayList<NameValuePair> queryStringParams) {
-        strSdkConfig.getAdManager().fetchAds(url, queryStringParams, strSdkConfig.getAdvertisingIdProvider().getAdvertisingId());
+    private void invokeAdFetcher(String url, ArrayList<NameValuePair> queryStringParams, String mediationRequestId) {
+        strSdkConfig.getAdManager().fetchAds(url, queryStringParams, strSdkConfig.getAdvertisingIdProvider().getAdvertisingId(), mediationRequestId);
     }
 
     /**

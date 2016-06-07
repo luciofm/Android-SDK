@@ -55,11 +55,14 @@ public class AdManagerTest extends TestBase {
 
     @Test
     public void fetchAds_whenRequestIsInProgress_doesNotStartNewRequest() throws Exception {
-        subject.fetchAds("url", new ArrayList<NameValuePair>(), "adId");
+        subject.fetchAds("url", new ArrayList<NameValuePair>(), "adId", "mrid");
         assertThat(adFetcherStub.fetchedAdsCount).isEqualTo(1);
+        assertThat(subject.getMediationRequestId()).isEqualTo("mrid");
 
-        subject.fetchAds("url", new ArrayList<NameValuePair>(), "adId");
+
+        subject.fetchAds("url", new ArrayList<NameValuePair>(), "adId", "mrid2");
         assertThat(adFetcherStub.fetchedAdsCount).isEqualTo(1);
+        assertThat(subject.getMediationRequestId()).isEqualTo("mrid");
     }
 
 
