@@ -1,5 +1,4 @@
 {
-  "adserverRequestId": "fake-adserver-request-id",
   "placement": {
     "layout": "multiple",
     "status": "pre-live",
@@ -42,6 +41,10 @@
   },
   "creatives": [
     {
+      "price": 1200,
+      "signature": "cd40e0c5f0fe8a1b47610a410fb1e2aaf09de4abbbd5ea923cabebf891b820d7",
+      "priceType": "vCPM",
+      "adserverRequestId": "fake-adserver-request-id",
       "auctionWinId": "fake-auction-win-id",
       "creative": {
         "creative_key": "fake-creative-key",

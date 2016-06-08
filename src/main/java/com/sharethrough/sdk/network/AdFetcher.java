@@ -1,82 +1,85 @@
 package com.sharethrough.sdk.network;
 
 import android.content.Context;
-import com.android.volley.*;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import com.sharethrough.sdk.*;
-import com.sharethrough.sdk.Response;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 public class AdFetcher {
     protected AdFetcherListener adFetcherListener;
-    protected RequestQueue requestQueue;
 
     public interface AdFetcherListener{
         void onAdResponseLoaded(Response response);
         void onAdResponseFailed();
     }
 
-    public AdFetcher(Context context) {
-        requestQueue = Volley.newRequestQueue(context);
-    }
-
     public void setAdFetcherListener(AdFetcherListener adFetcherListener) {
         this.adFetcherListener = adFetcherListener;
     }
 
-    public class STRStringRequest extends StringRequest {
-        public STRStringRequest(int method, String url, com.android.volley.Response.Listener<String> listener, com.android.volley.Response.ErrorListener errorListener) {
-            super(method, url, listener, errorListener);
-        }
+    public void fetchAds(String adRequestUrl){
+        SendHttpRequestTask sendHttpRequestTask = new SendHttpRequestTask();
+        sendHttpRequestTask.execute(adRequestUrl);
+    }
+
+    protected class SendHttpRequestTask extends AsyncTask<String, Void, String> {
 
         @Override
-        public Map<String, String> getHeaders(){
-            Map<String, String> headers = new HashMap<String, String>();
-            headers.put("User-Agent", Sharethrough.USER_AGENT);
-            return headers;
-        }
-    }
-    public void fetchAds(String adRequestUrl) {
-        STRStringRequest stringRequest = new STRStringRequest(Request.Method.GET, adRequestUrl,
-                new com.android.volley.Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        handleResponse(response);
-                    }
-                }, new com.android.volley.Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Logger.i("Ad request error: " + error.toString());
+        protected String doInBackground(String... params) {
+
+            if( params[0] == null || params[0].isEmpty()){
+                return null;
+            }
+
+            String json;
+            try {
+
+                DefaultHttpClient client = new DefaultHttpClient();
+                HttpGet request = new HttpGet(params[0]);
+                request.addHeader("User-Agent", Sharethrough.USER_AGENT);
+                HttpResponse httpResponse = client.execute(request);
+                int code = httpResponse.getStatusLine().getStatusCode();
+
+                if (code == 200) {
+                    InputStream content = httpResponse.getEntity().getContent();
+                    json = Misc.convertStreamToString(content);
+                    Response response = getResponse(json);
+
+                    // notify adFetcherListener
+                    adFetcherListener.onAdResponseLoaded(response);
+                } else {
+                    throw new HttpException("Status code is not 200");
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
                 adFetcherListener.onAdResponseFailed();
             }
-        });
-
-
-
-        // Add the request to the RequestQueue.
-        requestQueue.add(stringRequest);
-    }
-
-    protected void handleResponse(String response) {
-        try {
-            adFetcherListener.onAdResponseLoaded(getResponse(response));
-        } catch (JSONException e) {
-            e.printStackTrace();
-            adFetcherListener.onAdResponseFailed();
+            return null;
         }
     }
+
 
     protected Response getResponse(String json) throws JSONException {
         JSONObject jsonResponse = new JSONObject(json);
         Response response = new Response();
-
         JSONObject jsonPlacement = jsonResponse.getJSONObject("placement");
         Response.Placement placement = new Response.Placement();
         placement.layout = jsonPlacement.getString("layout");
@@ -88,14 +91,11 @@ public class AdFetcher {
 
         JSONArray creatives = jsonResponse.getJSONArray("creatives");
         response.creatives = new ArrayList<>(creatives.length());
-        String adserverRequestId = jsonResponse.getString("adserverRequestId");
         for (int i = 0; i < creatives.length(); i++) {
             JSONObject jsonCreative = creatives.getJSONObject(i);
             Response.Creative creative = new Response.Creative();
-
-            creative.adserverRequestId = adserverRequestId;
-
-
+            creative.price = jsonCreative.getInt("price");
+            creative.adserverRequestId = jsonCreative.getString("adserverRequestId");
             creative.auctionWinId = jsonCreative.getString("auctionWinId");
 
             JSONObject jsonCreativeInner = jsonCreative.getJSONObject("creative");
@@ -120,6 +120,9 @@ public class AdFetcher {
             creative.creative.creativeKey = jsonCreativeInner.getString("creative_key");
             creative.creative.campaignKey = jsonCreativeInner.getString("campaign_key");
             creative.creative.variantKey = jsonCreativeInner.getString("variant_key");
+            creative.price = jsonCreative.getInt("price");
+            creative.priceType = jsonCreative.getString("priceType");
+            creative.signature = jsonCreative.getString("signature");
 
             JSONObject beacons = jsonCreativeInner.getJSONObject("beacons");
             creative.creative.beacon = new Response.Creative.CreativeInner.Beacon();

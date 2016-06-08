@@ -5,11 +5,8 @@ import android.provider.Settings;
 import android.util.Log;
 import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 
 public class AdvertisingIdProvider {
@@ -24,7 +21,7 @@ public class AdvertisingIdProvider {
                 @Override
                 public void run() {
                     try {
-                        AdvertisingIdClient.Info adInfo = getAdvertisingInfo(context);
+                        AdvertisingIdClient.Info adInfo = AdvertisingIdClient.getAdvertisingIdInfo(context);
                         advertisingId = adInfo.getId();
                         if (adInfo.isLimitAdTrackingEnabled()) {
                             advertisingId = null;
@@ -36,20 +33,6 @@ public class AdvertisingIdProvider {
             });
         }
         Log.i("Sharethrough", "advertising ID: " + advertisingId);
-    }
-
-    protected AdvertisingIdClient.Info getAdvertisingInfo(Context context){
-        try {
-            return AdvertisingIdClient.getAdvertisingIdInfo(context);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (GooglePlayServicesNotAvailableException e) {
-            e.printStackTrace();
-        } catch (GooglePlayServicesRepairableException e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 
     public String getAdvertisingId() {

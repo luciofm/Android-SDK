@@ -21,13 +21,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.fakes.RoboMenuItem;
 import org.robolectric.res.builder.RobolectricPackageManager;
 import org.robolectric.shadows.ShadowContext;
+import org.robolectric.shadows.ShadowMenuInflater;
+import org.robolectric.tester.android.view.TestMenuItem;
 import org.robolectric.util.ActivityController;
 
 import java.util.Arrays;
@@ -35,26 +35,26 @@ import java.util.Arrays;
 import static org.fest.assertions.api.ANDROID.assertThat;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
-import static org.robolectric.Shadows.shadowOf;
+import static org.robolectric.Robolectric.shadowOf;
 
-@Config(shadows = {
-        ShareableDialogTest.MenuInflaterShadow.class})
+@Config(shadows = ShareableDialogTest.MenuInflaterShadow.class)
 public class ShareableDialogTest extends TestBase {
 
     private ShareableDialog subject;
-    private Creative creative = mock(Creative.class);;
+    private Creative creative;
     private BeaconService beaconService;
     private ActivityController<Activity> activityController;
     private int feedPosition;
 
     @Before
     public void setUp() throws Exception {
+        creative = mock(Creative.class);
         when(creative.getTitle()).thenReturn("Title");
         when(creative.getShareUrl()).thenReturn("http://share.me/with/friends");
         feedPosition = 5;
 
         beaconService = mock(BeaconService.class);
-        subject = new ShareableDialog(RuntimeEnvironment.application, android.R.style.Theme_Black, beaconService, feedPosition) {
+        subject = new ShareableDialog(Robolectric.application, android.R.style.Theme_Black, beaconService, feedPosition) {
             @Override
             protected Creative getCreative() {
                 return creative;
@@ -120,9 +120,9 @@ public class ShareableDialogTest extends TestBase {
         when(creative.getCustomEngagementUrl()).thenReturn("//custom.url");
         when(creative.getCustomEngagementLabel()).thenReturn("custom_label");
 
-        subject = new ShareableDialog(RuntimeEnvironment.application, android.R.style.Theme_Black, beaconService, feedPosition) {
+        subject = new ShareableDialog(Robolectric.application, android.R.style.Theme_Black, beaconService, feedPosition) {
             @Override
-            public Creative getCreative() {
+            protected Creative getCreative() {
                 return creative;
             }
         };
@@ -138,7 +138,7 @@ public class ShareableDialogTest extends TestBase {
         when(creative.getCustomEngagementUrl()).thenReturn("http://custom.url");
         when(creative.getCustomEngagementLabel()).thenReturn("custom_label");
 
-        MenuItem item = new RoboMenuItem(R.id.menu_item_custom);
+        MenuItem item = new TestMenuItem(R.id.menu_item_custom);
         subject.onMenuItemSelected(0, item);
 
         ShadowContext shadowContext = shadowOf(subject.getContext());
@@ -147,14 +147,15 @@ public class ShareableDialogTest extends TestBase {
     }
 
     @Implements(MenuInflater.class)
-    public static class MenuInflaterShadow{
+    public static class MenuInflaterShadow extends ShadowMenuInflater {
         public static ShareActionProvider LATEST_SHARE_ACTION_PROVIDER;
 
+        @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
         @Implementation
+        @Override
         public void inflate(int resource, Menu menu) {
-            menu.clear();
-            menu.add(0, R.id.menu_item_share, 0, "Share");
-            menu.add(0, R.id.menu_item_custom, 1, "Custom");
+            super.inflate(resource, menu);
+
             for (int i = 0; i < menu.size(); i++) {
                 MenuItem item = menu.getItem(i);
                 if (item.getItemId() == R.id.menu_item_share) {
@@ -173,7 +174,7 @@ public class ShareableDialogTest extends TestBase {
     }
 
     private void setUpPackages() {
-        RobolectricPackageManager packageManager = (RobolectricPackageManager) RuntimeEnvironment.application.getPackageManager();
+        RobolectricPackageManager packageManager = (RobolectricPackageManager) Robolectric.application.getPackageManager();
         Intent intent = new Intent(Intent.ACTION_SEND).setType("message/rfc822");
 
         ResolveInfo email = new ResolveInfo();

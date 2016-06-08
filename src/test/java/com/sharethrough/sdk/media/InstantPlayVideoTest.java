@@ -13,7 +13,7 @@ import com.sharethrough.sdk.dialogs.VideoDialog;
 import com.sharethrough.sdk.dialogs.WebViewDialogTest;
 import org.junit.Before;
 import org.junit.Test;
-import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Robolectric;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowDialog;
 
@@ -62,7 +62,7 @@ public class InstantPlayVideoTest extends TestBase {
         mockedCreative = mock(InstantPlayCreative.class);
         mockedBeaconService = mock(BeaconService.class);
         mockedVideoCompletionBeaconService = mock(VideoCompletionBeaconService.class);
-        mockedMutedVideoView = spy(new MutedVideoView(RuntimeEnvironment.application));
+        mockedMutedVideoView = spy(new MutedVideoView(Robolectric.application));
         feedPosition = 5;
         mockedTimer = mock(Timer.class);
         when(mockedCreative.getMediaUrl()).thenReturn("http://ab.co");
@@ -76,7 +76,7 @@ public class InstantPlayVideoTest extends TestBase {
         InstantPlayVideo.SilentAutoplayBeaconTask mockedSilentAutoplayBeaconTask = mock(InstantPlayVideo.SilentAutoplayBeaconTask.class);
         subject.silentAutoplayBeaconTask = mockedSilentAutoplayBeaconTask;
 
-        subject.wasClicked(new View(RuntimeEnvironment.application), mock(BeaconService.class), feedPosition);
+        subject.wasClicked(new View(Robolectric.application), mock(BeaconService.class), feedPosition);
         verify(mockedTimer).cancel();
         verify(mockedSilentAutoplayBeaconTask).cancel();
     }
@@ -88,15 +88,15 @@ public class InstantPlayVideoTest extends TestBase {
         InstantPlayVideo.VideoCompletionBeaconTask mockedVideoCompletionBeaconTask = mock(InstantPlayVideo.VideoCompletionBeaconTask.class);
         subject.videoCompletionBeaconTask = mockedVideoCompletionBeaconTask;
 
-        subject.wasClicked(new View(RuntimeEnvironment.application), mock(BeaconService.class), feedPosition);
+        subject.wasClicked(new View(Robolectric.application), mock(BeaconService.class), feedPosition);
         verify(mockedTimer).cancel();
         verify(mockedVideoCompletionBeaconTask).cancel();
     }
 
     @Test
     public void whenClick_pauseVideo() throws Exception {
-        FrameLayout viewContainer = new FrameLayout(RuntimeEnvironment.application);
-        MutedVideoView mockedVideoView = spy(new MutedVideoView(RuntimeEnvironment.application));
+        FrameLayout viewContainer = new FrameLayout(Robolectric.application);
+        MutedVideoView mockedVideoView = spy(new MutedVideoView(Robolectric.application));
         mockedVideoView.setTag("SharethroughAutoPlayVideoView");
         when(mockedVideoView.isPlaying()).thenReturn(true);
         when(mockedVideoView.canPause()).thenReturn(true);
@@ -111,10 +111,10 @@ public class InstantPlayVideoTest extends TestBase {
         assertThat(subject.isVideoPlaying).isFalse();
     }
 
-    @Config(sdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
+    @Config(emulateSdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
     @Test
     public void whenClicked_opensAutoPlayVideoDialog() throws Exception {
-        subject.wasClicked(new View(RuntimeEnvironment.application), mock(BeaconService.class), feedPosition);
+        subject.wasClicked(new View(Robolectric.application), mock(BeaconService.class), feedPosition);
         assertThat(ShadowDialog.getLatestDialog()).isInstanceOf(VideoDialog.class);
     }
 
@@ -124,8 +124,8 @@ public class InstantPlayVideoTest extends TestBase {
         int feedPosition = 5;
         BeaconService beaconService = mock(BeaconService.class);
 
-        FrameLayout viewContainer = new FrameLayout(RuntimeEnvironment.application);
-        MutedVideoView mockedVideoView = spy(new MutedVideoView(RuntimeEnvironment.application));
+        FrameLayout viewContainer = new FrameLayout(Robolectric.application);
+        MutedVideoView mockedVideoView = spy(new MutedVideoView(Robolectric.application));
         mockedVideoView.setTag("SharethroughAutoPlayVideoView");
         when(mockedVideoView.getCurrentPosition()).thenReturn(3000);
         viewContainer.addView(mockedVideoView);
@@ -142,8 +142,8 @@ public class InstantPlayVideoTest extends TestBase {
     public void whenRendered_setThumbnailImageInvisible() throws Exception {
         ImageView mockedImageView = mock(ImageView.class);
         IAdView mockedIAdView = mock(BasicAdView.class);
-        when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(RuntimeEnvironment.application));
-        when(mockedIAdView.getThumbnail()).thenReturn(new FrameLayout(RuntimeEnvironment.application));
+        when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(Robolectric.application));
+        when(mockedIAdView.getThumbnail()).thenReturn(new FrameLayout(Robolectric.application));
 
         subject.wasRendered(mockedIAdView, mockedImageView);
         verify(mockedImageView).setVisibility(View.INVISIBLE);
@@ -154,7 +154,7 @@ public class InstantPlayVideoTest extends TestBase {
         ImageView mockedImageView = mock(ImageView.class);
         IAdView mockedIAdView = mock(BasicAdView.class);
         FrameLayout mockedThumbnailContainer = mock(FrameLayout.class);
-        when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(RuntimeEnvironment.application));
+        when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(Robolectric.application));
         when(mockedIAdView.getThumbnail()).thenReturn(mockedThumbnailContainer);
 
         subject.swapMedia(mockedIAdView, mockedImageView);
@@ -166,7 +166,7 @@ public class InstantPlayVideoTest extends TestBase {
         ImageView mockedImageView = mock(ImageView.class);
         IAdView mockedIAdView = mock(BasicAdView.class);
         FrameLayout mockedThumbnailContainer = mock(FrameLayout.class);
-        when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(RuntimeEnvironment.application));
+        when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(Robolectric.application));
         when(mockedIAdView.getThumbnail()).thenReturn(mockedThumbnailContainer);
 
         subject.wasRendered(mockedIAdView, mockedImageView);
@@ -177,8 +177,8 @@ public class InstantPlayVideoTest extends TestBase {
     public void whenRendered_videoIsPrepared() throws Exception {
         ImageView mockedImageView = mock(ImageView.class);
         IAdView mockedIAdView = mock(BasicAdView.class);
-        FrameLayout thumbnailContainer = new FrameLayout(RuntimeEnvironment.application);
-        when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(RuntimeEnvironment.application));
+        FrameLayout thumbnailContainer = new FrameLayout(Robolectric.application);
+        when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(Robolectric.application));
         when(mockedIAdView.getThumbnail()).thenReturn(thumbnailContainer);
 
         when(mockedCreative.isVideoCompleted()).thenReturn(false);
@@ -201,8 +201,8 @@ public class InstantPlayVideoTest extends TestBase {
     public void whenVideoCompleted_beaconTimersCancelledAndMediaPlayStopped() {
         ImageView mockedImageView = mock(ImageView.class);
         IAdView mockedIAdView = mock(BasicAdView.class);
-        FrameLayout thumbnailContainer = new FrameLayout(RuntimeEnvironment.application);
-        when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(RuntimeEnvironment.application));
+        FrameLayout thumbnailContainer = new FrameLayout(Robolectric.application);
+        when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(Robolectric.application));
         when(mockedIAdView.getThumbnail()).thenReturn(thumbnailContainer);
 
         when(mockedCreative.isVideoCompleted()).thenReturn(false);
@@ -232,7 +232,7 @@ public class InstantPlayVideoTest extends TestBase {
         assertThat(subject.isVideoPrepared).isFalse();
 
         //verify videoViewDuration beacon sent
-        verify(mockedBeaconService).videoViewDuration(RuntimeEnvironment.application, mockedCreative, mockedMutedVideoView.getCurrentPosition(), true, feedPosition);
+        verify(mockedBeaconService).videoViewDuration(Robolectric.application, mockedCreative, mockedMutedVideoView.getCurrentPosition(), true, feedPosition);
         verifyNoMoreInteractions(mockedBeaconService);
     }
 
@@ -240,10 +240,10 @@ public class InstantPlayVideoTest extends TestBase {
     public void whenVideoOnScreenBeforeClicked_videoPlays() {
         ImageView mockedImageView = mock(ImageView.class);
 
-        FrameLayout thumbnailContainer = new FrameLayout(RuntimeEnvironment.application);
+        FrameLayout thumbnailContainer = new FrameLayout(Robolectric.application);
 
-        IAdView mockedIAdView = spy(new BasicAdView(RuntimeEnvironment.application));
-        when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(RuntimeEnvironment.application));
+        IAdView mockedIAdView = spy(new BasicAdView(Robolectric.application));
+        when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(Robolectric.application));
         when(mockedIAdView.getThumbnail()).thenReturn(thumbnailContainer);
         when(mockedCreative.isVideoCompleted()).thenReturn(false);
         when(mockedCreative.wasClicked()).thenReturn(false);
@@ -276,10 +276,10 @@ public class InstantPlayVideoTest extends TestBase {
     @Test
     public void whenVideoOnScreenAfterClicked_videoPaused() {
         ImageView mockedImageView = mock(ImageView.class);
-        FrameLayout thumbnailContainer = new FrameLayout(RuntimeEnvironment.application);
+        FrameLayout thumbnailContainer = new FrameLayout(Robolectric.application);
 
-        IAdView mockedIAdView = spy(new BasicAdView(RuntimeEnvironment.application));
-        when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(RuntimeEnvironment.application));
+        IAdView mockedIAdView = spy(new BasicAdView(Robolectric.application));
+        when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(Robolectric.application));
         when(mockedIAdView.getThumbnail()).thenReturn(thumbnailContainer);
         when(mockedCreative.isVideoCompleted()).thenReturn(false);
         when(mockedCreative.wasClicked()).thenReturn(true);
@@ -295,10 +295,10 @@ public class InstantPlayVideoTest extends TestBase {
     @Test
     public void whenVideoOffScreen_videoPauses() {
         ImageView mockedImageView = mock(ImageView.class);
-        FrameLayout thumbnailContainer = new FrameLayout(RuntimeEnvironment.application);
+        FrameLayout thumbnailContainer = new FrameLayout(Robolectric.application);
 
-        IAdView mockedIAdView = spy(new BasicAdView(RuntimeEnvironment.application));
-        when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(RuntimeEnvironment.application));
+        IAdView mockedIAdView = spy(new BasicAdView(Robolectric.application));
+        when(mockedIAdView.getAdView()).thenReturn(new FrameLayout(Robolectric.application));
         when(mockedIAdView.getThumbnail()).thenReturn(thumbnailContainer);
 
         subject.wasRendered(mockedIAdView, mockedImageView);
@@ -320,7 +320,7 @@ public class InstantPlayVideoTest extends TestBase {
         mockedIAdView.getScreenVisibilityListener().offScreen();
 
         //verify videoViewDuration beacon sent
-        verify(mockedBeaconService).videoViewDuration(RuntimeEnvironment.application, mockedCreative, currentPosition, true, feedPosition);
+        verify(mockedBeaconService).videoViewDuration(Robolectric.application, mockedCreative, currentPosition, true, feedPosition);
         verifyNoMoreInteractions(mockedBeaconService);
 
         //verify current position saved
@@ -356,11 +356,11 @@ public class InstantPlayVideoTest extends TestBase {
         when(mockedCreative.wasClicked()).thenReturn(false);
         when(mockedVideoView.isPlaying()).thenReturn(true);
         when(mockedVideoView.getCurrentPosition()).thenReturn(3011);
-        when(mockedVideoView.getContext()).thenReturn(RuntimeEnvironment.application);
+        when(mockedVideoView.getContext()).thenReturn(Robolectric.application);
 
         InstantPlayVideo.SilentAutoplayBeaconTask playbackTimerTask = subject.instantiateSilentPlaybackTimerTask(mockedVideoView);
         playbackTimerTask.run();
-        verify(mockedBeaconService).silentAutoPlayDuration(RuntimeEnvironment.application, mockedCreative, 3000, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition);
     }
 
     @Test
@@ -370,11 +370,11 @@ public class InstantPlayVideoTest extends TestBase {
         when(mockedVideoView.isPlaying()).thenReturn(true);
         when(mockedVideoView.getCurrentPosition()).thenReturn(7012);
         when(mockedVideoView.getDuration()).thenReturn(10000);
-        when(mockedVideoView.getContext()).thenReturn(RuntimeEnvironment.application);
+        when(mockedVideoView.getContext()).thenReturn(Robolectric.application);
 
         InstantPlayVideo.SilentAutoplayBeaconTask playbackTimerTask = subject.instantiateSilentPlaybackTimerTask(mockedVideoView);
         playbackTimerTask.run();
-        verify(mockedBeaconService).silentAutoPlayDuration(RuntimeEnvironment.application, mockedCreative, 3000, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition);
         verifyNoMoreInteractions(mockedBeaconService);
     }
 
@@ -385,12 +385,12 @@ public class InstantPlayVideoTest extends TestBase {
         when(mockedVideoView.isPlaying()).thenReturn(true);
         when(mockedVideoView.getCurrentPosition()).thenReturn(10012);
         when(mockedVideoView.getDuration()).thenReturn(30000);
-        when(mockedVideoView.getContext()).thenReturn(RuntimeEnvironment.application);
+        when(mockedVideoView.getContext()).thenReturn(Robolectric.application);
 
         InstantPlayVideo.SilentAutoplayBeaconTask playbackTimerTask = subject.instantiateSilentPlaybackTimerTask(mockedVideoView);
         playbackTimerTask.run();
-        verify(mockedBeaconService).silentAutoPlayDuration(RuntimeEnvironment.application, mockedCreative, 3000, feedPosition);
-        verify(mockedBeaconService).silentAutoPlayDuration(RuntimeEnvironment.application, mockedCreative, 10000, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 10000, feedPosition);
         verifyNoMoreInteractions(mockedBeaconService);
     }
 
@@ -401,13 +401,13 @@ public class InstantPlayVideoTest extends TestBase {
         when(mockedVideoView.isPlaying()).thenReturn(true);
         when(mockedVideoView.getCurrentPosition()).thenReturn(15012);
         when(mockedVideoView.getDuration()).thenReturn(30000);
-        when(mockedVideoView.getContext()).thenReturn(RuntimeEnvironment.application);
+        when(mockedVideoView.getContext()).thenReturn(Robolectric.application);
 
         InstantPlayVideo.SilentAutoplayBeaconTask playbackTimerTask = subject.instantiateSilentPlaybackTimerTask(mockedVideoView);
         playbackTimerTask.run();
-        verify(mockedBeaconService).silentAutoPlayDuration(RuntimeEnvironment.application, mockedCreative, 3000, feedPosition);
-        verify(mockedBeaconService).silentAutoPlayDuration(RuntimeEnvironment.application, mockedCreative, 10000, feedPosition);
-        verify(mockedBeaconService).silentAutoPlayDuration(RuntimeEnvironment.application, mockedCreative, 15000, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 10000, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 15000, feedPosition);
         verifyNoMoreInteractions(mockedBeaconService);
     }
 
@@ -418,14 +418,14 @@ public class InstantPlayVideoTest extends TestBase {
         when(mockedVideoView.isPlaying()).thenReturn(true);
         when(mockedVideoView.getCurrentPosition()).thenReturn(30012);
         when(mockedVideoView.getDuration()).thenReturn(40000);
-        when(mockedVideoView.getContext()).thenReturn(RuntimeEnvironment.application);
+        when(mockedVideoView.getContext()).thenReturn(Robolectric.application);
 
         InstantPlayVideo.SilentAutoplayBeaconTask playbackTimerTask = subject.instantiateSilentPlaybackTimerTask(mockedVideoView);
         playbackTimerTask.run();
-        verify(mockedBeaconService).silentAutoPlayDuration(RuntimeEnvironment.application, mockedCreative, 3000, feedPosition);
-        verify(mockedBeaconService).silentAutoPlayDuration(RuntimeEnvironment.application, mockedCreative, 10000, feedPosition);
-        verify(mockedBeaconService).silentAutoPlayDuration(RuntimeEnvironment.application, mockedCreative, 15000, feedPosition);
-        verify(mockedBeaconService).silentAutoPlayDuration(RuntimeEnvironment.application, mockedCreative, 30000, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 3000, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 10000, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 15000, feedPosition);
+        verify(mockedBeaconService).silentAutoPlayDuration(Robolectric.application, mockedCreative, 30000, feedPosition);
         verifyNoMoreInteractions(mockedBeaconService);
     }
 

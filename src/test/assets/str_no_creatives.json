@@ -1,5 +1,4 @@
 {
-  "adserverRequestId": "fake-adserver-request-id",
   "placement": {
     "template": "<div/>",
     "layout": "single",

@@ -8,7 +8,8 @@ import com.sharethrough.sdk.dialogs.WebViewDialogTest;
 import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
-import org.robolectric.RuntimeEnvironment;
+import org.mockito.Mock;
+import org.robolectric.Robolectric;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowDialog;
 
@@ -36,10 +37,10 @@ public class ClickoutTest extends TestBase {
         verifyNoMoreInteractions(adView);
     }
 
-    @Config(sdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
+    @Config(emulateSdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
     @Test
     public void clickListener_opensWebViewDialog() throws Exception {
-        subject.wasClicked(new ImageView(RuntimeEnvironment.application), beaconService, feedPosition);
+        subject.wasClicked(new ImageView(Robolectric.application), beaconService, feedPosition);
         assertThat(ShadowDialog.getLatestDialog()).isInstanceOf(WebViewDialog.class);
     }
 

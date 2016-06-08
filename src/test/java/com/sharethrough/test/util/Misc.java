@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import org.mockito.ArgumentCaptor;
-import org.robolectric.Shadows;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -15,7 +14,7 @@ import java.util.concurrent.ExecutorService;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
-
+import static org.robolectric.Robolectric.shadowOf;
 
 public class Misc {
     public static <V extends View> V findViewOfType(Class<V> viewType, ViewGroup viewGroup) {
@@ -39,7 +38,7 @@ public class Misc {
     }
 
     public static void assertImageViewFromBitmap(ImageView imageView, Bitmap expected) {
-        Bitmap actual = ((BitmapDrawable) Shadows.shadowOf(imageView).getDrawable()).getBitmap();
+        Bitmap actual = ((BitmapDrawable) shadowOf(imageView).getDrawable()).getBitmap();
         assertThat(actual).isEqualTo(expected);
     }
 

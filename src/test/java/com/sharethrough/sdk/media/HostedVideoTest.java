@@ -13,7 +13,6 @@ import com.sharethrough.test.util.TestAdView;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.robolectric.Robolectric;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowDialog;
 
@@ -27,7 +26,7 @@ public class HostedVideoTest extends TestBase {
         assertThat(new HostedVideo(mock(Creative.class)).getOverlayImageResourceId()).isEqualTo(R.drawable.non_yt_play);
     }
 
-    @Config(sdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
+    @Config(emulateSdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
     @Test
     public void whenClicked_opensVideoDialog() throws Exception {
         Creative creative = mock(Creative.class);
@@ -35,7 +34,7 @@ public class HostedVideoTest extends TestBase {
         HostedVideo subject = new HostedVideo(creative);
         int feedPosition = 5;
 
-        subject.wasClicked(new View(RuntimeEnvironment.application), mock(BeaconService.class), feedPosition);
+        subject.wasClicked(new View(Robolectric.application), mock(BeaconService.class), feedPosition);
 
         assertThat(ShadowDialog.getLatestDialog()).isInstanceOf(VideoDialog.class);
     }

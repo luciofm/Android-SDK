@@ -5,13 +5,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.webkit.TestWebSettings;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.ShareActionProvider;
-import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.TestBase;
@@ -19,20 +16,17 @@ import com.sharethrough.test.util.Misc;
 import org.junit.Before;
 import org.junit.Test;
 import org.robolectric.Robolectric;
-import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implements;
-import org.robolectric.fakes.RoboMenuItem;
-import org.robolectric.fakes.RoboWebSettings;
 import org.robolectric.shadows.ShadowWebView;
+import org.robolectric.tester.android.view.TestMenuItem;
 import org.robolectric.util.ActivityController;
-import org.robolectric.util.ReflectionHelpers;
 
-import static com.sharethrough.sdk.dialogs.ShareableDialogTest.MenuInflaterShadow.LATEST_SHARE_ACTION_PROVIDER;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.*;
+import static org.robolectric.Robolectric.shadowOf;
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 @Config(shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
@@ -49,7 +43,7 @@ public class WebViewDialogTest extends TestBase {
 
     @Before
     public void setUp() throws Exception {
-        ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", 18);
+        Robolectric.Reflection.setFinalStaticField(Build.VERSION.class, "SDK_INT", 18);
 
         creative = mock(Creative.class);
         when(creative.getTitle()).thenReturn("Title");
@@ -64,7 +58,7 @@ public class WebViewDialogTest extends TestBase {
         subject.show();
 
         webView = Misc.findViewOfType(WebView.class, (ViewGroup) subject.getWindow().getDecorView());
-        shadowWebView = Shadows.shadowOf(webView);
+        shadowWebView = shadowOf(webView);
     }
 
     @Test
@@ -174,13 +168,13 @@ public class WebViewDialogTest extends TestBase {
     public void cancelingUnloadsTheWebpage_soTheMusicStops() throws Exception {
         subject.cancel();
 
-        assertThat(Shadows.shadowOf(webView).getLastLoadedUrl()).isEqualTo("about:");
+        assertThat(shadowOf(webView).getLastLoadedUrl()).isEqualTo("about:");
     }
 
     @Test
     public void upButtonCancelsTheDialog() throws Exception {
         when(creative.getType()).thenReturn(Creative.CreativeType.ARTICLE);
-        subject.onMenuItemSelected(-1, new RoboMenuItem(android.R.id.home));
+        subject.onMenuItemSelected(-1, new TestMenuItem(android.R.id.home));
         assertThat(subject.isShowing()).isFalse();
     }
 
@@ -196,7 +190,7 @@ public class WebViewDialogTest extends TestBase {
         shadowWebView.setCanGoBack(true);
         subject.onKeyDown(KeyEvent.KEYCODE_BACK, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK));
         assertThat(subject.isShowing()).isTrue();
-        assertThat(Shadows.shadowOf(webView).getGoBackInvocations()).isEqualTo(1);
+        assertThat(shadowOf(webView).getGoBackInvocations()).isEqualTo(1);
     }
 
     @Implements(WebView.class)
@@ -209,9 +203,9 @@ public class WebViewDialogTest extends TestBase {
         }
     }
 
-    public static class MyTestWebSettings extends RoboWebSettings {
+    public static class MyTestWebSettings extends TestWebSettings {
         private boolean mediaPlaybackRequiresUserGesture = true;
-        private WebSettings.PluginState pluginState = null;
+        private PluginState pluginState = null;
 
         @Override
         public void setMediaPlaybackRequiresUserGesture(boolean require) {
@@ -224,12 +218,12 @@ public class WebViewDialogTest extends TestBase {
         }
 
         @Override
-        public synchronized void setPluginState(WebSettings.PluginState state) {
+        public synchronized void setPluginState(PluginState state) {
             pluginState = state;
         }
 
         @Override
-        public synchronized WebSettings.PluginState getPluginState() {
+        public synchronized PluginState getPluginState() {
             return pluginState;
         }
 

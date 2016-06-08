@@ -7,10 +7,6 @@ public class InstantPlayCreative extends Creative {
     private int currentPosition = 0;
     private boolean isVideoCompleted = false;
 
-    public InstantPlayCreative(Response.Creative responseCreative, String mediationRequestId) {
-        super(responseCreative, mediationRequestId);
-    }
-
     public boolean isVideoCompleted() {
         return isVideoCompleted;
     }
@@ -25,5 +21,8 @@ public class InstantPlayCreative extends Creative {
 
     public void setCurrentPosition(int currentPosition) {
         this.currentPosition = currentPosition;
+    }
+    public InstantPlayCreative(Response.Creative responseCreative) {
+        super(responseCreative);
     }
 }

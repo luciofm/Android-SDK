@@ -23,10 +23,8 @@ public class Creative {
     private boolean wasClicked = false;
     public boolean wasVisible = false;
 
-    public Creative(Response.Creative responseCreative, String mediationRequestId) {
+    public Creative(Response.Creative responseCreative) {
         this.responseCreative = responseCreative;
-        // To remove for asap v2
-        this.responseCreative.mediationRequestId = mediationRequestId;
     }
 
     public String getTitle() {
@@ -77,10 +75,6 @@ public class Creative {
         return responseCreative.adserverRequestId;
     }
 
-    public String getMediationRequestId() {
-        return responseCreative.mediationRequestId;
-    }
-
     public String getAuctionWinId() {
         return responseCreative.auctionWinId;
     }
@@ -103,6 +97,18 @@ public class Creative {
 
     public String getCampaignKey() {
         return responseCreative.creative.campaignKey;
+    }
+
+    public String getSignature() {
+        return responseCreative.signature;
+    }
+
+    public String getAuctionType() {
+        return responseCreative.priceType;
+    }
+
+    public String getAuctionPrice() {
+        return String.valueOf(responseCreative.price);
     }
 
     public String getCustomEngagementUrl() {

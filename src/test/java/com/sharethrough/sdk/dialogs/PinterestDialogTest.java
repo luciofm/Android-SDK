@@ -7,7 +7,6 @@ import com.sharethrough.sdk.TestBase;
 import org.junit.Before;
 import org.junit.Test;
 import org.robolectric.Robolectric;
-import org.robolectric.RuntimeEnvironment;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -26,7 +25,7 @@ public class PinterestDialogTest extends TestBase {
         creative = mock(Creative.class);
         url = "http://ab.co/";
         when(creative.getMediaUrl()).thenReturn(url);
-        subject = new PinterestDialog(RuntimeEnvironment.application, creative, mock(BeaconService.class), feedPosition);
+        subject = new PinterestDialog(Robolectric.application, creative, mock(BeaconService.class), feedPosition);
     }
 
     @Test

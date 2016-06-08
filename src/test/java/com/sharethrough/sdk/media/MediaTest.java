@@ -11,10 +11,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.robolectric.Shadows;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import static org.robolectric.Robolectric.shadowOf;
 
 public class MediaTest extends TestBase {
     private boolean isThumbnailOverlayCentered;
@@ -67,7 +67,7 @@ public class MediaTest extends TestBase {
         verify(adView.getThumbnail()).addView(imageViewArgumentCaptor.capture(), layoutParamsArgumentCaptor.capture());
 
         ImageView youtubeIcon = imageViewArgumentCaptor.getValue();
-        assertThat(Shadows.shadowOf(youtubeIcon).getImageResourceId()).isEqualTo(overlayImageResourceId);
+        assertThat(shadowOf(youtubeIcon).getImageResourceId()).isEqualTo(overlayImageResourceId);
         int overlayDimensionMax = 25;
 
         FrameLayout.LayoutParams layoutParams = layoutParamsArgumentCaptor.getValue();

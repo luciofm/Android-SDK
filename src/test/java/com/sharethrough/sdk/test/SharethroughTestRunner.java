@@ -1,9 +1,10 @@
 package com.sharethrough.sdk.test;
 
 import org.junit.runners.model.InitializationError;
+import org.robolectric.AndroidManifest;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.SdkConfig;
 import org.robolectric.annotation.Config;
-import org.robolectric.manifest.AndroidManifest;
 
 public class SharethroughTestRunner extends RobolectricTestRunner {
     public SharethroughTestRunner(Class<?> testClass) throws InitializationError {
@@ -11,7 +12,7 @@ public class SharethroughTestRunner extends RobolectricTestRunner {
     }
 
     @Override
-    protected int pickSdkVersion(Config config, AndroidManifest appManifest) {
-        return ((config != null) && (config.sdk().length > 0 && config.sdk()[0] > 0)) ? config.sdk()[0] : 18;
+    protected SdkConfig pickSdkVersion(AndroidManifest appManifest, Config config) {
+        return ((config != null) && (config.emulateSdk() > 0)) ? new SdkConfig(config.emulateSdk()) : new SdkConfig(18);
     }
 }

@@ -6,7 +6,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.robolectric.Robolectric;
-import org.robolectric.RuntimeEnvironment;
 
 import java.util.Date;
 import java.util.Timer;
@@ -41,7 +40,7 @@ public class AdImageViewTest extends TestBase {
         adView = mock(TestAdView.class);
         when(adView.getAdView()).thenReturn(adView);
         when(adView.isShown()).thenReturn(true);
-        subject = new AdImageViewStub(RuntimeEnvironment.application, sharethrough, creative, adView, feedPosition, beaconService);
+        subject = new AdImageViewStub(Robolectric.application, sharethrough, creative, adView, feedPosition, beaconService);
 
     }
 
@@ -50,7 +49,7 @@ public class AdImageViewTest extends TestBase {
         creative.renderedTime = Integer.MIN_VALUE;
         creative.wasVisible = true;
 
-        when(sharethrough.getAdCacheTimeInMilliseconds()).thenReturn((long) 20);
+        when(sharethrough.getAdCacheTimeInMilliseconds()).thenReturn(20);
         subject.onAttachedToWindow();
         verify(sharethrough).putCreativeIntoAdView(adView, feedPosition);
     }
@@ -59,7 +58,7 @@ public class AdImageViewTest extends TestBase {
     public void WhenAdImageViewIsAttached_VerifyThatAdViewTimerTaskIsScheduled() throws Exception {
         creative.renderedTime = Integer.MAX_VALUE;
 
-        when(sharethrough.getAdCacheTimeInMilliseconds()).thenReturn((long) 20);
+        when(sharethrough.getAdCacheTimeInMilliseconds()).thenReturn(20);
         subject.onAttachedToWindow();
         verify(timer).schedule(any(TimerTask.class), anyInt(), anyInt());
     }
