@@ -313,11 +313,13 @@ public class Sharethrough {
         final DFPNetworking.DFPCreativeKeyCallback creativeKeyCallback = new DFPNetworking.DFPCreativeKeyCallback() {
             @Override
             public void receivedCreativeKey() {
+                dfpNetworking.setRunning(false);
                 fetchAds();
             }
 
             @Override
             public void DFPKeyError(String errorMessage) {
+                dfpNetworking.setRunning(false);
                 Log.e("DFP", "received Error message: " + errorMessage);
             }
         };
@@ -331,6 +333,7 @@ public class Sharethrough {
 
             @Override
             public void DFPError(String errorMessage) {
+                dfpNetworking.setRunning(false);
                 Log.e("DFP", "Error fetching DFP path: " + errorMessage);
             }
         };

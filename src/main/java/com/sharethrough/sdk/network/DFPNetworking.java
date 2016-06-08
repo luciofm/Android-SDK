@@ -21,17 +21,24 @@ import java.net.URI;
 import java.util.concurrent.ExecutorService;
 
 public class DFPNetworking {
-
     private static String BASE_URL = "https://platform-cdn.sharethrough.com/placements/";
+    private boolean isRunning = false;
 
+    public void setRunning(boolean isRunning) {
+        this.isRunning = isRunning;
+    }
     public void fetchDFPPath(final String key, final DFPPathFetcherCallback callback) {
         STRExecutorService.getInstance().execute(new Runnable() {
             @Override
             public void run() {
+                if (isRunning) {
+                    return;
+                }
+                isRunning = true;
+
                 final URI uri = URI.create(BASE_URL + key + "/sdk.json");
                 String json = null;
                 try {
-
                     DefaultHttpClient client = new DefaultHttpClient();
                     HttpGet request = new HttpGet(uri);
                     request.addHeader("User-Agent", Sharethrough.USER_AGENT);
@@ -49,6 +56,7 @@ public class DFPNetworking {
                     }
                     Log.e("Sharethrough", msg, e);
                     callback.DFPError(msg);
+                    isRunning = false;
                 }
             }
         });
