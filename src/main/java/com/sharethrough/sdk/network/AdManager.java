@@ -18,6 +18,7 @@ public class AdManager {
     protected AdFetcher adFetcher;
 
     private boolean isRunning = false;
+    private String mediationRequestId = ""; // To remove for asap v2
 
     // Interface to notify Sharethrough ads are ready to show
     public interface AdManagerListener{
@@ -59,11 +60,15 @@ public class AdManager {
             adManagerListener.onAdsReady(creatives, new Placement(response.placement));
         }
         isRunning = false;
+        // To remove for asap v2
+        mediationRequestId = "";
     }
 
     public void handleAdResponseFailed() {
         adManagerListener.onAdsFailedToLoad();
         isRunning = false;
+        // To remove for asap v2
+        mediationRequestId = "";
     }
 
     protected List<Creative> convertToCreatives(Response response) {
@@ -72,23 +77,25 @@ public class AdManager {
             Creative creative;
             if (responseCreative.creative.action.equals("hosted-video")) {
                 if (!responseCreative.creative.forceClickToPlay && response.placement.allowInstantPlay) {
-                    creative = new InstantPlayCreative(responseCreative);
+                    creative = new InstantPlayCreative(responseCreative, mediationRequestId);
                 } else {
-                    creative = new Creative(responseCreative);
+                    creative = new Creative(responseCreative, mediationRequestId);
                 }
             } else {
-                creative = new Creative(responseCreative);
+                creative = new Creative(responseCreative, mediationRequestId);
             }
             creatives.add(creative);
         }
         return creatives;
     }
 
-    public synchronized void fetchAds(String url, ArrayList<NameValuePair> queryStringParams, String advertisingId){
+    public synchronized void fetchAds(String url, ArrayList<NameValuePair> queryStringParams, String advertisingId, String mediationRequestId){
         if(isRunning) {
             return;
         }
         isRunning = true;
+        // To remove for asap v2
+        this.mediationRequestId = mediationRequestId;
 
         String adRequestUrl = generateRequestUrl(url, queryStringParams, advertisingId);
 
@@ -118,5 +125,13 @@ public class AdManager {
 
         String result = url + "?" + formattedQueryStringParams;
         return result;
+    }
+
+    public void setMediationRequestId(String mediationRequestId) {
+        this.mediationRequestId = mediationRequestId;
+    }
+
+    public String getMediationRequestId() {
+        return this.mediationRequestId;
     }
 }

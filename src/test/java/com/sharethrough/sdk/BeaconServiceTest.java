@@ -13,7 +13,6 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.shadows.ShadowLog;
 import org.robolectric.shadows.httpclient.*;
@@ -40,6 +39,7 @@ public class BeaconServiceTest extends TestBase {
     private String advertisingId;
     private Response.Creative responseCreative;
     private int feedPosition;
+    private String mediationRequestId;
 
     @Before
     public void setUp() throws Exception {
@@ -82,7 +82,9 @@ public class BeaconServiceTest extends TestBase {
         beacon.silentPlay = new ArrayList<>();
 
         responseCreative.creative.beacon = beacon;
-        creative = new Creative(responseCreative);
+
+        mediationRequestId = "fake-mrid"; // To remove for asap v2
+        creative = new Creative(responseCreative, mediationRequestId);
 
         packageInfo.versionName = "fake_app_id";
         when(placement.getStatus()).thenReturn("live");
@@ -117,6 +119,7 @@ public class BeaconServiceTest extends TestBase {
         expectedCommonParams.put("campkey", "campaign key");
         expectedCommonParams.put("arid", "fake-adserver-request-id");
         expectedCommonParams.put("awid", "fake-auction-win-id");
+        expectedCommonParams.put("mrid", "fake-mrid");
 
 
         assertThat(subject.commonParamsWithCreative(RuntimeEnvironment.application, creative)).isEqualTo(expectedCommonParams);
@@ -133,7 +136,7 @@ public class BeaconServiceTest extends TestBase {
         responseCreativeWithDealId.creative.campaignKey= "campaign key";
         responseCreativeWithDealId.creative.dealId = "fake_deal_id";
 
-        creative = new Creative(responseCreativeWithDealId);
+        creative = new Creative(responseCreativeWithDealId, mediationRequestId);
 
         expectedCommonParams.put("pkey", "placement key");
         expectedCommonParams.put("vkey", "variant key");
@@ -142,6 +145,7 @@ public class BeaconServiceTest extends TestBase {
         expectedCommonParams.put("arid", "fake-adserver-request-id");
         expectedCommonParams.put("awid", "fake-auction-win-id");
         expectedCommonParams.put("deal_id", "fake_deal_id");
+        expectedCommonParams.put("mrid", "fake-mrid");
         assertThat(subject.commonParamsWithCreative(RuntimeEnvironment.application, creative)).isEqualTo(expectedCommonParams);
     }
 
@@ -225,7 +229,7 @@ public class BeaconServiceTest extends TestBase {
 
         responseCreative.creative.beacon.impression = impressionEndoints;
 
-        Creative testCreative = new Creative(responseCreative);
+        Creative testCreative = new Creative(responseCreative, mediationRequestId);
 
         subject.adReceived(RuntimeEnvironment.application, testCreative, feedPosition);
 
@@ -256,7 +260,7 @@ public class BeaconServiceTest extends TestBase {
 
         responseCreative.creative.beacon.visible = visibleEndoints;
 
-        Creative testCreative = new Creative(responseCreative);
+        Creative testCreative = new Creative(responseCreative, mediationRequestId);
 
         subject.adVisible(RendererTest.makeAdView(), testCreative, feedPosition);
 
@@ -288,7 +292,7 @@ public class BeaconServiceTest extends TestBase {
         responseCreative.creative.beacon.click = clickEndoints;
         responseCreative.creative.beacon.play = playEndoints;
 
-        Creative testCreative = new Creative(responseCreative);
+        Creative testCreative = new Creative(responseCreative, mediationRequestId);
 
         subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition);
 
@@ -319,7 +323,7 @@ public class BeaconServiceTest extends TestBase {
 
         responseCreative.creative.beacon.silentPlay = silentPlayEndpoints;
 
-        Creative testCreative = new Creative(responseCreative);
+        Creative testCreative = new Creative(responseCreative, mediationRequestId);
 
         subject.silentAutoPlayDuration(RuntimeEnvironment.application, testCreative, seconds, feedPosition);
 
@@ -356,7 +360,7 @@ public class BeaconServiceTest extends TestBase {
 
         responseCreative.creative.beacon.tenSecondSilentPlay = silentPlayEndpoints;
 
-        Creative testCreative = new Creative(responseCreative);
+        Creative testCreative = new Creative(responseCreative, mediationRequestId);
 
         subject.silentAutoPlayDuration(RuntimeEnvironment.application, testCreative, seconds, feedPosition);
 
@@ -393,7 +397,7 @@ public class BeaconServiceTest extends TestBase {
 
         responseCreative.creative.beacon.fifteenSecondSilentPlay = silentPlayEndpoints;
 
-        Creative testCreative = new Creative(responseCreative);
+        Creative testCreative = new Creative(responseCreative, mediationRequestId);
 
         subject.silentAutoPlayDuration(RuntimeEnvironment.application, testCreative, seconds, feedPosition);
 
@@ -430,7 +434,7 @@ public class BeaconServiceTest extends TestBase {
 
         responseCreative.creative.beacon.thirtySecondSilentPlay = silentPlayEndpoints;
 
-        Creative testCreative = new Creative(responseCreative);
+        Creative testCreative = new Creative(responseCreative, mediationRequestId);
 
         subject.silentAutoPlayDuration(RuntimeEnvironment.application, testCreative, seconds, feedPosition);
 
@@ -466,7 +470,7 @@ public class BeaconServiceTest extends TestBase {
 
         responseCreative.creative.beacon.completedSilentPlay = silentPlayEndpoints;
 
-        Creative testCreative = new Creative(responseCreative);
+        Creative testCreative = new Creative(responseCreative, mediationRequestId);
 
         subject.videoPlayed(RuntimeEnvironment.application, testCreative, 95, true, feedPosition);
 
@@ -496,7 +500,7 @@ public class BeaconServiceTest extends TestBase {
         responseCreative.creative.beacon.impression = new ArrayList<>();
         responseCreative.creative.beacon.visible = new ArrayList<>();
 
-        Creative testCreative = new Creative(responseCreative);
+        Creative testCreative = new Creative(responseCreative, mediationRequestId);
 
         subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition);
 
@@ -523,7 +527,7 @@ public class BeaconServiceTest extends TestBase {
 
         responseCreative.creative.beacon.click = clickEndoints;
 
-        Creative testCreative = new Creative(responseCreative);
+        Creative testCreative = new Creative(responseCreative, mediationRequestId);
 
         subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition);
 

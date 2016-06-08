@@ -92,7 +92,10 @@ public class AdFetcher {
         for (int i = 0; i < creatives.length(); i++) {
             JSONObject jsonCreative = creatives.getJSONObject(i);
             Response.Creative creative = new Response.Creative();
+
             creative.adserverRequestId = adserverRequestId;
+
+
             creative.auctionWinId = jsonCreative.getString("auctionWinId");
 
             JSONObject jsonCreativeInner = jsonCreative.getJSONObject("creative");

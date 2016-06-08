@@ -53,9 +53,9 @@ public class SharethroughSerializerTest extends TestBase {
     @Test
     public void GetCreativesQueue_SerializedStringShouldReturnCreativesQueue() throws Exception {
         CreativesQueue cq = new CreativesQueue();
-        cq.add(new Creative(new Response.Creative()));
-        cq.add(new Creative(new Response.Creative()));
-        cq.add(new Creative(new Response.Creative()));
+        cq.add(new Creative(new Response.Creative(), "mrid"));
+        cq.add(new Creative(new Response.Creative(), "mrid"));
+        cq.add(new Creative(new Response.Creative(), "mrid"));
         assertThat(cq.size()).isEqualTo(3);
 
         String serializedSharethroughObj = SharethroughSerializer.serialize(cq, new LruCache<Integer, Creative>(10), 2, 5);
@@ -75,9 +75,9 @@ public class SharethroughSerializerTest extends TestBase {
     public void GetSlot_SerializedStringShouldReturnSlot() throws Exception {
         LruCache<Integer,Creative> slot = new LruCache<>(10);
 
-        slot.put(0, new Creative(new Response.Creative()));
-        slot.put(1, new Creative(new Response.Creative()));
-        slot.put(2, new Creative(new Response.Creative()));
+        slot.put(0, new Creative(new Response.Creative(), "mrid"));
+        slot.put(1, new Creative(new Response.Creative(), "mrid"));
+        slot.put(2, new Creative(new Response.Creative(), "mrid"));
         assertThat(slot.size()).isEqualTo(3);
 
         String serializedSharethroughObj = SharethroughSerializer.serialize(new CreativesQueue(), slot, 2, 5);

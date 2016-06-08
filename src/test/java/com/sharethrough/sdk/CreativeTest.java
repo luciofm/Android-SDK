@@ -14,13 +14,14 @@ public class CreativeTest extends TestBase {
     private static final byte[] LOGO_BYTES = new byte[0];
     private Creative subject;
     private Response.Creative responseCreative;
+    private String mediationRequestId; // To remove for asap v2
 
     @Before
     public void setUp() throws Exception {
         responseCreative = new Response.Creative();
         responseCreative.creative = new Response.Creative.CreativeInner();
         responseCreative.creative.beacon = new Response.Creative.CreativeInner.Beacon();
-        subject = new Creative(responseCreative);
+        subject = new Creative(responseCreative, mediationRequestId);
     }
 
     @Test

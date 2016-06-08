@@ -25,7 +25,7 @@ import java.util.Map;
  */
 public class ASAPManager {
     private static final String PROGRAMMATIC = "stx_monetize";
-    public static final String ASAP_ENDPOINT_PREFIX = "https://asap-staging.sharethrough.com/v1";
+    public static final String ASAP_ENDPOINT_PREFIX = "http://asap-staging-359753157.us-west-2.elb.amazonaws.com/v1";
     private static final String PLACEMENT_KEY = "placement_key";
     private static final String ASAP_UNDEFINED = "undefined";
     private static final String ASAP_OK = "OK";
@@ -41,11 +41,12 @@ public class ASAPManager {
     }
 
     public interface ASAPManagerListener {
-        void onSuccess(ArrayList<NameValuePair> queryStringParams);
+        void onSuccess(ArrayList<NameValuePair> queryStringParams, String mediationRequestId);
         void onError(String error);
     }
 
     public class AdResponse {
+        String mrid;
         String pkey;
         String adServer;
         String keyType;
@@ -76,7 +77,7 @@ public class ASAPManager {
         Gson gson = new Gson();
         try {
             AdResponse adResponse = gson.fromJson(response, AdResponse.class);
-            if (adResponse.pkey == null || adResponse.adServer == null
+            if (adResponse.mrid == null || adResponse.pkey == null || adResponse.adServer == null
                     || adResponse.keyType == null || adResponse.keyValue == null || adResponse.status == null) {
                 asapManagerListener.onError("ASAP response does not have correct key values");
             } else if (!adResponse.status.equals(ASAP_OK)) {
@@ -87,7 +88,7 @@ public class ASAPManager {
                 if (!adResponse.keyType.equals(PROGRAMMATIC) && !adResponse.keyType.equals(ASAP_UNDEFINED) && !adResponse.keyValue.equals(ASAP_UNDEFINED)) {
                     queryStringParams.add(new BasicNameValuePair(adResponse.keyType, adResponse.keyValue));
                 }
-                asapManagerListener.onSuccess(queryStringParams);
+                asapManagerListener.onSuccess(queryStringParams, adResponse.mrid);
             }
         } catch (JsonParseException e) {
             asapManagerListener.onError(e.toString());

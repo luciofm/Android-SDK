@@ -25,6 +25,9 @@ public class Response {
     public static class Creative {
         @JsonProperty("adserverRequestId")
         public String adserverRequestId;
+        @JsonProperty("mediationRequestId")
+        public String mediationRequestId;
+
         @JsonProperty("auctionWinId")
         public String auctionWinId;
         @JsonProperty("price")

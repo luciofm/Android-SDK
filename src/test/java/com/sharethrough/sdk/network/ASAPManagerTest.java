@@ -22,11 +22,13 @@ import static org.mockito.Mockito.*;
 public class ASAPManagerTest extends TestBase  {
     private ASAPManager subject;
     private String pkey;
+    private String mediationRequestId;
     @Mock private RequestQueue requestQueue;
     @Mock private ASAPManager.ASAPManagerListener asapManagerListener;
     @Before
     public void setUp() throws Exception {
         pkey = "fakePkey";
+        mediationRequestId = "fakeMrid";
         subject = new ASAPManager(pkey, requestQueue);
     }
     @Test
@@ -49,42 +51,42 @@ public class ASAPManagerTest extends TestBase  {
 
     @Test
     public void handleResponse_callsOnErrorIfResponseStatusIsNotOK() {
-        String responseStatusNotOK = "{ 'pkey': 'c1a0a591', 'adServer': 'DFP', 'keyType': 'undefined', 'keyValue': 'undefined', 'status': 'Error'}";
+        String responseStatusNotOK = "{ 'mrid': 'fakeMrid', 'pkey': 'c1a0a591', 'adServer': 'DFP', 'keyType': 'undefined', 'keyValue': 'undefined', 'status': 'Error'}";
         subject.handleResponse(responseStatusNotOK, asapManagerListener);
         verify(asapManagerListener).onError("Error");
     }
     @Test
     public void handleResponse_callsSuccessWithCorrectParamsForDirectSell() {
-        String responseForDirectSell = "{ 'pkey': 'c1a0a591', 'adServer': 'DFP', 'keyType': 'creative_key', 'keyValue': 'fakeckey', 'status': 'OK'}";
+        String responseForDirectSell = "{ 'mrid': 'fakeMrid', 'pkey': 'c1a0a591', 'adServer': 'DFP', 'keyType': 'creative_key', 'keyValue': 'fakeckey', 'status': 'OK'}";
         subject.handleResponse(responseForDirectSell, asapManagerListener);
 
         ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
         queryStringParams.add(new BasicNameValuePair("placement_key", "fakePkey"));
         queryStringParams.add(new BasicNameValuePair("creative_key", "fakeckey"));
-        verify(asapManagerListener).onSuccess(queryStringParams);
+        verify(asapManagerListener).onSuccess(queryStringParams, mediationRequestId);
     }
     @Test
     public void handleResponse_callsSuccessWithCorrectParamsForProgrammatic() {
-        String responseForProgrammatic = "{ 'pkey': 'c1a0a591', 'adServer': 'DFP', 'keyType': 'stx_monetize', 'keyValue': 'undefined', 'status': 'OK'}";
+        String responseForProgrammatic = "{ 'mrid': 'fakeMrid', 'pkey': 'c1a0a591', 'adServer': 'DFP', 'keyType': 'stx_monetize', 'keyValue': 'undefined', 'status': 'OK'}";
         subject.handleResponse(responseForProgrammatic, asapManagerListener);
 
         ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
         queryStringParams.add(new BasicNameValuePair("placement_key", "fakePkey"));
-        verify(asapManagerListener).onSuccess(queryStringParams);
+        verify(asapManagerListener).onSuccess(queryStringParams, mediationRequestId);
     }
 
     @Test
     public void handleResponse_callsSuccessWithCorrectParamsNoAdServerSetup() {
-        String responseForNoAdServer = "{ 'pkey': 'c1a0a591', 'adServer': 'DFP', 'keyType': 'undefined', 'keyValue': 'undefined', 'status': 'OK'}";
+        String responseForNoAdServer = "{ 'mrid': 'fakeMrid', 'pkey': 'c1a0a591', 'adServer': 'DFP', 'keyType': 'undefined', 'keyValue': 'undefined', 'status': 'OK'}";
         subject.handleResponse(responseForNoAdServer, asapManagerListener);
 
         ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
         queryStringParams.add(new BasicNameValuePair("placement_key", "fakePkey"));
-        verify(asapManagerListener).onSuccess(queryStringParams);
+        verify(asapManagerListener).onSuccess(queryStringParams, mediationRequestId);
     }
     @Test
     public void handleResponse_callsOnErrorWithInCorrectParams() {
-        String responseForIncorrectResponse = "{'pkey': 'c1a0a591'}";
+        String responseForIncorrectResponse = "{'mrid': 'fakeMrid', 'pkey': 'c1a0a591'}";
         subject.handleResponse(responseForIncorrectResponse, asapManagerListener);
         verify(asapManagerListener).onError(anyString());
     }
@@ -93,6 +95,13 @@ public class ASAPManagerTest extends TestBase  {
     public void handleResponse_callsOnErrorWithInCorrectJson() {
         String responseIncorrectJson = "{'pkey'l;}";
         subject.handleResponse(responseIncorrectJson, asapManagerListener);
+        verify(asapManagerListener).onError(anyString());
+    }
+
+    @Test
+    public void handleResponse_callsOnErrorWithNoMrid() {
+        String responseForNoMrid = "{ 'pkey': 'c1a0a591', 'adServer': 'DFP', 'keyType': 'undefined', 'keyValue': 'undefined', 'status': 'OK'}";
+        subject.handleResponse(responseForNoMrid, asapManagerListener);
         verify(asapManagerListener).onError(anyString());
     }
 }

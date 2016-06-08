@@ -78,6 +78,7 @@ public class BeaconService {
         if(false == creative.getDealId().isEmpty()) {
             result.put("deal_id", creative.getDealId());
         }
+        result.put("mrid", creative.getMediationRequestId());
         return result;
     }
 
