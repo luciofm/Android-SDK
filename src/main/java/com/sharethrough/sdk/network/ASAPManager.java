@@ -25,7 +25,7 @@ import java.util.Map;
  */
 public class ASAPManager {
     private static final String PROGRAMMATIC = "stx_monetize";
-    public static final String ASAP_ENDPOINT_PREFIX = "http://asap-staging-359753157.us-west-2.elb.amazonaws.com/v1";
+    public static final String ASAP_ENDPOINT_PREFIX = "http://asap.sharethrough.com/v1";
     private static final String PLACEMENT_KEY = "placement_key";
     private static final String ASAP_UNDEFINED = "undefined";
     private static final String ASAP_OK = "OK";
