@@ -53,6 +53,11 @@ public class Sharethrough {
         public void noAdsToShow() {
 
         }
+
+        @Override
+        public void adsFailedToLoad() {
+
+        }
     };
     private Handler handler = new Handler(Looper.getMainLooper());
     private LruCache<Integer, Creative> creativesBySlot = new LruCache<>(10);
@@ -238,7 +243,7 @@ public class Sharethrough {
 
         @Override
         public void onAdsFailedToLoad() {
-
+            fireAdsFailedToLoad();
         }
     };
 
@@ -267,6 +272,15 @@ public class Sharethrough {
             @Override
             public void run() {
                 onStatusChangeListener.newAdsToShow();
+            }
+        });
+    }
+
+    private void fireAdsFailedToLoad() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                onStatusChangeListener.adsFailedToLoad();
             }
         });
     }
@@ -533,6 +547,11 @@ public class Sharethrough {
          * This method is invoked when there are no ads to be shown.
          */
         void noAdsToShow();
+
+        /**
+         * This method is invoked when the request fails to go through
+         */
+        void adsFailedToLoad();
     }
 
     public static void addDFPKeys(final String dfpPath, final String adGroupString) {
