@@ -44,6 +44,11 @@ public class Sharethrough {
         public void noAdsToShow() {
 
         }
+
+        @Override
+        public void adsFailedToLoad() {
+
+        }
     };
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
@@ -82,6 +87,7 @@ public class Sharethrough {
 
             @Override
             public void onError(String error) {
+                onStatusChangeListener.adsFailedToLoad();
                 Logger.e("ASAP error: " + error, null);
             }
         });
@@ -112,6 +118,7 @@ public class Sharethrough {
 
         @Override
         public void onAdsFailedToLoad() {
+            fireAdsFailedToLoad();
         }
     };
 
@@ -140,6 +147,15 @@ public class Sharethrough {
             @Override
             public void run() {
                 onStatusChangeListener.newAdsToShow();
+            }
+        });
+    }
+
+    private void fireAdsFailedToLoad() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                onStatusChangeListener.adsFailedToLoad();
             }
         });
     }
@@ -337,6 +353,11 @@ public class Sharethrough {
          * This method is invoked when there are no ads to be shown.
          */
         void noAdsToShow();
+
+        /**
+         * This method is invoked when the request fails to go through
+         * */
+        void adsFailedToLoad();
     }
 
     public String serialize() {
