@@ -334,6 +334,7 @@ public class Sharethrough {
             @Override
             public void DFPKeyError(String errorMessage) {
                 dfpNetworking.setRunning(false);
+                fireAdsFailedToLoad();
                 Log.e("DFP", "received Error message: " + errorMessage);
             }
         };
@@ -348,6 +349,7 @@ public class Sharethrough {
             @Override
             public void DFPError(String errorMessage) {
                 dfpNetworking.setRunning(false);
+                fireAdsFailedToLoad();
                 Log.e("DFP", "Error fetching DFP path: " + errorMessage);
             }
         };
