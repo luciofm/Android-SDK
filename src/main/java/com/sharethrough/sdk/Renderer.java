@@ -21,6 +21,15 @@ import com.squareup.picasso.Picasso;
 import java.util.Timer;
 
 public class Renderer {
+    private RendererListener rendererListener;
+
+    public interface RendererListener {
+        public void render(String imageUrl, ImageView imageView);
+    }
+
+    public void setRendererListener(RendererListener rendererListener) {
+        this.rendererListener = rendererListener;
+    }
 
     public void putCreativeIntoAdView(final IAdView adView, final Creative creative, final BeaconService beaconService,
     final Sharethrough sharethrough, final Timer timer) {
@@ -56,9 +65,13 @@ public class Renderer {
                 ImageView brandLogoView = adView.getBrandLogo();
                 if (brandLogoView != null ){
                     if(creative.getBrandLogoUrl() != null && !creative.getBrandLogoUrl().isEmpty()) {
-                        Picasso.with(container.getContext()).load(creative.getBrandLogoUrl()).fit().centerCrop().tag("STRBrandLogo").into(brandLogoView);
+                        if (rendererListener != null) {
+                            rendererListener.render(creative.getBrandLogoUrl(), brandLogoView);
+                        } else {
+                            Picasso.with(container.getContext()).load(creative.getBrandLogoUrl()).fit().centerCrop().tag("STRBrandLogo").into(brandLogoView);
+                        }
                         brandLogoView.setVisibility(View.VISIBLE);
-                    }else{
+                    } else{
                         brandLogoView.setVisibility(View.GONE);
                     }
                 }
@@ -68,7 +81,11 @@ public class Renderer {
                 thumbnailContainer.removeAllViews();
                 final AdImageView thumbnailImage = new AdImageView(container.getContext(), sharethrough, creative, adView, feedPosition, beaconService);
                 if (creative.getThumbnailUrl() != null && !creative.getThumbnailUrl().isEmpty())
-                    Picasso.with(container.getContext()).load(creative.getThumbnailUrl()).fit().centerCrop().tag("STRAdImage").into(thumbnailImage);
+                    if (rendererListener != null) {
+                        rendererListener.render(creative.getThumbnailUrl(), thumbnailImage);
+                    } else {
+                        Picasso.with(container.getContext()).load(creative.getThumbnailUrl()).fit().centerCrop().tag("STRAdImage").into(thumbnailImage);
+                    }
                 sharethrough.fetchAdsIfReadyForMore();
                 thumbnailContainer.addView(thumbnailImage,
                         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));

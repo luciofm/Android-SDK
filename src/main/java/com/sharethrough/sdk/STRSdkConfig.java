@@ -46,6 +46,10 @@ public class STRSdkConfig {
         this.creativesBySlot = SharethroughSerializer.getSlot(serializedSharethrough);
     }
 
+    public void setRenderListener(Renderer.RendererListener rendererListener) {
+        this.renderer.setRendererListener(rendererListener);
+    }
+
     public String getSerializedSharethrough() {
         return serializedSharethrough;
     }
