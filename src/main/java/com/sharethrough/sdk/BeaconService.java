@@ -10,8 +10,8 @@ import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
 import com.sharethrough.android.sdk.BuildConfig;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+//import org.apache.http.client.methods.HttpGet;
+//import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -223,7 +223,7 @@ public class BeaconService {
                 }
 
 
-                DefaultHttpClient client = new DefaultHttpClient();
+//                DefaultHttpClient client = new DefaultHttpClient();
                 String url = uriBuilder.build().toString();
 
 
@@ -231,13 +231,13 @@ public class BeaconService {
                 Logger.d("beacon fired type: %s", beaconParams.get("type") == null ? "third party beacon " : beaconParams.get("type"));
                 Logger.d("beacon user event: %s", beaconParams.get("userEvent"));
                 Logger.i("beacon url: %s", url);
-                try {
-                    HttpGet request = new HttpGet(url);
-                    request.addHeader("User-Agent", Sharethrough.USER_AGENT + "; " + appPackageName);
-                    client.execute(request);
-                } catch (Exception e) {
-                    Logger.e("beacon fired failed for %s", e, url);
-                }
+//                try {
+//                    HttpGet request = new HttpGet(url);
+//                    request.addHeader("User-Agent", Sharethrough.USER_AGENT + "; " + appPackageName);
+//                    client.execute(request);
+//                } catch (Exception e) {
+//                    Logger.e("beacon fired failed for %s", e, url);
+//                }
             }
         });
     }

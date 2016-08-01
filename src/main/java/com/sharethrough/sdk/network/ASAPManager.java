@@ -1,5 +1,6 @@
 package com.sharethrough.sdk.network;
 
+import android.util.Pair;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -8,9 +9,9 @@ import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.sharethrough.sdk.Logger;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.message.BasicNameValuePair;
+//import org.apache.http.NameValuePair;
+//import org.apache.http.client.utils.URLEncodedUtils;
+//import org.apache.http.message.BasicNameValuePair;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -41,7 +42,7 @@ public class ASAPManager {
     }
 
     public interface ASAPManagerListener {
-        void onSuccess(ArrayList<NameValuePair> queryStringParams, String mediationRequestId);
+        void onSuccess(ArrayList<Pair<String,String>> queryStringParams, String mediationRequestId);
         void onError(String error);
     }
 
@@ -83,12 +84,12 @@ public class ASAPManager {
             } else if (!adResponse.status.equals(ASAP_OK)) {
                 asapManagerListener.onError(adResponse.status);
             } else {
-                ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
-                queryStringParams.add(new BasicNameValuePair(PLACEMENT_KEY, placementKey));
-                if (!adResponse.keyType.equals(PROGRAMMATIC) && !adResponse.keyType.equals(ASAP_UNDEFINED) && !adResponse.keyValue.equals(ASAP_UNDEFINED)) {
-                    queryStringParams.add(new BasicNameValuePair(adResponse.keyType, adResponse.keyValue));
-                }
-                asapManagerListener.onSuccess(queryStringParams, adResponse.mrid);
+//                ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
+//                queryStringParams.add(new BasicNameValuePair(PLACEMENT_KEY, placementKey));
+//                if (!adResponse.keyType.equals(PROGRAMMATIC) && !adResponse.keyType.equals(ASAP_UNDEFINED) && !adResponse.keyValue.equals(ASAP_UNDEFINED)) {
+//                    queryStringParams.add(new BasicNameValuePair(adResponse.keyType, adResponse.keyValue));
+//                }
+//                asapManagerListener.onSuccess(queryStringParams, adResponse.mrid);
             }
         } catch (JsonParseException e) {
             asapManagerListener.onError(e.toString());

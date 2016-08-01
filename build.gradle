@@ -33,7 +33,7 @@ android {
         }
     }
 
-    compileSdkVersion 21
+    compileSdkVersion 23
     buildToolsVersion '21.1.1'
 
     compileOptions {
@@ -60,7 +60,7 @@ android {
         defaultConfig {
             versionCode code
             versionName version
-            minSdkVersion 14
+            minSdkVersion 15
             targetSdkVersion 18
         }
     }
@@ -69,8 +69,8 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 14
+        minSdkVersion 15
+        targetSdkVersion 15
         versionCode 1
         versionName version
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
@@ -177,6 +177,8 @@ dependencies {
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.google.code.gson:gson:2.5'
     compile 'com.android.volley:volley:1.0.0'
+    compile 'com.facebook.android:facebook-android-sdk:4.+'
+
     // Espresso
     androidTestCompile('junit:junit:4.11') {
         exclude module: 'hamcrest-core'

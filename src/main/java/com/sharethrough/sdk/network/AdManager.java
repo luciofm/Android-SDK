@@ -2,12 +2,13 @@ package com.sharethrough.sdk.network;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.util.Pair;
 import com.sharethrough.sdk.*;
 import com.sharethrough.sdk.mediation.MediationManager;
 import com.sharethrough.sdk.mediation.STRMediationAdapter;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.message.BasicNameValuePair;
+//import org.apache.http.NameValuePair;
+//import org.apache.http.client.utils.URLEncodedUtils;
+//import org.apache.http.message.BasicNameValuePair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,7 +104,7 @@ public class AdManager implements STRMediationAdapter {
         return creatives;
     }
 
-    public synchronized void fetchAds(String url, ArrayList<NameValuePair> queryStringParams, String advertisingId, String mediationRequestId){
+    public synchronized void fetchAds(String url, ArrayList<Pair<String,String>> queryStringParams, String advertisingId, String mediationRequestId){
         if(isRunning) {
             return;
         }
@@ -118,9 +119,9 @@ public class AdManager implements STRMediationAdapter {
         adFetcher.fetchAds(adRequestUrl);
     }
 
-    private String generateRequestUrl(String url, ArrayList<NameValuePair> queryStringParams, String advertisingId) {
+    private String generateRequestUrl(String url, ArrayList<Pair<String, String>> queryStringParams, String advertisingId) {
         if (advertisingId != null) {
-            queryStringParams.add(new BasicNameValuePair("uid", advertisingId));
+            queryStringParams.add(new Pair<>("uid", advertisingId));
         }
 
         String appPackageName = applicationContext.getPackageName();
@@ -132,11 +133,12 @@ public class AdManager implements STRMediationAdapter {
         }
 
         if(versionName != null){
-            queryStringParams.add(new BasicNameValuePair("appId", versionName));
+            queryStringParams.add(new Pair<>("appId", versionName));
         }
-        queryStringParams.add(new BasicNameValuePair("appName", appPackageName));
-        String formattedQueryStringParams = URLEncodedUtils.format(queryStringParams, "utf-8");
+        queryStringParams.add(new Pair<>("appName", appPackageName));
+//        String formattedQueryStringParams = URLEncodedUtils.format(queryStringParams, "utf-8");
 
+        String formattedQueryStringParams = "";
         String result = url + "?" + formattedQueryStringParams;
         return result;
     }

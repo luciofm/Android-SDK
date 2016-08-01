@@ -5,11 +5,11 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Pair;
 import com.sharethrough.android.sdk.BuildConfig;
 import com.sharethrough.sdk.mediation.MediationManager;
 import com.sharethrough.sdk.network.ASAPManager;
 import com.sharethrough.sdk.network.AdManager;
-import org.apache.http.NameValuePair;
 import java.util.*;
 
 /**
@@ -78,7 +78,7 @@ public class Sharethrough {
 
         strSdkConfig.getAsapManager().callASAP(new ASAPManager.ASAPManagerListener() {
             @Override
-            public void onSuccess(ArrayList<NameValuePair> queryStringParams, String mediationRequestId) {
+            public void onSuccess(ArrayList<Pair<String,String>> queryStringParams, String mediationRequestId) {
                 String asapResponse = "fake_asap_response";
                 Map<String, String> extras = new HashMap<String, String>();
                 strSdkConfig.getMediationManager().initiateWaterfallAndLoadAd(asapResponse, mediationListener, extras);
@@ -103,7 +103,7 @@ public class Sharethrough {
             strSdkConfig.getMediationManager().loadNextAd();
         }
     };
-    
+
     protected AdManager.AdManagerListener adManagerListener = new AdManager.AdManagerListener() {
         @Override
         public void onAdsReady(List<Creative> listOfCreativesReadyForShow, Placement placement) {
