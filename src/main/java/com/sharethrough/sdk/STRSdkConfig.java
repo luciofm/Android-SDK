@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.LruCache;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.sharethrough.sdk.mediation.MediationManager;
 import com.sharethrough.sdk.network.ASAPManager;
 import com.sharethrough.sdk.network.AdManager;
 
@@ -23,6 +24,7 @@ public class STRSdkConfig {
     private AdvertisingIdProvider advertisingIdProvider;
     private RequestQueue requestQueue;
     private ASAPManager asapManager;
+    private MediationManager mediationManager;
 
     public STRSdkConfig(Context context, String placementKey){
         Logger.setContext(context);
@@ -38,6 +40,7 @@ public class STRSdkConfig {
         this.asapManager = new ASAPManager(placementKey, requestQueue);
         this.creativesBySlot = new LruCache<>(10);
         this.creativeIndices = new HashSet<>(); //contains history of all indices for creatives, whereas creativesBySlot only caches the last 10
+        this.mediationManager = new MediationManager(context);
     }
 
     public void setSerializedSharethrough( String serializedSharethrough ){
@@ -84,5 +87,9 @@ public class STRSdkConfig {
 
     public ASAPManager getAsapManager() {
         return asapManager;
+    }
+
+    public MediationManager getMediationManager() {
+        return mediationManager;
     }
 }

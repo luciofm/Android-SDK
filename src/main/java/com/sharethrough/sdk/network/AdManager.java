@@ -3,22 +3,31 @@ package com.sharethrough.sdk.network;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import com.sharethrough.sdk.*;
+import com.sharethrough.sdk.mediation.MediationManager;
+import com.sharethrough.sdk.mediation.STRMediationAdapter;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
-public class AdManager {
+public class AdManager implements STRMediationAdapter {
 
     private Context applicationContext;
     private AdManagerListener adManagerListener;
+    private MediationManager.MediationListener mediationListener;
     protected AdFetcher adFetcher;
 
     private boolean isRunning = false;
     private String mediationRequestId = ""; // To remove for asap v2
+
+    @Override
+    public void loadAd(MediationManager.MediationListener mediationListener, Map<String, String> extras) {
+        fetchAds("", null, "", "");
+    }
 
     // Interface to notify Sharethrough ads are ready to show
     public interface AdManagerListener{
@@ -35,6 +44,10 @@ public class AdManager {
 
     public void setAdManagerListener(AdManagerListener adManagerListener) {
         this.adManagerListener = adManagerListener;
+    }
+
+    public void setMediationListener(MediationManager.MediationListener mediationListener) {
+        this.mediationListener = mediationListener;
     }
 
     protected void setAdFetcherListener() {
@@ -58,6 +71,7 @@ public class AdManager {
             adManagerListener.onNoAdsToShow();
         }else {
             adManagerListener.onAdsReady(creatives, new Placement(response.placement));
+            mediationListener.onAdLoaded();
         }
         isRunning = false;
         // To remove for asap v2

@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import com.sharethrough.android.sdk.BuildConfig;
+import com.sharethrough.sdk.mediation.MediationManager;
 import com.sharethrough.sdk.network.ASAPManager;
 import com.sharethrough.sdk.network.AdManager;
 import org.apache.http.NameValuePair;
@@ -59,6 +60,7 @@ public class Sharethrough {
         }
 
         strSdkConfig.getAdManager().setAdManagerListener(adManagerListener);
+        strSdkConfig.getAdManager().setMediationListener(mediationListener);
     }
 
     protected Placement createPlacement(int articlesBetweenAds, int articlesBeforeFirstAd) {
@@ -77,7 +79,10 @@ public class Sharethrough {
         strSdkConfig.getAsapManager().callASAP(new ASAPManager.ASAPManagerListener() {
             @Override
             public void onSuccess(ArrayList<NameValuePair> queryStringParams, String mediationRequestId) {
-                invokeAdFetcher(apiUrlPrefix, queryStringParams, mediationRequestId);
+                String asapResponse = "fake_asap_response";
+                Map<String, String> extras = new HashMap<String, String>();
+                strSdkConfig.getMediationManager().initiateWaterfallAndLoadAd(asapResponse, mediationListener, extras);
+                //invokeAdFetcher(apiUrlPrefix, queryStringParams, mediationRequestId);
             }
 
             @Override
@@ -87,6 +92,18 @@ public class Sharethrough {
         });
     }
 
+    protected MediationManager.MediationListener mediationListener = new MediationManager.MediationListener() {
+        @Override
+        public void onAdLoaded() {
+            fireNewAdsToShow();
+        }
+
+        @Override
+        public void onAdFailedToLoad() {
+            strSdkConfig.getMediationManager().loadNextAd();
+        }
+    };
+    
     protected AdManager.AdManagerListener adManagerListener = new AdManager.AdManagerListener() {
         @Override
         public void onAdsReady(List<Creative> listOfCreativesReadyForShow, Placement placement) {
@@ -144,9 +161,9 @@ public class Sharethrough {
         });
     }
 
-    private void invokeAdFetcher(String url, ArrayList<NameValuePair> queryStringParams, String mediationRequestId) {
-        strSdkConfig.getAdManager().fetchAds(url, queryStringParams, strSdkConfig.getAdvertisingIdProvider().getAdvertisingId(), mediationRequestId);
-    }
+//    private void invokeAdFetcher(String url, ArrayList<NameValuePair> queryStringParams, String mediationRequestId) {
+//        strSdkConfig.getAdManager().fetchAds(url, queryStringParams, strSdkConfig.getAdvertisingIdProvider().getAdvertisingId(), mediationRequestId);
+//    }
 
     /**
      *
