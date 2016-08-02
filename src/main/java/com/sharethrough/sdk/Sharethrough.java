@@ -102,6 +102,11 @@ public class Sharethrough {
         public void onAdFailedToLoad() {
             strSdkConfig.getMediationManager().loadNextAd();
         }
+
+        @Override
+        public void onAllAdsFailedToLoad() {
+            fireNoAdsToShow();
+        }
     };
 
     protected AdManager.AdManagerListener adManagerListener = new AdManager.AdManagerListener() {

@@ -29,6 +29,11 @@ public class MediationManager {
          * to load an ad
          */
         void onAdFailedToLoad();
+
+        /**
+         *
+         */
+        void onAllAdsFailedToLoad();
     }
     public MediationManager(Context context) {
         this.context = context;
@@ -46,10 +51,10 @@ public class MediationManager {
         loadAd();
     }
 
-    private void setUpWaterfall(final String response,
+    private void setUpWaterfall(final String asapResponse,
                                 final MediationListener mediationListener,
                                 final Map<String, String> extras) {
-        this.mediationWaterfall = new MediationWaterfall(response);
+        this.mediationWaterfall = new MediationWaterfall(asapResponse);
         this.mediationListener = mediationListener;
     }
 
@@ -59,7 +64,8 @@ public class MediationManager {
         if (mediationAdapter != null) {
             mediationAdapter.loadAd(mediationListener, new HashMap<String, String>());
         } else {
-            mediationListener.onAdFailedToLoad();
+            //end of waterfall
+            mediationListener.onAllAdsFailedToLoad();
         }
     }
 
