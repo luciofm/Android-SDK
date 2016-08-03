@@ -4,10 +4,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import com.sharethrough.sdk.media.*;
+import com.sharethrough.sdk.mediation.ICreative;
 
 import java.util.List;
 
-public class Creative {
+public class Creative implements ICreative {
     public enum CreativeType {
         HOSTEDVIDEO,
         CLICKOUT,
@@ -27,6 +28,10 @@ public class Creative {
         this.responseCreative = responseCreative;
         // To remove for asap v2
         this.responseCreative.mediationRequestId = mediationRequestId;
+    }
+
+    public String getNetworkType() {
+        return ICreative.STRAd;
     }
 
     public String getTitle() {

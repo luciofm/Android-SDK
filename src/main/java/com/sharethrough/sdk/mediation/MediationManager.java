@@ -1,6 +1,7 @@
 package com.sharethrough.sdk.mediation;
 
 import android.content.Context;
+import com.facebook.ads.NativeAd;
 import com.sharethrough.sdk.network.AdManager;
 
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ public class MediationManager {
          * Class extending STRMediationAdapter must call this method when it successfully
          * loads an ad
          */
-        void onAdLoaded();
+        void onAdLoaded(NativeAd fbAd);
 
         /**
          * Classes extending STRMediationAdapter must call this method when it fails
@@ -59,10 +60,10 @@ public class MediationManager {
     }
 
     private void loadAd() {
-        STRMediationAdapter mediationAdapter = getMediationAdapter(mediationWaterfall.getNextThirdPartyNetwork());
+        STRMediationAdapter mediationAdapter = getMediationAdapter("");
 
         if (mediationAdapter != null) {
-            mediationAdapter.loadAd(mediationListener, new HashMap<String, String>());
+            mediationAdapter.loadAd(context, mediationListener, new HashMap<String, String>());
         } else {
             //end of waterfall
             mediationListener.onAllAdsFailedToLoad();
@@ -70,7 +71,9 @@ public class MediationManager {
     }
 
     private STRMediationAdapter getMediationAdapter(String thirdPartyNetwork) {
-        if (mediationAdapters.get(thirdPartyNetwork) != null) {
+        return new FANAdapter();
+
+        /**if (mediationAdapters.get(thirdPartyNetwork) != null) {
             return mediationAdapters.get(thirdPartyNetwork);
         } else {
             STRMediationAdapter result = null;
@@ -85,7 +88,7 @@ public class MediationManager {
                     return result;
             }
             return result;
-        }
+        }**/
     }
 
     public class MediationWaterfall {

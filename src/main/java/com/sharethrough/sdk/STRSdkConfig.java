@@ -26,7 +26,10 @@ public class STRSdkConfig {
     private ASAPManager asapManager;
     private MediationManager mediationManager;
 
+    public Context context;
+
     public STRSdkConfig(Context context, String placementKey){
+        this.context = context;
         Logger.setContext(context);
         Logger.enabled = true;
 

@@ -21,7 +21,6 @@ public class AdManager implements STRMediationAdapter {
     private AdManagerListener adManagerListener;
     private MediationManager.MediationListener mediationListener;
     protected AdFetcher adFetcher;
-re
     private boolean isRunning = false;
     private String mediationRequestId = ""; // To remove for asap v2
 
@@ -72,7 +71,6 @@ re
             adManagerListener.onNoAdsToShow();
         }else {
             adManagerListener.onAdsReady(creatives, new Placement(response.placement));
-            mediationListener.onAdLoaded();
         }
         isRunning = false;
         // To remove for asap v2

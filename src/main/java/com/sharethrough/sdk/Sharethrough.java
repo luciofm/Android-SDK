@@ -6,10 +6,17 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Pair;
+import android.view.Gravity;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import com.facebook.ads.NativeAd;
 import com.sharethrough.android.sdk.BuildConfig;
 import com.sharethrough.sdk.mediation.MediationManager;
 import com.sharethrough.sdk.network.ASAPManager;
 import com.sharethrough.sdk.network.AdManager;
+import com.squareup.picasso.Picasso;
+
 import java.util.*;
 
 /**
@@ -94,7 +101,9 @@ public class Sharethrough {
 
     protected MediationManager.MediationListener mediationListener = new MediationManager.MediationListener() {
         @Override
-        public void onAdLoaded() {
+        public void onAdLoaded(NativeAd fbAd) {
+            fbQueue.add(fbAd);
+            Logger.d("Insert fb ad to queue, queue size: %d", fbQueue.size());
             fireNewAdsToShow();
         }
 
@@ -209,6 +218,8 @@ public class Sharethrough {
         return creative;
     }
 
+    public Queue<NativeAd> fbQueue = new LinkedList<>();
+
     /**
      *
      * @param adView    Any class that implements IAdView.
@@ -237,6 +248,44 @@ public class Sharethrough {
         }
     }
 
+    public void renderFbAd(final IAdView adView, final int feedPosition) {
+        final NativeAd nativeAd = fbQueue.remove();
+        Logger.d("Pop fb ad from queue to render, queue size: %d", fbQueue.size());
+
+        if (nativeAd != null) {
+            //render fb ad
+
+            handler.post(new Runnable() {
+                public void run() {
+                    String titleForAd = nativeAd.getAdTitle();
+                    NativeAd.Image coverImage = nativeAd.getAdCoverImage();
+                    NativeAd.Image iconForAd = nativeAd.getAdIcon();
+                    String socialContextForAd = nativeAd.getAdSocialContext();
+                    String titleForAdButton = nativeAd.getAdCallToAction();
+                    String textForAdBody = nativeAd.getAdBody();
+                    NativeAd.Rating appRatingForAd = nativeAd.getAdStarRating();
+
+                    // Add code here to create a custom view that uses the ad properties
+                    // For example:
+                    adView.adReady();
+
+                    adView.getTitle().setText(titleForAd);
+                    adView.getDescription().setText(textForAdBody);
+
+                    FrameLayout thumbnailContainer = adView.getThumbnail();
+                    ImageView thumbnailImage = new ImageView(strSdkConfig.context);
+                    Picasso.with(strSdkConfig.context).load(coverImage.getUrl()).fit().centerCrop().tag("STRAdImage").into(thumbnailImage);
+                    thumbnailContainer.addView(thumbnailImage,
+                            new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
+                }
+            }
+            );
+
+            // Register the native ad view with the native ad instance
+            nativeAd.registerViewForInteraction(adView.getAdView());
+        }
+    }
+
     public void setOrCallPlacementCallback(Callback<Placement> placementCallback) {
         if (placementSet){
             placementCallback.call(placement);
@@ -262,7 +311,10 @@ public class Sharethrough {
      * Fetches more ads if running low on ads.
      */
     public void fetchAdsIfReadyForMore() {
-        if (strSdkConfig.getCreativeQueue().readyForMore()) {
+//        if (strSdkConfig.getCreativeQueue().readyForMore()) {
+//            fetchAds();
+//        }
+        if (fbQueue.size() <= 1) {
             fetchAds();
         }
     }
@@ -279,7 +331,8 @@ public class Sharethrough {
      * @return the number of prefetched ads available to show.
      */
     public int getNumberOfAdsReadyToShow() {
-        return strSdkConfig.getCreativeQueue().size();
+        return fbQueue.size();
+//        return strSdkConfig.getCreativeQueue().size();
     }
 
     /**
