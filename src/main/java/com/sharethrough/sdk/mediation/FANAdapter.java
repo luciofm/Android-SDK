@@ -52,7 +52,8 @@ public class FANAdapter implements STRMediationAdapter {
 
         fbAd.setAdListener(fbAdListener);
         fbAd.setImpressionListener(fbImpressionListener);
-        AdSettings.addTestDevice("76de221f26624cfaa2d4c382cf7e6f8a");
+//        AdSettings.addTestDevice("76de221f26624cfaa2d4c382cf7e6f8a");
+        AdSettings.addTestDevice("061a6dc6d4ebeb551d11f39c9b6965ea");
 
         Logger.d("Mediating Facebook");
         fbAd.loadAd();
