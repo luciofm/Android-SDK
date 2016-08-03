@@ -21,13 +21,13 @@ public class AdManager implements STRMediationAdapter {
     private AdManagerListener adManagerListener;
     private MediationManager.MediationListener mediationListener;
     protected AdFetcher adFetcher;
-
+re
     private boolean isRunning = false;
     private String mediationRequestId = ""; // To remove for asap v2
 
     @Override
-    public void loadAd(MediationManager.MediationListener mediationListener, Map<String, String> extras) {
-        fetchAds("", null, "", "");
+    public void loadAd(Context context, MediationManager.MediationListener mediationListener, Map<String, String> extras) {
+
     }
 
     // Interface to notify Sharethrough ads are ready to show
