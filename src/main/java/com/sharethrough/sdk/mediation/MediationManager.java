@@ -2,6 +2,9 @@ package com.sharethrough.sdk.mediation;
 
 import android.content.Context;
 import com.facebook.ads.NativeAd;
+import com.google.gson.JsonObject;
+import com.sharethrough.sdk.Renderer;
+import com.sharethrough.sdk.network.ASAPManager;
 import com.sharethrough.sdk.network.AdManager;
 
 import java.util.ArrayList;
@@ -17,6 +20,7 @@ public class MediationManager {
     private MediationListener mediationListener;
     private MediationWaterfall mediationWaterfall;
     private Map<String, STRMediationAdapter> mediationAdapters = new HashMap<>();
+    private Map<String, IRenderer> renderers = new HashMap<>();
 
     public interface MediationListener {
         /**
@@ -40,11 +44,10 @@ public class MediationManager {
         this.context = context;
     }
 
-    public void initiateWaterfallAndLoadAd(final String response,
-                                           final MediationListener mediationListener,
-                                           final Map<String, String> extras
+    public void initiateWaterfallAndLoadAd(final ASAPManager.AdResponse asapResponse,
+                                           final MediationListener mediationListener
     ) {
-        setUpWaterfall(response, mediationListener, extras);
+        setUpWaterfall(asapResponse.mediationNetworks, mediationListener);
         loadAd();
     }
 
@@ -52,10 +55,9 @@ public class MediationManager {
         loadAd();
     }
 
-    private void setUpWaterfall(final String asapResponse,
-                                final MediationListener mediationListener,
-                                final Map<String, String> extras) {
-        this.mediationWaterfall = new MediationWaterfall(asapResponse);
+    private void setUpWaterfall(final ArrayList<ASAPManager.AdResponse.Network> mediationNetworks,
+                                final MediationListener mediationListener) {
+        this.mediationWaterfall = new MediationWaterfall(mediationNetworks);
         this.mediationListener = mediationListener;
     }
 
@@ -63,7 +65,7 @@ public class MediationManager {
         STRMediationAdapter mediationAdapter = getMediationAdapter("");
 
         if (mediationAdapter != null) {
-            mediationAdapter.loadAd(context, mediationListener, new HashMap<String, String>());
+            mediationAdapter.loadAd(context, mediationListener);
         } else {
             //end of waterfall
             mediationListener.onAllAdsFailedToLoad();
@@ -71,9 +73,7 @@ public class MediationManager {
     }
 
     private STRMediationAdapter getMediationAdapter(String thirdPartyNetwork) {
-        return new FANAdapter();
-
-        /**if (mediationAdapters.get(thirdPartyNetwork) != null) {
+        if (mediationAdapters.get(thirdPartyNetwork) != null) {
             return mediationAdapters.get(thirdPartyNetwork);
         } else {
             STRMediationAdapter result = null;
@@ -88,15 +88,38 @@ public class MediationManager {
                     return result;
             }
             return result;
-        }**/
+        }
+    }
+
+    public IRenderer getRenderer(String thirdPartyNetwork) {
+        IRenderer renderer = null;
+        if (renderers.get(thirdPartyNetwork) != null) {
+            return renderers.get(thirdPartyNetwork);
+        } else {
+            switch (thirdPartyNetwork) {
+                case "STR":
+                    renderer = new Renderer();
+                    renderers.put(thirdPartyNetwork, renderer);
+                    return renderer;
+                case "FAN":
+                    renderer = new Renderer();
+                    renderers.put(thirdPartyNetwork, renderer);
+                    return renderer;
+            }
+            return renderer;
+        }
     }
 
     public class MediationWaterfall {
-        private List<String> thirdPartyNetworks = new ArrayList<>();
+        private List<ASAPManager.AdResponse.Network> thirdPartyNetworks = new ArrayList<>();
         private int currentIndex = -1;
 
-        public MediationWaterfall (String response) {
-
+        public MediationWaterfall (ArrayList<ASAPManager.AdResponse.Network> mediationNetworks) {
+            if (mediationNetworks != null) {
+                thirdPartyNetworks = mediationNetworks;
+            } else {
+                thirdPartyNetworks = new ArrayList<>();
+            }
         }
 
         private void incrementIndex() {
@@ -107,9 +130,10 @@ public class MediationManager {
             return currentIndex;
         }
 
-        public String getNextThirdPartyNetwork() {
+        public String getNextThirdPartyNetworkName() {
             incrementIndex();
-            return thirdPartyNetworks.get(getCurrentIndex());
+            return thirdPartyNetworks.get(getCurrentIndex()).name;
         }
+
     }
 }

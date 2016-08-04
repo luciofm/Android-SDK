@@ -25,7 +25,7 @@ public class AdManager implements STRMediationAdapter {
     private String mediationRequestId = ""; // To remove for asap v2
 
     @Override
-    public void loadAd(Context context, MediationManager.MediationListener mediationListener, Map<String, String> extras) {
+    public void loadAd(Context context, MediationManager.MediationListener mediationListener) {
 
     }
 

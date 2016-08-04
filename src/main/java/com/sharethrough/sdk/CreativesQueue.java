@@ -1,13 +1,15 @@
 package com.sharethrough.sdk;
 
+import com.sharethrough.sdk.mediation.ICreative;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class CreativesQueue {
-    private final List<Creative> list = Collections.synchronizedList(new ArrayList<Creative>());
+    private final List<ICreative> list = Collections.synchronizedList(new ArrayList<ICreative>());
 
-    public void add(Creative creative) {
+    public void add(ICreative creative) {
         list.add(creative);
     }
 
@@ -15,7 +17,7 @@ public class CreativesQueue {
         return list.size() <= 1;
     }
 
-    public Creative getNext() {
+    public ICreative getNext() {
         return list.isEmpty() ? null : list.remove(0);
     }
 

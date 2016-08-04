@@ -7,6 +7,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.sharethrough.sdk.Logger;
 //import org.apache.http.NameValuePair;
@@ -25,8 +26,11 @@ import java.util.Map;
  * Created by engineers on 4/26/16.
  */
 public class ASAPManager {
-    private static final String PROGRAMMATIC = "stx_monetize";
     public static final String ASAP_ENDPOINT_PREFIX = "http://asap.sharethrough.com/v1";
+    public static final String QUERY_STRING_PARAMS = "query_string_params";
+    public static final String MEDIATION_ID = "mediation_id";
+    public static final String MEDIATION_NETWORKS = "mediation_networks";
+    private static final String PROGRAMMATIC = "stx_monetize";
     private static final String PLACEMENT_KEY = "placement_key";
     private static final String ASAP_UNDEFINED = "undefined";
     private static final String ASAP_OK = "OK";
@@ -42,17 +46,25 @@ public class ASAPManager {
     }
 
     public interface ASAPManagerListener {
-        void onSuccess(ArrayList<Pair<String,String>> queryStringParams, String mediationRequestId);
+        void onSuccess(AdResponse asapResponse);
         void onError(String error);
     }
 
     public class AdResponse {
-        String mrid;
-        String pkey;
-        String adServer;
-        String keyType;
-        String keyValue;
-        String status;
+        public String mrid;
+        public String pkey;
+        public String adServer;
+        public String keyType;
+        public String keyValue;
+        public String status;
+        public String getAdServerPath;
+        public ArrayList<Network> mediationNetworks;
+
+        public class Network {
+            public String key;
+            public String name;
+            public JsonObject parameters;
+        }
     }
 
     public void updateAsapEndpoint(Map<String, String> customKeyValues) {
@@ -84,12 +96,13 @@ public class ASAPManager {
             } else if (!adResponse.status.equals(ASAP_OK)) {
                 asapManagerListener.onError(adResponse.status);
             } else {
+                HashMap<String, Object> asapResponse = new HashMap<>();
                 ArrayList<Pair<String,String>> queryStringParams = new ArrayList<>();
                 queryStringParams.add(new Pair<>(PLACEMENT_KEY, placementKey));
                 if (!adResponse.keyType.equals(PROGRAMMATIC) && !adResponse.keyType.equals(ASAP_UNDEFINED) && !adResponse.keyValue.equals(ASAP_UNDEFINED)) {
                     queryStringParams.add(new Pair<>(adResponse.keyType, adResponse.keyValue));
                 }
-                asapManagerListener.onSuccess(queryStringParams, adResponse.mrid);
+                asapManagerListener.onSuccess(adResponse);
             }
         } catch (JsonParseException e) {
             asapManagerListener.onError(e.toString());

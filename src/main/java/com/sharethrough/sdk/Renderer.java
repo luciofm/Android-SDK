@@ -15,12 +15,13 @@ import android.widget.TextView;
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.beacons.VideoCompletionBeaconService;
 import com.sharethrough.sdk.media.*;
+import com.sharethrough.sdk.mediation.IRenderer;
 import com.squareup.picasso.Picasso;
 
 
 import java.util.Timer;
 
-public class Renderer {
+public class Renderer implements IRenderer {
 
     public void putCreativeIntoAdView(final IAdView adView, final Creative creative, final BeaconService beaconService,
     final Sharethrough sharethrough, final Timer timer) {

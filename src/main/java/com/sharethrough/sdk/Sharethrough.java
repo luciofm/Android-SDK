@@ -12,6 +12,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.facebook.ads.NativeAd;
 import com.sharethrough.android.sdk.BuildConfig;
+import com.sharethrough.sdk.mediation.ICreative;
 import com.sharethrough.sdk.mediation.MediationManager;
 import com.sharethrough.sdk.network.ASAPManager;
 import com.sharethrough.sdk.network.AdManager;
@@ -85,10 +86,8 @@ public class Sharethrough {
 
         strSdkConfig.getAsapManager().callASAP(new ASAPManager.ASAPManagerListener() {
             @Override
-            public void onSuccess(ArrayList<Pair<String,String>> queryStringParams, String mediationRequestId) {
-                String asapResponse = "fake_asap_response";
-                Map<String, String> extras = new HashMap<String, String>();
-                strSdkConfig.getMediationManager().initiateWaterfallAndLoadAd(asapResponse, mediationListener, extras);
+            public void onSuccess(ASAPManager.AdResponse asapResponse) {
+                strSdkConfig.getMediationManager().initiateWaterfallAndLoadAd(asapResponse, mediationListener);
                 //invokeAdFetcher(apiUrlPrefix, queryStringParams, mediationRequestId);
             }
 
@@ -194,24 +193,28 @@ public class Sharethrough {
      * @return null if there is no creatives to show in both the slot and queue, and sets the isAdRenewed to true if
      * there is a new creative to show
      */
-    private Creative getCreativeToShow(int feedPosition, boolean[] isAdRenewed) {
-        Creative creative = strSdkConfig.getCreativesBySlot().get(feedPosition);
-        if (creative == null || creative.hasExpired(adCacheTimeInMilliseconds)) {
+    private ICreative getCreativeToShow(int feedPosition, boolean[] isAdRenewed) {
+        ICreative creative = strSdkConfig.getCreativesBySlot().get(feedPosition);
+        if (creative == null /*|| creative.hasExpired(adCacheTimeInMilliseconds)*/) {
 
             if (strSdkConfig.getCreativeQueue().size() != 0) {
                 synchronized (strSdkConfig.getCreativeQueue()) {
                     creative = strSdkConfig.getCreativeQueue().getNext();
                 }
-                insertCreativeIntoSlot(feedPosition, creative);
+
+                //for now only cache STR creatives
+                if (creative instanceof Creative) {
+                    insertCreativeIntoSlot(feedPosition, (Creative)creative);
+                }
                 (isAdRenewed[0]) = true;
             }
         }
 
-        if (creative != null) {
+        if (creative != null && creative instanceof Creative) {
             if (isAdRenewed[0]) {
-                Logger.d("pop creative ckey: %s at position %d , creative cache size: %d ", creative.getCreativeKey() ,feedPosition , strSdkConfig.getCreativeQueue().size());
+                Logger.d("pop creative ckey: %s at position %d , creative cache size: %d ", ((Creative) creative).getCreativeKey() ,feedPosition , strSdkConfig.getCreativeQueue().size());
             } else {
-                Logger.d("get creative ckey: %s from creative slot at position %d",creative.getCreativeKey(), feedPosition);
+                Logger.d("get creative ckey: %s from creative slot at position %d", ((Creative) creative).getCreativeKey(), feedPosition);
             }
         }
 
@@ -232,9 +235,10 @@ public class Sharethrough {
         boolean[] isAdRenewed = new boolean[1];
         isAdRenewed[0] = false;
 
-        Creative creative = getCreativeToShow(feedPosition, isAdRenewed);
+        ICreative creative = getCreativeToShow(feedPosition, isAdRenewed);
         if (creative != null) {
-            strSdkConfig.getRenderer().putCreativeIntoAdView(adView, creative, strSdkConfig.getBeaconService(), this, feedPosition, new Timer("AdView timer for " + creative));
+
+            strSdkConfig.getRendererFactory().render(strSdkConfig.getMediationManager(), adView, creative, strSdkConfig.getBeaconService(), this, feedPosition);
             if( isAdRenewed[0] ){
                 fireNewAdsToShow();
             }

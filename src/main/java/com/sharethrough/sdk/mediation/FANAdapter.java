@@ -14,7 +14,7 @@ public class FANAdapter implements STRMediationAdapter {
     public static String FAN_PLACEMENT_ID = "FAN_PLACEMENT_ID";
 
     @Override
-    public void loadAd(Context context, final MediationManager.MediationListener mediationListener, Map<String, String> extras) {
+    public void loadAd(Context context, final MediationManager.MediationListener mediationListener) {
         final NativeAd fbAd = new NativeAd(context, "548597075312947_565374090301912");
 
 
