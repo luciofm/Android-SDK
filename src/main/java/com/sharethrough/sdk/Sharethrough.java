@@ -101,9 +101,34 @@ public class Sharethrough {
     protected MediationManager.MediationListener mediationListener = new MediationManager.MediationListener() {
         @Override
         public void onAdLoaded(NativeAd fbAd) {
+            strSdkConfig.getMediationManager().setWaterfallComplete();
             fbQueue.add(fbAd);
             Logger.d("Insert fb ad to queue, queue size: %d", fbQueue.size());
             fireNewAdsToShow();
+        }
+
+        @Override
+        public void onAdLoaded(List<ICreative> creatives, Placement placement) {
+            strSdkConfig.getMediationManager().setWaterfallComplete();
+//            fbQueue.add(fbAd);
+//            Logger.d("Insert fb ad to queue, queue size: %d", fbQueue.size());
+
+            if (!placementSet) {
+                Sharethrough.this.placement = placement;
+                placementSet = true;
+                placementCallback.call(placement);
+            }
+
+            for(ICreative creative : creatives) {
+                strSdkConfig.getCreativeQueue().add(creative);
+                if (creative != null) {
+                    if (creative instanceof Creative)
+                        Logger.d("insert creative ckey: %s, creative cache size %d", ((Creative)creative).getCreativeKey(), strSdkConfig.getCreativeQueue().size());
+                    else if (creative instanceof FacebookCreative)
+                        Logger.d("Insert fb ad to queue, queue size: %d", fbQueue.size());
+                }
+                fireNewAdsToShow();
+            }
         }
 
         @Override

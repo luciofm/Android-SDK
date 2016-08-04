@@ -2,7 +2,6 @@ package com.sharethrough.sdk.mediation;
 
 import android.content.Context;
 import com.facebook.ads.NativeAd;
-import com.google.gson.JsonObject;
 import com.sharethrough.sdk.Renderer;
 import com.sharethrough.sdk.network.ASAPManager;
 import com.sharethrough.sdk.network.AdManager;
@@ -19,8 +18,10 @@ public class MediationManager {
     private Context context;
     private MediationListener mediationListener;
     private MediationWaterfall mediationWaterfall;
+    private ASAPManager.AdResponse asapResponse;
     private Map<String, STRMediationAdapter> mediationAdapters = new HashMap<>();
     private Map<String, IRenderer> renderers = new HashMap<>();
+    private boolean isWaterfallRunning = false;
 
     public interface MediationListener {
         /**
@@ -47,28 +48,41 @@ public class MediationManager {
     public void initiateWaterfallAndLoadAd(final ASAPManager.AdResponse asapResponse,
                                            final MediationListener mediationListener
     ) {
-        setUpWaterfall(asapResponse.mediationNetworks, mediationListener);
-        loadAd();
+        if (isWaterfallRunning) {
+            return;
+        }
+
+        isWaterfallRunning = true;
+        setUpWaterfall(asapResponse, mediationListener);
+        loadNextAd();
     }
 
-    public void loadNextAd() {
-        loadAd();
-    }
-
-    private void setUpWaterfall(final ArrayList<ASAPManager.AdResponse.Network> mediationNetworks,
+    private void setUpWaterfall(final ASAPManager.AdResponse asapResponse,
                                 final MediationListener mediationListener) {
-        this.mediationWaterfall = new MediationWaterfall(mediationNetworks);
+        this.asapResponse = asapResponse;
+        this.mediationWaterfall = new MediationWaterfall(asapResponse.mediationNetworks);
         this.mediationListener = mediationListener;
     }
 
-    private void loadAd() {
-        STRMediationAdapter mediationAdapter = getMediationAdapter("");
+    /**
+     * Needs to be called by MediationListener when an ad loads successfully so the next
+     * waterfall can be initiated properly. Also needs to be called when waterfall is
+     * exhausted and all ads failed to load
+     */
+    public void setWaterfallComplete() {
+        isWaterfallRunning = false;
+    }
+
+    public void loadNextAd() {
+        ASAPManager.AdResponse.Network network = mediationWaterfall.getNextThirdPartyNetwork();
+        STRMediationAdapter mediationAdapter = getMediationAdapter(network.name);
 
         if (mediationAdapter != null) {
-            mediationAdapter.loadAd(context, mediationListener);
+            mediationAdapter.loadAd(context, mediationListener, asapResponse, network);
         } else {
             //end of waterfall
             mediationListener.onAllAdsFailedToLoad();
+            setWaterfallComplete();
         }
     }
 
@@ -130,9 +144,9 @@ public class MediationManager {
             return currentIndex;
         }
 
-        public String getNextThirdPartyNetworkName() {
+        public ASAPManager.AdResponse.Network getNextThirdPartyNetwork() {
             incrementIndex();
-            return thirdPartyNetworks.get(getCurrentIndex()).name;
+            return thirdPartyNetworks.get(getCurrentIndex());
         }
 
     }

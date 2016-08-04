@@ -11,8 +11,8 @@ import com.sharethrough.sdk.mediation.STRMediationAdapter;
 //import org.apache.http.message.BasicNameValuePair;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 public class AdManager implements STRMediationAdapter {
@@ -25,8 +25,16 @@ public class AdManager implements STRMediationAdapter {
     private String mediationRequestId = ""; // To remove for asap v2
 
     @Override
-    public void loadAd(Context context, MediationManager.MediationListener mediationListener) {
+    public void loadAd(Context context, MediationManager.MediationListener mediationListener, ASAPManager.AdResponse asapResponse, ASAPManager.AdResponse.Network network) {
+        ArrayList<Pair<String,String>> queryStringParams = new ArrayList<>();
+        queryStringParams.add(new Pair<>(ASAPManager.PLACEMENT_KEY, asapResponse.pkey));
+        if (!asapResponse.keyType.equals(ASAPManager.PROGRAMMATIC)
+                && !asapResponse.keyType.equals(ASAPManager.ASAP_UNDEFINED)
+                && !asapResponse.keyValue.equals(ASAPManager.ASAP_UNDEFINED)) {
+            queryStringParams.add(new Pair<>(asapResponse.keyType, asapResponse.keyValue));
+        }
 
+        fetchAds("", queryStringParams, "", asapResponse.mrid);
     }
 
     // Interface to notify Sharethrough ads are ready to show
@@ -134,7 +142,7 @@ public class AdManager implements STRMediationAdapter {
             queryStringParams.add(new Pair<>("appId", versionName));
         }
         queryStringParams.add(new Pair<>("appName", appPackageName));
-//        String formattedQueryStringParams = URLEncodedUtils.format(queryStringParams, "utf-8");
+        String formattedQueryStringParams = URLEncodedUtils.format(queryStringParams, "utf-8");
 
         String formattedQueryStringParams = "";
         String result = url + "?" + formattedQueryStringParams;

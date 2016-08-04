@@ -30,9 +30,9 @@ public class ASAPManager {
     public static final String QUERY_STRING_PARAMS = "query_string_params";
     public static final String MEDIATION_ID = "mediation_id";
     public static final String MEDIATION_NETWORKS = "mediation_networks";
-    private static final String PROGRAMMATIC = "stx_monetize";
-    private static final String PLACEMENT_KEY = "placement_key";
-    private static final String ASAP_UNDEFINED = "undefined";
+    public static final String PROGRAMMATIC = "stx_monetize";
+    public static final String PLACEMENT_KEY = "placement_key";
+    public static final String ASAP_UNDEFINED = "undefined";
     private static final String ASAP_OK = "OK";
     private String placementKey;
     private RequestQueue requestQueue;
@@ -96,12 +96,6 @@ public class ASAPManager {
             } else if (!adResponse.status.equals(ASAP_OK)) {
                 asapManagerListener.onError(adResponse.status);
             } else {
-                HashMap<String, Object> asapResponse = new HashMap<>();
-                ArrayList<Pair<String,String>> queryStringParams = new ArrayList<>();
-                queryStringParams.add(new Pair<>(PLACEMENT_KEY, placementKey));
-                if (!adResponse.keyType.equals(PROGRAMMATIC) && !adResponse.keyType.equals(ASAP_UNDEFINED) && !adResponse.keyValue.equals(ASAP_UNDEFINED)) {
-                    queryStringParams.add(new Pair<>(adResponse.keyType, adResponse.keyValue));
-                }
                 asapManagerListener.onSuccess(adResponse);
             }
         } catch (JsonParseException e) {
