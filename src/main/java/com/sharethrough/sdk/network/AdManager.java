@@ -11,7 +11,6 @@ import com.sharethrough.sdk.mediation.STRMediationAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 
 
 public class AdManager implements STRMediationAdapter {

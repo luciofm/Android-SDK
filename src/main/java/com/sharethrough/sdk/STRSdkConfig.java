@@ -5,9 +5,7 @@ import android.util.LruCache;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.sharethrough.sdk.mediation.MediationManager;
-import com.sharethrough.sdk.mediation.RendererFactory;
 import com.sharethrough.sdk.network.ASAPManager;
-import com.sharethrough.sdk.network.AdManager;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,11 +22,10 @@ public class STRSdkConfig {
     private RequestQueue requestQueue;
     private ASAPManager asapManager;
     private MediationManager mediationManager;
-    private RendererFactory rendererFactory;
 
     public Context context;
 
-    public STRSdkConfig(Context context, String placementKey){
+    public STRSdkConfig(Context context, String placementKey) {
         this.context = context;
         Logger.setContext(context);
         Logger.enabled = true;
@@ -42,10 +39,9 @@ public class STRSdkConfig {
         this.creativesBySlot = new LruCache<>(10);
         this.creativeIndices = new HashSet<>(); //contains history of all indices for creatives, whereas creativesBySlot only caches the last 10
         this.mediationManager = new MediationManager(context, beaconService);
-        this.rendererFactory = new RendererFactory();
     }
 
-    public void setSerializedSharethrough( String serializedSharethrough ){
+    public void setSerializedSharethrough(String serializedSharethrough) {
         this.serializedSharethrough = serializedSharethrough;
         this.creativeQueue = SharethroughSerializer.getCreativesQueue(serializedSharethrough);
         this.creativesBySlot = SharethroughSerializer.getSlot(serializedSharethrough);
@@ -85,9 +81,5 @@ public class STRSdkConfig {
 
     public MediationManager getMediationManager() {
         return mediationManager;
-    }
-
-    public RendererFactory getRendererFactory() {
-        return rendererFactory;
     }
 }

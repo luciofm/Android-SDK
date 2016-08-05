@@ -6,6 +6,7 @@ import java.util.Map;
 
 import android.content.Context;
 import com.facebook.ads.*;
+import com.sharethrough.sdk.IAdView;
 import com.sharethrough.sdk.Logger;
 import com.sharethrough.sdk.network.ASAPManager;
 
@@ -62,11 +63,10 @@ public class FANAdapter implements STRMediationAdapter {
         fbAd.loadAd();
     }
 
+    @Override
+    public void render(IAdView adview, ICreative creative, int feedPosition) {
 
-
-
-
-
+    }
 
 
 }

@@ -22,8 +22,8 @@ public class MediationManager {
     private Map<String, STRMediationAdapter> mediationAdapters = new HashMap<>();
     private boolean isWaterfallRunning = false;
 
-    public final static String STR_Network = "stx";
-    public final static String FAN_NETWORK = "fan";
+    public final String STR_Network = "stx";
+    public final String FAN_NETWORK = "fan";
 
     public interface MediationListener {
         /**
