@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Pair;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -15,7 +14,6 @@ import com.sharethrough.android.sdk.BuildConfig;
 import com.sharethrough.sdk.mediation.ICreative;
 import com.sharethrough.sdk.mediation.MediationManager;
 import com.sharethrough.sdk.network.ASAPManager;
-import com.sharethrough.sdk.network.AdManager;
 import com.squareup.picasso.Picasso;
 
 import java.util.*;
@@ -67,7 +65,6 @@ public class Sharethrough {
             this.placement = createPlacement(articlesBetweenAds, articlesBeforeFirstAd);
         }
 
-        strSdkConfig.getAdManager().setAdManagerListener(adManagerListener);
         strSdkConfig.getAdManager().setMediationListener(mediationListener);
     }
 
@@ -100,18 +97,8 @@ public class Sharethrough {
 
     protected MediationManager.MediationListener mediationListener = new MediationManager.MediationListener() {
         @Override
-        public void onAdLoaded(NativeAd fbAd) {
-            strSdkConfig.getMediationManager().setWaterfallComplete();
-            fbQueue.add(fbAd);
-            Logger.d("Insert fb ad to queue, queue size: %d", fbQueue.size());
-            fireNewAdsToShow();
-        }
-
-        @Override
         public void onAdLoaded(List<ICreative> creatives, Placement placement) {
             strSdkConfig.getMediationManager().setWaterfallComplete();
-//            fbQueue.add(fbAd);
-//            Logger.d("Insert fb ad to queue, queue size: %d", fbQueue.size());
 
             if (!placementSet) {
                 Sharethrough.this.placement = placement;
@@ -124,8 +111,8 @@ public class Sharethrough {
                 if (creative != null) {
                     if (creative instanceof Creative)
                         Logger.d("insert creative ckey: %s, creative cache size %d", ((Creative)creative).getCreativeKey(), strSdkConfig.getCreativeQueue().size());
-                    else if (creative instanceof FacebookCreative)
-                        Logger.d("Insert fb ad to queue, queue size: %d", fbQueue.size());
+//                    else if (creative instanceof FacebookCreative)
+//                        Logger.d("Insert fb ad to queue, queue size: %d", fbQueue.size());
                 }
                 fireNewAdsToShow();
             }
@@ -139,34 +126,6 @@ public class Sharethrough {
         @Override
         public void onAllAdsFailedToLoad() {
             fireNoAdsToShow();
-        }
-    };
-
-    protected AdManager.AdManagerListener adManagerListener = new AdManager.AdManagerListener() {
-        @Override
-        public void onAdsReady(List<Creative> listOfCreativesReadyForShow, Placement placement) {
-            if (!placementSet) {
-                Sharethrough.this.placement = placement;
-                placementSet = true;
-                placementCallback.call(placement);
-            }
-
-            for(Creative creative : listOfCreativesReadyForShow) {
-                strSdkConfig.getCreativeQueue().add(creative);
-                if (creative != null) {
-                    Logger.d("insert creative ckey: %s, creative cache size %d", creative.getCreativeKey(), strSdkConfig.getCreativeQueue().size());
-                }
-                fireNewAdsToShow();
-            }
-        }
-
-        @Override
-        public void onNoAdsToShow(){
-            fireNoAdsToShow();
-        }
-
-        @Override
-        public void onAdsFailedToLoad() {
         }
     };
 
@@ -198,10 +157,6 @@ public class Sharethrough {
             }
         });
     }
-
-//    private void invokeAdFetcher(String url, ArrayList<NameValuePair> queryStringParams, String mediationRequestId) {
-//        strSdkConfig.getAdManager().fetchAds(url, queryStringParams, strSdkConfig.getAdvertisingIdProvider().getAdvertisingId(), mediationRequestId);
-//    }
 
     /**
      *

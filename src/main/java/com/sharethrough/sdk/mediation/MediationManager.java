@@ -2,6 +2,7 @@ package com.sharethrough.sdk.mediation;
 
 import android.content.Context;
 import com.facebook.ads.NativeAd;
+import com.sharethrough.sdk.Placement;
 import com.sharethrough.sdk.Renderer;
 import com.sharethrough.sdk.network.ASAPManager;
 import com.sharethrough.sdk.network.AdManager;
@@ -28,7 +29,7 @@ public class MediationManager {
          * Class extending STRMediationAdapter must call this method when it successfully
          * loads an ad
          */
-        void onAdLoaded(NativeAd fbAd);
+        void onAdLoaded(List<ICreative> creatives, Placement placement);
 
         /**
          * Classes extending STRMediationAdapter must call this method when it fails

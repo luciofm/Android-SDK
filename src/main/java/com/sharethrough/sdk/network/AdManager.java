@@ -2,8 +2,10 @@ package com.sharethrough.sdk.network;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.util.Pair;
 import com.sharethrough.sdk.*;
+import com.sharethrough.sdk.mediation.ICreative;
 import com.sharethrough.sdk.mediation.MediationManager;
 import com.sharethrough.sdk.mediation.STRMediationAdapter;
 //import org.apache.http.NameValuePair;
@@ -18,7 +20,6 @@ import java.util.List;
 public class AdManager implements STRMediationAdapter {
 
     private Context applicationContext;
-    private AdManagerListener adManagerListener;
     private MediationManager.MediationListener mediationListener;
     protected AdFetcher adFetcher;
     private boolean isRunning = false;
@@ -50,10 +51,6 @@ public class AdManager implements STRMediationAdapter {
         setAdFetcherListener();
     }
 
-    public void setAdManagerListener(AdManagerListener adManagerListener) {
-        this.adManagerListener = adManagerListener;
-    }
-
     public void setMediationListener(MediationManager.MediationListener mediationListener) {
         this.mediationListener = mediationListener;
     }
@@ -73,12 +70,12 @@ public class AdManager implements STRMediationAdapter {
     }
 
     public void handleAdResponseLoaded(Response response) {
-        List<Creative> creatives = convertToCreatives(response);
+        List<ICreative> creatives = convertToCreatives(response);
         Logger.d("ad request returned %d creatives ", creatives.size());
         if(creatives.isEmpty()){
-            adManagerListener.onNoAdsToShow();
+            mediationListener.onAdFailedToLoad();
         }else {
-            adManagerListener.onAdsReady(creatives, new Placement(response.placement));
+            mediationListener.onAdLoaded(creatives, new Placement(response.placement));
         }
         isRunning = false;
         // To remove for asap v2
@@ -86,14 +83,14 @@ public class AdManager implements STRMediationAdapter {
     }
 
     public void handleAdResponseFailed() {
-        adManagerListener.onAdsFailedToLoad();
+        mediationListener.onAdFailedToLoad();
         isRunning = false;
         // To remove for asap v2
         mediationRequestId = "";
     }
 
-    protected List<Creative> convertToCreatives(Response response) {
-        ArrayList<Creative> creatives = new ArrayList<Creative>();
+    protected List<ICreative> convertToCreatives(Response response) {
+        ArrayList<ICreative> creatives = new ArrayList<>();
         for (final Response.Creative responseCreative : response.creatives) {
             Creative creative;
             if (responseCreative.creative.action.equals("hosted-video")) {
@@ -138,14 +135,19 @@ public class AdManager implements STRMediationAdapter {
             e.printStackTrace();
         }
 
+        //http://www.test.com?param1=2&param2=test
         if(versionName != null){
             queryStringParams.add(new Pair<>("appId", versionName));
         }
         queryStringParams.add(new Pair<>("appName", appPackageName));
-        String formattedQueryStringParams = URLEncodedUtils.format(queryStringParams, "utf-8");
+//        String formattedQueryStringParams = URLEncodedUtils.format(queryStringParams, "utf-8");
 
-        String formattedQueryStringParams = "";
-        String result = url + "?" + formattedQueryStringParams;
+        Uri.Builder builder = new Uri.Builder();
+        for (Pair<String,String> queryParam : queryStringParams) {
+            builder.appendQueryParameter(queryParam.first, queryParam.second);
+        }
+
+        String result = url + "?" + builder.toString();
         return result;
     }
 

@@ -5,6 +5,7 @@ import java.util.Map;
 import android.content.Context;
 import com.facebook.ads.*;
 import com.sharethrough.sdk.Logger;
+import com.sharethrough.sdk.network.ASAPManager;
 
 
 /**
@@ -14,7 +15,7 @@ public class FANAdapter implements STRMediationAdapter {
     public static String FAN_PLACEMENT_ID = "FAN_PLACEMENT_ID";
 
     @Override
-    public void loadAd(Context context, final MediationManager.MediationListener mediationListener) {
+    public void loadAd(Context context, final MediationManager.MediationListener mediationListener, ASAPManager.AdResponse adResponse, ASAPManager.AdResponse.Network network) {
         final NativeAd fbAd = new NativeAd(context, "548597075312947_565374090301912");
 
 
@@ -39,7 +40,7 @@ public class FANAdapter implements STRMediationAdapter {
                 // https://developers.facebook.com/docs/audience-network/android/native-api
                 if (fbAd.equals(ad)) {
                     Logger.d("Facebook ad loaded");
-                    mediationListener.onAdLoaded(fbAd);
+//                    mediationListener.onAdLoaded(fbAd);
                     return;
                 }
             }
