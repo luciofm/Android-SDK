@@ -1,9 +1,7 @@
 package com.sharethrough.sdk.mediation;
 
 import android.content.Context;
-import com.facebook.ads.NativeAd;
-import com.sharethrough.sdk.Placement;
-import com.sharethrough.sdk.Renderer;
+import com.sharethrough.sdk.*;
 import com.sharethrough.sdk.network.ASAPManager;
 import com.sharethrough.sdk.network.AdManager;
 
@@ -17,19 +15,22 @@ import java.util.Map;
  */
 public class MediationManager {
     private Context context;
+    private BeaconService beaconService;
     private MediationListener mediationListener;
     private MediationWaterfall mediationWaterfall;
     private ASAPManager.AdResponse asapResponse;
     private Map<String, STRMediationAdapter> mediationAdapters = new HashMap<>();
-    private Map<String, IRenderer> renderers = new HashMap<>();
     private boolean isWaterfallRunning = false;
+
+    public final static String STR_Network = "stx";
+    public final static String FAN_NETWORK = "fan";
 
     public interface MediationListener {
         /**
          * Class extending STRMediationAdapter must call this method when it successfully
          * loads an ad
          */
-        void onAdLoaded(List<ICreative> creatives, Placement placement);
+        void onAdLoaded(List<ICreative> creatives);
 
         /**
          * Classes extending STRMediationAdapter must call this method when it fails
@@ -42,8 +43,9 @@ public class MediationManager {
          */
         void onAllAdsFailedToLoad();
     }
-    public MediationManager(Context context) {
+    public MediationManager(Context context, BeaconService beaconService) {
         this.context = context;
+        this.beaconService = beaconService;
     }
 
     public void initiateWaterfallAndLoadAd(final ASAPManager.AdResponse asapResponse,
@@ -88,42 +90,49 @@ public class MediationManager {
     }
 
     private STRMediationAdapter getMediationAdapter(String thirdPartyNetwork) {
-        if (mediationAdapters.get(thirdPartyNetwork) != null) {
-            return mediationAdapters.get(thirdPartyNetwork);
+        STRMediationAdapter mediationAdapter = mediationAdapters.get(thirdPartyNetwork);
+        if (mediationAdapter != null) {
+            return mediationAdapter;
         } else {
-            STRMediationAdapter result = null;
             switch (thirdPartyNetwork) {
-                case "STR":
-                    result = new AdManager(context);
-                    mediationAdapters.put(thirdPartyNetwork, result);
-                    return result;
-                case "FAN":
-                    result = new FANAdapter();
-                    mediationAdapters.put(thirdPartyNetwork, result);
-                    return result;
+                case STR_Network:
+                    mediationAdapter = new AdManager(context, beaconService);
+                    mediationAdapters.put(thirdPartyNetwork, mediationAdapter);
+                    Logger.d("Mediating Sharethrough as network #" + "%d", mediationWaterfall.getCurrentIndex()+1);
+                case FAN_NETWORK:
+                    mediationAdapter = new FANAdapter();
+                    mediationAdapters.put(thirdPartyNetwork, mediationAdapter);
+                    Logger.d("Mediating Facebook as network #" + "%d", mediationWaterfall.getCurrentIndex()+1);
             }
-            return result;
+            return mediationAdapter;
         }
     }
 
-    public IRenderer getRenderer(String thirdPartyNetwork) {
-        IRenderer renderer = null;
-        if (renderers.get(thirdPartyNetwork) != null) {
-            return renderers.get(thirdPartyNetwork);
-        } else {
-            switch (thirdPartyNetwork) {
-                case "STR":
-                    renderer = new Renderer();
-                    renderers.put(thirdPartyNetwork, renderer);
-                    return renderer;
-                case "FAN":
-                    renderer = new Renderer();
-                    renderers.put(thirdPartyNetwork, renderer);
-                    return renderer;
-            }
-            return renderer;
-        }
+    public void render(IAdView adView, ICreative creative, int feedPosition) {
+        String networkName = creative.getNetworkType();
+        STRMediationAdapter mediationAdapter = mediationAdapters.get(networkName);
+
+        mediationAdapter.render(adView, creative, feedPosition);
     }
+
+//    public IRenderer getRenderer(String thirdPartyNetwork) {
+//        IRenderer renderer = null;
+//        if (renderers.get(thirdPartyNetwork) != null) {
+//            return renderers.get(thirdPartyNetwork);
+//        } else {
+//            switch (thirdPartyNetwork) {
+//                case STR_Network:
+//                    renderer = new Renderer();
+//                    renderers.put(thirdPartyNetwork, renderer);
+//                    return renderer;
+//                case FAN_NETWORK:
+//                    renderer = new Renderer();
+//                    renderers.put(thirdPartyNetwork, renderer);
+//                    return renderer;
+//            }
+//            return renderer;
+//        }
+//    }
 
     public class MediationWaterfall {
         private List<ASAPManager.AdResponse.Network> thirdPartyNetworks = new ArrayList<>();
@@ -147,6 +156,10 @@ public class MediationManager {
 
         public ASAPManager.AdResponse.Network getNextThirdPartyNetwork() {
             incrementIndex();
+            return getCurrentThirdPartyNetwork();
+        }
+
+        public ASAPManager.AdResponse.Network getCurrentThirdPartyNetwork() {
             return thirdPartyNetworks.get(getCurrentIndex());
         }
 

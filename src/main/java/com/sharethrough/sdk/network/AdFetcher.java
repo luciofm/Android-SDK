@@ -38,7 +38,7 @@ public class AdFetcher {
 
         @Override
         public Map<String, String> getHeaders(){
-            Map<String, String> headers = new HashMap<String, String>();
+            Map<String, String> headers = new HashMap<>();
             headers.put("User-Agent", Sharethrough.USER_AGENT);
             return headers;
         }

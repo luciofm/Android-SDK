@@ -46,7 +46,7 @@ class AdImageView extends ImageView {
 
     private void scheduleVisibleBeaconTask() {
         visibleBeaconTimer = getTimer();
-        visibleBeaconTask = new AdViewTimerTask(adView, feedPosition, creative, beaconService, new DateProvider(), sharethrough);
+        visibleBeaconTask = new AdViewTimerTask(adView, feedPosition, creative, beaconService, new DateProvider());
         visibleBeaconTimer.schedule(visibleBeaconTask, 0, 100);
     }
 

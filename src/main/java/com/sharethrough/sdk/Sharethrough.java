@@ -11,6 +11,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.facebook.ads.NativeAd;
 import com.sharethrough.android.sdk.BuildConfig;
+import com.sharethrough.sdk.mediation.FacebookAd;
 import com.sharethrough.sdk.mediation.ICreative;
 import com.sharethrough.sdk.mediation.MediationManager;
 import com.sharethrough.sdk.network.ASAPManager;
@@ -28,7 +29,6 @@ public class Sharethrough {
     public static String USER_AGENT = System.getProperty("http.agent") + "; STR " + SDK_VERSION_NUMBER;
     protected boolean firedNewAdsToShow;
 
-    private String apiUrlPrefix = "http://btlr.sharethrough.com/v4";
     private Handler handler = new Handler(Looper.getMainLooper());
 
     protected Placement placement;
@@ -64,8 +64,6 @@ public class Sharethrough {
             int articlesBeforeFirstAd = SharethroughSerializer.getArticlesBefore(strSdkConfig.getSerializedSharethrough());
             this.placement = createPlacement(articlesBetweenAds, articlesBeforeFirstAd);
         }
-
-        strSdkConfig.getAdManager().setMediationListener(mediationListener);
     }
 
     protected Placement createPlacement(int articlesBetweenAds, int articlesBeforeFirstAd) {
@@ -85,7 +83,6 @@ public class Sharethrough {
             @Override
             public void onSuccess(ASAPManager.AdResponse asapResponse) {
                 strSdkConfig.getMediationManager().initiateWaterfallAndLoadAd(asapResponse, mediationListener);
-                //invokeAdFetcher(apiUrlPrefix, queryStringParams, mediationRequestId);
             }
 
             @Override
@@ -97,14 +94,8 @@ public class Sharethrough {
 
     protected MediationManager.MediationListener mediationListener = new MediationManager.MediationListener() {
         @Override
-        public void onAdLoaded(List<ICreative> creatives, Placement placement) {
+        public void onAdLoaded(List<ICreative> creatives) {
             strSdkConfig.getMediationManager().setWaterfallComplete();
-
-            if (!placementSet) {
-                Sharethrough.this.placement = placement;
-                placementSet = true;
-                placementCallback.call(placement);
-            }
 
             for(ICreative creative : creatives) {
                 strSdkConfig.getCreativeQueue().add(creative);
@@ -218,7 +209,7 @@ public class Sharethrough {
         ICreative creative = getCreativeToShow(feedPosition, isAdRenewed);
         if (creative != null) {
 
-            strSdkConfig.getRendererFactory().render(strSdkConfig.getMediationManager(), adView, creative, strSdkConfig.getBeaconService(), this, feedPosition);
+            strSdkConfig.getMediationManager().render(adView, creative, feedPosition);
             if( isAdRenewed[0] ){
                 fireNewAdsToShow();
             }
@@ -232,12 +223,14 @@ public class Sharethrough {
         }
     }
 
-    public void renderFbAd(final IAdView adView, final int feedPosition) {
-        final NativeAd nativeAd = fbQueue.remove();
+    public void renderFbAd(final IAdView adView, ICreative creative, final int feedPosition) {
+
         Logger.d("Pop fb ad from queue to render, queue size: %d", fbQueue.size());
 
-        if (nativeAd != null) {
+        if (creative != null && creative instanceof FacebookAd) {
             //render fb ad
+
+            final NativeAd nativeAd = ((NativeAd) ((FacebookAd)creative).getFbAd());
 
             handler.post(new Runnable() {
                 public void run() {
@@ -295,12 +288,12 @@ public class Sharethrough {
      * Fetches more ads if running low on ads.
      */
     public void fetchAdsIfReadyForMore() {
-//        if (strSdkConfig.getCreativeQueue().readyForMore()) {
-//            fetchAds();
-//        }
-        if (fbQueue.size() <= 1) {
+        if (strSdkConfig.getCreativeQueue().readyForMore()) {
             fetchAds();
         }
+//        if (fbQueue.size() <= 1) {
+//            fetchAds();
+//        }
     }
 
     /**
@@ -315,8 +308,8 @@ public class Sharethrough {
      * @return the number of prefetched ads available to show.
      */
     public int getNumberOfAdsReadyToShow() {
-        return fbQueue.size();
-//        return strSdkConfig.getCreativeQueue().size();
+//        return fbQueue.size();
+        return strSdkConfig.getCreativeQueue().size();
     }
 
     /**

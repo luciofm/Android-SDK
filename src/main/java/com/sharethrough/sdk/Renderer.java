@@ -70,10 +70,8 @@ public class Renderer implements IRenderer {
                 final AdImageView thumbnailImage = new AdImageView(container.getContext(), sharethrough, creative, adView, feedPosition, beaconService);
                 if (creative.getThumbnailUrl() != null && !creative.getThumbnailUrl().isEmpty())
                     Picasso.with(container.getContext()).load(creative.getThumbnailUrl()).fit().centerCrop().tag("STRAdImage").into(thumbnailImage);
-                sharethrough.fetchAdsIfReadyForMore();
                 thumbnailContainer.addView(thumbnailImage,
                         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
-
                 final Media media = createMedia(adView, creative, beaconService, feedPosition);
                 handler.post(new Runnable() { // give thumbnailImage a chance to render so we can use its size
                     @Override

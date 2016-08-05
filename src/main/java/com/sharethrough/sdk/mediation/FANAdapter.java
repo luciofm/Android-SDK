@@ -1,5 +1,7 @@
 package com.sharethrough.sdk.mediation;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import android.content.Context;
@@ -39,8 +41,10 @@ public class FANAdapter implements STRMediationAdapter {
                 // This identity check is from Facebook's Native API sample code:
                 // https://developers.facebook.com/docs/audience-network/android/native-api
                 if (fbAd.equals(ad)) {
-                    Logger.d("Facebook ad loaded");
-//                    mediationListener.onAdLoaded(fbAd);
+                    Logger.d("Facebook returned 1 creative");
+                    List<ICreative> creatives = new ArrayList<ICreative>();
+                    creatives.add(new FacebookAd(fbAd));
+                    mediationListener.onAdLoaded(creatives);
                     return;
                 }
             }
@@ -54,11 +58,11 @@ public class FANAdapter implements STRMediationAdapter {
         fbAd.setAdListener(fbAdListener);
         fbAd.setImpressionListener(fbImpressionListener);
 //        AdSettings.addTestDevice("76de221f26624cfaa2d4c382cf7e6f8a");
-        AdSettings.addTestDevice("061a6dc6d4ebeb551d11f39c9b6965ea");
-
-        Logger.d("Mediating Facebook");
+        AdSettings.addTestDevice("152459e6948206aad3bb3a37f88b7b8d");
         fbAd.loadAd();
     }
+
+
 
 
 

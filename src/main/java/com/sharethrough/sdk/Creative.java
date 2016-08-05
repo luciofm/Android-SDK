@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import com.sharethrough.sdk.media.*;
 import com.sharethrough.sdk.mediation.ICreative;
+import com.sharethrough.sdk.mediation.MediationManager;
 
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class Creative implements ICreative {
     }
 
     public String getNetworkType() {
-        return ICreative.STRAd;
+        return MediationManager.STR_Network;
     }
 
     public String getTitle() {

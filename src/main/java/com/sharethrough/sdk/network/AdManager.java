@@ -8,47 +8,44 @@ import com.sharethrough.sdk.*;
 import com.sharethrough.sdk.mediation.ICreative;
 import com.sharethrough.sdk.mediation.MediationManager;
 import com.sharethrough.sdk.mediation.STRMediationAdapter;
-//import org.apache.http.NameValuePair;
-//import org.apache.http.client.utils.URLEncodedUtils;
-//import org.apache.http.message.BasicNameValuePair;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
 
 
 public class AdManager implements STRMediationAdapter {
 
     private Context applicationContext;
+    private BeaconService beaconService;
     private MediationManager.MediationListener mediationListener;
     protected AdFetcher adFetcher;
+    private Renderer renderer;
     private boolean isRunning = false;
     private String mediationRequestId = ""; // To remove for asap v2
 
+    private static final String sharethroughEndPoint = "http://btlr.sharethrough.com/v4";
+
     @Override
     public void loadAd(Context context, MediationManager.MediationListener mediationListener, ASAPManager.AdResponse asapResponse, ASAPManager.AdResponse.Network network) {
-        ArrayList<Pair<String,String>> queryStringParams = new ArrayList<>();
-        queryStringParams.add(new Pair<>(ASAPManager.PLACEMENT_KEY, asapResponse.pkey));
-        if (!asapResponse.keyType.equals(ASAPManager.PROGRAMMATIC)
-                && !asapResponse.keyType.equals(ASAPManager.ASAP_UNDEFINED)
-                && !asapResponse.keyValue.equals(ASAPManager.ASAP_UNDEFINED)) {
-            queryStringParams.add(new Pair<>(asapResponse.keyType, asapResponse.keyValue));
-        }
+        this.mediationListener = mediationListener;
 
-        fetchAds("", queryStringParams, "", asapResponse.mrid);
+        //todo: make android id accessible through singleton
+        fetchAds(sharethroughEndPoint, generateQueryStringParams(asapResponse), "", asapResponse.mrid);
     }
 
-    // Interface to notify Sharethrough ads are ready to show
-    public interface AdManagerListener{
-        void onAdsReady(List<Creative> listOfCreativesReadyForShow, Placement placement);
-        void onNoAdsToShow();
-        void onAdsFailedToLoad();
+    @Override
+    public void render(IAdView adview, ICreative creative, int feedPosition) {
+//        renderer.putCreativeIntoAdView(adview, ((Creative) creative), beaconService, sharethrough, feedPosition, new Timer("AdView timer for " + creative));
     }
 
-    public AdManager(Context context) {
+    public AdManager(Context context, BeaconService beaconService) {
         this.applicationContext = context;
-        adFetcher = new AdFetcher(context);
+        this.beaconService = beaconService;
+
+        this.adFetcher = new AdFetcher(context);
         setAdFetcherListener();
+        this.renderer = new Renderer();
     }
 
     public void setMediationListener(MediationManager.MediationListener mediationListener) {
@@ -71,11 +68,11 @@ public class AdManager implements STRMediationAdapter {
 
     public void handleAdResponseLoaded(Response response) {
         List<ICreative> creatives = convertToCreatives(response);
-        Logger.d("ad request returned %d creatives ", creatives.size());
+        Logger.d("Sharethrough STX returned %d creatives ", creatives.size());
         if(creatives.isEmpty()){
             mediationListener.onAdFailedToLoad();
         }else {
-            mediationListener.onAdLoaded(creatives, new Placement(response.placement));
+            mediationListener.onAdLoaded(creatives);
         }
         isRunning = false;
         // To remove for asap v2
@@ -107,7 +104,7 @@ public class AdManager implements STRMediationAdapter {
         return creatives;
     }
 
-    public synchronized void fetchAds(String url, ArrayList<Pair<String,String>> queryStringParams, String advertisingId, String mediationRequestId){
+    public synchronized void fetchAds(String url, List<Pair<String,String>> queryStringParams, String advertisingId, String mediationRequestId){
         if(isRunning) {
             return;
         }
@@ -122,7 +119,19 @@ public class AdManager implements STRMediationAdapter {
         adFetcher.fetchAds(adRequestUrl);
     }
 
-    private String generateRequestUrl(String url, ArrayList<Pair<String, String>> queryStringParams, String advertisingId) {
+    private List<Pair<String, String>> generateQueryStringParams(ASAPManager.AdResponse asapResponse) {
+        ArrayList<Pair<String,String>> queryStringParams = new ArrayList<>();
+        queryStringParams.add(new Pair<>(ASAPManager.PLACEMENT_KEY, asapResponse.pkey));
+        if (!asapResponse.keyType.equals(ASAPManager.PROGRAMMATIC)
+                && !asapResponse.keyType.equals(ASAPManager.ASAP_UNDEFINED)
+                && !asapResponse.keyValue.equals(ASAPManager.ASAP_UNDEFINED)) {
+            queryStringParams.add(new Pair<>(asapResponse.keyType, asapResponse.keyValue));
+        }
+
+        return queryStringParams;
+    }
+
+    private String generateRequestUrl(String url, List<Pair<String, String>> queryStringParams, String advertisingId) {
         if (advertisingId != null) {
             queryStringParams.add(new Pair<>("uid", advertisingId));
         }
@@ -134,21 +143,17 @@ public class AdManager implements STRMediationAdapter {
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
-
-        //http://www.test.com?param1=2&param2=test
         if(versionName != null){
             queryStringParams.add(new Pair<>("appId", versionName));
         }
         queryStringParams.add(new Pair<>("appName", appPackageName));
-//        String formattedQueryStringParams = URLEncodedUtils.format(queryStringParams, "utf-8");
 
         Uri.Builder builder = new Uri.Builder();
         for (Pair<String,String> queryParam : queryStringParams) {
             builder.appendQueryParameter(queryParam.first, queryParam.second);
         }
 
-        String result = url + "?" + builder.toString();
-        return result;
+        return url + builder.toString();
     }
 
     public void setMediationRequestId(String mediationRequestId) {

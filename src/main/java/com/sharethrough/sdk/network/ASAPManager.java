@@ -1,6 +1,5 @@
 package com.sharethrough.sdk.network;
 
-import android.util.Pair;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -10,15 +9,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.sharethrough.sdk.Logger;
-//import org.apache.http.NameValuePair;
-//import org.apache.http.client.utils.URLEncodedUtils;
-//import org.apache.http.message.BasicNameValuePair;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 
