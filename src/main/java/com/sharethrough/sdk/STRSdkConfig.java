@@ -23,6 +23,7 @@ public class STRSdkConfig {
     private AdvertisingIdProvider advertisingIdProvider;
     private RequestQueue requestQueue;
     private ASAPManager asapManager;
+    private ContextInfo contextInfo;
 
     public STRSdkConfig(Context context, String placementKey){
         Logger.setContext(context);
@@ -30,7 +31,8 @@ public class STRSdkConfig {
 
         this.placementKey = placementKey;
         this.advertisingIdProvider = new AdvertisingIdProvider(context);
-        this.beaconService = new BeaconService(new DateProvider(), UUID.randomUUID(), advertisingIdProvider, context, placementKey);
+        this.contextInfo = new ContextInfo(context);
+        this.beaconService = new BeaconService(new DateProvider(), UUID.randomUUID(), advertisingIdProvider, contextInfo, placementKey);
         this.adManager = new AdManager(context);
         this.renderer = new Renderer();
         this.creativeQueue = new CreativesQueue();

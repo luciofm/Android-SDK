@@ -88,7 +88,7 @@ public class VideoDialog extends ShareableDialog {
             public void onClick(View v) {
                 if (videoView.isPlaying()) {
                     videoView.pause();
-                    beaconService.videoViewDuration(videoView.getContext(), creative, videoView.getCurrentPosition(), false, feedPosition);
+                    beaconService.videoViewDuration(creative, videoView.getCurrentPosition(), false, feedPosition);
                     playButton.setVisibility(View.VISIBLE);
                 } else {
                     videoView.start(); // oddly, resume and start do the opposite of what we'd expect
@@ -101,7 +101,7 @@ public class VideoDialog extends ShareableDialog {
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            beaconService.videoViewDuration(videoView.getContext(), creative, videoView.getCurrentPosition(), false, feedPosition);
+            beaconService.videoViewDuration(creative, videoView.getCurrentPosition(), false, feedPosition);
         }
         return super.onMenuItemSelected(featureId, item);
     }

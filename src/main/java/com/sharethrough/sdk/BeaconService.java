@@ -2,13 +2,9 @@ package com.sharethrough.sdk;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
-import android.view.Display;
 import android.view.View;
-import android.view.WindowManager;
 import com.sharethrough.android.sdk.BuildConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -24,51 +20,37 @@ public class BeaconService {
     private final Provider<Date> dateProvider;
     private final AdvertisingIdProvider advertisingIdProvider;
     private final UUID session;
-    private final String appPackageName;
-    private final Context context;
-    private String appVersionName;
     private String placementKey;
+    private final ContextInfo contextInfo;
 
-    public BeaconService(final Provider<Date> dateProvider, final UUID session, final AdvertisingIdProvider advertisingIdProvider, Context context, String pkey) {
+    public BeaconService(final Provider<Date> dateProvider, final UUID session, final AdvertisingIdProvider advertisingIdProvider,final ContextInfo contextInfo,final String pkey) {
         this.dateProvider = dateProvider;
         this.session = session;
         this.advertisingIdProvider = advertisingIdProvider;
-        this.context = context;
         this.placementKey = pkey;
-        appPackageName = context.getPackageName();
-        try {
-            appVersionName = context.getPackageManager().getPackageInfo(appPackageName, PackageManager.GET_META_DATA).versionName;
-        } catch (PackageManager.NameNotFoundException e) {
-            appVersionName = "unknown";
-            e.printStackTrace();
-        }
+        this.contextInfo = contextInfo;
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    Map<String, String> commonParams(Context context) {
+    Map<String, String> commonParams() {
         Map<String, String> result = new HashMap();
         result.put("umtime", String.valueOf(dateProvider.get().getTime()));
-        result.put("ploc", context.getPackageName());
-
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        result.put("bwidth", "" + size.x);
-        result.put("bheight", "" + size.y);
+        result.put("ploc", contextInfo.getAppPackageName());
+        result.put("bwidth", "" + contextInfo.getScreenSize().x);
+        result.put("bheight", "" + contextInfo.getScreenSize().y);
 
         if (advertisingIdProvider.getAdvertisingId() != null) result.put("uid", advertisingIdProvider.getAdvertisingId());
         result.put("session", session.toString());
 
-        result.put("ua", Build.MODEL + "; Android " + Build.VERSION.RELEASE + "; " + appPackageName + "; STR " + BuildConfig.VERSION_NAME);
-        result.put("appName", appPackageName);
-        result.put("appId", appVersionName);
+        result.put("ua", Build.MODEL + "; Android " + Build.VERSION.RELEASE + "; " + contextInfo.getAppPackageName() + "; STR " + BuildConfig.VERSION_NAME);
+        result.put("appName", contextInfo.getAppPackageName());
+        result.put("appId", contextInfo.getAppVersionName());
 
         return result;
     }
 
-    Map<String, String> commonParamsWithCreative(final Context context, final Creative creative) {
-        Map<String, String> result = commonParams(context);
+    Map<String, String> commonParamsWithCreative(final Creative creative) {
+        Map<String, String> result = commonParams();
         result.put("pkey", placementKey);
         result.put("vkey", creative.getVariantKey());
         result.put("ckey", creative.getCreativeKey());
@@ -82,8 +64,8 @@ public class BeaconService {
         return result;
     }
 
-    public void fireArticleDurationForAd(final Context context, final Creative creative, long timeSpentInView){
-        Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
+    public void fireArticleDurationForAd(final Creative creative, long timeSpentInView){
+        Map<String, String> beaconParams = commonParamsWithCreative(creative);
         beaconParams.put("type","userEvent");
         beaconParams.put("userEvent","articleViewDuration");
         beaconParams.put("duration", String.valueOf(timeSpentInView));
@@ -92,7 +74,7 @@ public class BeaconService {
     }
 
     public void adClicked(final String userEvent, final Creative creative, View view, int feedPosition) {
-        Map<String, String> beaconParams = commonParamsWithCreative(view.getContext(), creative);
+        Map<String, String> beaconParams = commonParamsWithCreative(creative);
         beaconParams.put("pheight", "" + view.getHeight());
         beaconParams.put("pwidth", "" + view.getWidth());
         beaconParams.put("type", "userEvent");
@@ -114,7 +96,7 @@ public class BeaconService {
     }
 
     public void adRequested(final String placementKey) {
-        Map<String, String> beaconParams = commonParams(context);
+        Map<String, String> beaconParams = commonParams();
         beaconParams.put("type", "impressionRequest");
         beaconParams.put("pkey", placementKey);
 
@@ -122,7 +104,7 @@ public class BeaconService {
     }
 
     public void adReceived(final Context context, final Creative creative, int feedPosition) {
-        Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
+        Map<String, String> beaconParams = commonParamsWithCreative(creative);
         beaconParams.put("type", "impression");
         beaconParams.put("placementIndex", String.valueOf(feedPosition));
 
@@ -132,7 +114,7 @@ public class BeaconService {
 
     public void adVisible(final View adView, final Creative creative, int feedPosition) {
         Context context = adView.getContext();
-        Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
+        Map<String, String> beaconParams = commonParamsWithCreative(creative);
         beaconParams.put("pheight", "" + adView.getHeight());
         beaconParams.put("pwidth", "" + adView.getWidth());
         beaconParams.put("type", "visible");
@@ -144,7 +126,7 @@ public class BeaconService {
 
 
     public void adShared(final Context context, final Creative creative, final String medium, int feedPosition) {
-        Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
+        Map<String, String> beaconParams = commonParamsWithCreative(creative);
         beaconParams.put("type", "userEvent");
         beaconParams.put("userEvent", "share");
         beaconParams.put("engagement", "true");
@@ -154,7 +136,7 @@ public class BeaconService {
     }
 
     public void autoplayVideoEngagement(final Context context, final Creative creative, final int duration, int feedPosition) {
-        Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
+        Map<String, String> beaconParams = commonParamsWithCreative(creative);
         beaconParams.put("type", "userEvent");
         beaconParams.put("userEvent", "autoplayVideoEngagement");
         beaconParams.put("videoDuration", String.valueOf(duration));
@@ -162,8 +144,8 @@ public class BeaconService {
         fireBeacon(beaconParams);
     }
 
-    public void silentAutoPlayDuration(final Context context, final Creative creative, final int duration, int feedPosition) {
-        Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
+    public void silentAutoPlayDuration(final Creative creative, final int duration, int feedPosition) {
+        Map<String, String> beaconParams = commonParamsWithCreative(creative);
         beaconParams.put("type", "silentAutoPlayDuration");
         beaconParams.put("duration", String.valueOf(duration));
         beaconParams.put("placementIndex", String.valueOf(feedPosition));
@@ -187,8 +169,8 @@ public class BeaconService {
         }
     }
 
-    public void videoViewDuration(final Context context, final Creative creative, final int duration, final boolean isSilent, int feedPosition) {
-        Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
+    public void videoViewDuration(final Creative creative, final int duration, final boolean isSilent, int feedPosition) {
+        Map<String, String> beaconParams = commonParamsWithCreative(creative);
         beaconParams.put("type", "videoViewDuration");
         beaconParams.put("duration", String.valueOf(duration));
         beaconParams.put("silent", String.valueOf(isSilent));
@@ -201,7 +183,7 @@ public class BeaconService {
             fireThirdPartyBeacons(creative.getCompletedSilentPlayBeacons());
         }
 
-        Map<String, String> beaconParams = commonParamsWithCreative(context, creative);
+        Map<String, String> beaconParams = commonParamsWithCreative(creative);
         beaconParams.put("type", "completionPercent");
         beaconParams.put("value", String.valueOf(percent));
         beaconParams.put("isSilentPlay", String.valueOf(isSilent));
@@ -233,7 +215,7 @@ public class BeaconService {
                 Logger.i("beacon url: %s", url);
                 try {
                     HttpGet request = new HttpGet(url);
-                    request.addHeader("User-Agent", Sharethrough.USER_AGENT + "; " + appPackageName);
+                    request.addHeader("User-Agent", Sharethrough.USER_AGENT + "; " + contextInfo.getAppPackageName());
                     client.execute(request);
                 } catch (Exception e) {
                     Logger.e("beacon fired failed for %s", e, url);
@@ -244,13 +226,5 @@ public class BeaconService {
 
     private String replaceCacheBusterParam(String uri) {
         return uri.replaceAll("\\[timestamp\\]", String.valueOf(dateProvider.get().getTime()));
-    }
-
-    public String getAppPackageName() {
-        return appPackageName;
-    }
-
-    public String getAppVersionName() {
-        return appVersionName;
     }
 }
