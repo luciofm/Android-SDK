@@ -95,7 +95,7 @@ public class Sharethrough {
     protected MediationManager.MediationListener mediationListener = new MediationManager.MediationListener() {
         @Override
         public void onAdLoaded(List<ICreative> creatives) {
-            strSdkConfig.getMediationManager().setWaterfallComplete();
+            strSdkConfig.getAsapManager().setWaterfallComplete();
 
             for(ICreative creative : creatives) {
                 strSdkConfig.getCreativeQueue().add(creative);
@@ -116,6 +116,7 @@ public class Sharethrough {
 
         @Override
         public void onAllAdsFailedToLoad() {
+            strSdkConfig.getAsapManager().setWaterfallComplete();
             fireNoAdsToShow();
         }
     };

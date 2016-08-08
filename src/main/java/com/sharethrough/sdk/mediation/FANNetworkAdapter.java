@@ -32,8 +32,8 @@ public class FANNetworkAdapter implements STRMediationAdapter {
         AdListener fbAdListener = new AdListener() {
             @Override
             public void onError(Ad ad, AdError adError) {
-                mediationListener.onAdFailedToLoad();
                 Logger.d("Facebook ads failed to load");
+                mediationListener.onAdFailedToLoad();
 
             }
 

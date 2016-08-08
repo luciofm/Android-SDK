@@ -21,10 +21,6 @@ public class MediationManager {
     private MediationWaterfall mediationWaterfall;
     private ASAPManager.AdResponse asapResponse;
     private Map<String, STRMediationAdapter> mediationAdapters = new HashMap<>();
-    private boolean isWaterfallRunning = false;
-
-    public static final String STR_Network = "stx";
-    public static final String FAN_NETWORK = "fan";
 
     public interface MediationListener {
         /**
@@ -52,11 +48,6 @@ public class MediationManager {
     public void initiateWaterfallAndLoadAd(final ASAPManager.AdResponse asapResponse,
                                            final MediationListener mediationListener
     ) {
-        if (isWaterfallRunning) {
-            return;
-        }
-
-        isWaterfallRunning = true;
         setUpWaterfall(asapResponse, mediationListener);
         loadNextAd();
     }
@@ -69,45 +60,48 @@ public class MediationManager {
     }
 
     /**
-     * Needs to be called by MediationListener when an ad loads successfully so the next
-     * waterfall can be initiated properly. Also needs to be called when waterfall is
-     * exhausted and all ads failed to load
+     * Loads ad(s) using appropriate mediation adapter based on waterfall order
      */
-    public void setWaterfallComplete() {
-        isWaterfallRunning = false;
-    }
-
     public void loadNextAd() {
         ASAPManager.AdResponse.Network network = mediationWaterfall.getNextThirdPartyNetwork();
-        STRMediationAdapter mediationAdapter = getMediationAdapter(network);
-
-        if (mediationAdapter != null) {
-            mediationAdapter.loadAd(context, mediationListener, asapResponse, network);
-        } else {
-            //end of waterfall
+        if (network == null) { // end of waterfall
             mediationListener.onAllAdsFailedToLoad();
-            setWaterfallComplete();
+        }
+
+        try {
+            STRMediationAdapter mediationAdapter  = getMediationAdapter(network);
+            mediationAdapters.put(network.name, mediationAdapter);
+            Logger.d("Mediating %s as network #" + "%d", network.name, mediationWaterfall.getCurrentIndex()+1);
+            mediationAdapter.loadAd(context, mediationListener, asapResponse, network);
+        } catch (Exception e) {
+            Logger.e("Could not instantiate a STRNetworkManager based off class name: %s", e, network.androidClassName);
+            mediationListener.onAdFailedToLoad();
         }
     }
 
-    private STRMediationAdapter getMediationAdapter(ASAPManager.AdResponse.Network thirdPartyNetwork) {
+    /**
+     * Gets MediationAdapter if it already has been instantiated or instantiates a new one using reflection
+     * @param thirdPartyNetwork
+     * @return
+     * @throws Exception if can not instantiate an adapter based off class name
+     */
+    private STRMediationAdapter getMediationAdapter(ASAPManager.AdResponse.Network thirdPartyNetwork) throws Exception {
         STRMediationAdapter mediationAdapter = mediationAdapters.get(thirdPartyNetwork.name);
         if (mediationAdapter != null) {
             return mediationAdapter;
         } else {
-            try {
-                mediationAdapter = create(thirdPartyNetwork.androidClassName);
-                mediationAdapters.put(thirdPartyNetwork.name, mediationAdapter);
-                Logger.d("Mediating %s as network #" + "%d", thirdPartyNetwork.name, mediationWaterfall.getCurrentIndex()+1);
-            } catch (Exception e) {
-                e.printStackTrace();
-                Logger.e("Could not instantiate a STRNetworkManager based off class name: %s", e, thirdPartyNetwork.androidClassName);
-            }
+            mediationAdapter = createAdapter(thirdPartyNetwork.androidClassName);
         }
         return mediationAdapter;
     }
 
-    public STRMediationAdapter create(final String className) throws Exception {
+    /**
+     * Creates a mediation adapter using reflection
+     * @param className
+     * @return
+     * @throws Exception
+     */
+    private STRMediationAdapter createAdapter(final String className) throws Exception {
         if (className != null && !className.contains("STX")) {
             final Class<? extends STRMediationAdapter> nativeClass = Class.forName(className)
                     .asSubclass(STRMediationAdapter.class);
@@ -121,6 +115,12 @@ public class MediationManager {
         }
     }
 
+    /**
+     * Renders an ad using appropriate mediation adapter
+     * @param adView
+     * @param creative
+     * @param feedPosition
+     */
     public void render(IAdView adView, ICreative creative, int feedPosition) {
         String networkName = creative.getNetworkType();
         STRMediationAdapter mediationAdapter = mediationAdapters.get(networkName);
@@ -154,8 +154,11 @@ public class MediationManager {
         }
 
         public ASAPManager.AdResponse.Network getCurrentThirdPartyNetwork() {
-            return thirdPartyNetworks.get(getCurrentIndex());
+            if (getCurrentIndex() < thirdPartyNetworks.size()) {
+                return thirdPartyNetworks.get(getCurrentIndex());
+            } else {
+                return null;
+            }
         }
-
     }
 }

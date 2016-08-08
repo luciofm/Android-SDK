@@ -21,15 +21,14 @@ import java.util.Map;
  */
 public class ASAPManager {
     public static final String ASAP_ENDPOINT_PREFIX = "http://dumb-waiter.sharethrough.com/asap/v1";//"http://asap.sharethrough.com/v1";
-    public static final String QUERY_STRING_PARAMS = "query_string_params";
-    public static final String MEDIATION_ID = "mediation_id";
-    public static final String MEDIATION_NETWORKS = "mediation_networks";
     public static final String PROGRAMMATIC = "stx_monetize";
     public static final String PLACEMENT_KEY = "placement_key";
     public static final String ASAP_UNDEFINED = "undefined";
     private static final String ASAP_OK = "OK";
     private String placementKey;
     private RequestQueue requestQueue;
+
+    //todo: make isRunning last for entire waterfall
     private boolean isRunning = false;
     private String asapEndpoint;
 
@@ -98,6 +97,15 @@ public class ASAPManager {
         }
     }
 
+    /**
+     * Needs to be called by MediationListener when an ad loads successfully so the next
+     * waterfall can be initiated properly. Also needs to be called when waterfall is
+     * exhausted and all ads failed to load
+     */
+    public void setWaterfallComplete() {
+        isRunning = false;
+    }
+
     public void callASAP(final ASAPManagerListener asapManagerListener) {
         if (isRunning) {
             return;
@@ -109,13 +117,12 @@ public class ASAPManager {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        isRunning = false;
                         handleResponse(response, asapManagerListener);
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                isRunning = false;
+                setWaterfallComplete();
                 asapManagerListener.onError(error.toString());
             }
         });

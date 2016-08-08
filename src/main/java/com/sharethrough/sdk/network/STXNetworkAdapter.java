@@ -12,7 +12,6 @@ import com.sharethrough.sdk.mediation.STRMediationAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class STXNetworkAdapter implements STRMediationAdapter {
 
     private Context applicationContext;
