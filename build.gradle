@@ -208,7 +208,6 @@ sourceSets {
         java {
             srcDir "$projectDir"
             include  'src/main/java/com/sharethrough/sdk/Sharethrough.java'
-            include  'src/main/java/com/sharethrough/sdk/SharethroughListAdapter.java'
             include  'src/main/java/com/sharethrough/sdk/BasicAdView.java'
             include  'src/main/java/com/sharethrough/sdk/IAdView.java'
         }
