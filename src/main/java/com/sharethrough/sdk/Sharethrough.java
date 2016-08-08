@@ -27,7 +27,6 @@ public class Sharethrough {
     protected Placement placement;
     protected boolean placementSet;
     protected STRSdkConfig strSdkConfig;
-    protected final int adCacheTimeInMilliseconds = 300000;
 
     private Callback<Placement> placementCallback = new Callback<Placement>() {
         @Override
@@ -165,7 +164,7 @@ public class Sharethrough {
      */
     private Creative getCreativeToShow(int feedPosition, boolean[] isAdRenewed) {
         Creative creative = strSdkConfig.getCreativesBySlot().get(feedPosition);
-        if (creative == null || creative.hasExpired(adCacheTimeInMilliseconds)) {
+        if (creative == null) {
 
             if (strSdkConfig.getCreativeQueue().size() != 0) {
                 synchronized (strSdkConfig.getCreativeQueue()) {
@@ -318,10 +317,6 @@ public class Sharethrough {
         }
         putCreativeIntoAdView(view, feedPosition);
         return view;
-    }
-
-    public long getAdCacheTimeInMilliseconds() {
-        return adCacheTimeInMilliseconds;
     }
 
     /**
