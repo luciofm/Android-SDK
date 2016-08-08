@@ -2,8 +2,7 @@ package com.sharethrough.sdk.network;
 
 import android.content.Context;
 import com.android.volley.*;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import com.android.volley.toolbox.*;
 import com.sharethrough.sdk.*;
 import com.sharethrough.sdk.Response;
 import org.json.JSONArray;
@@ -24,7 +23,8 @@ public class AdFetcher {
     }
 
     public AdFetcher(Context context) {
-        requestQueue = Volley.newRequestQueue(context);
+        requestQueue = new RequestQueue(new NoCache(), new BasicNetwork(new HurlStack()));
+        requestQueue.start();
     }
 
     public void setAdFetcherListener(AdFetcherListener adFetcherListener) {
@@ -58,9 +58,6 @@ public class AdFetcher {
             }
         });
 
-
-
-        // Add the request to the RequestQueue.
         requestQueue.add(stringRequest);
     }
 
