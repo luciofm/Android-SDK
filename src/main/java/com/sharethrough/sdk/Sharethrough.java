@@ -1,28 +1,18 @@
 package com.sharethrough.sdk;
 
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.Gravity;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import com.facebook.ads.NativeAd;
 import com.sharethrough.android.sdk.BuildConfig;
-import com.sharethrough.sdk.mediation.FANCreative;
 import com.sharethrough.sdk.mediation.ICreative;
 import com.sharethrough.sdk.mediation.MediationManager;
 import com.sharethrough.sdk.network.ASAPManager;
-import com.squareup.picasso.Picasso;
 
 import java.util.*;
 
 /**
  * Methods to handle configuration for Sharethrough's Android SDK.
  */
-@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
 public class Sharethrough {
     public static final String SDK_VERSION_NUMBER = BuildConfig.VERSION_NAME;
     public static final String PRIVACY_POLICY_ENDPOINT = "http://platform-cdn.sharethrough.com/privacy-policy.html?opt_out_url={OPT_OUT_URL}&opt_out_text={OPT_OUT_TEXT}";
@@ -34,7 +24,6 @@ public class Sharethrough {
     protected Placement placement;
     protected boolean placementSet;
     protected STRSdkConfig strSdkConfig;
-    protected final int adCacheTimeInMilliseconds = 300000;
 
     private Callback<Placement> placementCallback = new Callback<Placement>() {
         @Override
@@ -53,7 +42,6 @@ public class Sharethrough {
         }
     };
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public Sharethrough(STRSdkConfig config) {
         this.strSdkConfig = config;
         this.placement = createPlacement(Integer.MAX_VALUE, Integer.MAX_VALUE);
@@ -102,6 +90,7 @@ public class Sharethrough {
                 if (creative != null) {
                     if (creative instanceof Creative)
                         Logger.d("insert creative ckey: %s, creative cache size %d", ((Creative)creative).getCreativeKey(), strSdkConfig.getCreativeQueue().size());
+                    //todo: figure this out
 //                    else if (creative instanceof FacebookCreative)
 //                        Logger.d("Insert fb ad to queue, queue size: %d", fbQueue.size());
                 }
@@ -165,10 +154,10 @@ public class Sharethrough {
      * @return null if there is no creatives to show in both the slot and queue, and sets the isAdRenewed to true if
      * there is a new creative to show
      */
+
     private ICreative getCreativeToShow(int feedPosition, boolean[] isAdRenewed) {
         ICreative creative = strSdkConfig.getCreativesBySlot().get(feedPosition);
-        if (creative == null /*|| creative.hasExpired(adCacheTimeInMilliseconds)*/) {
-
+        if (creative == null) {
             if (strSdkConfig.getCreativeQueue().size() != 0) {
                 synchronized (strSdkConfig.getCreativeQueue()) {
                     creative = strSdkConfig.getCreativeQueue().getNext();
@@ -198,7 +187,6 @@ public class Sharethrough {
      * @param adView    Any class that implements IAdView.
      * @param feedPosition The starting position in your feed where you would like your first ad.
      */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public void putCreativeIntoAdView(final IAdView adView, final int feedPosition) {
 
         //prevent pubs from calling this before we fire new ads to show
@@ -219,46 +207,6 @@ public class Sharethrough {
             if (strSdkConfig.getCreativeQueue().readyForMore()) {
                 fetchAds();
             }
-        }
-    }
-
-    public void renderFbAd(final IAdView adView, ICreative creative, final int feedPosition) {
-
-        Logger.d("Pop fb ad from queue to render, queue size: %d", strSdkConfig.getCreativeQueue().size());
-
-        if (creative != null && creative instanceof FANCreative) {
-            //render fb ad
-
-            final NativeAd nativeAd = ((NativeAd) ((FANCreative)creative).getFbAd());
-
-            handler.post(new Runnable() {
-                public void run() {
-                    String titleForAd = nativeAd.getAdTitle();
-                    NativeAd.Image coverImage = nativeAd.getAdCoverImage();
-                    NativeAd.Image iconForAd = nativeAd.getAdIcon();
-                    String socialContextForAd = nativeAd.getAdSocialContext();
-                    String titleForAdButton = nativeAd.getAdCallToAction();
-                    String textForAdBody = nativeAd.getAdBody();
-                    NativeAd.Rating appRatingForAd = nativeAd.getAdStarRating();
-
-                    // Add code here to create a custom view that uses the ad properties
-                    // For example:
-                    adView.adReady();
-
-                    adView.getTitle().setText(titleForAd);
-                    adView.getDescription().setText(textForAdBody);
-
-                    FrameLayout thumbnailContainer = adView.getThumbnail();
-                    ImageView thumbnailImage = new ImageView(strSdkConfig.context);
-                    Picasso.with(strSdkConfig.context).load(coverImage.getUrl()).fit().centerCrop().tag("STRAdImage").into(thumbnailImage);
-                    thumbnailContainer.addView(thumbnailImage,
-                            new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
-                }
-            }
-            );
-
-            // Register the native ad view with the native ad instance
-            nativeAd.registerViewForInteraction(adView.getAdView());
         }
     }
 
@@ -290,9 +238,6 @@ public class Sharethrough {
         if (strSdkConfig.getCreativeQueue().readyForMore()) {
             fetchAds();
         }
-//        if (fbQueue.size() <= 1) {
-//            fetchAds();
-//        }
     }
 
     /**
@@ -307,7 +252,6 @@ public class Sharethrough {
      * @return the number of prefetched ads available to show.
      */
     public int getNumberOfAdsReadyToShow() {
-//        return fbQueue.size();
         return strSdkConfig.getCreativeQueue().size();
     }
 
@@ -358,7 +302,6 @@ public class Sharethrough {
         return onStatusChangeListener;
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public IAdView getAdView(Context context, int feedPosition, int adLayoutResourceId, int title, int description,
                              int advertiser, int thumbnail, int optoutId, int brandLogoId, IAdView convertView) {
         IAdView view = convertView;
@@ -369,10 +312,6 @@ public class Sharethrough {
         }
         putCreativeIntoAdView(view, feedPosition);
         return view;
-    }
-
-    public long getAdCacheTimeInMilliseconds() {
-        return adCacheTimeInMilliseconds;
     }
 
     /**

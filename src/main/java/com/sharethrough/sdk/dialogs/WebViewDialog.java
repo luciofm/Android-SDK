@@ -51,7 +51,7 @@ public class WebViewDialog extends ShareableDialog {
                 //fire beacon
                 long totalTimeSpent = endTime - startTimeInArticle;
                 totalTimeSpent = totalTimeSpent >= 0? totalTimeSpent:0;
-                beaconService.fireArticleDurationForAd(getContext(),creative, totalTimeSpent);
+                beaconService.fireArticleDurationForAd(creative, totalTimeSpent);
             }
         }
 

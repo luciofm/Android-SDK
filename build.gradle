@@ -34,7 +34,7 @@ android {
     }
 
     compileSdkVersion 23
-    buildToolsVersion '21.1.1'
+    buildToolsVersion '21.1.2'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -61,7 +61,7 @@ android {
             versionCode code
             versionName version
             minSdkVersion 15
-            targetSdkVersion 18
+            targetSdkVersion 23
         }
     }
     else {
@@ -70,7 +70,7 @@ android {
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 15
+        targetSdkVersion 23
         versionCode 1
         versionName version
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
@@ -215,7 +215,6 @@ sourceSets {
         java {
             srcDir "$projectDir"
             include  'src/main/java/com/sharethrough/sdk/Sharethrough.java'
-            include  'src/main/java/com/sharethrough/sdk/SharethroughListAdapter.java'
             include  'src/main/java/com/sharethrough/sdk/BasicAdView.java'
             include  'src/main/java/com/sharethrough/sdk/IAdView.java'
         }

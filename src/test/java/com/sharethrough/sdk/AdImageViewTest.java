@@ -46,20 +46,8 @@ public class AdImageViewTest extends TestBase {
     }
 
     @Test
-    public void WhenAdCacheTimeExpires_putInANewAd() throws Exception {
-        creative.renderedTime = Integer.MIN_VALUE;
-        creative.wasVisible = true;
-
-        when(sharethrough.getAdCacheTimeInMilliseconds()).thenReturn((long) 20);
-        subject.onAttachedToWindow();
-        verify(sharethrough).putCreativeIntoAdView(adView, feedPosition);
-    }
-
-    @Test
     public void WhenAdImageViewIsAttached_VerifyThatAdViewTimerTaskIsScheduled() throws Exception {
         creative.renderedTime = Integer.MAX_VALUE;
-
-        when(sharethrough.getAdCacheTimeInMilliseconds()).thenReturn((long) 20);
         subject.onAttachedToWindow();
         verify(timer).schedule(any(TimerTask.class), anyInt(), anyInt());
     }

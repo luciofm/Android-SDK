@@ -82,10 +82,6 @@ public class Creative implements ICreative {
         }
     }
 
-    public boolean hasExpired(int adCacheTimeInMilliseconds) {
-        return (new DateProvider().get().getTime()) - renderedTime >= adCacheTimeInMilliseconds;
-    }
-
     public String getAdserverRequestId() {
         return responseCreative.adserverRequestId;
     }

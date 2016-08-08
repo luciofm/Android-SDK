@@ -98,7 +98,7 @@ public class VideoDialogTest extends TestBase {
 
         ((View) videoView.getParent()).performClick();
         assertThat(videoView.isPlaying()).isFalse();
-        verify(beaconService).videoViewDuration(videoView.getContext(), creative, videoView.getCurrentPosition(), false, feedPosition);
+        verify(beaconService).videoViewDuration(creative, videoView.getCurrentPosition(), false, feedPosition);
     }
 
     @Test
@@ -107,7 +107,7 @@ public class VideoDialogTest extends TestBase {
         when(mockedMenuItem.getItemId()).thenReturn(android.R.id.home);
         subject.onMenuItemSelected(0, mockedMenuItem);
 
-        verify(beaconService).videoViewDuration(videoView.getContext(), creative, videoView.getCurrentPosition(), false, feedPosition);
+        verify(beaconService).videoViewDuration(creative, videoView.getCurrentPosition(), false, feedPosition);
     }
 
     @Test

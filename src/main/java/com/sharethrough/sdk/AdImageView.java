@@ -27,13 +27,7 @@ class AdImageView extends ImageView {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-
         killVisibleBeaconTask();
-
-        if (forceAdRefreshIfRecyclerViewAndExpired()) {
-            return;
-        }
-
         scheduleVisibleBeaconTask();
 
     }
@@ -48,16 +42,6 @@ class AdImageView extends ImageView {
         visibleBeaconTimer = getTimer();
         visibleBeaconTask = new AdViewTimerTask(adView, feedPosition, creative, beaconService, new DateProvider());
         visibleBeaconTimer.schedule(visibleBeaconTask, 0, 100);
-    }
-
-    private boolean forceAdRefreshIfRecyclerViewAndExpired() {
-        long currentTime = (new DateProvider()).get().getTime();
-        if (creative.wasVisible && (currentTime - creative.renderedTime) >= sharethrough.getAdCacheTimeInMilliseconds()) {
-            sharethrough.putCreativeIntoAdView(adView, feedPosition);
-            return true;
-        }
-
-        return false;
     }
 
     private void killVisibleBeaconTask() {

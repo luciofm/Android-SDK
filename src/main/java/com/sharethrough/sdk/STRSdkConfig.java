@@ -22,6 +22,7 @@ public class STRSdkConfig {
     private RequestQueue requestQueue;
     private ASAPManager asapManager;
     private MediationManager mediationManager;
+    private ContextInfo contextInfo;
 
     public Context context;
 
@@ -32,7 +33,8 @@ public class STRSdkConfig {
 
         this.placementKey = placementKey;
         this.advertisingIdProvider = new AdvertisingIdProvider(context);
-        this.beaconService = new BeaconService(new DateProvider(), UUID.randomUUID(), advertisingIdProvider, context, placementKey);
+        this.contextInfo = new ContextInfo(context);
+        this.beaconService = new BeaconService(new DateProvider(), UUID.randomUUID(), advertisingIdProvider, contextInfo, placementKey);
         this.creativeQueue = new CreativesQueue();
         this.requestQueue = Volley.newRequestQueue(context.getApplicationContext());
         this.asapManager = new ASAPManager(placementKey, requestQueue);
