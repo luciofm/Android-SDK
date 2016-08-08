@@ -5,15 +5,21 @@ import com.facebook.ads.Ad;
 /**
  * Created by engineer on 8/3/16.
  */
-public class FacebookAd implements ICreative {
+public class FANCreative implements ICreative {
     private Ad fbAd;
+    private String networkType;
+
+    @Override
+    public void setNetworkType(String networkType) {
+        this.networkType = networkType;
+    }
 
     @Override
     public String getNetworkType() {
-        return MediationManager.FAN_NETWORK;
+        return networkType;
     }
 
-    public FacebookAd(Ad ad) {
+    public FANCreative(Ad ad) {
         this.fbAd = ad;
     }
 

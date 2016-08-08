@@ -2,7 +2,6 @@ package com.sharethrough.sdk.mediation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import android.content.Context;
 import com.facebook.ads.*;
@@ -14,11 +13,12 @@ import com.sharethrough.sdk.network.ASAPManager;
 /**
  * Created by danicashei on 8/1/16.
  */
-public class FANAdapter implements STRMediationAdapter {
-    public static String FAN_PLACEMENT_ID = "FAN_PLACEMENT_ID";
+public class FANNetworkAdapter implements STRMediationAdapter {
+    public static String FAN_PLACEMENT_ID = "fanPlacementId";
 
     @Override
-    public void loadAd(Context context, final MediationManager.MediationListener mediationListener, ASAPManager.AdResponse adResponse, ASAPManager.AdResponse.Network network) {
+    public void loadAd(Context context, final MediationManager.MediationListener mediationListener, final ASAPManager.AdResponse adResponse, final ASAPManager.AdResponse.Network network) {
+        String fanPlacementId = network.parameters.get(FAN_PLACEMENT_ID).getAsString();
         final NativeAd fbAd = new NativeAd(context, "548597075312947_565374090301912");
 
 
@@ -44,7 +44,9 @@ public class FANAdapter implements STRMediationAdapter {
                 if (fbAd.equals(ad)) {
                     Logger.d("Facebook returned 1 creative");
                     List<ICreative> creatives = new ArrayList<ICreative>();
-                    creatives.add(new FacebookAd(fbAd));
+                    FANCreative convertedFbAd = new FANCreative(fbAd);
+                    convertedFbAd.setNetworkType(network.name);
+                    creatives.add(convertedFbAd);
                     mediationListener.onAdLoaded(creatives);
                     return;
                 }
@@ -52,7 +54,7 @@ public class FANAdapter implements STRMediationAdapter {
 
             @Override
             public void onAdClicked(Ad ad) {
-                System.out.println("ad clicked");
+                System.out.println("Facebook ad clicked");
             }
         };
 

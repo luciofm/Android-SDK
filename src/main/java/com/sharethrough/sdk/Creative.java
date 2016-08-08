@@ -24,6 +24,7 @@ public class Creative implements ICreative {
     public long renderedTime = Long.MAX_VALUE;
     private boolean wasClicked = false;
     public boolean wasVisible = false;
+    private String networkType;
 
     public Creative(Response.Creative responseCreative, String mediationRequestId) {
         this.responseCreative = responseCreative;
@@ -31,8 +32,14 @@ public class Creative implements ICreative {
         this.responseCreative.mediationRequestId = mediationRequestId;
     }
 
+    @Override
+    public void setNetworkType(String networkType) {
+        this.networkType = networkType;
+    }
+
+    @Override
     public String getNetworkType() {
-        return MediationManager.STR_Network;
+        return networkType;
     }
 
     public String getTitle() {

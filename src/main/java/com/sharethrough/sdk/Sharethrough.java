@@ -11,7 +11,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.facebook.ads.NativeAd;
 import com.sharethrough.android.sdk.BuildConfig;
-import com.sharethrough.sdk.mediation.FacebookAd;
+import com.sharethrough.sdk.mediation.FANCreative;
 import com.sharethrough.sdk.mediation.ICreative;
 import com.sharethrough.sdk.mediation.MediationManager;
 import com.sharethrough.sdk.network.ASAPManager;
@@ -192,8 +192,6 @@ public class Sharethrough {
         return creative;
     }
 
-    public Queue<NativeAd> fbQueue = new LinkedList<>();
-
     /**
      *
      * @param adView    Any class that implements IAdView.
@@ -225,12 +223,12 @@ public class Sharethrough {
 
     public void renderFbAd(final IAdView adView, ICreative creative, final int feedPosition) {
 
-        Logger.d("Pop fb ad from queue to render, queue size: %d", fbQueue.size());
+        Logger.d("Pop fb ad from queue to render, queue size: %d", strSdkConfig.getCreativeQueue().size());
 
-        if (creative != null && creative instanceof FacebookAd) {
+        if (creative != null && creative instanceof FANCreative) {
             //render fb ad
 
-            final NativeAd nativeAd = ((NativeAd) ((FacebookAd)creative).getFbAd());
+            final NativeAd nativeAd = ((NativeAd) ((FANCreative)creative).getFbAd());
 
             handler.post(new Runnable() {
                 public void run() {

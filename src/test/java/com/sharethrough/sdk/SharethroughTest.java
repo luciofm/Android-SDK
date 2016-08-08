@@ -5,7 +5,6 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import com.android.volley.RequestQueue;
 import com.sharethrough.sdk.network.ASAPManager;
-import com.sharethrough.sdk.network.AdManager;
 import com.sharethrough.test.util.TestAdView;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -14,7 +13,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 import java.util.*;
@@ -32,7 +30,7 @@ public class SharethroughTest extends TestBase {
     private String serializedSharethrough;
     @Mock private BeaconService beaconService;
     @Mock private STRSdkConfig strSdkConfig;
-    @Mock private AdManager adManager;
+    @Mock private com.sharethrough.sdk.network.STXNetworkAdapter STXNetworkAdapter;
     @Mock private Renderer renderer;
     @Mock private CreativesQueue creativeQueue;
     @Mock private LruCache<Integer, Creative> creativesBySlot;
@@ -64,7 +62,7 @@ public class SharethroughTest extends TestBase {
         placementKey = "fakeKey";
         when(strSdkConfig.getSerializedSharethrough()).thenReturn(serializedSharethrough);
         when(strSdkConfig.getBeaconService()).thenReturn(beaconService);
-        when(strSdkConfig.getAdManager()).thenReturn(adManager);
+        when(strSdkConfig.getAdManager()).thenReturn(STXNetworkAdapter);
         when(strSdkConfig.getRenderer()).thenReturn(renderer);
         when(strSdkConfig.getCreativesBySlot()).thenReturn(creativesBySlot);
         when(strSdkConfig.getCreativeIndices()).thenReturn(creativeIndices);
@@ -96,7 +94,7 @@ public class SharethroughTest extends TestBase {
 
     @Test
     public void constructor_setsAdManagerListener() throws Exception {
-        verify(adManager).setAdManagerListener((AdManager.AdManagerListener) anyObject());
+        verify(STXNetworkAdapter).setAdManagerListener((com.sharethrough.sdk.network.STXNetworkAdapter.AdManagerListener) anyObject());
     }
 
     @Test
@@ -165,7 +163,7 @@ public class SharethroughTest extends TestBase {
     @Test
     public void putCreativeIntoAdView_whenQueueWantsMore_fetchesMoreAds() throws Exception {
         when(creativeQueue.readyForMore()).thenReturn(true);
-        reset(adManager);
+        reset(STXNetworkAdapter);
         subject.putCreativeIntoAdView(adView);
 
         verify(asapManager, atLeastOnce()).callASAP((ASAPManager.ASAPManagerListener) anyObject());

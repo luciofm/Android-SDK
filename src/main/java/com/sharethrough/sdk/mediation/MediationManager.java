@@ -3,8 +3,9 @@ package com.sharethrough.sdk.mediation;
 import android.content.Context;
 import com.sharethrough.sdk.*;
 import com.sharethrough.sdk.network.ASAPManager;
-import com.sharethrough.sdk.network.AdManager;
+import com.sharethrough.sdk.network.STXNetworkAdapter;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,8 +23,8 @@ public class MediationManager {
     private Map<String, STRMediationAdapter> mediationAdapters = new HashMap<>();
     private boolean isWaterfallRunning = false;
 
-    public final String STR_Network = "stx";
-    public final String FAN_NETWORK = "fan";
+    public static final String STR_Network = "stx";
+    public static final String FAN_NETWORK = "fan";
 
     public interface MediationListener {
         /**
@@ -78,7 +79,7 @@ public class MediationManager {
 
     public void loadNextAd() {
         ASAPManager.AdResponse.Network network = mediationWaterfall.getNextThirdPartyNetwork();
-        STRMediationAdapter mediationAdapter = getMediationAdapter(network.name);
+        STRMediationAdapter mediationAdapter = getMediationAdapter(network);
 
         if (mediationAdapter != null) {
             mediationAdapter.loadAd(context, mediationListener, asapResponse, network);
@@ -89,22 +90,34 @@ public class MediationManager {
         }
     }
 
-    private STRMediationAdapter getMediationAdapter(String thirdPartyNetwork) {
-        STRMediationAdapter mediationAdapter = mediationAdapters.get(thirdPartyNetwork);
+    private STRMediationAdapter getMediationAdapter(ASAPManager.AdResponse.Network thirdPartyNetwork) {
+        STRMediationAdapter mediationAdapter = mediationAdapters.get(thirdPartyNetwork.name);
         if (mediationAdapter != null) {
             return mediationAdapter;
         } else {
-            switch (thirdPartyNetwork) {
-                case STR_Network:
-                    mediationAdapter = new AdManager(context, beaconService);
-                    mediationAdapters.put(thirdPartyNetwork, mediationAdapter);
-                    Logger.d("Mediating Sharethrough as network #" + "%d", mediationWaterfall.getCurrentIndex()+1);
-                case FAN_NETWORK:
-                    mediationAdapter = new FANAdapter();
-                    mediationAdapters.put(thirdPartyNetwork, mediationAdapter);
-                    Logger.d("Mediating Facebook as network #" + "%d", mediationWaterfall.getCurrentIndex()+1);
+            try {
+                mediationAdapter = create(thirdPartyNetwork.androidClassName);
+                mediationAdapters.put(thirdPartyNetwork.name, mediationAdapter);
+                Logger.d("Mediating %s as network #" + "%d", thirdPartyNetwork.name, mediationWaterfall.getCurrentIndex()+1);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Logger.e("Could not instantiate a STRNetworkManager based off class name: %s", e, thirdPartyNetwork.androidClassName);
             }
-            return mediationAdapter;
+        }
+        return mediationAdapter;
+    }
+
+    public STRMediationAdapter create(final String className) throws Exception {
+        if (className != null && !className.contains("STX")) {
+            final Class<? extends STRMediationAdapter> nativeClass = Class.forName(className)
+                    .asSubclass(STRMediationAdapter.class);
+            //Preconditions.checkNotNull(nativeClass);
+
+            final Constructor<?> nativeConstructor = nativeClass.getDeclaredConstructor((Class[]) null);
+            nativeConstructor.setAccessible(true);
+            return (STRMediationAdapter) nativeConstructor.newInstance();
+        } else {
+            return new STXNetworkAdapter(context, beaconService);
         }
     }
 
@@ -114,25 +127,6 @@ public class MediationManager {
 
         mediationAdapter.render(adView, creative, feedPosition);
     }
-
-//    public IRenderer getRenderer(String thirdPartyNetwork) {
-//        IRenderer renderer = null;
-//        if (renderers.get(thirdPartyNetwork) != null) {
-//            return renderers.get(thirdPartyNetwork);
-//        } else {
-//            switch (thirdPartyNetwork) {
-//                case STR_Network:
-//                    renderer = new Renderer();
-//                    renderers.put(thirdPartyNetwork, renderer);
-//                    return renderer;
-//                case FAN_NETWORK:
-//                    renderer = new Renderer();
-//                    renderers.put(thirdPartyNetwork, renderer);
-//                    return renderer;
-//            }
-//            return renderer;
-//        }
-//    }
 
     public class MediationWaterfall {
         private List<ASAPManager.AdResponse.Network> thirdPartyNetworks = new ArrayList<>();

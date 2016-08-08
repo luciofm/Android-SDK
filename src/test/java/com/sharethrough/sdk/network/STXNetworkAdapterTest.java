@@ -10,7 +10,6 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 import java.util.ArrayList;
@@ -18,10 +17,10 @@ import java.util.List;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-public class AdManagerTest extends TestBase {
+public class STXNetworkAdapterTest extends TestBase {
 
-    private AdManager subject;
-    @Mock private AdManager.AdManagerListener adManagerListener;
+    private STXNetworkAdapter subject;
+    @Mock private STXNetworkAdapter.AdManagerListener adManagerListener;
 
     private static final String SINGLE_LAYOUT_FIXTURE = Fixtures.getFile("assets/str_single_ad_youtube.json");
     private static final String NO_CREATIVE_FIXTURE = Fixtures.getFile("assets/str_no_creatives.json");
@@ -45,7 +44,7 @@ public class AdManagerTest extends TestBase {
 
     @Before
     public void setUp() throws Exception {
-        subject = new AdManager(RuntimeEnvironment.application.getApplicationContext());
+        subject = new STXNetworkAdapter(RuntimeEnvironment.application.getApplicationContext());
         subject.setAdManagerListener(adManagerListener);
 
         adFetcherStub = new AdFetcherStub(RuntimeEnvironment.application);

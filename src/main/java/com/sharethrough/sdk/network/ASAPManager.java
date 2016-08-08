@@ -20,7 +20,7 @@ import java.util.Map;
  * Created by engineers on 4/26/16.
  */
 public class ASAPManager {
-    public static final String ASAP_ENDPOINT_PREFIX = "http://asap.sharethrough.com/v1";
+    public static final String ASAP_ENDPOINT_PREFIX = "http://dumb-waiter.sharethrough.com/asap/v1";//"http://asap.sharethrough.com/v1";
     public static final String QUERY_STRING_PARAMS = "query_string_params";
     public static final String MEDIATION_ID = "mediation_id";
     public static final String MEDIATION_NETWORKS = "mediation_networks";
@@ -57,6 +57,7 @@ public class ASAPManager {
         public class Network {
             public String key;
             public String name;
+            public String androidClassName;
             public JsonObject parameters;
         }
     }

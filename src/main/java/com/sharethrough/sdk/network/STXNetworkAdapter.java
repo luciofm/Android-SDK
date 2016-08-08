@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class AdManager implements STRMediationAdapter {
+public class STXNetworkAdapter implements STRMediationAdapter {
 
     private Context applicationContext;
     private BeaconService beaconService;
@@ -35,10 +35,11 @@ public class AdManager implements STRMediationAdapter {
 
     @Override
     public void render(IAdView adview, ICreative creative, int feedPosition) {
+        //todo: remove renderer dependency on sharethrough
 //        renderer.putCreativeIntoAdView(adview, ((Creative) creative), beaconService, sharethrough, feedPosition, new Timer("AdView timer for " + creative));
     }
 
-    public AdManager(Context context, BeaconService beaconService) {
+    public STXNetworkAdapter(Context context, BeaconService beaconService) {
         this.applicationContext = context;
         this.beaconService = beaconService;
 
