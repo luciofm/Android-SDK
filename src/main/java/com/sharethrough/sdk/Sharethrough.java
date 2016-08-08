@@ -1,8 +1,6 @@
 package com.sharethrough.sdk;
 
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import com.sharethrough.android.sdk.BuildConfig;
@@ -14,7 +12,6 @@ import java.util.*;
 /**
  * Methods to handle configuration for Sharethrough's Android SDK.
  */
-@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
 public class Sharethrough {
     public static final String SDK_VERSION_NUMBER = BuildConfig.VERSION_NAME;
     public static final String PRIVACY_POLICY_ENDPOINT = "http://platform-cdn.sharethrough.com/privacy-policy.html?opt_out_url={OPT_OUT_URL}&opt_out_text={OPT_OUT_TEXT}";
@@ -27,7 +24,6 @@ public class Sharethrough {
     protected Placement placement;
     protected boolean placementSet;
     protected STRSdkConfig strSdkConfig;
-    protected final int adCacheTimeInMilliseconds = 300000;
 
     private Callback<Placement> placementCallback = new Callback<Placement>() {
         @Override
@@ -46,7 +42,6 @@ public class Sharethrough {
         }
     };
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public Sharethrough(STRSdkConfig config) {
         this.strSdkConfig = config;
         this.placement = createPlacement(Integer.MAX_VALUE, Integer.MAX_VALUE);
@@ -165,7 +160,7 @@ public class Sharethrough {
      */
     private Creative getCreativeToShow(int feedPosition, boolean[] isAdRenewed) {
         Creative creative = strSdkConfig.getCreativesBySlot().get(feedPosition);
-        if (creative == null || creative.hasExpired(adCacheTimeInMilliseconds)) {
+        if (creative == null) {
 
             if (strSdkConfig.getCreativeQueue().size() != 0) {
                 synchronized (strSdkConfig.getCreativeQueue()) {
@@ -192,7 +187,6 @@ public class Sharethrough {
      * @param adView    Any class that implements IAdView.
      * @param feedPosition The starting position in your feed where you would like your first ad.
      */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public void putCreativeIntoAdView(final IAdView adView, final int feedPosition) {
 
         //prevent pubs from calling this before we fire new ads to show
@@ -307,7 +301,6 @@ public class Sharethrough {
         return onStatusChangeListener;
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public IAdView getAdView(Context context, int feedPosition, int adLayoutResourceId, int title, int description,
                              int advertiser, int thumbnail, int optoutId, int brandLogoId, IAdView convertView) {
         IAdView view = convertView;
@@ -318,10 +311,6 @@ public class Sharethrough {
         }
         putCreativeIntoAdView(view, feedPosition);
         return view;
-    }
-
-    public long getAdCacheTimeInMilliseconds() {
-        return adCacheTimeInMilliseconds;
     }
 
     /**

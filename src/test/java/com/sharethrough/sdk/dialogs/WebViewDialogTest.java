@@ -71,7 +71,7 @@ public class WebViewDialogTest extends TestBase {
     public void whenMediaIsArticle_fireTimeInViewBeacon_fires_once() throws Exception{
         when(creative.getType()).thenReturn(Creative.CreativeType.ARTICLE);
         subject.fireTimeInViewBeacon();
-        verify(beaconService).fireArticleDurationForAd(any(Context.class), any(Creative.class), anyLong());
+        verify(beaconService).fireArticleDurationForAd(any(Creative.class), anyLong());
         reset(beaconService);
         subject.fireTimeInViewBeacon();
         verifyNoMoreInteractions(beaconService);
@@ -88,7 +88,7 @@ public class WebViewDialogTest extends TestBase {
     public void whenMediaIsArticle_navigate_different_domain_fire_timeinviewbeacon() throws Exception{
         when(creative.getType()).thenReturn(Creative.CreativeType.ARTICLE);
         shadowWebView.getWebViewClient().shouldOverrideUrlLoading(webView, "http://www.different.com/sharethrough");
-        verify(beaconService).fireArticleDurationForAd(any(Context.class), any(Creative.class), anyLong());
+        verify(beaconService).fireArticleDurationForAd(any(Creative.class), anyLong());
     }
 
     @Test
@@ -111,7 +111,7 @@ public class WebViewDialogTest extends TestBase {
 
         shadowWebView.setCanGoBack(false);
         subject.onKeyDown(KeyEvent.KEYCODE_BACK, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK));
-        verify(beaconService).fireArticleDurationForAd(any(Context.class), any(Creative.class), anyLong());
+        verify(beaconService).fireArticleDurationForAd(any(Creative.class), anyLong());
     }
 
     @Test
@@ -129,7 +129,7 @@ public class WebViewDialogTest extends TestBase {
 
         subject.startTimeInArticle = 0;
         subject.fireTimeInViewBeacon(10000);
-        verify(beaconService).fireArticleDurationForAd(subject.getContext(), creative, 10000);
+        verify(beaconService).fireArticleDurationForAd(creative, 10000);
     }
 
 

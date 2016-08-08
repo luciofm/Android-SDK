@@ -115,7 +115,7 @@ public class InstantPlayVideo extends Media {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
                 synchronized (videoStateLock) {
-                    beaconService.videoViewDuration(videoView.getContext(), creative, videoView.getCurrentPosition(), true, feedPosition);
+                    beaconService.videoViewDuration(creative, videoView.getCurrentPosition(), true, feedPosition);
                     ((InstantPlayCreative) creative).setVideoCompleted(true);
                     cancelSilentAutoplayBeaconTask();
                     cancelVideoCompletionBeaconTask();
@@ -154,7 +154,7 @@ public class InstantPlayVideo extends Media {
             public void offScreen() {
                 synchronized (videoStateLock) {
                     if (isVideoPrepared && videoView.isPlaying() && videoView.canPause()) {
-                        beaconService.videoViewDuration(videoView.getContext(), creative, videoView.getCurrentPosition(), true, feedPosition);
+                        beaconService.videoViewDuration(creative, videoView.getCurrentPosition(), true, feedPosition);
                         ((InstantPlayCreative) creative).setCurrentPosition(videoView.getCurrentPosition());
                         cancelSilentAutoplayBeaconTask();
                         cancelVideoCompletionBeaconTask();
@@ -254,18 +254,18 @@ public class InstantPlayVideo extends Media {
             if (videoView.isPlaying()) {
                 if ( !hasThreeSecondSilentPlayBeaconFired && videoView.getCurrentPosition() >= 3000 ) {
                     hasThreeSecondSilentPlayBeaconFired = true;
-                    beaconService.silentAutoPlayDuration(videoView.getContext(), creative, 3000, feedPosition);
+                    beaconService.silentAutoPlayDuration(creative, 3000, feedPosition);
                 }
                 if ( !hasTenSecondSilentPlayBeaconFired && videoView.getCurrentPosition() >= 10000) {
                     hasTenSecondSilentPlayBeaconFired = true;
-                    beaconService.silentAutoPlayDuration(videoView.getContext(), creative, 10000, feedPosition);
+                    beaconService.silentAutoPlayDuration(creative, 10000, feedPosition);
                 }
                 if ( !hasFifteenSecondSilentPlayBeaconFired && videoView.getCurrentPosition() >= 15000) {
                     hasFifteenSecondSilentPlayBeaconFired = true;
-                    beaconService.silentAutoPlayDuration(videoView.getContext(), creative, 15000, feedPosition);
+                    beaconService.silentAutoPlayDuration(creative, 15000, feedPosition);
                 } if ( !hasThirtySecondSilentPlayBeaconFired && videoView.getCurrentPosition() >= 30000) {
                     hasThirtySecondSilentPlayBeaconFired = true;
-                    beaconService.silentAutoPlayDuration(videoView.getContext(), creative, 30000, feedPosition);
+                    beaconService.silentAutoPlayDuration(creative, 30000, feedPosition);
                 }
             }
         }

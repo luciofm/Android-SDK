@@ -290,20 +290,6 @@ public class SharethroughTest extends TestBase {
     }
 
     @Test
-    public void ifSlotNOTEmptyAndCreativeExpired_fireNewAdsIsCalled() {
-        Creative creative2 = mock(Creative.class);
-        when(creativeQueue.size()).thenReturn(2);
-        when(creativeQueue.getNext()).thenReturn(creative).thenReturn(creative2).thenThrow(new RuntimeException("Too many calls"));
-        IAdView generatedAdView = subject.getAdView(RuntimeEnvironment.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
-        when(creative.hasExpired(anyInt())).thenReturn(true);
-        subject.firedNewAdsToShow = false;
-        IAdView generatedAdView2 = subject.getAdView(RuntimeEnvironment.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView);
-        assertThat(generatedAdView).isSameAs(generatedAdView2);
-
-        assertThat(subject.firedNewAdsToShow);
-    }
-
-    @Test
     public void creativeIndicesStoresAllUniqueCreativeIndexHistory_creativesBySlotOnlyCachesTenUniqueIndices() {
         LruCache<Integer, Creative> slot = new LruCache<>(10);
         Set<Integer> creativeIndices = new HashSet<>();
@@ -341,7 +327,6 @@ public class SharethroughTest extends TestBase {
         when(creativeQueue.size()).thenReturn(2);
         when(creativeQueue.getNext()).thenReturn(creative).thenReturn(creative2).thenThrow(new RuntimeException("Too many calls"));
         IAdView generatedAdView = subject.getAdView(RuntimeEnvironment.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null);
-        when(creative.hasExpired(anyInt())).thenReturn(false);
         subject.firedNewAdsToShow = false;
         IAdView generatedAdView2 = subject.getAdView(RuntimeEnvironment.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView);
         assertThat(generatedAdView).isSameAs(generatedAdView2);

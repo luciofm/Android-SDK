@@ -93,14 +93,14 @@ public class BeaconServiceTest extends TestBase {
         when(context.getPackageManager()).thenReturn(packageManager);
         when(packageManager.getPackageInfo("com.example.sdk", PackageManager.GET_META_DATA)).thenReturn(packageInfo);
 
-        subject = new BeaconService(new DateProvider(), session, advertisingIdProvider, RuntimeEnvironment.application,"placement key");
+        subject = new BeaconService(new DateProvider(), session, advertisingIdProvider, new ContextInfo(RuntimeEnvironment.application),"placement key");
 
         STRExecutorService.setExecutorService(executorService);
     }
 
     @Test
     public void commonParams_returnsParamsSentInAllBeacons() throws Exception {
-        assertThat(subject.commonParams(RuntimeEnvironment.application)).isEqualTo(expectedCommonParams);
+        assertThat(subject.commonParams()).isEqualTo(expectedCommonParams);
     }
 
     @Test
@@ -108,7 +108,7 @@ public class BeaconServiceTest extends TestBase {
         when(advertisingIdProvider.getAdvertisingId()).thenReturn(null);
         HashMap<String, String> expectedCommonParamsWithoutAdvertisingId = new HashMap<>(expectedCommonParams);
         expectedCommonParamsWithoutAdvertisingId.remove("uid");
-        assertThat(subject.commonParams(RuntimeEnvironment.application)).isEqualTo(expectedCommonParamsWithoutAdvertisingId);
+        assertThat(subject.commonParams()).isEqualTo(expectedCommonParamsWithoutAdvertisingId);
     }
 
     @Test
@@ -122,7 +122,7 @@ public class BeaconServiceTest extends TestBase {
         expectedCommonParams.put("mrid", "fake-mrid");
 
 
-        assertThat(subject.commonParamsWithCreative(RuntimeEnvironment.application, creative)).isEqualTo(expectedCommonParams);
+        assertThat(subject.commonParamsWithCreative(creative)).isEqualTo(expectedCommonParams);
     }
 
     @Test
@@ -146,12 +146,12 @@ public class BeaconServiceTest extends TestBase {
         expectedCommonParams.put("awid", "fake-auction-win-id");
         expectedCommonParams.put("deal_id", "fake_deal_id");
         expectedCommonParams.put("mrid", "fake-mrid");
-        assertThat(subject.commonParamsWithCreative(RuntimeEnvironment.application, creative)).isEqualTo(expectedCommonParams);
+        assertThat(subject.commonParamsWithCreative(creative)).isEqualTo(expectedCommonParams);
     }
 
     @Test
     public void fireAdClicked() throws Exception {
-        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(RuntimeEnvironment.application, creative);
+        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(creative);
         expectedBeaconParams.put("type", "userEvent");
         expectedBeaconParams.put("userEvent", "fake user event");
         expectedBeaconParams.put("engagement", "true");
@@ -170,7 +170,7 @@ public class BeaconServiceTest extends TestBase {
     @Test
     public void fireAdRequested() throws Exception {
         final String key = "abc";
-        Map<String, String> expectedBeaconParams = subject.commonParams(RuntimeEnvironment.application);
+        Map<String, String> expectedBeaconParams = subject.commonParams();
         expectedBeaconParams.put("type", "impressionRequest");
         expectedBeaconParams.put("pkey", key);
 
@@ -184,7 +184,7 @@ public class BeaconServiceTest extends TestBase {
 
     @Test
     public void fireAdReceived() throws Exception {
-        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(RuntimeEnvironment.application, creative);
+        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(creative);
         expectedBeaconParams.put("type", "impression");
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
@@ -196,7 +196,7 @@ public class BeaconServiceTest extends TestBase {
 
     @Test
     public void fireAdVisible() throws Exception {
-        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(RuntimeEnvironment.application, creative);
+        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(creative);
         expectedBeaconParams.put("type", "visible");
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
@@ -208,7 +208,7 @@ public class BeaconServiceTest extends TestBase {
 
     @Test
     public void whenFireAdShareCalled_fireRightBeacon() throws Exception {
-        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(RuntimeEnvironment.application, creative);
+        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(creative);
         expectedBeaconParams.put("type", "userEvent");
         expectedBeaconParams.put("userEvent", "share");
         expectedBeaconParams.put("share", "shareType");
@@ -325,7 +325,7 @@ public class BeaconServiceTest extends TestBase {
 
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
 
-        subject.silentAutoPlayDuration(RuntimeEnvironment.application, testCreative, seconds, feedPosition);
+        subject.silentAutoPlayDuration(testCreative, seconds, feedPosition);
 
         FakeHttp.addHttpResponseRule(new RequestMatcher() {
             @Override
@@ -362,7 +362,7 @@ public class BeaconServiceTest extends TestBase {
 
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
 
-        subject.silentAutoPlayDuration(RuntimeEnvironment.application, testCreative, seconds, feedPosition);
+        subject.silentAutoPlayDuration(testCreative, seconds, feedPosition);
 
         FakeHttp.addHttpResponseRule(new RequestMatcher() {
             @Override
@@ -399,7 +399,7 @@ public class BeaconServiceTest extends TestBase {
 
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
 
-        subject.silentAutoPlayDuration(RuntimeEnvironment.application, testCreative, seconds, feedPosition);
+        subject.silentAutoPlayDuration(testCreative, seconds, feedPosition);
 
         FakeHttp.addHttpResponseRule(new RequestMatcher() {
             @Override
@@ -436,7 +436,7 @@ public class BeaconServiceTest extends TestBase {
 
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
 
-        subject.silentAutoPlayDuration(RuntimeEnvironment.application, testCreative, seconds, feedPosition);
+        subject.silentAutoPlayDuration(testCreative, seconds, feedPosition);
 
         FakeHttp.addHttpResponseRule(new RequestMatcher() {
             @Override
@@ -547,7 +547,7 @@ public class BeaconServiceTest extends TestBase {
 
     @Test
     public void videoPlayed() throws Exception {
-        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(RuntimeEnvironment.application, creative);
+        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(creative);
         expectedBeaconParams.put("type", "completionPercent");
         expectedBeaconParams.put("value", "123");
         expectedBeaconParams.put("isSilentPlay", "false");
@@ -562,20 +562,20 @@ public class BeaconServiceTest extends TestBase {
 
     @Test
     public void silentAutoPlayDuration() throws Exception {
-        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(RuntimeEnvironment.application, creative);
+        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(creative);
         expectedBeaconParams.put("type", "silentAutoPlayDuration");
         expectedBeaconParams.put("duration", "3000");
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
             public void run() {
-                subject.silentAutoPlayDuration(RuntimeEnvironment.application, creative, 3000, feedPosition);
+                subject.silentAutoPlayDuration(creative, 3000, feedPosition);
             }
         });
     }
 
     @Test
     public void autoplayVideoEngagement() throws Exception {
-        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(RuntimeEnvironment.application, creative);
+        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(creative);
         expectedBeaconParams.put("type", "userEvent");
         expectedBeaconParams.put("videoDuration", "4567");
         expectedBeaconParams.put("userEvent", "autoplayVideoEngagement");
@@ -589,14 +589,14 @@ public class BeaconServiceTest extends TestBase {
 
     @Test
     public void videoViewDuration() throws Exception {
-        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(RuntimeEnvironment.application, creative);
+        Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(creative);
         expectedBeaconParams.put("duration", "4567");
         expectedBeaconParams.put("type", "videoViewDuration");
         expectedBeaconParams.put("silent", "false");
         assertBeaconFired(expectedBeaconParams, new Runnable() {
             @Override
             public void run() {
-                subject.videoViewDuration(RuntimeEnvironment.application, creative, 4567, false, feedPosition);
+                subject.videoViewDuration(creative, 4567, false, feedPosition);
             }
         });
     }
