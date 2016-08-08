@@ -34,7 +34,7 @@ android {
     }
 
     compileSdkVersion 21
-    buildToolsVersion '21.1.1'
+    buildToolsVersion '21.1.2'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -60,7 +60,7 @@ android {
         defaultConfig {
             versionCode code
             versionName version
-            minSdkVersion 14
+            minSdkVersion 15
             targetSdkVersion 18
         }
     }
@@ -69,8 +69,8 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 14
+        minSdkVersion 15
+        targetSdkVersion 18
         versionCode 1
         versionName version
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
