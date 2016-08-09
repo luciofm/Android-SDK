@@ -87,13 +87,7 @@ public class Sharethrough {
 
             for(ICreative creative : creatives) {
                 strSdkConfig.getCreativeQueue().add(creative);
-                if (creative != null) {
-                    if (creative instanceof Creative)
-                        Logger.d("insert creative ckey: %s, creative cache size %d", ((Creative)creative).getCreativeKey(), strSdkConfig.getCreativeQueue().size());
-                    //todo: figure this out
-//                    else if (creative instanceof FacebookCreative)
-//                        Logger.d("Insert fb ad to queue, queue size: %d", fbQueue.size());
-                }
+                Logger.d("insert creative, creative cache size %d", strSdkConfig.getCreativeQueue().size());
                 fireNewAdsToShow();
             }
         }
@@ -163,7 +157,7 @@ public class Sharethrough {
                     creative = strSdkConfig.getCreativeQueue().getNext();
                 }
 
-                //for now only cache STR creatives
+                //todo: for now only cache STR creatives
                 if (creative instanceof Creative) {
                     insertCreativeIntoSlot(feedPosition, (Creative)creative);
                 }
