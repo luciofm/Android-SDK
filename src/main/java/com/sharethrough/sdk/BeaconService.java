@@ -5,14 +5,13 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import android.view.View;
+
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.BasicNetwork;
-import com.android.volley.toolbox.HurlStack;
-import com.android.volley.toolbox.NoCache;
+import com.android.volley.VolleyError;
 import com.sharethrough.android.sdk.BuildConfig;
-//import org.apache.http.client.methods.HttpGet;
-//import org.apache.http.client.methods.HttpGet;
-//import org.apache.http.impl.client.DefaultHttpClient;
+import com.sharethrough.sdk.network.STRStringRequest;
+
 
 import java.util.Date;
 import java.util.HashMap;
@@ -29,13 +28,19 @@ public class BeaconService {
     private final ContextInfo contextInfo;
     private RequestQueue requestQueue;
 
-    public BeaconService(final Provider<Date> dateProvider, final UUID session, final AdvertisingIdProvider advertisingIdProvider,final ContextInfo contextInfo,final String pkey) {
+    public BeaconService(final Provider<Date> dateProvider,
+                         final UUID session,
+                         final AdvertisingIdProvider advertisingIdProvider,
+                         final ContextInfo contextInfo,
+                         final String pkey,
+                         final RequestQueue requestQueue) {
+
         this.dateProvider = dateProvider;
         this.session = session;
         this.advertisingIdProvider = advertisingIdProvider;
         this.placementKey = pkey;
         this.contextInfo = contextInfo;
-        this.requestQueue = new RequestQueue(new NoCache(), new BasicNetwork(new HurlStack()));
+        this.requestQueue = requestQueue;
         this.requestQueue.start();
     }
 
@@ -204,52 +209,32 @@ public class BeaconService {
     }
 
     private void fireBeacon(final Map<String, String> beaconParams, final String uri) {
-//        STRExecutorService.getInstance().execute(new Runnable() {
-//            @Override
-//            public void run() {
-//                Uri.Builder uriBuilder = Uri.parse(uri).buildUpon();
-//                for (Map.Entry<String, String> entry : beaconParams.entrySet()) {
-//                    uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
-//                }
-//
-//
-//                String url = uriBuilder.build().toString();
-//
-//
-//                url = url.replace("[", "%5B").replace("]", "%5D");
-//                Logger.d("beacon fired type: %s", beaconParams.get("type") == null ? "third party beacon " : beaconParams.get("type"));
-//                Logger.d("beacon user event: %s", beaconParams.get("userEvent"));
-//                Logger.i("beacon url: %s", url);
-//
-//                try {
-//                    AdFetcher.STRStringRequest
-//
-//                    request.addHeader("User-Agent", Sharethrough.USER_AGENT + "; " + contextInfo.getAppPackageName());
-//
-//
-//                    /**
-//                     *  STRStringRequest stringRequest = new STRStringRequest(Request.Method.GET, adRequestUrl,
-//                     new com.android.volley.Response.Listener<String>() {
-//                    @Override
-//                    public void onResponse(String response) {
-//                    handleResponse(response);
-//                    }
-//                    }, new com.android.volley.Response.ErrorListener() {
-//                    @Override
-//                    public void onErrorResponse(VolleyError error) {
-//                    Logger.i("Ad request error: " + error.toString());
-//                    adFetcherListener.onAdResponseFailed();
-//                    }
-//                    });
-//
-//                     requestQueue.add(stringRequest);
-//                     */
-//                    client.execute(request);
-//                } catch (Exception e) {
-//                    Logger.e("beacon fired failed for %s", e, url);
-//                }
-//            }
-//        });
+        Uri.Builder uriBuilder = Uri.parse(uri).buildUpon();
+        for (Map.Entry<String, String> entry : beaconParams.entrySet()) {
+            uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
+        }
+
+        String url = uriBuilder.build().toString();
+
+
+        url = url.replace("[", "%5B").replace("]", "%5D");
+        Logger.d("beacon fired type: %s", beaconParams.get("type") == null ? "third party beacon " : beaconParams.get("type"));
+        Logger.d("beacon user event: %s", beaconParams.get("userEvent"));
+        Logger.i("beacon url: %s", url);
+
+        STRStringRequest stringRequest = new STRStringRequest(Request.Method.GET, url,
+                new com.android.volley.Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                    }
+                }, new com.android.volley.Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Logger.e("beacon fired failed for %s", error);
+                    }
+                });
+        requestQueue.add(stringRequest);
     }
 
     private String replaceCacheBusterParam(String uri) {

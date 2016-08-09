@@ -31,18 +31,6 @@ public class AdFetcher {
         this.adFetcherListener = adFetcherListener;
     }
 
-    public class STRStringRequest extends StringRequest {
-        public STRStringRequest(int method, String url, com.android.volley.Response.Listener<String> listener, com.android.volley.Response.ErrorListener errorListener) {
-            super(method, url, listener, errorListener);
-        }
-
-        @Override
-        public Map<String, String> getHeaders(){
-            Map<String, String> headers = new HashMap<>();
-            headers.put("User-Agent", Sharethrough.USER_AGENT);
-            return headers;
-        }
-    }
     public void fetchAds(String adRequestUrl) {
         STRStringRequest stringRequest = new STRStringRequest(Request.Method.GET, adRequestUrl,
                 new com.android.volley.Response.Listener<String>() {

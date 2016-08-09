@@ -3,23 +3,25 @@ package com.sharethrough.sdk;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
+import com.android.volley.Cache;
+import com.android.volley.Network;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.BasicNetwork;
+import com.android.volley.toolbox.HurlStack;
+import com.android.volley.toolbox.NoCache;
 import com.sharethrough.android.sdk.BuildConfig;
-import com.sharethrough.test.util.Misc;
-import org.apache.http.HttpRequest;
-import org.apache.http.NameValuePair;
-import org.apache.http.RequestLine;
-import org.apache.http.client.utils.URLEncodedUtils;
+import com.sharethrough.sdk.network.STRStringRequest;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.shadows.ShadowLog;
-import org.robolectric.shadows.httpclient.*;
 
-import java.net.URI;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -29,7 +31,6 @@ public class BeaconServiceTest extends TestBase {
     private Date now;
     private UUID session;
     private BeaconService subject;
-    @Mock private ExecutorService executorService;
     private Creative creative;
     @Mock private AdvertisingIdProvider advertisingIdProvider;
     @Mock private Context context;
@@ -40,6 +41,27 @@ public class BeaconServiceTest extends TestBase {
     private Response.Creative responseCreative;
     private int feedPosition;
     private String mediationRequestId;
+
+    public class FakeRequestQueue extends RequestQueue{
+
+        public ArrayList<Object> cache = new ArrayList<>();
+        public FakeRequestQueue(Cache cache, Network network) {
+            super(cache, network);
+        }
+
+        @Override
+        public <T> Request<T> add(Request<T> request) {
+            cache.add(request);
+            return null;
+        }
+
+        @Override
+        public void start() {
+            return;
+        }
+
+    }
+    private FakeRequestQueue fakeRequestQueue = new FakeRequestQueue(new NoCache(), new BasicNetwork(new HurlStack()));
 
     @Before
     public void setUp() throws Exception {
@@ -93,9 +115,7 @@ public class BeaconServiceTest extends TestBase {
         when(context.getPackageManager()).thenReturn(packageManager);
         when(packageManager.getPackageInfo("com.example.sdk", PackageManager.GET_META_DATA)).thenReturn(packageInfo);
 
-        subject = new BeaconService(new DateProvider(), session, advertisingIdProvider, new ContextInfo(RuntimeEnvironment.application),"placement key");
-
-        STRExecutorService.setExecutorService(executorService);
+        subject = new BeaconService(new DateProvider(), session, advertisingIdProvider, new ContextInfo(RuntimeEnvironment.application),"placement key", fakeRequestQueue);
     }
 
     @Test
@@ -155,16 +175,12 @@ public class BeaconServiceTest extends TestBase {
         expectedBeaconParams.put("type", "userEvent");
         expectedBeaconParams.put("userEvent", "fake user event");
         expectedBeaconParams.put("engagement", "true");
-
+        expectedBeaconParams.put("placementIndex", String.valueOf(feedPosition));
         expectedBeaconParams.put("pheight", "0");
         expectedBeaconParams.put("pwidth", "0");
-
-        assertBeaconFired(expectedBeaconParams, new Runnable() {
-            @Override
-            public void run() {
-                subject.adClicked("fake user event", creative, RendererTest.makeAdView().getAdView(), feedPosition);
-            }
-        });
+        subject.adClicked("fake user event", creative, RendererTest.makeAdView().getAdView(), feedPosition);
+        STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
+        assertBeaconFired(request.getUrl(), expectedBeaconParams);
     }
 
     @Test
@@ -173,38 +189,34 @@ public class BeaconServiceTest extends TestBase {
         Map<String, String> expectedBeaconParams = subject.commonParams();
         expectedBeaconParams.put("type", "impressionRequest");
         expectedBeaconParams.put("pkey", key);
-
-        assertBeaconFired(expectedBeaconParams, new Runnable() {
-            @Override
-            public void run() {
-                subject.adRequested(key);
-            }
-        });
+        subject.adRequested(key);
+        STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
+        assertBeaconFired(request.getUrl(), expectedBeaconParams);
     }
 
     @Test
     public void fireAdReceived() throws Exception {
         Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(creative);
         expectedBeaconParams.put("type", "impression");
-        assertBeaconFired(expectedBeaconParams, new Runnable() {
-            @Override
-            public void run() {
-                subject.adReceived(RuntimeEnvironment.application, creative, feedPosition);
-            }
-        });
+        expectedBeaconParams.put("placementIndex", String.valueOf(feedPosition));
+        subject.adReceived(RuntimeEnvironment.application, creative, feedPosition);
+        STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
+        assertBeaconFired(request.getUrl(), expectedBeaconParams);
     }
 
     @Test
     public void fireAdVisible() throws Exception {
         Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(creative);
+        expectedBeaconParams.put("pheight","0");
+        expectedBeaconParams.put("pwidth","0");
         expectedBeaconParams.put("type", "visible");
-        assertBeaconFired(expectedBeaconParams, new Runnable() {
-            @Override
-            public void run() {
-                subject.adVisible(RendererTest.makeAdView(), creative, feedPosition);
-            }
-        });
+        expectedBeaconParams.put("placementIndex", String.valueOf(feedPosition));
+
+        subject.adVisible(RendererTest.makeAdView(), creative, feedPosition);
+        STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
+        assertBeaconFired(request.getUrl(),expectedBeaconParams);
     }
+
 
     @Test
     public void whenFireAdShareCalled_fireRightBeacon() throws Exception {
@@ -213,12 +225,10 @@ public class BeaconServiceTest extends TestBase {
         expectedBeaconParams.put("userEvent", "share");
         expectedBeaconParams.put("share", "shareType");
         expectedBeaconParams.put("engagement", "true");
-        assertBeaconFired(expectedBeaconParams, new Runnable() {
-            @Override
-            public void run() {
-                subject.adShared(RuntimeEnvironment.application, creative, "shareType", feedPosition);
-            }
-        });
+        expectedBeaconParams.put("placementIndex", String.valueOf(feedPosition));
+        subject.adShared(RuntimeEnvironment.application, creative, "shareType", feedPosition);
+        STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
+        assertBeaconFired(request.getUrl(), expectedBeaconParams);
     }
 
     @Test
@@ -226,59 +236,35 @@ public class BeaconServiceTest extends TestBase {
         String[] initialUrls = {"//impressionEndOne?cacheBuster=[timestamp]", "//impressionEndTwo?cacheBuster=[timestamp]"};
 
         ArrayList<String> impressionEndoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
-
         responseCreative.creative.beacon.impression = impressionEndoints;
-
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
-
         subject.adReceived(RuntimeEnvironment.application, testCreative, feedPosition);
+        assertThat(fakeRequestQueue.cache.size() == 3);
 
-
-        FakeHttp.addHttpResponseRule(new RequestMatcher() {
-            @Override
-            public boolean matches(HttpRequest request) {
-                return true;
-            }
-        }, new TestHttpResponse(200, ""));
-
-        Misc.runAll(executorService);
-
-        List<HttpRequestInfo> info = FakeHttp.getFakeHttpLayer().getSentHttpRequestInfos();
-        assertThat(info.size()).isEqualTo(3);
-        for (int i = 0; i < info.size() - 1; i++) {
+        for (int i = 0; i < fakeRequestQueue.cache.size() - 1; i++) {
             String cacheBustedUrl = initialUrls[i].replaceAll("\\[timestamp\\]", String.valueOf(now.getTime()));
             String expectedUrl = "http:" + cacheBustedUrl;
-            assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
+            STRStringRequest request = (STRStringRequest) fakeRequestQueue.cache.get(i);
+            assertThat(request.getUrl()).isEqualTo(expectedUrl);
         }
     }
 
     @Test
     public void whenAdVisibleCalled_fireVisibleThirdPartyBeacons() throws Exception {
         String[] initialUrls = {"//visibleEndOne?cacheBuster=[timestamp]", "//visibleEndTwo?cacheBuster=[timestamp]"};
-
         ArrayList<String> visibleEndoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
-
         responseCreative.creative.beacon.visible = visibleEndoints;
-
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
 
         subject.adVisible(RendererTest.makeAdView(), testCreative, feedPosition);
 
-        FakeHttp.addHttpResponseRule(new RequestMatcher() {
-            @Override
-            public boolean matches(HttpRequest request) {
-                return true;
-            }
-        }, new TestHttpResponse(200, ""));
+        assertThat(fakeRequestQueue.cache.size() == 3);
 
-        Misc.runAll(executorService);
-
-        List<HttpRequestInfo> info = FakeHttp.getFakeHttpLayer().getSentHttpRequestInfos();
-        assertThat(info.size()).isEqualTo(3);
-        for (int i = 0; i < info.size() - 1; i++) {
+        for (int i = 0; i < fakeRequestQueue.cache.size() - 1; i++) {
             String cacheBustedUrl = initialUrls[i].replaceAll("\\[timestamp\\]", String.valueOf(now.getTime()));
             String expectedUrl = "http:" + cacheBustedUrl;
-            assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
+            STRStringRequest request = (STRStringRequest) fakeRequestQueue.cache.get(i);
+            assertThat(request.getUrl()).isEqualTo(expectedUrl);
         }
     }
 
@@ -296,21 +282,12 @@ public class BeaconServiceTest extends TestBase {
 
         subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition);
 
-        FakeHttp.addHttpResponseRule(new RequestMatcher() {
-            @Override
-            public boolean matches(HttpRequest request) {
-                return true;
-            }
-        }, new TestHttpResponse(200, ""));
-
-        Misc.runAll(executorService);
-
-        List<HttpRequestInfo> info = FakeHttp.getFakeHttpLayer().getSentHttpRequestInfos();
-        assertThat(info.size()).isEqualTo(5);
-        for (int i = 0; i < info.size() - 1; i++) {
+        assertThat(fakeRequestQueue.cache.size() == 5);
+        for (int i = 0; i < fakeRequestQueue.cache.size() - 1; i++) {
             String cacheBustedUrl = initialUrls[i].replaceAll("\\[timestamp\\]", String.valueOf(now.getTime()));
             String expectedUrl = "http:" + cacheBustedUrl.replace("[", "%5B").replace("]", "%5D");
-            assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
+            STRStringRequest request = (STRStringRequest) fakeRequestQueue.cache.get(i);
+            assertThat(request.getUrl()).isEqualTo(expectedUrl);
         }
     }
 
@@ -320,32 +297,20 @@ public class BeaconServiceTest extends TestBase {
         String[] initialUrls = {"//silentPlay/EndOne", "//silentPlay/End[Two]?cacheBuster=[timestamp]"};
 
         ArrayList<String> silentPlayEndpoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
-
         responseCreative.creative.beacon.silentPlay = silentPlayEndpoints;
-
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
-
         subject.silentAutoPlayDuration(testCreative, seconds, feedPosition);
 
-        FakeHttp.addHttpResponseRule(new RequestMatcher() {
-            @Override
-            public boolean matches(HttpRequest request) {
-                return true;
-            }
-        }, new TestHttpResponse(200, ""));
-
-        Misc.runAll(executorService);
-
-        List<HttpRequestInfo> info = FakeHttp.getFakeHttpLayer().getSentHttpRequestInfos();
-        assertThat(info.size()).isEqualTo(3);
-        for (int i = 0; i < info.size() - 1; i++) {
+        assertThat(fakeRequestQueue.cache.size() == 3);
+        for (int i = 0; i < fakeRequestQueue.cache.size() - 1; i++) {
             String cacheBustedUrl = initialUrls[i].replaceAll("\\[timestamp\\]", String.valueOf(now.getTime()));
             String expectedUrl = "http:" + cacheBustedUrl.replace("[", "%5B").replace("]", "%5D");
-            assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
+            STRStringRequest request = (STRStringRequest) fakeRequestQueue.cache.get(i);
+            assertThat(request.getUrl()).isEqualTo(expectedUrl);
         }
 
         //first party beacon
-        String returnedUrl = info.get(2).getHttpRequest().getRequestLine().getUri();
+        String returnedUrl = ((STRStringRequest)fakeRequestQueue.cache.get(2)).getUrl();
         assertThat(returnedUrl).contains("type=silentAutoPlayDuration");
         assertThat(returnedUrl).contains("duration=" + seconds);
         assertThat(returnedUrl).contains("placementIndex=" + feedPosition);
@@ -357,69 +322,44 @@ public class BeaconServiceTest extends TestBase {
         String[] initialUrls = {"//silentPlay/EndOne", "//silentPlay/End[Two]?cacheBuster=[timestamp]"};
 
         ArrayList<String> silentPlayEndpoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
-
         responseCreative.creative.beacon.tenSecondSilentPlay = silentPlayEndpoints;
-
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
-
         subject.silentAutoPlayDuration(testCreative, seconds, feedPosition);
 
-        FakeHttp.addHttpResponseRule(new RequestMatcher() {
-            @Override
-            public boolean matches(HttpRequest request) {
-                return true;
-            }
-        }, new TestHttpResponse(200, ""));
-
-        Misc.runAll(executorService);
-
-        List<HttpRequestInfo> info = FakeHttp.getFakeHttpLayer().getSentHttpRequestInfos();
-        assertThat(info.size()).isEqualTo(3);
-        for (int i = 0; i < info.size() - 1; i++) {
+        assertThat(fakeRequestQueue.cache.size() == 3);
+        for (int i = 0; i < fakeRequestQueue.cache.size() - 1; i++) {
             String cacheBustedUrl = initialUrls[i].replaceAll("\\[timestamp\\]", String.valueOf(now.getTime()));
             String expectedUrl = "http:" + cacheBustedUrl.replace("[", "%5B").replace("]", "%5D");
-            assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
+            STRStringRequest request = (STRStringRequest) fakeRequestQueue.cache.get(i);
+            assertThat(request.getUrl()).isEqualTo(expectedUrl);
         }
 
         //first party beacon
-        String returnedUrl = info.get(2).getHttpRequest().getRequestLine().getUri();
+        String returnedUrl = ((STRStringRequest)fakeRequestQueue.cache.get(2)).getUrl();
         assertThat(returnedUrl).contains("type=silentAutoPlayDuration");
         assertThat(returnedUrl).contains("duration=" + seconds);
-        assertThat(returnedUrl).contains("placementIndex="+ feedPosition);
+        assertThat(returnedUrl).contains("placementIndex=" + feedPosition);
     }
 
     @Test
     public void whenSilentAutoplayDuration15SecondsCalled_fireSilentPlayThirdPartyBeacons() throws Exception {
         int seconds = 15000;
         String[] initialUrls = {"//silentPlay/EndOne", "//silentPlay/End[Two]?cacheBuster=[timestamp]"};
-
         ArrayList<String> silentPlayEndpoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
-
         responseCreative.creative.beacon.fifteenSecondSilentPlay = silentPlayEndpoints;
-
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
-
         subject.silentAutoPlayDuration(testCreative, seconds, feedPosition);
 
-        FakeHttp.addHttpResponseRule(new RequestMatcher() {
-            @Override
-            public boolean matches(HttpRequest request) {
-                return true;
-            }
-        }, new TestHttpResponse(200, ""));
-
-        Misc.runAll(executorService);
-
-        List<HttpRequestInfo> info = FakeHttp.getFakeHttpLayer().getSentHttpRequestInfos();
-        assertThat(info.size()).isEqualTo(3);
-        for (int i = 0; i < info.size() - 1; i++) {
+        assertThat(fakeRequestQueue.cache.size() == 3);
+        for (int i = 0; i < fakeRequestQueue.cache.size() - 1; i++) {
             String cacheBustedUrl = initialUrls[i].replaceAll("\\[timestamp\\]", String.valueOf(now.getTime()));
             String expectedUrl = "http:" + cacheBustedUrl.replace("[", "%5B").replace("]", "%5D");
-            assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
+            STRStringRequest request = (STRStringRequest) fakeRequestQueue.cache.get(i);
+            assertThat(request.getUrl()).isEqualTo(expectedUrl);
         }
 
         //first party beacon
-        String returnedUrl = info.get(2).getHttpRequest().getRequestLine().getUri();
+        String returnedUrl = ((STRStringRequest)fakeRequestQueue.cache.get(2)).getUrl();
         assertThat(returnedUrl).contains("type=silentAutoPlayDuration");
         assertThat(returnedUrl).contains("duration=" + seconds);
         assertThat(returnedUrl).contains("placementIndex="+ feedPosition);
@@ -429,34 +369,21 @@ public class BeaconServiceTest extends TestBase {
     public void whenSilentAutoplayDuration30SecondsCalled_fireSilentPlayThirdPartyBeacons() throws Exception {
         int seconds = 30000;
         String[] initialUrls = {"//silentPlay/EndOne", "//silentPlay/End[Two]?cacheBuster=[timestamp]"};
-
         ArrayList<String> silentPlayEndpoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
-
         responseCreative.creative.beacon.thirtySecondSilentPlay = silentPlayEndpoints;
-
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
-
         subject.silentAutoPlayDuration(testCreative, seconds, feedPosition);
 
-        FakeHttp.addHttpResponseRule(new RequestMatcher() {
-            @Override
-            public boolean matches(HttpRequest request) {
-                return true;
-            }
-        }, new TestHttpResponse(200, ""));
-
-        Misc.runAll(executorService);
-
-        List<HttpRequestInfo> info = FakeHttp.getFakeHttpLayer().getSentHttpRequestInfos();
-        assertThat(info.size()).isEqualTo(3);
-        for (int i = 0; i < info.size() - 1; i++) {
+        assertThat(fakeRequestQueue.cache.size() == 3);
+        for (int i = 0; i < fakeRequestQueue.cache.size() - 1; i++) {
             String cacheBustedUrl = initialUrls[i].replaceAll("\\[timestamp\\]", String.valueOf(now.getTime()));
             String expectedUrl = "http:" + cacheBustedUrl.replace("[", "%5B").replace("]", "%5D");
-            assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
+            STRStringRequest request = (STRStringRequest) fakeRequestQueue.cache.get(i);
+            assertThat(request.getUrl()).isEqualTo(expectedUrl);
         }
 
         //first party beacon
-        String returnedUrl = info.get(2).getHttpRequest().getRequestLine().getUri();
+        String returnedUrl = ((STRStringRequest)fakeRequestQueue.cache.get(2)).getUrl();
         assertThat(returnedUrl).contains("type=silentAutoPlayDuration");
         assertThat(returnedUrl).contains("duration=" + seconds);
         assertThat(returnedUrl).contains("placementIndex="+ feedPosition);
@@ -465,30 +392,17 @@ public class BeaconServiceTest extends TestBase {
     @Test
     public void whenSilentAutoplayDurationPlayedFor95Percent_fireCompletedThirdPartyBeacons() throws Exception {
         String[] initialUrls = {"//silentPlay/EndOne", "//silentPlay/End[Two]?cacheBuster=[timestamp]"};
-
         ArrayList<String> silentPlayEndpoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
-
         responseCreative.creative.beacon.completedSilentPlay = silentPlayEndpoints;
-
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
-
         subject.videoPlayed(RuntimeEnvironment.application, testCreative, 95, true, feedPosition);
 
-        FakeHttp.addHttpResponseRule(new RequestMatcher() {
-            @Override
-            public boolean matches(HttpRequest request) {
-                return true;
-            }
-        }, new TestHttpResponse(200, ""));
-
-        Misc.runAll(executorService);
-
-        List<HttpRequestInfo> info = FakeHttp.getFakeHttpLayer().getSentHttpRequestInfos();
-        assertThat(info.size()).isEqualTo(3);
-        for (int i = 0; i < 2; i++) {
+        assertThat(fakeRequestQueue.cache.size() == 3);
+        for (int i = 0; i < fakeRequestQueue.cache.size() - 1; i++) {
             String cacheBustedUrl = initialUrls[i].replaceAll("\\[timestamp\\]", String.valueOf(now.getTime()));
             String expectedUrl = "http:" + cacheBustedUrl.replace("[", "%5B").replace("]", "%5D");
-            assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).isEqualTo(expectedUrl);
+            STRStringRequest request = (STRStringRequest) fakeRequestQueue.cache.get(i);
+            assertThat(request.getUrl()).isEqualTo(expectedUrl);
         }
     }
 
@@ -504,19 +418,10 @@ public class BeaconServiceTest extends TestBase {
 
         subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition);
 
-        FakeHttp.addHttpResponseRule(new RequestMatcher() {
-            @Override
-            public boolean matches(HttpRequest request) {
-                return true;
-            }
-        }, new TestHttpResponse(200, ""));
-
-        Misc.runAll(executorService);
-
-        List<HttpRequestInfo> info = FakeHttp.getFakeHttpLayer().getSentHttpRequestInfos();
-        assertThat(info.size()).isEqualTo(1);
-        for (int i = 0; i < info.size() - 1; i++) {
-            assertThat(info.get(i).getHttpRequest().getRequestLine().getUri()).doesNotContain("third-party");
+        assertThat(fakeRequestQueue.cache.size() == 1);
+        for (int i = 0; i < fakeRequestQueue.cache.size() - 1; i++) {
+            STRStringRequest request = (STRStringRequest) fakeRequestQueue.cache.get(i);
+            assertThat(request.getUrl()).doesNotContain("third-party");
         }
     }
 
@@ -524,24 +429,11 @@ public class BeaconServiceTest extends TestBase {
     public void whenAThirdPartyBeaconIsInvalid_logsWithoutCrashing() throws Exception {
         String badUrl = "//%%%invalid%url%%%";
         List<String> clickEndoints = Arrays.asList(badUrl);
-
         responseCreative.creative.beacon.click = clickEndoints;
-
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
-
         subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition);
 
-        FakeHttp.addHttpResponseRule(new RequestMatcher() {
-            @Override
-            public boolean matches(HttpRequest request) {
-                return true;
-            }
-        }, new TestHttpResponse(200, ""));
-
-        Misc.runAll(executorService);
-
-        List<HttpRequestInfo> info = FakeHttp.getFakeHttpLayer().getSentHttpRequestInfos();
-        assertThat(info.size()).isEqualTo(1);
+        assertThat(fakeRequestQueue.cache.size() == 1);
         assertThat(ShadowLog.getLogs().get(2).msg).contains(badUrl);
     }
 
@@ -551,13 +443,11 @@ public class BeaconServiceTest extends TestBase {
         expectedBeaconParams.put("type", "completionPercent");
         expectedBeaconParams.put("value", "123");
         expectedBeaconParams.put("isSilentPlay", "false");
-        assertBeaconFired(expectedBeaconParams, new Runnable() {
-            @Override
-            public void run() {
-                subject.videoPlayed(RuntimeEnvironment.application, creative, 123, false, feedPosition);
+        expectedBeaconParams.put("placementIndex", String.valueOf(feedPosition));
+        subject.videoPlayed(RuntimeEnvironment.application, creative, 123, false, feedPosition);
+        STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
+        assertBeaconFired(request.getUrl(), expectedBeaconParams);
 
-            }
-        });
     }
 
     @Test
@@ -565,12 +455,10 @@ public class BeaconServiceTest extends TestBase {
         Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(creative);
         expectedBeaconParams.put("type", "silentAutoPlayDuration");
         expectedBeaconParams.put("duration", "3000");
-        assertBeaconFired(expectedBeaconParams, new Runnable() {
-            @Override
-            public void run() {
-                subject.silentAutoPlayDuration(creative, 3000, feedPosition);
-            }
-        });
+        expectedBeaconParams.put("placementIndex", String.valueOf(feedPosition));
+        subject.silentAutoPlayDuration(creative, 3000, feedPosition);
+        STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
+        assertBeaconFired(request.getUrl(), expectedBeaconParams);
     }
 
     @Test
@@ -579,12 +467,12 @@ public class BeaconServiceTest extends TestBase {
         expectedBeaconParams.put("type", "userEvent");
         expectedBeaconParams.put("videoDuration", "4567");
         expectedBeaconParams.put("userEvent", "autoplayVideoEngagement");
-        assertBeaconFired(expectedBeaconParams, new Runnable() {
-            @Override
-            public void run() {
-                subject.autoplayVideoEngagement(RuntimeEnvironment.application, creative, 4567, feedPosition);
-            }
-        });
+        expectedBeaconParams.put("placementIndex", String.valueOf(feedPosition));
+        subject.autoplayVideoEngagement(RuntimeEnvironment.application, creative, 4567, feedPosition);
+
+        STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
+        assertBeaconFired(request.getUrl(), expectedBeaconParams);
+
     }
 
     @Test
@@ -593,43 +481,20 @@ public class BeaconServiceTest extends TestBase {
         expectedBeaconParams.put("duration", "4567");
         expectedBeaconParams.put("type", "videoViewDuration");
         expectedBeaconParams.put("silent", "false");
-        assertBeaconFired(expectedBeaconParams, new Runnable() {
-            @Override
-            public void run() {
-                subject.videoViewDuration(creative, 4567, false, feedPosition);
-            }
-        });
+        expectedBeaconParams.put("placementIndex", String.valueOf(feedPosition));
+        subject.videoViewDuration(creative, 4567, false, feedPosition);
+        STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
+        assertBeaconFired(request.getUrl(), expectedBeaconParams);
     }
 
-    private void assertBeaconFired(final Map<String, String> expectedBeaconParams, Runnable fireBeacon) {
-        final boolean[] wasCalled = {false};
-        RequestMatcher requestMatcher = new RequestMatcher() {
-            @Override
-            public boolean matches(HttpRequest httpRequest) {
-                wasCalled[0] = true;
-                RequestLine requestLine = httpRequest.getRequestLine();
-                URI uri = URI.create(requestLine.getUri());
-                List<NameValuePair> parse = URLEncodedUtils.parse(uri, null);
-                Map<String, String> params = new HashMap<String, String>(parse.size());
-                for (NameValuePair nameValuePair : parse) {
-                    params.put(nameValuePair.getName(), nameValuePair.getValue());
-                }
+    private void assertBeaconFired(final String firedUrl, final Map<String, String> expectedBeaconParams) {
+        Uri.Builder uriBuilder = Uri.parse(BeaconService.TRACKING_URL).buildUpon();
+        for (Map.Entry<String, String> entry : expectedBeaconParams.entrySet()) {
+            uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
+        }
 
-                assertThat(requestLine.getMethod()).isEqualTo("GET");
-                assertThat(httpRequest.containsHeader("User-Agent")).isTrue();
-                assertThat(uri.getPath()).isEqualTo("/butler");
-                assertThat(uri.getHost()).isEqualTo("b.sharethrough.com");
-                assertThat(params.entrySet()).containsAll(expectedBeaconParams.entrySet());
-                return true;
-            }
-        };
-        FakeHttp.addHttpResponseRule(requestMatcher, new TestHttpResponse(200, ""));
-
-        fireBeacon.run();
-
-        Misc.runLast(STRExecutorService.getInstance());
-
-        assertThat(wasCalled[0]).isTrue();
+        String expectedUrl = uriBuilder.build().toString();
+        assertThat(firedUrl).isEqualTo(expectedUrl);
     }
 
     private class DateProvider implements Provider<Date> {

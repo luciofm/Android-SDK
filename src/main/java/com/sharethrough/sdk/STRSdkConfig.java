@@ -3,6 +3,9 @@ package com.sharethrough.sdk;
 import android.content.Context;
 import android.util.LruCache;
 import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.BasicNetwork;
+import com.android.volley.toolbox.HurlStack;
+import com.android.volley.toolbox.NoCache;
 import com.android.volley.toolbox.Volley;
 import com.sharethrough.sdk.mediation.MediationManager;
 import com.sharethrough.sdk.network.ASAPManager;
@@ -34,7 +37,13 @@ public class STRSdkConfig {
         this.placementKey = placementKey;
         this.advertisingIdProvider = new AdvertisingIdProvider(context);
         this.contextInfo = new ContextInfo(context);
-        this.beaconService = new BeaconService(new DateProvider(), UUID.randomUUID(), advertisingIdProvider, contextInfo, placementKey);
+        this.beaconService = new BeaconService(new DateProvider(),
+                UUID.randomUUID(),
+                advertisingIdProvider,
+                contextInfo,
+                placementKey,
+                new RequestQueue(new NoCache(), new BasicNetwork(new HurlStack())));
+
         this.creativeQueue = new CreativesQueue();
         this.requestQueue = Volley.newRequestQueue(context.getApplicationContext());
         this.asapManager = new ASAPManager(placementKey, requestQueue);
