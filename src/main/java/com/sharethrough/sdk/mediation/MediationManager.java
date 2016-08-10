@@ -18,9 +18,9 @@ public class MediationManager {
     private Context context;
     private BeaconService beaconService;
     private MediationListener mediationListener;
-    private MediationWaterfall mediationWaterfall;
     private ASAPManager.AdResponse asapResponse;
-    private Map<String, STRMediationAdapter> mediationAdapters = new HashMap<>();
+    private MediationWaterfall mediationWaterfall;
+    private Map<String, STRMediationAdapter> mediationAdapters;
 
     public interface MediationListener {
         /**
@@ -40,22 +40,24 @@ public class MediationManager {
          */
         void onAllAdsFailedToLoad();
     }
-    public MediationManager(Context context, BeaconService beaconService) {
+    public MediationManager(Context context, BeaconService beaconService, Map<String, STRMediationAdapter> mediationAdapters) {
         this.context = context;
         this.beaconService = beaconService;
+        this.mediationAdapters = mediationAdapters;
     }
 
     public void initiateWaterfallAndLoadAd(final ASAPManager.AdResponse asapResponse,
-                                           final MediationListener mediationListener
-    ) {
-        setUpWaterfall(asapResponse, mediationListener);
+                                           final MediationListener mediationListener,
+                                           final MediationWaterfall mediationWaterfall) {
+        setUpWaterfall(asapResponse, mediationListener, mediationWaterfall);
         loadNextAd();
     }
 
-    private void setUpWaterfall(final ASAPManager.AdResponse asapResponse,
-                                final MediationListener mediationListener) {
+    void setUpWaterfall(final ASAPManager.AdResponse asapResponse,
+                        final MediationListener mediationListener,
+                        final MediationWaterfall mediationWaterfall) {
         this.asapResponse = asapResponse;
-        this.mediationWaterfall = new MediationWaterfall(asapResponse.mediationNetworks);
+        this.mediationWaterfall = mediationWaterfall;
         this.mediationListener = mediationListener;
     }
 
@@ -66,17 +68,21 @@ public class MediationManager {
         ASAPManager.AdResponse.Network network = mediationWaterfall.getNextThirdPartyNetwork();
         if (network == null) { // end of waterfall
             mediationListener.onAllAdsFailedToLoad();
+            return;
         }
 
+        Logger.d("Mediating %s as network #" + "%d", network.name, mediationWaterfall.getCurrentIndex()+1);
+        STRMediationAdapter mediationAdapter;
         try {
-            STRMediationAdapter mediationAdapter  = getMediationAdapter(network);
-            mediationAdapters.put(network.name, mediationAdapter);
-            Logger.d("Mediating %s as network #" + "%d", network.name, mediationWaterfall.getCurrentIndex()+1);
-            mediationAdapter.loadAd(context, mediationListener, asapResponse, network);
+            mediationAdapter  = getMediationAdapter(network);
         } catch (Exception e) {
             Logger.e("Could not instantiate a STRNetworkManager based off class name: %s", e, network.androidClassName);
             mediationListener.onAdFailedToLoad();
+            return;
         }
+
+        mediationAdapters.put(network.name, mediationAdapter);
+        mediationAdapter.loadAd(context, mediationListener, asapResponse, network);
     }
 
     /**
@@ -85,14 +91,13 @@ public class MediationManager {
      * @return
      * @throws Exception if can not instantiate an adapter based off class name
      */
-    private STRMediationAdapter getMediationAdapter(ASAPManager.AdResponse.Network thirdPartyNetwork) throws Exception {
+    STRMediationAdapter getMediationAdapter(ASAPManager.AdResponse.Network thirdPartyNetwork) throws Exception {
         STRMediationAdapter mediationAdapter = mediationAdapters.get(thirdPartyNetwork.name);
         if (mediationAdapter != null) {
             return mediationAdapter;
         } else {
-            mediationAdapter = createAdapter(thirdPartyNetwork.androidClassName);
+            return createAdapter(thirdPartyNetwork.androidClassName);
         }
-        return mediationAdapter;
     }
 
     /**
@@ -101,7 +106,7 @@ public class MediationManager {
      * @return
      * @throws Exception
      */
-    private STRMediationAdapter createAdapter(final String className) throws Exception {
+    STRMediationAdapter createAdapter(final String className) throws Exception {
         if (className != null && !className.contains("STX")) {
             final Class<? extends STRMediationAdapter> nativeClass = Class.forName(className)
                     .asSubclass(STRMediationAdapter.class);
@@ -128,11 +133,11 @@ public class MediationManager {
         mediationAdapter.render(adView, creative, feedPosition);
     }
 
-    public class MediationWaterfall {
-        private List<ASAPManager.AdResponse.Network> thirdPartyNetworks = new ArrayList<>();
-        private int currentIndex = -1;
+    public static class MediationWaterfall {
+        List<ASAPManager.AdResponse.Network> thirdPartyNetworks = new ArrayList<>();
+        int currentIndex = -1;
 
-        public MediationWaterfall (ArrayList<ASAPManager.AdResponse.Network> mediationNetworks) {
+        public MediationWaterfall (List<ASAPManager.AdResponse.Network> mediationNetworks) {
             if (mediationNetworks != null) {
                 thirdPartyNetworks = mediationNetworks;
             } else {
@@ -148,6 +153,10 @@ public class MediationManager {
             return currentIndex;
         }
 
+        /**
+         * Gets next third party network in waterfall
+         * @return null if waterfall complete
+         */
         public ASAPManager.AdResponse.Network getNextThirdPartyNetwork() {
             incrementIndex();
             return getCurrentThirdPartyNetwork();
