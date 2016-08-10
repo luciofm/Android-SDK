@@ -70,11 +70,12 @@ public class Sharethrough {
         strSdkConfig.getAsapManager().callASAP(new ASAPManager.ASAPManagerListener() {
             @Override
             public void onSuccess(ASAPManager.AdResponse asapResponse) {
-                strSdkConfig.getMediationManager().initiateWaterfallAndLoadAd(asapResponse, mediationListener);
+                strSdkConfig.getMediationManager().initiateWaterfallAndLoadAd(asapResponse, mediationListener, new MediationManager.MediationWaterfall(asapResponse.mediationNetworks));
             }
 
             @Override
             public void onError(String error) {
+                strSdkConfig.getAsapManager().setWaterfallComplete();
                 Logger.e("ASAP error: " + error, null);
             }
         });

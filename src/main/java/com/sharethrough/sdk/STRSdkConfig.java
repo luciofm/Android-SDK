@@ -8,8 +8,10 @@ import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.NoCache;
 import com.android.volley.toolbox.Volley;
 import com.sharethrough.sdk.mediation.MediationManager;
+import com.sharethrough.sdk.mediation.STRMediationAdapter;
 import com.sharethrough.sdk.network.ASAPManager;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -49,7 +51,7 @@ public class STRSdkConfig {
         this.asapManager = new ASAPManager(placementKey, requestQueue);
         this.creativesBySlot = new LruCache<>(10);
         this.creativeIndices = new HashSet<>(); //contains history of all indices for creatives, whereas creativesBySlot only caches the last 10
-        this.mediationManager = new MediationManager(context, beaconService);
+        this.mediationManager = new MediationManager(context, beaconService, new HashMap<String, STRMediationAdapter>());
     }
 
     public void setSerializedSharethrough(String serializedSharethrough) {
