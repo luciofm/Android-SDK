@@ -7,7 +7,6 @@ import com.sharethrough.sdk.network.STXNetworkAdapter;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
