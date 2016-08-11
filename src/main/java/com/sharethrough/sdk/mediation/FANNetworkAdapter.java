@@ -3,17 +3,15 @@ package com.sharethrough.sdk.mediation;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Gravity;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 import com.facebook.ads.*;
 import com.sharethrough.sdk.IAdView;
 import com.sharethrough.sdk.Logger;
-import com.sharethrough.sdk.mediation.FANCreative;
-import com.sharethrough.sdk.mediation.ICreative;
-import com.sharethrough.sdk.mediation.MediationManager;
-import com.sharethrough.sdk.mediation.STRMediationAdapter;
 import com.sharethrough.sdk.network.ASAPManager;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,10 +60,27 @@ public class FANNetworkAdapter implements STRMediationAdapter {
             @Override
             public void run() {
                 if( nativeAd.isAdLoaded()){
-                    FANCreative fanCreative = (FANCreative) creative;
-                    adview.getTitle().setText(nativeAd.getAdTitle());
-                    adview.getDescription().setText(nativeAd.getAdSubtitle());
+
+                    //setting ui element
+                    final FrameLayout thumbnailContainer = adview.getThumbnail();
+                    MediaView mediaView = new MediaView(thumbnailContainer.getContext());
+                    mediaView.setNativeAd(nativeAd);
+                    ImageView nativeAdIcon = adview.getBrandLogo();
+                    TextView nativeAdTitle = adview.getTitle();
+                    TextView nativeAdBody = adview.getDescription();
+                    ImageView optoutIcon = adview.getOptout();
+
+                    //filling in data
+                    thumbnailContainer.addView(mediaView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
+                    nativeAdTitle.setText(nativeAd.getAdTitle());
+                    nativeAdBody.setText(nativeAd.getAdBody());
+
+                    //set Ad icon
+                    NativeAd.Image adIcon = nativeAd.getAdIcon();
+                    NativeAd.downloadAndDisplayImage(adIcon, nativeAdIcon);
+
                     adview.adReady();
+                    nativeAd.registerViewForInteraction(adview.getAdView());
                 }
             }
         });
