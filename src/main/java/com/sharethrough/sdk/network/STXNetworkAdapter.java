@@ -23,13 +23,15 @@ public class STXNetworkAdapter implements STRMediationAdapter {
     private String mediationRequestId = ""; // To remove for asap v2
 
     private static final String sharethroughEndPoint = "http://btlr.sharethrough.com/v4";
+    public static final String KEY_TYPE = "keyType";
+    public static final String KEY_VALUE = "keyValue";
 
     @Override
     public void loadAd(Context context, MediationManager.MediationListener mediationListener, ASAPManager.AdResponse asapResponse, ASAPManager.AdResponse.Network network) {
         this.mediationListener = mediationListener;
 
         //todo: make android id accessible through singleton
-        fetchAds(sharethroughEndPoint, generateQueryStringParams(asapResponse), "", asapResponse.mrid);
+        fetchAds(sharethroughEndPoint, generateQueryStringParams(asapResponse, network), "", asapResponse.mrid);
     }
 
     @Override
@@ -118,13 +120,18 @@ public class STXNetworkAdapter implements STRMediationAdapter {
         adFetcher.fetchAds(adRequestUrl);
     }
 
-    private List<Pair<String, String>> generateQueryStringParams(ASAPManager.AdResponse asapResponse) {
+    protected List<Pair<String, String>> generateQueryStringParams(ASAPManager.AdResponse asapResponse, ASAPManager.AdResponse.Network network) {
         ArrayList<Pair<String,String>> queryStringParams = new ArrayList<>();
         queryStringParams.add(new Pair<>(ASAPManager.PLACEMENT_KEY, asapResponse.pkey));
-        if (!asapResponse.keyType.equals(ASAPManager.PROGRAMMATIC)
-                && !asapResponse.keyType.equals(ASAPManager.ASAP_UNDEFINED)
-                && !asapResponse.keyValue.equals(ASAPManager.ASAP_UNDEFINED)) {
-            queryStringParams.add(new Pair<>(asapResponse.keyType, asapResponse.keyValue));
+
+        if (network.parameters.get(KEY_TYPE) != null && network.parameters.get(KEY_VALUE) != null) {
+            String keyType = network.parameters.get(KEY_TYPE).getAsString();
+            String keyValue = network.parameters.get(KEY_VALUE).getAsString();
+            if (!keyType.equals(ASAPManager.PROGRAMMATIC)
+                    && !keyType.equals(ASAPManager.ASAP_UNDEFINED)
+                    && !keyValue.equals(ASAPManager.ASAP_UNDEFINED)) {
+                queryStringParams.add(new Pair<>(keyType, keyValue));
+            }
         }
 
         return queryStringParams;

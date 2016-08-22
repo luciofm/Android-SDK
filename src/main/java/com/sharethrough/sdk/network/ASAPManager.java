@@ -43,17 +43,17 @@ public class ASAPManager {
         void onError(String error);
     }
 
-    public class AdResponse {
+    public static class AdResponse {
         public String mrid;
         public String pkey;
         public String adServer;
-        public String keyType;
-        public String keyValue;
-        public String status;
         public String getAdServerPath;
+        public String articlesBeforeFirstAd;
+        public String articlesBetweenAds;
         public ArrayList<Network> mediationNetworks;
+        public String status;
 
-        public class Network {
+        public static class Network {
             public String key;
             public String name;
             public String androidClassName;
@@ -85,7 +85,7 @@ public class ASAPManager {
         try {
             AdResponse adResponse = gson.fromJson(response, AdResponse.class);
             if (adResponse.mrid == null || adResponse.pkey == null || adResponse.adServer == null
-                    || adResponse.keyType == null || adResponse.keyValue == null || adResponse.status == null) {
+                    || adResponse.status == null) {
                 asapManagerListener.onError("ASAP response does not have correct key values");
             } else if (!adResponse.status.equals(ASAP_OK)) {
                 asapManagerListener.onError(adResponse.status);
