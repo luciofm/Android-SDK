@@ -84,8 +84,7 @@ public class ASAPManager {
         Gson gson = new Gson();
         try {
             AdResponse adResponse = gson.fromJson(response, AdResponse.class);
-            if (adResponse.mrid == null || adResponse.pkey == null || adResponse.adServer == null
-                    || adResponse.status == null) {
+            if (adResponse.mrid == null || adResponse.pkey == null || adResponse.status == null) {
                 asapManagerListener.onError("ASAP response does not have correct key values");
             } else if (!adResponse.status.equals(ASAP_OK)) {
                 asapManagerListener.onError(adResponse.status);
