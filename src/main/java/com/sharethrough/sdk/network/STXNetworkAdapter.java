@@ -11,6 +11,7 @@ import com.sharethrough.sdk.mediation.STRMediationAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
 
 public class STXNetworkAdapter implements STRMediationAdapter {
 
@@ -21,6 +22,7 @@ public class STXNetworkAdapter implements STRMediationAdapter {
     private Renderer renderer;
     private boolean isRunning = false;
     private String mediationRequestId = ""; // To remove for asap v2
+    private ASAPManager.AdResponse.Network network = new ASAPManager.AdResponse.Network();
 
     private static final String sharethroughEndPoint = "http://btlr.sharethrough.com/v4";
     public static final String KEY_TYPE = "keyType";
@@ -29,6 +31,7 @@ public class STXNetworkAdapter implements STRMediationAdapter {
     @Override
     public void loadAd(Context context, MediationManager.MediationListener mediationListener, ASAPManager.AdResponse asapResponse, ASAPManager.AdResponse.Network network) {
         this.mediationListener = mediationListener;
+        this.network = network;
 
         //todo: make android id accessible through singleton
         fetchAds(sharethroughEndPoint, generateQueryStringParams(asapResponse, network), "", asapResponse.mrid);
@@ -36,8 +39,7 @@ public class STXNetworkAdapter implements STRMediationAdapter {
 
     @Override
     public void render(IAdView adview, ICreative creative, int feedPosition) {
-        //todo: remove renderer dependency on sharethrough
-//        renderer.putCreativeIntoAdView(adview, ((Creative) creative), beaconService, sharethrough, feedPosition, new Timer("AdView timer for " + creative));
+        renderer.putCreativeIntoAdView(adview, ((Creative) creative), beaconService, feedPosition, new Timer("AdView timer for " + creative));
     }
 
     public STXNetworkAdapter(Context context, BeaconService beaconService) {
@@ -100,6 +102,7 @@ public class STXNetworkAdapter implements STRMediationAdapter {
             } else {
                 creative = new Creative(responseCreative, mediationRequestId);
             }
+            creative.setNetworkType(network.name);
             creatives.add(creative);
         }
         return creatives;

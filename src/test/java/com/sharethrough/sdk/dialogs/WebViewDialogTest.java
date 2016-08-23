@@ -214,6 +214,11 @@ public class WebViewDialogTest extends TestBase {
         private WebSettings.PluginState pluginState = null;
 
         @Override
+        public boolean supportZoom() {
+            return false;
+        }
+
+        @Override
         public void setMediaPlaybackRequiresUserGesture(boolean require) {
             mediaPlaybackRequiresUserGesture = require;
         }
@@ -221,6 +226,146 @@ public class WebViewDialogTest extends TestBase {
         @Override
         public boolean getMediaPlaybackRequiresUserGesture() {
             return mediaPlaybackRequiresUserGesture;
+        }
+
+        @Override
+        public void setEnableSmoothTransition(boolean enable) {
+
+        }
+
+        @Override
+        public boolean enableSmoothTransition() {
+            return false;
+        }
+
+        @Override
+        public void setSavePassword(boolean save) {
+
+        }
+
+        @Override
+        public boolean getSavePassword() {
+            return false;
+        }
+
+        @Override
+        public void setDefaultZoom(ZoomDensity zoom) {
+
+        }
+
+        @Override
+        public ZoomDensity getDefaultZoom() {
+            return null;
+        }
+
+        @Override
+        public boolean supportMultipleWindows() {
+            return false;
+        }
+
+        @Override
+        public LayoutAlgorithm getLayoutAlgorithm() {
+            return null;
+        }
+
+        @Override
+        public void setStandardFontFamily(String font) {
+
+        }
+
+        @Override
+        public String getStandardFontFamily() {
+            return null;
+        }
+
+        @Override
+        public void setFixedFontFamily(String font) {
+
+        }
+
+        @Override
+        public String getFixedFontFamily() {
+            return null;
+        }
+
+        @Override
+        public void setSansSerifFontFamily(String font) {
+
+        }
+
+        @Override
+        public String getSansSerifFontFamily() {
+            return null;
+        }
+
+        @Override
+        public void setSerifFontFamily(String font) {
+
+        }
+
+        @Override
+        public String getSerifFontFamily() {
+            return null;
+        }
+
+        @Override
+        public void setCursiveFontFamily(String font) {
+
+        }
+
+        @Override
+        public String getCursiveFontFamily() {
+            return null;
+        }
+
+        @Override
+        public void setFantasyFontFamily(String font) {
+
+        }
+
+        @Override
+        public String getFantasyFontFamily() {
+            return null;
+        }
+
+        @Override
+        public void setMinimumFontSize(int size) {
+
+        }
+
+        @Override
+        public int getMinimumFontSize() {
+            return 0;
+        }
+
+        @Override
+        public void setMinimumLogicalFontSize(int size) {
+
+        }
+
+        @Override
+        public int getMinimumLogicalFontSize() {
+            return 0;
+        }
+
+        @Override
+        public void setDefaultFixedFontSize(int size) {
+
+        }
+
+        @Override
+        public int getDefaultFixedFontSize() {
+            return 0;
+        }
+
+        @Override
+        public void setLoadsImagesAutomatically(boolean flag) {
+
+        }
+
+        @Override
+        public boolean getLoadsImagesAutomatically() {
+            return false;
         }
 
         @Override
@@ -241,6 +386,16 @@ public class WebViewDialogTest extends TestBase {
         @Override
         public int getMixedContentMode() {
             return 0;
+        }
+
+        @Override
+        public void setOffscreenPreRaster(boolean enabled) {
+
+        }
+
+        @Override
+        public boolean getOffscreenPreRaster() {
+            return false;
         }
 
     }

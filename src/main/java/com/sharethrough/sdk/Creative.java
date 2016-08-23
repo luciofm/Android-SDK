@@ -1,11 +1,8 @@
 package com.sharethrough.sdk;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import com.sharethrough.sdk.media.*;
+import com.google.gson.Gson;
 import com.sharethrough.sdk.mediation.ICreative;
-import com.sharethrough.sdk.mediation.MediationManager;
 
 import java.util.List;
 
@@ -40,6 +37,16 @@ public class Creative implements ICreative {
     @Override
     public String getNetworkType() {
         return networkType;
+    }
+
+    public static String serialize(ICreative creative) {
+        Gson gson = new Gson();
+        return gson.toJson(creative);
+    }
+
+    public static ICreative deserialize(String serializedCreative) {
+        Gson gson = new Gson();
+        return ((Creative)gson.fromJson(serializedCreative, Creative.class));
     }
 
     public String getTitle() {

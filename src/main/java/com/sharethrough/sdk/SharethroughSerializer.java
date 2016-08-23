@@ -6,10 +6,11 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.sharethrough.sdk.mediation.ICreative;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 
 public class SharethroughSerializer {
@@ -19,7 +20,7 @@ public class SharethroughSerializer {
     public static final String ARTICLES_BETWEEN = "articles_between";
     private static Gson gson = new Gson();
 
-    public static HashMap<String, Type> classMap= new HashMap<>();
+    public static HashMap<String, Class> classMap= new HashMap<>();
     static {
         classMap.put("STX", Creative.class);
     }
@@ -32,9 +33,7 @@ public class SharethroughSerializer {
         HashMap<String, String> hashmap = new HashMap<>();
         Type slotType = new TypeToken<LruCache<Integer,Creative>>() {}.getType();
         String slotOutput = gson.toJson(slot, slotType);
-        Type serializedQueueType = new TypeToken<ArrayList<Pair<String,String>>>() {}.getType();
-        String queueOutput = gson.toJson(serializeQueueByType(queue), serializedQueueType);
-        hashmap.put(QUEUE, queueOutput);
+        hashmap.put(QUEUE, serializeQueueByType(queue));
         hashmap.put(SLOT, slotOutput);
         hashmap.put(ARTICLES_BEFORE, String.valueOf(articlesBefore));
         hashmap.put(ARTICLES_BETWEEN, String.valueOf(articlesBetween));
@@ -42,15 +41,35 @@ public class SharethroughSerializer {
         return serializedSharethroughObj;
     }
 
-    public static ArrayList<Pair<String, String>> serializeQueueByType(CreativesQueue queue) {
+    /**
+     * Serialize creative queue based on creative type, all new creative types need to have a "serialize"
+     * and "deserialize" method
+     * @param queue
+     * @return
+     */
+    public static String serializeQueueByType(CreativesQueue queue) {
         ArrayList<Pair<String, String>> result = new ArrayList<>();
         while (queue.size() > 0) {
             ICreative creative = queue.getNext();
-            if (creative instanceof Creative) {
-                result.add(new Pair(creative.getNetworkType(), gson.toJson(creative)));
+            if (classMap.containsKey(creative.getNetworkType())) {
+                Class creativeClass = classMap.get(creative.getNetworkType());
+                try {
+                    Method method = creativeClass.getDeclaredMethod("serialize", ICreative.class);
+                    result.add(new Pair(creative.getNetworkType(), (String) method.invoke(null, creative)));
+                } catch (NoSuchMethodException e) {
+                    Logger.e("There is no serialize method for this class - %s", e, creativeClass);
+                } catch (InvocationTargetException e) {
+                    Logger.e("Serialize method for this class - %s - cannot be invoked", e, creativeClass);
+                } catch (IllegalAccessException e) {
+                    Logger.e("Serialize method for this class - %s - cannot be invoked", e, creativeClass);
+                }
+
             }
         }
-        return result;
+
+        Type serializedQueueType = new TypeToken<ArrayList<Pair<String,String>>>() {}.getType();
+        String queueOutput = gson.toJson(result, serializedQueueType);
+        return queueOutput;
     }
 
     /**
@@ -85,8 +104,16 @@ public class SharethroughSerializer {
         CreativesQueue result = new CreativesQueue();
         for (Pair<String, String> entry : cq) {
             if (classMap.containsKey(entry.first)) {
-                //todo: this should be reflection
-                result.add((ICreative) gson.fromJson(entry.second, classMap.get(entry.first)));
+                Class creativeClass = classMap.get(entry.first);
+                try {
+                    Method method = creativeClass.getDeclaredMethod("deserialize", String.class);
+                    result.add((ICreative) method.invoke(null, entry.second));
+                } catch (NoSuchMethodException e) {
+                    Logger.e("There is no deserialize method for this class - %s", e, creativeClass);
+                } catch (InvocationTargetException e) {
+                    Logger.e("Deserialize method for this class - %s - cannot be invoked", e, creativeClass);
+                } catch (IllegalAccessException e) {
+                    Logger.e("Deserialize method for this class - %s - cannot be invoked", e, creativeClass);                }
             }
         }
 
