@@ -23,13 +23,12 @@ import java.util.Timer;
 
 public class Renderer implements IRenderer {
 
-    public void putCreativeIntoAdView(final IAdView adView, final Creative creative, final BeaconService beaconService,
-    final Sharethrough sharethrough, final Timer timer) {
-        putCreativeIntoAdView(adView, creative, beaconService, sharethrough, 0, timer);
+    public void putCreativeIntoAdView(final IAdView adView, final Creative creative, final BeaconService beaconService, final Timer timer) {
+        putCreativeIntoAdView(adView, creative, beaconService, 0, timer);
     }
 
     public void putCreativeIntoAdView(final IAdView adView, final Creative creative, final BeaconService beaconService,
-                                      final Sharethrough sharethrough, final int feedPosition, final Timer timer) {
+                                      final int feedPosition, final Timer timer) {
         final ViewGroup container = adView.getAdView();
         if (!creative.wasRendered) {
             beaconService.adReceived(container.getContext(), creative, feedPosition);
@@ -67,7 +66,7 @@ public class Renderer implements IRenderer {
                 FrameLayout thumbnailContainer = adView.getThumbnail();
 
                 thumbnailContainer.removeAllViews();
-                final AdImageView thumbnailImage = new AdImageView(container.getContext(), sharethrough, creative, adView, feedPosition, beaconService);
+                final AdImageView thumbnailImage = new AdImageView(container.getContext(), creative, adView, feedPosition, beaconService);
                 if (creative.getThumbnailUrl() != null && !creative.getThumbnailUrl().isEmpty())
                     Picasso.with(container.getContext()).load(creative.getThumbnailUrl()).fit().centerCrop().tag("STRAdImage").into(thumbnailImage);
                 thumbnailContainer.addView(thumbnailImage,

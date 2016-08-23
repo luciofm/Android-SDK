@@ -7,16 +7,14 @@ import java.util.Timer;
 class AdImageView extends ImageView {
     Timer visibleBeaconTimer;
     AdViewTimerTask visibleBeaconTask;
-    Sharethrough sharethrough;
     Creative creative;
     IAdView adView;
     int feedPosition;
     BeaconService beaconService;
     Context context;
 
-    AdImageView(Context context, Sharethrough sharethrough, Creative creative, IAdView adview, int feedPosition, BeaconService beaconService) {
+    AdImageView(Context context, Creative creative, IAdView adview, int feedPosition, BeaconService beaconService) {
         super(context);
-        this.sharethrough = sharethrough;
         this.creative = creative;
         this.adView = adview;
         this.feedPosition = feedPosition;

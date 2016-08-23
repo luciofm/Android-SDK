@@ -26,7 +26,7 @@ public class AdImageViewTest extends TestBase {
 
     class AdImageViewStub extends AdImageView {
         AdImageViewStub( Context context, Sharethrough sharethrough, Creative creative, IAdView adview, int feedPosition, BeaconService beaconService) {
-            super(context, sharethrough, creative, adview, feedPosition, beaconService );
+            super(context, creative, adview, feedPosition, beaconService );
         }
 
         @Override
