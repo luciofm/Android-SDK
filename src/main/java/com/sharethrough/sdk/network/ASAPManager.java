@@ -20,7 +20,7 @@ import java.util.Map;
  * Created by engineers on 4/26/16.
  */
 public class ASAPManager {
-    public static final String ASAP_ENDPOINT_PREFIX = "http://dumb-waiter.sharethrough.com/asap/v1";//"http://asap.sharethrough.com/v1";
+    public static final String ASAP_ENDPOINT_PREFIX = "http://asap.sharethrough.com/v2";
     public static final String PROGRAMMATIC = "stx_monetize";
     public static final String PLACEMENT_KEY = "placement_key";
     public static final String ASAP_UNDEFINED = "undefined";

@@ -1,12 +1,15 @@
 package com.sharethrough.sdk;
 
 import android.util.LruCache;
+import android.util.Pair;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.sharethrough.sdk.mediation.ICreative;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
-
+import java.util.Map;
 
 
 public class SharethroughSerializer {
@@ -16,6 +19,11 @@ public class SharethroughSerializer {
     public static final String ARTICLES_BETWEEN = "articles_between";
     private static Gson gson = new Gson();
 
+    public static HashMap<String, Type> classMap= new HashMap<>();
+    static {
+        classMap.put("STX", Creative.class);
+    }
+
     public static String serialize( CreativesQueue queue, LruCache<Integer, Creative> slot, int articlesBefore, int articlesBetween ){
         if( queue == null || slot == null ){
             return "";
@@ -24,13 +32,25 @@ public class SharethroughSerializer {
         HashMap<String, String> hashmap = new HashMap<>();
         Type slotType = new TypeToken<LruCache<Integer,Creative>>() {}.getType();
         String slotOutput = gson.toJson(slot, slotType);
-        String queueOutput = gson.toJson(queue);
+        Type serializedQueueType = new TypeToken<ArrayList<Pair<String,String>>>() {}.getType();
+        String queueOutput = gson.toJson(serializeQueueByType(queue), serializedQueueType);
         hashmap.put(QUEUE, queueOutput);
         hashmap.put(SLOT, slotOutput);
         hashmap.put(ARTICLES_BEFORE, String.valueOf(articlesBefore));
         hashmap.put(ARTICLES_BETWEEN, String.valueOf(articlesBetween));
         String serializedSharethroughObj = gson.toJson(hashmap);
         return serializedSharethroughObj;
+    }
+
+    public static ArrayList<Pair<String, String>> serializeQueueByType(CreativesQueue queue) {
+        ArrayList<Pair<String, String>> result = new ArrayList<>();
+        while (queue.size() > 0) {
+            ICreative creative = queue.getNext();
+            if (creative instanceof Creative) {
+                result.add(new Pair(creative.getNetworkType(), gson.toJson(creative)));
+            }
+        }
+        return result;
     }
 
     /**
@@ -55,11 +75,22 @@ public class SharethroughSerializer {
      */
     public static CreativesQueue getCreativesQueue(String serializedSharethrough) {
         String serializedQueue = (String) deserialize(serializedSharethrough).get(QUEUE);
-        CreativesQueue cq = gson.fromJson(serializedQueue, CreativesQueue.class);
+
+        Type serializedQueueType = new TypeToken<ArrayList<Pair<String,String>>>() {}.getType();
+        ArrayList<Pair<String,String>> cq = gson.fromJson(serializedQueue, serializedQueueType);
         if( cq == null ){
-            cq = new CreativesQueue();
+            cq = new ArrayList<>();
         }
-        return cq;
+
+        CreativesQueue result = new CreativesQueue();
+        for (Pair<String, String> entry : cq) {
+            if (classMap.containsKey(entry.first)) {
+                //todo: this should be reflection
+                result.add((ICreative) gson.fromJson(entry.second, classMap.get(entry.first)));
+            }
+        }
+
+        return result;
     }
 
     /**

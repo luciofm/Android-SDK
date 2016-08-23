@@ -53,14 +53,44 @@ public class SharethroughSerializerTest extends TestBase {
     @Test
     public void GetCreativesQueue_SerializedStringShouldReturnCreativesQueue() throws Exception {
         CreativesQueue cq = new CreativesQueue();
-        cq.add(new Creative(new Response.Creative(), "mrid"));
-        cq.add(new Creative(new Response.Creative(), "mrid"));
-        cq.add(new Creative(new Response.Creative(), "mrid"));
+        Creative creative1 = new Creative(new Response.Creative(), "mrid");
+        creative1.setNetworkType("STX");
+        cq.add(creative1);
+        Creative creative2 = new Creative(new Response.Creative(), "mrid");
+        creative2.setNetworkType("STX");
+        cq.add(creative2);
+        Creative creative3 = new Creative(new Response.Creative(), "mrid");
+        creative3.setNetworkType("STX");
+        cq.add(creative3);
         assertThat(cq.size()).isEqualTo(3);
 
         String serializedSharethroughObj = SharethroughSerializer.serialize(cq, new LruCache<Integer, Creative>(10), 2, 5);
         CreativesQueue retreivedCq = SharethroughSerializer.getCreativesQueue(serializedSharethroughObj);
-        assertThat(retreivedCq.size()).isEqualTo(3);
+        assertThat(retreivedCq.size()).isEqualTo(3);;
+        assertThat(retreivedCq.getNext() instanceof Creative).isEqualTo(true);
+        assertThat(retreivedCq.getNext().getNetworkType()).isEqualTo("STX");
+        assertThat(retreivedCq.getNext().getNetworkType()).isEqualTo("STX");
+    }
+
+    @Test
+    public void GetCreativesQueue_SerializedStringShouldReturnCreativesQueueWithOnlySharethrough() throws Exception {
+        CreativesQueue cq = new CreativesQueue();
+        Creative creative1 = new Creative(new Response.Creative(), "mrid");
+        creative1.setNetworkType("STX");
+        cq.add(creative1);
+        Creative creative2 = new Creative(new Response.Creative(), "mrid");
+        creative2.setNetworkType("NOT STX");
+        cq.add(creative2);
+        Creative creative3 = new Creative(new Response.Creative(), "mrid");
+        creative3.setNetworkType("STX");
+        cq.add(creative3);
+        assertThat(cq.size()).isEqualTo(3);
+
+        String serializedSharethroughObj = SharethroughSerializer.serialize(cq, new LruCache<Integer, Creative>(10), 2, 5);
+        CreativesQueue retreivedCq = SharethroughSerializer.getCreativesQueue(serializedSharethroughObj);
+
+        //only STX creatives are serialized because the Serializer is only aware of "STX" type creatives
+        assertThat(retreivedCq.size()).isEqualTo(2);
     }
 
     @Test
