@@ -20,7 +20,6 @@ public class STXNetworkAdapter implements STRMediationAdapter {
     private MediationManager.MediationListener mediationListener;
     protected AdFetcher adFetcher;
     private Renderer renderer;
-    private boolean isRunning = false;
     private String mediationRequestId = ""; // To remove for asap v2
     private ASAPManager.AdResponse.Network network = new ASAPManager.AdResponse.Network();
 
@@ -34,7 +33,7 @@ public class STXNetworkAdapter implements STRMediationAdapter {
         this.network = network;
 
         //todo: make android id accessible through singleton
-        fetchAds(sharethroughEndPoint, generateQueryStringParams(asapResponse, network), "", asapResponse.mrid);
+        fetchAds(sharethroughEndPoint, generateQueryStringParams(asapResponse, network), AdvertisingIdProvider.getAdvertisingId(), asapResponse.mrid);
     }
 
     @Override
@@ -77,14 +76,12 @@ public class STXNetworkAdapter implements STRMediationAdapter {
         }else {
             mediationListener.onAdLoaded(creatives);
         }
-        isRunning = false;
         // To remove for asap v2
         mediationRequestId = "";
     }
 
     public void handleAdResponseFailed() {
         mediationListener.onAdFailedToLoad();
-        isRunning = false;
         // To remove for asap v2
         mediationRequestId = "";
     }
@@ -109,10 +106,6 @@ public class STXNetworkAdapter implements STRMediationAdapter {
     }
 
     public synchronized void fetchAds(String url, List<Pair<String,String>> queryStringParams, String advertisingId, String mediationRequestId){
-        if(isRunning) {
-            return;
-        }
-        isRunning = true;
         // To remove for asap v2
         this.mediationRequestId = mediationRequestId;
 
