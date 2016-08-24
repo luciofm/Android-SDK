@@ -29,11 +29,6 @@ public class AdvertisingIdProviderTest extends TestBase {
             super(context);
             info = new AdvertisingIdClient.Info(advertisingId,limitedTrackingAvailable);
         }
-
-        @Override
-        protected AdvertisingIdClient.Info getAdvertisingInfo(Context context){
-            return info;
-        }
     }
 
     @Before

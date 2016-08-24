@@ -110,7 +110,7 @@ public class BeaconServiceTest extends TestBase {
 
         packageInfo.versionName = "fake_app_id";
         when(placement.getStatus()).thenReturn("live");
-        when(advertisingIdProvider.getAdvertisingId()).thenReturn(advertisingId);
+        AdvertisingIdProvider.advertisingId = advertisingId;
         when(context.getPackageName()).thenReturn("com.example.sdk");
         when(context.getPackageManager()).thenReturn(packageManager);
         when(packageManager.getPackageInfo("com.example.sdk", PackageManager.GET_META_DATA)).thenReturn(packageInfo);
@@ -125,7 +125,7 @@ public class BeaconServiceTest extends TestBase {
 
     @Test
     public void whenAdvertisingIdNotSet_commonParams_returnsParamsSentInAllBeacons() throws Exception {
-        when(advertisingIdProvider.getAdvertisingId()).thenReturn(null);
+        AdvertisingIdProvider.advertisingId = null;
         HashMap<String, String> expectedCommonParamsWithoutAdvertisingId = new HashMap<>(expectedCommonParams);
         expectedCommonParamsWithoutAdvertisingId.remove("uid");
         assertThat(subject.commonParams()).isEqualTo(expectedCommonParamsWithoutAdvertisingId);
