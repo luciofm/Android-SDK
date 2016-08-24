@@ -58,19 +58,6 @@ public class STXNetworkAdapterTest extends TestBase {
     }
 
     @Test
-    public void fetchAds_whenRequestIsInProgress_doesNotStartNewRequest() throws Exception {
-        subject.fetchAds("url", new ArrayList<Pair<String, String>>(), "adId", "mrid");
-        assertThat(adFetcherStub.fetchedAdsCount).isEqualTo(1);
-        assertThat(subject.getMediationRequestId()).isEqualTo("mrid");
-
-
-        subject.fetchAds("url", new ArrayList<Pair<String, String>>(), "adId", "mrid2");
-        assertThat(adFetcherStub.fetchedAdsCount).isEqualTo(1);
-        assertThat(subject.getMediationRequestId()).isEqualTo("mrid");
-    }
-
-
-    @Test
     public void handleAdResponseLoaded_whenNoCreativesReturn_callOnNoAdsToShow() throws Exception {
         Response response = new Response();
         response.creatives = new ArrayList<>();
