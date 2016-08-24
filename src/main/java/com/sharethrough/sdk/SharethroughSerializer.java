@@ -4,7 +4,6 @@ import android.util.LruCache;
 import android.util.Pair;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.sharethrough.sdk.mediation.FANCreative;
 import com.sharethrough.sdk.mediation.ICreative;
 
 import java.lang.reflect.InvocationTargetException;
@@ -25,7 +24,6 @@ public class SharethroughSerializer {
     public static HashMap<String, Class> classMap= new HashMap<>();
     static {
         classMap.put("STX", Creative.class);
-        classMap.put("Fan ....", FANCreative.class);
     }
 
     public static String serialize( CreativesQueue queue, LruCache<Integer, ICreative> slot, int articlesBefore, int articlesBetween ){
