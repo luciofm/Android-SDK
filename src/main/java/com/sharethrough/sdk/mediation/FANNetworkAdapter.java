@@ -1,9 +1,12 @@
 package com.sharethrough.sdk.mediation;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -22,7 +25,7 @@ public class FANNetworkAdapter implements STRMediationAdapter {
     @Override
     public void loadAd(final Context context, final MediationManager.MediationListener mediationListener, final ASAPManager.AdResponse adResponse, final ASAPManager.AdResponse.Network network) {
         nativeAd = new NativeAd(context, "548597075312947_565374090301912");
-        AdSettings.addTestDevice("2b96b2c92445c088a7d6b2f12aef1f93");
+        AdSettings.addTestDevice("3e41895b1482f5e3fd3d8e7ef60e7970");
         nativeAd.setAdListener(new AdListener() {
 
             @Override
@@ -70,6 +73,7 @@ public class FANNetworkAdapter implements STRMediationAdapter {
                     TextView nativeAdBody = adview.getDescription();
                     ImageView optoutIcon = adview.getOptout();
 
+
                     //filling in data
                     thumbnailContainer.addView(mediaView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
                     nativeAdTitle.setText(nativeAd.getAdTitle());
@@ -79,8 +83,22 @@ public class FANNetworkAdapter implements STRMediationAdapter {
                     NativeAd.Image adIcon = nativeAd.getAdIcon();
                     NativeAd.downloadAndDisplayImage(adIcon, nativeAdIcon);
 
-                    adview.adReady();
+                    NativeAd.Image adChoices = nativeAd.getAdChoicesIcon();
+                    NativeAd.downloadAndDisplayImage(adChoices, optoutIcon);
+
                     nativeAd.registerViewForInteraction(adview.getAdView());
+
+                    optoutIcon.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (nativeAd.getAdChoicesLinkUrl() != null && false == nativeAd.getAdChoicesLinkUrl().isEmpty()) {
+                                Intent adChoicesIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(nativeAd.getAdChoicesLinkUrl()));
+                                v.getContext().startActivity(adChoicesIntent);
+                            }
+                        }
+                    });
+
+                    adview.adReady();
                 }
             }
         });
