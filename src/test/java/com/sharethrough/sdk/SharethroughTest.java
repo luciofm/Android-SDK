@@ -31,7 +31,7 @@ public class SharethroughTest extends TestBase {
     @Mock private BeaconService beaconService;
     @Mock private STRSdkConfig strSdkConfig;
     @Mock private CreativesQueue creativeQueue;
-    @Mock private LruCache<Integer, Creative> creativesBySlot;
+    @Mock private LruCache<Integer, ICreative> creativesBySlot;
     @Mock private Set<Integer> creativeIndices;
     @Mock private AdvertisingIdProvider advertisingIdProvider;
     @Mock private RequestQueue requestQueue;
@@ -280,7 +280,7 @@ public class SharethroughTest extends TestBase {
 
     @Test
     public void creativeIndicesStoresAllUniqueCreativeIndexHistory_creativesBySlotOnlyCachesTenUniqueIndices() {
-        LruCache<Integer, Creative> slot = new LruCache<>(10);
+        LruCache<Integer, ICreative> slot = new LruCache<>(10);
         Set<Integer> creativeIndices = new HashSet<>();
         when(strSdkConfig.getCreativesBySlot()).thenReturn(slot);
         when(strSdkConfig.getCreativeIndices()).thenReturn(creativeIndices);

@@ -7,6 +7,7 @@ import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.NoCache;
 import com.android.volley.toolbox.Volley;
+import com.sharethrough.sdk.mediation.ICreative;
 import com.sharethrough.sdk.mediation.MediationManager;
 import com.sharethrough.sdk.mediation.STRMediationAdapter;
 import com.sharethrough.sdk.network.ASAPManager;
@@ -21,7 +22,7 @@ public class STRSdkConfig {
     private String serializedSharethrough;
     private BeaconService beaconService;
     private CreativesQueue creativeQueue;
-    private LruCache<Integer, Creative> creativesBySlot;
+    private LruCache<Integer, ICreative> creativesBySlot;
     private Set<Integer> creativeIndices;
     private AdvertisingIdProvider advertisingIdProvider;
     private RequestQueue requestQueue;
@@ -72,7 +73,7 @@ public class STRSdkConfig {
         return creativeQueue;
     }
 
-    public LruCache<Integer, Creative> getCreativesBySlot() {
+    public LruCache<Integer, ICreative> getCreativesBySlot() {
         return creativesBySlot;
     }
 

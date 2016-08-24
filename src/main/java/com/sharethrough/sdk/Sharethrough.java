@@ -150,28 +150,20 @@ public class Sharethrough {
      * there is a new creative to show
      */
 
-    private ICreative getCreativeToShow(int feedPosition, boolean[] isAdRenewed) {
+    private ICreative getCreativeToShow(int feedPosition) {
         ICreative creative = strSdkConfig.getCreativesBySlot().get(feedPosition);
         if (creative == null) {
             if (strSdkConfig.getCreativeQueue().size() != 0) {
                 synchronized (strSdkConfig.getCreativeQueue()) {
                     creative = strSdkConfig.getCreativeQueue().getNext();
                 }
-
-                //todo: for now only cache STR creatives
-                if (creative instanceof Creative) {
-                    insertCreativeIntoSlot(feedPosition, (Creative)creative);
-                }
-                (isAdRenewed[0]) = true;
+                insertCreativeIntoSlot(feedPosition, (Creative)creative);
+                Logger.d("pop creative at position %d , creative cache size: %d ", feedPosition , strSdkConfig.getCreativeQueue().size());
             }
         }
 
-        if (creative != null && creative instanceof Creative) {
-            if (isAdRenewed[0]) {
-                Logger.d("pop creative ckey: %s at position %d , creative cache size: %d ", ((Creative) creative).getCreativeKey() ,feedPosition , strSdkConfig.getCreativeQueue().size());
-            } else {
-                Logger.d("get creative ckey: %s from creative slot at position %d", ((Creative) creative).getCreativeKey(), feedPosition);
-            }
+        if (creative != null) {
+            Logger.d("get creative from creative slot at position %d", feedPosition);
         }
 
         return creative;
@@ -183,18 +175,9 @@ public class Sharethrough {
      * @param feedPosition The starting position in your feed where you would like your first ad.
      */
     public void putCreativeIntoAdView(final IAdView adView, final int feedPosition) {
-
-        //prevent pubs from calling this before we fire new ads to show
-        boolean[] isAdRenewed = new boolean[1];
-        isAdRenewed[0] = false;
-
-        ICreative creative = getCreativeToShow(feedPosition, isAdRenewed);
+        ICreative creative = getCreativeToShow(feedPosition);
         if (creative != null) {
-
             strSdkConfig.getMediationManager().render(adView, creative, feedPosition);
-            if( isAdRenewed[0] ){
-                fireNewAdsToShow();
-            }
         }
 
         //grab more ads if appropriate
