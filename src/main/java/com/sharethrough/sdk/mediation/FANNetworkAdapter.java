@@ -72,6 +72,8 @@ public class FANNetworkAdapter implements STRMediationAdapter {
                     TextView nativeAdTitle = adview.getTitle();
                     TextView nativeAdBody = adview.getDescription();
                     ImageView optoutIcon = adview.getOptout();
+                    TextView slug = adview.getSlug();
+                    slug.setText("Promoted");
 
 
                     //filling in data

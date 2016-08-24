@@ -281,11 +281,11 @@ public class Sharethrough {
     }
 
     public IAdView getAdView(Context context, int feedPosition, int adLayoutResourceId, int title, int description,
-                             int advertiser, int thumbnail, int optoutId, int brandLogoId, IAdView convertView) {
+                             int advertiser, int thumbnail, int optoutId, int brandLogoId, IAdView convertView, int slug) {
         IAdView view = convertView;
         if (view == null) {
             BasicAdView v = new BasicAdView(context);
-            v.prepareWithResourceIds(adLayoutResourceId, title, description, advertiser, thumbnail, optoutId, brandLogoId);
+            v.prepareWithResourceIds(adLayoutResourceId, title, description, advertiser, thumbnail, optoutId, brandLogoId, slug);
             view = v;
         }
         putCreativeIntoAdView(view, feedPosition);
