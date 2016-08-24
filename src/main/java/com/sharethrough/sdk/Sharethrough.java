@@ -105,7 +105,7 @@ public class Sharethrough {
         }
     };
 
-    private void insertCreativeIntoSlot(int feedPosition, Creative creative) {
+    private void insertCreativeIntoSlot(int feedPosition, ICreative creative) {
         if( creative != null ) {
             strSdkConfig.getCreativesBySlot().put(feedPosition, creative);
             strSdkConfig.getCreativeIndices().add(feedPosition);
@@ -157,7 +157,7 @@ public class Sharethrough {
                 synchronized (strSdkConfig.getCreativeQueue()) {
                     creative = strSdkConfig.getCreativeQueue().getNext();
                 }
-                insertCreativeIntoSlot(feedPosition, (Creative)creative);
+                insertCreativeIntoSlot(feedPosition, creative);
                 Logger.d("pop creative at position %d , creative cache size: %d ", feedPosition , strSdkConfig.getCreativeQueue().size());
             }
         }
