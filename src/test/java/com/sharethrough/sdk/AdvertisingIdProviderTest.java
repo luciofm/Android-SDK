@@ -3,6 +3,8 @@ package com.sharethrough.sdk;
 import android.content.Context;
 import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +14,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -29,6 +32,11 @@ public class AdvertisingIdProviderTest extends TestBase {
             super(context);
             info = new AdvertisingIdClient.Info(advertisingId,limitedTrackingAvailable);
         }
+
+        @Override
+        public AdvertisingIdClient.Info getAdvertisingIdInfo(Context context) throws GooglePlayServicesNotAvailableException, IOException, GooglePlayServicesRepairableException {
+            return info;
+        }
     }
 
     @Before
@@ -45,6 +53,7 @@ public class AdvertisingIdProviderTest extends TestBase {
     @Test
     public void whenAdvertisingIdIsUnavailable() throws Exception {
         MyGooglePlayServicesUtilShadow.IS_AVAILABLE = true;
+        AdvertisingIdProvider.hasRetrievedAdvertisingId = false;
         AdvertisingIdProviderStub subject = new AdvertisingIdProviderStub(RuntimeEnvironment.application, null, true);
         ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
         verify(STRExecutorService.getInstance()).execute(runnableArgumentCaptor.capture());
@@ -58,6 +67,7 @@ public class AdvertisingIdProviderTest extends TestBase {
     @Test
     public void whenLimitedAdTrackingIsEnabled() throws Exception {
         MyGooglePlayServicesUtilShadow.IS_AVAILABLE = true;
+        AdvertisingIdProvider.hasRetrievedAdvertisingId = false;
         AdvertisingIdProviderStub subject = new AdvertisingIdProviderStub(RuntimeEnvironment.application, null, true);
         com.sharethrough.test.util.Misc.runLast(STRExecutorService.getInstance());
         assertThat(subject.getAdvertisingId()).isEqualTo(null);
@@ -66,6 +76,7 @@ public class AdvertisingIdProviderTest extends TestBase {
     @Test
     public void whenAdvertisingIdIsAvailableForUse() throws Exception {
         MyGooglePlayServicesUtilShadow.IS_AVAILABLE = true;
+        AdvertisingIdProvider.hasRetrievedAdvertisingId = false;
         AdvertisingIdProviderStub subject = new AdvertisingIdProviderStub(RuntimeEnvironment.application, "0u812", false);
 
         ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);

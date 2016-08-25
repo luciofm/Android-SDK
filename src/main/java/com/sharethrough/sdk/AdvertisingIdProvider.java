@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutorService;
 
 public class AdvertisingIdProvider {
     public static String advertisingId;
-    private static boolean hasRetrievedAdvertisingId = false;
+    public static boolean hasRetrievedAdvertisingId = false;
 
     public AdvertisingIdProvider(final Context context) {
         if (hasRetrievedAdvertisingId) {
@@ -28,7 +28,7 @@ public class AdvertisingIdProvider {
                 @Override
                 public void run() {
                     try {
-                        AdvertisingIdClient.Info adInfo = AdvertisingIdClient.getAdvertisingIdInfo(context);
+                        AdvertisingIdClient.Info adInfo = getAdvertisingIdInfo(context);
                         advertisingId = adInfo.getId();
                         if (adInfo.isLimitAdTrackingEnabled()) {
                             advertisingId = null;
@@ -44,6 +44,10 @@ public class AdvertisingIdProvider {
                 }
             });
         }
+    }
+
+    public AdvertisingIdClient.Info getAdvertisingIdInfo(Context context) throws GooglePlayServicesNotAvailableException, IOException, GooglePlayServicesRepairableException {
+        return AdvertisingIdClient.getAdvertisingIdInfo(context);
     }
 
     public static String getAdvertisingId() {
