@@ -269,6 +269,7 @@ public class RendererTest extends TestBase {
         FrameLayout thumbnail = mock(FrameLayout.class);
         TextView advertiser = mock(TextView.class);
         TextView description = mock(TextView.class);
+        TextView slug = mock(TextView.class);
         TextView title = mock(TextView.class);
         ImageView brandLogo = new ImageView(RuntimeEnvironment.application);
         ImageView optout = new ImageView(RuntimeEnvironment.application);
@@ -289,6 +290,11 @@ public class RendererTest extends TestBase {
         @Override
         public void adReady() {
             adReady_wasCalled = true;
+        }
+
+        @Override
+        public TextView getSlug() {
+            return slug;
         }
 
         @Override
