@@ -40,6 +40,7 @@ public class FANNetworkAdapter implements STRMediationAdapter {
                     List<ICreative> creatives = new ArrayList<>();
                     FANCreative convertedFbAd = new FANCreative(nativeAd);
                     convertedFbAd.setNetworkType(network.name);
+                    convertedFbAd.setClassName(network.androidClassName);
                     creatives.add(convertedFbAd);
                     mediationListener.onAdLoaded(creatives);
                     return;

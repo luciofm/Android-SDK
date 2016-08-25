@@ -8,6 +8,7 @@ import com.facebook.ads.Ad;
 public class FANCreative implements ICreative {
     private Ad fbAd;
     private String networkType;
+    private String className;
 
     @Override
     public void setNetworkType(String networkType) {
@@ -17,6 +18,16 @@ public class FANCreative implements ICreative {
     @Override
     public String getNetworkType() {
         return networkType;
+    }
+
+    @Override
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    @Override
+    public String getClassName() {
+        return className;
     }
 
     public FANCreative(Ad ad) {

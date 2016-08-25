@@ -100,6 +100,7 @@ public class STXNetworkAdapter implements STRMediationAdapter {
                 creative = new Creative(responseCreative, mediationRequestId);
             }
             creative.setNetworkType(network.name);
+            creative.setClassName(network.androidClassName);
             creatives.add(creative);
         }
         return creatives;

@@ -1,6 +1,7 @@
 package com.sharethrough.sdk.mediation;
 
 import android.content.Context;
+import com.google.android.gms.ads.mediation.MediationAdapter;
 import com.sharethrough.sdk.*;
 import com.sharethrough.sdk.network.ASAPManager;
 import com.sharethrough.sdk.network.STXNetworkAdapter;
@@ -109,7 +110,6 @@ public class MediationManager {
         if (className != null && !className.contains("STX")) {
             final Class<? extends STRMediationAdapter> nativeClass = Class.forName(className)
                     .asSubclass(STRMediationAdapter.class);
-            //Preconditions.checkNotNull(nativeClass);
 
             final Constructor<?> nativeConstructor = nativeClass.getDeclaredConstructor((Class[]) null);
             nativeConstructor.setAccessible(true);
@@ -126,10 +126,16 @@ public class MediationManager {
      * @param feedPosition
      */
     public void render(IAdView adView, ICreative creative, int feedPosition) {
-        String networkName = creative.getNetworkType();
-        STRMediationAdapter mediationAdapter = mediationAdapters.get(networkName);
-
-        mediationAdapter.render(adView, creative, feedPosition);
+        ASAPManager.AdResponse.Network network = new ASAPManager.AdResponse.Network();
+        network.androidClassName = creative.getClassName();
+        network.name =creative.getNetworkType();
+        try {
+            STRMediationAdapter mediationAdapter  = getMediationAdapter(network);
+            mediationAdapter.render(adView, creative, feedPosition);
+        } catch (Exception e) {
+            Logger.e("Needed to instantiate adapter before rendering ad but could not instantiate a STRNetworkManager based off class name: %s", e, network.androidClassName);
+            return;
+        }
     }
 
     public static class MediationWaterfall {

@@ -22,6 +22,7 @@ public class Creative implements ICreative {
     private boolean wasClicked = false;
     public boolean wasVisible = false;
     private String networkType;
+    private String className;
 
     public Creative(Response.Creative responseCreative, String mediationRequestId) {
         this.responseCreative = responseCreative;
@@ -37,6 +38,16 @@ public class Creative implements ICreative {
     @Override
     public String getNetworkType() {
         return networkType;
+    }
+
+    @Override
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    @Override
+    public String getClassName() {
+        return className;
     }
 
     public static String serialize(ICreative creative) {

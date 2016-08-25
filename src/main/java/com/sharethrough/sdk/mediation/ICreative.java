@@ -6,6 +6,8 @@ package com.sharethrough.sdk.mediation;
 public interface ICreative {
     void setNetworkType(String networkType);
     String getNetworkType();
+    void setClassName(String className);
+    String getClassName();
 
     //todo: classes extending ICreative need serialize and deserialize method
 }
