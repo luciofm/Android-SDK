@@ -102,6 +102,8 @@ android {
         }
     }
 
+    sourceSets.main.java.exclude 'com/sharethrough/sdk/mediation/FANNetworkAdapter.java'
+
     packagingOptions {
         exclude 'LICENSE.txt'
         exclude 'META-INF/LICENSE.txt'
