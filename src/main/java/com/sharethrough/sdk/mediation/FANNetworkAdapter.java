@@ -21,22 +21,29 @@ import java.util.List;
 
 public class FANNetworkAdapter implements STRMediationAdapter {
     private NativeAd nativeAd = null;
+    private static String FAN_PLACEMENT_ID = "fanPlacementId";
 
     @Override
     public void loadAd(final Context context, final MediationManager.MediationListener mediationListener, final ASAPManager.AdResponse adResponse, final ASAPManager.AdResponse.Network network) {
-        nativeAd = new NativeAd(context, "548597075312947_565374090301912");
-        AdSettings.addTestDevice("3e41895b1482f5e3fd3d8e7ef60e7970");
+        if (!networkHasValidParams(network)) {
+            mediationListener.onAdFailedToLoad();
+        };
+
+        String facebookPlacementId = network.parameters.get(FAN_PLACEMENT_ID).getAsString();
+        nativeAd = new NativeAd(context, facebookPlacementId);
+//        AdSettings.addTestDevice("ebe0abdb73271a5598f9a0b4f6308ff1");
         nativeAd.setAdListener(new AdListener() {
 
             @Override
             public void onError(Ad ad, AdError error) {
-                int i = 4;
+                Logger.d("Facebook returned 0 creatives");
+                mediationListener.onAdFailedToLoad();
             }
 
             @Override
             public void onAdLoaded(Ad ad) {
                 if (nativeAd.equals(ad)) {
-                    Logger.d("Facebook return 1 creative");
+                    Logger.d("Facebook returned 1 creative");
                     List<ICreative> creatives = new ArrayList<>();
                     FANCreative convertedFbAd = new FANCreative(nativeAd);
                     convertedFbAd.setNetworkType(network.name);
@@ -107,5 +114,12 @@ public class FANNetworkAdapter implements STRMediationAdapter {
         });
 
 
+    }
+
+    private boolean networkHasValidParams(ASAPManager.AdResponse.Network network) {
+        if (network == null || network.parameters == null || network.parameters.get(FAN_PLACEMENT_ID) == null) {
+            return false;
+        }
+        return true;
     }
 }
