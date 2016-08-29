@@ -77,9 +77,9 @@ public class MediationManagerTest extends TestBase {
     @Test
     public void getMediationAdapter_createsNewFanAdapterAndStoresInMap() throws Exception {
         network1.name = "FAN";
-        network1.androidClassName = "com.sharethrough.sdk.mediation.FANNetworkAdapter";
+        network1.androidClassName = "com.sharethrough.sdk.mediation.DummyMediationAdapter";
         when(mediationAdapters.get(network1.name)).thenReturn(null);
-        assertTrue(subject.getMediationAdapter(network1) instanceof FANNetworkAdapter);
+        assertTrue(subject.getMediationAdapter(network1) instanceof DummyMediationAdapter);
     }
 
     @Test
