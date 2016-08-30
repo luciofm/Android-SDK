@@ -44,21 +44,23 @@ public class Sharethrough {
 
     public Sharethrough(STRSdkConfig config) {
         this.strSdkConfig = config;
-        this.placement = createPlacement(Integer.MAX_VALUE, Integer.MAX_VALUE);
+        this.placement = createPlacement(Integer.MAX_VALUE, Integer.MAX_VALUE, "", "");
 
         if (strSdkConfig.getSerializedSharethrough() != null && !strSdkConfig.getSerializedSharethrough().isEmpty()) {
             Logger.d("deserializing Sharethrough: queue count - " + strSdkConfig.getCreativeQueue().size() + ", slot snapshot: " + strSdkConfig.getCreativesBySlot().snapshot());
             int articlesBetweenAds = SharethroughSerializer.getArticlesBetween(strSdkConfig.getSerializedSharethrough());
             int articlesBeforeFirstAd = SharethroughSerializer.getArticlesBefore(strSdkConfig.getSerializedSharethrough());
-            this.placement = createPlacement(articlesBetweenAds, articlesBeforeFirstAd);
+            this.placement = createPlacement(articlesBetweenAds, articlesBeforeFirstAd, "", "");
         }
     }
 
-    protected Placement createPlacement(int articlesBetweenAds, int articlesBeforeFirstAd) {
+    protected Placement createPlacement(int articlesBetweenAds, int articlesBeforeFirstAd, String promotedByText, String directSellPromotedByText) {
         Response.Placement responsePlacement = new Response.Placement();
         responsePlacement.articlesBetweenAds = articlesBetweenAds;
         responsePlacement.articlesBeforeFirstAd = articlesBeforeFirstAd;
         responsePlacement.status = "";
+        responsePlacement.promotedByText = promotedByText;
+        responsePlacement.directSellPromotedByText = directSellPromotedByText;
         return new Placement(responsePlacement);
     }
 
@@ -83,7 +85,7 @@ public class Sharethrough {
 
     protected MediationManager.MediationListener mediationListener = new MediationManager.MediationListener() {
         @Override
-        public void onAdLoaded(List<ICreative> creatives) {
+        public void onAdLoaded(List<ICreative> creatives, Placement p) {
             strSdkConfig.getAsapManager().setWaterfallComplete();
 
             for(ICreative creative : creatives) {
@@ -91,6 +93,7 @@ public class Sharethrough {
                 Logger.d("insert creative, creative cache size %d", strSdkConfig.getCreativeQueue().size());
                 fireNewAdsToShow();
             }
+            placement = p;
         }
 
         @Override

@@ -27,7 +27,7 @@ public class MediationManager {
          * Class extending STRMediationAdapter must call this method when it successfully
          * loads an ad
          */
-        void onAdLoaded(List<ICreative> creatives);
+        void onAdLoaded(List<ICreative> creatives, Placement placement);
 
         /**
          * Classes extending STRMediationAdapter must call this method when it fails

@@ -3,11 +3,15 @@ package com.sharethrough.sdk;
 public class Placement {
     private final int articlesBeforeFirstAd;
     private final int articlesBetweenAds;
+    private final String promotedByText;
+    private final String directSellPromotedByText;
     private final String status;
 
     public Placement(Response.Placement placement) {
         this.articlesBeforeFirstAd = placement.articlesBeforeFirstAd;
         this.articlesBetweenAds = placement.articlesBetweenAds;
+        this.promotedByText = placement.promotedByText;
+        this.directSellPromotedByText = placement.directSellPromotedByText;
         this.status = placement.status;
     }
 
@@ -17,6 +21,14 @@ public class Placement {
 
     public int getArticlesBetweenAds() {
         return articlesBetweenAds;
+    }
+
+    public String getPromotedByText() {
+        return promotedByText;
+    }
+
+    public String getDirectSellPromotedByText() {
+        return directSellPromotedByText;
     }
 
     public String getStatus() { return status; }

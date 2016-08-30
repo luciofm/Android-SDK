@@ -17,6 +17,10 @@ public class Response {
         public String status;
         @JsonProperty("allowInstantPlay")
         public Boolean allowInstantPlay;
+        @JsonProperty("promoted_by_text")
+        public String promotedByText;
+        @JsonProperty("direct_sell_promoted_by_text")
+        public String directSellPromotedByText;
     }
 
     @JsonProperty("creatives")
@@ -79,6 +83,8 @@ public class Response {
             public String dealId;
             @JsonProperty("force_click_to_play")
             public Boolean forceClickToPlay;
+            @JsonProperty("promoted_by_text")
+            public String promotedByText;
 
             public static class Beacon {
                 @JsonProperty("impression")

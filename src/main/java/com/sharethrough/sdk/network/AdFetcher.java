@@ -69,6 +69,10 @@ public class AdFetcher {
         placement.articlesBetweenAds = jsonPlacement.optInt("articlesBetweenAds", Integer.MAX_VALUE);
         placement.status = jsonPlacement.getString("status");
         placement.allowInstantPlay = jsonPlacement.optBoolean("allowInstantPlay", false);
+        JSONObject jsonPlacementAttributes = jsonPlacement.getJSONObject("placementAttributes");
+
+        placement.promotedByText = jsonPlacementAttributes.getString("promoted_by_text");
+        placement.directSellPromotedByText = jsonPlacementAttributes.getString("direct_sell_promoted_by_text");
         response.placement = placement;
 
         JSONArray creatives = jsonResponse.getJSONArray("creatives");
@@ -105,7 +109,8 @@ public class AdFetcher {
             creative.creative.creativeKey = jsonCreativeInner.getString("creative_key");
             creative.creative.campaignKey = jsonCreativeInner.getString("campaign_key");
             creative.creative.variantKey = jsonCreativeInner.getString("variant_key");
-
+            creative.creative.promotedByText = jsonCreativeInner.optString("promoted_by_text");
+            
             JSONObject beacons = jsonCreativeInner.getJSONObject("beacons");
             creative.creative.beacon = new Response.Creative.CreativeInner.Beacon();
             parseBeacons(placement, creative, beacons);

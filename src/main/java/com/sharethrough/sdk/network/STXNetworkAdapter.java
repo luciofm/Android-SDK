@@ -74,7 +74,7 @@ public class STXNetworkAdapter implements STRMediationAdapter {
         if(creatives.isEmpty()){
             mediationListener.onAdFailedToLoad();
         }else {
-            mediationListener.onAdLoaded(creatives);
+            mediationListener.onAdLoaded(creatives, new Placement(response.placement));
         }
         // To remove for asap v2
         mediationRequestId = "";
