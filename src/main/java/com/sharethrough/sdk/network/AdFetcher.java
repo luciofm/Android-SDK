@@ -31,12 +31,12 @@ public class AdFetcher {
         this.adFetcherListener = adFetcherListener;
     }
 
-    public void fetchAds(String adRequestUrl) {
+    public void fetchAds(String adRequestUrl, final boolean isDirectSell) {
         STRStringRequest stringRequest = new STRStringRequest(Request.Method.GET, adRequestUrl,
                 new com.android.volley.Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        handleResponse(response);
+                        handleResponse(response, isDirectSell);
                     }
                 }, new com.android.volley.Response.ErrorListener() {
             @Override
@@ -49,16 +49,16 @@ public class AdFetcher {
         requestQueue.add(stringRequest);
     }
 
-    protected void handleResponse(String response) {
+    protected void handleResponse(String response, boolean isDirectSell) {
         try {
-            adFetcherListener.onAdResponseLoaded(getResponse(response));
+            adFetcherListener.onAdResponseLoaded(getResponse(response, isDirectSell));
         } catch (JSONException e) {
             e.printStackTrace();
             adFetcherListener.onAdResponseFailed();
         }
     }
 
-    protected Response getResponse(String json) throws JSONException {
+    protected Response getResponse(String json, boolean isDirectSell) throws JSONException {
         JSONObject jsonResponse = new JSONObject(json);
         Response response = new Response();
 
@@ -109,8 +109,9 @@ public class AdFetcher {
             creative.creative.creativeKey = jsonCreativeInner.getString("creative_key");
             creative.creative.campaignKey = jsonCreativeInner.getString("campaign_key");
             creative.creative.variantKey = jsonCreativeInner.getString("variant_key");
-            creative.creative.promotedByText = jsonCreativeInner.optString("promoted_by_text");
-            
+
+            creative.creative.promotedByText = getPromotedByText(isDirectSell, jsonPlacementAttributes, jsonCreativeInner);
+
             JSONObject beacons = jsonCreativeInner.getJSONObject("beacons");
             creative.creative.beacon = new Response.Creative.CreativeInner.Beacon();
             parseBeacons(placement, creative, beacons);
@@ -118,6 +119,23 @@ public class AdFetcher {
             response.creatives.add(creative);
         }
         return response;
+    }
+
+    private String getPromotedByText(boolean isDirectSell, JSONObject jsonPlacementAttributes, JSONObject jsonCreativeAttributes) {
+        if (isDirectSell) {
+            if (!jsonCreativeAttributes.optString("promoted_by_text").isEmpty()) {
+                return jsonCreativeAttributes.optString("promoted_by_text");
+            } else if (!jsonPlacementAttributes.optString("direct_sell_promoted_by_text").isEmpty()) {
+                return jsonPlacementAttributes.optString("direct_sell_promoted_by_text");
+            }
+            return jsonPlacementAttributes.optString("promoted_by_text");
+        } else {
+            if(!jsonPlacementAttributes.optString("promoted_by_text").isEmpty()) {
+                return jsonPlacementAttributes.optString("promoted_by_text");
+            } else {
+                return "Ad By";
+            }
+        }
     }
 
     private void parseBeacons(Response.Placement placement, Response.Creative creative, JSONObject beacons) throws JSONException {

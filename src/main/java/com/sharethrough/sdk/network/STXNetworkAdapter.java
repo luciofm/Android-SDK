@@ -114,7 +114,9 @@ public class STXNetworkAdapter implements STRMediationAdapter {
 
         Logger.d("ad request sent pkey: %s", queryStringParams.get(0));
         Logger.d("ad request url: %s", adRequestUrl);
-        adFetcher.fetchAds(adRequestUrl);
+
+        boolean isDirectSell = adRequestUrl.contains("creative_key") || adRequestUrl.contains("campaign_key");
+        adFetcher.fetchAds(adRequestUrl, isDirectSell);
     }
 
     protected List<Pair<String, String>> generateQueryStringParams(ASAPManager.AdResponse asapResponse, ASAPManager.AdResponse.Network network) {

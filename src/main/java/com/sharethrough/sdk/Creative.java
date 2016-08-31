@@ -193,4 +193,8 @@ public class Creative implements ICreative {
     public String getOptOutUrl() {
         return responseCreative.creative.optOutUrl;
     }
+
+    public String getSlug() {
+        return responseCreative.creative.promotedByText;
+    }
 }

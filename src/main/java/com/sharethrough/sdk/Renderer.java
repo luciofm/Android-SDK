@@ -53,6 +53,11 @@ public class Renderer implements IRenderer {
 
                 adView.getAdvertiser().setText(creative.getAdvertiser());
 
+                String slug = creative.getSlug();
+                if(slug != null && !slug.isEmpty()) {
+                    adView.getSlug().setText(slug);
+                }
+
                 ImageView brandLogoView = adView.getBrandLogo();
                 if (brandLogoView != null ){
                     if(creative.getBrandLogoUrl() != null && !creative.getBrandLogoUrl().isEmpty()) {
