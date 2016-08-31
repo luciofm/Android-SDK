@@ -43,21 +43,21 @@ public class AdFetcherTest extends TestBase {
 
     @Test
     public void fetchAds_triggersAdRequest() throws Exception {
-        subject.fetchAds("url");
+        subject.fetchAds("url", false);
 
         verify(requestQueue).add((Request) anyObject());
     }
 
     @Test
     public void handleResponse_callBackWithAdResponseLoaded_whenJsonIsValid() throws Exception {
-        subject.handleResponse(SINGLE_LAYOUT_FIXTURE);
+        subject.handleResponse(SINGLE_LAYOUT_FIXTURE, false);
 
         verify(adfetcherlistener).onAdResponseLoaded((Response) anyObject());
     }
 
     @Test
     public void handleResponse_callBackWithAdResponseLoaded_whenJsonIsValidButNoAds() throws Exception {
-        subject.handleResponse(NO_CREATIVE_FIXTURE);
+        subject.handleResponse(NO_CREATIVE_FIXTURE, false);
 
         verify(adfetcherlistener).onAdResponseLoaded((Response) anyObject());
     }
@@ -65,35 +65,31 @@ public class AdFetcherTest extends TestBase {
     @Test
     public void handleResponse_callBackWithAdResponseFailed_whenJsonIsInvalid() throws Exception {
         String responseBody = "{234789wdfjkl ";
-        subject.handleResponse(responseBody);
+        subject.handleResponse(responseBody, false);
 
         verify(adfetcherlistener).onAdResponseFailed();
     }
 
     @Test
     public void getResponse_willNotParseBeacons_ifPlacementIsPreLive() throws Exception {
-        Response response = subject.getResponse(PRE_LIVE_PLACEMENT_FIXTURE);
-        assertThat(response.creatives.get(0).creative.beacon.impression).isEmpty();
-        assertThat(response.creatives.get(0).creative.beacon.visible).isEmpty();
-        assertThat(response.creatives.get(0).creative.beacon.play).isEmpty();
-        assertThat(response.creatives.get(0).creative.beacon.click).isEmpty();
-        assertThat(response.creatives.get(0).creative.beacon.silentPlay).isEmpty();
+        Response response = subject.getResponse(PRE_LIVE_PLACEMENT_FIXTURE, false);
+        assertThat(response.creatives.get(0).creative.beacons.impression).isEmpty();
+        assertThat(response.creatives.get(0).creative.beacons.visible).isEmpty();
+        assertThat(response.creatives.get(0).creative.beacons.play).isEmpty();
+        assertThat(response.creatives.get(0).creative.beacons.click).isEmpty();
+        assertThat(response.creatives.get(0).creative.beacons.silent_play).isEmpty();
     }
 
     @Test
     public void getResponse_willParseBeacons_ifPlacementIsLive() throws Exception {
-        Response response = subject.getResponse(SINGLE_LAYOUT_FIXTURE);
-        assertThat(response.creatives.get(0).creative.beacon.impression).isEmpty();
-        assertThat(response.creatives.get(0).creative.beacon.visible).isEmpty();
-        assertThat(response.creatives.get(0).creative.beacon.play.size()).isEqualTo(2);
-        assertThat(response.creatives.get(0).creative.beacon.click.size()).isEqualTo(2);
-        assertThat(response.creatives.get(0).creative.beacon.silentPlay.size()).isEqualTo(2);
-        assertThat(response.creatives.get(0).creative.optOutText.isEmpty());
-        assertThat(response.creatives.get(0).creative.optOutUrl.isEmpty());
-
-        assertThat(response.creatives.get(1).creative.optOutUrl).isEqualTo("http://www.example.com/opt-out");
-        assertThat(response.creatives.get(1).creative.optOutText).isEqualTo("don't click this link");
+        Response response = subject.getResponse(SINGLE_LAYOUT_FIXTURE, false);
+        assertThat(response.creatives.get(0).creative.beacons.impression).isEmpty();
+        assertThat(response.creatives.get(0).creative.beacons.visible).isEmpty();
+        assertThat(response.creatives.get(0).creative.beacons.play.size()).isEqualTo(2);
+        assertThat(response.creatives.get(0).creative.beacons.click.size()).isEqualTo(2);
+        assertThat(response.creatives.get(0).creative.beacons.silent_play.size()).isEqualTo(2);
     }
 
-
+    //todo test direct sell
 }
+

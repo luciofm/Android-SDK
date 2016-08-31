@@ -5,7 +5,11 @@
     "layout": "multiple",
     "status": "live",
     "articlesBeforeFirstAd": 2,
-    "articlesBetweenAds": 3
+    "articlesBetweenAds": 3,
+    "placementAttributes" : {
+      "direct_sell_promoted_by_text": "Promoted by",
+      "promoted_by_text": "Promoted by"
+    }
   },
   "creatives": [
     {

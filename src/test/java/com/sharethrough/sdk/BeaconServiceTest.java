@@ -88,22 +88,19 @@ public class BeaconServiceTest extends TestBase {
         responseCreative.creative = new Response.Creative.CreativeInner();
         responseCreative.adserverRequestId = "fake-adserver-request-id";
         responseCreative.auctionWinId = "fake-auction-win-id";
-        responseCreative.creative.variantKey = "variant key";
-        responseCreative.creative.creativeKey = "creative key";
-        responseCreative.creative.campaignKey= "campaign key";
-        responseCreative.creative.dealId= "";
-        responseCreative.signature = "signature";
-        responseCreative.priceType = "price type";
-        responseCreative.price = 1000;
+        responseCreative.creative.variant_key = "variant key";
+        responseCreative.creative.creative_key = "creative key";
+        responseCreative.creative.campaign_key= "campaign key";
+        responseCreative.creative.deal_id= "";
 
         Response.Creative.CreativeInner.Beacon beacon = new Response.Creative.CreativeInner.Beacon();
         beacon.click = new ArrayList<>();
         beacon.play = new ArrayList<>();
         beacon.visible = new ArrayList<>();
         beacon.impression = new ArrayList<>();
-        beacon.silentPlay = new ArrayList<>();
+        beacon.silent_play = new ArrayList<>();
 
-        responseCreative.creative.beacon = beacon;
+        responseCreative.creative.beacons = beacon;
 
         mediationRequestId = "fake-mrid"; // To remove for asap v2
         creative = new Creative(responseCreative, mediationRequestId);
@@ -151,10 +148,10 @@ public class BeaconServiceTest extends TestBase {
         responseCreativeWithDealId.creative = new Response.Creative.CreativeInner();
         responseCreativeWithDealId.adserverRequestId = "fake-adserver-request-id";
         responseCreativeWithDealId.auctionWinId = "fake-auction-win-id";
-        responseCreativeWithDealId.creative.variantKey = "variant key";
-        responseCreativeWithDealId.creative.creativeKey = "creative key";
-        responseCreativeWithDealId.creative.campaignKey= "campaign key";
-        responseCreativeWithDealId.creative.dealId = "fake_deal_id";
+        responseCreativeWithDealId.creative.variant_key = "variant key";
+        responseCreativeWithDealId.creative.creative_key = "creative key";
+        responseCreativeWithDealId.creative.campaign_key= "campaign key";
+        responseCreativeWithDealId.creative.deal_id = "fake_deal_id";
 
         creative = new Creative(responseCreativeWithDealId, mediationRequestId);
 
@@ -236,7 +233,7 @@ public class BeaconServiceTest extends TestBase {
         String[] initialUrls = {"//impressionEndOne?cacheBuster=[timestamp]", "//impressionEndTwo?cacheBuster=[timestamp]"};
 
         ArrayList<String> impressionEndoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
-        responseCreative.creative.beacon.impression = impressionEndoints;
+        responseCreative.creative.beacons.impression = impressionEndoints;
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
         subject.adReceived(RuntimeEnvironment.application, testCreative, feedPosition);
         assertThat(fakeRequestQueue.cache.size() == 3);
@@ -253,7 +250,7 @@ public class BeaconServiceTest extends TestBase {
     public void whenAdVisibleCalled_fireVisibleThirdPartyBeacons() throws Exception {
         String[] initialUrls = {"//visibleEndOne?cacheBuster=[timestamp]", "//visibleEndTwo?cacheBuster=[timestamp]"};
         ArrayList<String> visibleEndoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
-        responseCreative.creative.beacon.visible = visibleEndoints;
+        responseCreative.creative.beacons.visible = visibleEndoints;
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
 
         subject.adVisible(RendererTest.makeAdView(), testCreative, feedPosition);
@@ -275,8 +272,8 @@ public class BeaconServiceTest extends TestBase {
         ArrayList<String> clickEndoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
         ArrayList<String> playEndoints = new ArrayList<>(Arrays.asList(initialUrls[2], initialUrls[3]));
 
-        responseCreative.creative.beacon.click = clickEndoints;
-        responseCreative.creative.beacon.play = playEndoints;
+        responseCreative.creative.beacons.click = clickEndoints;
+        responseCreative.creative.beacons.play = playEndoints;
 
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
 
@@ -297,7 +294,7 @@ public class BeaconServiceTest extends TestBase {
         String[] initialUrls = {"//silentPlay/EndOne", "//silentPlay/End[Two]?cacheBuster=[timestamp]"};
 
         ArrayList<String> silentPlayEndpoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
-        responseCreative.creative.beacon.silentPlay = silentPlayEndpoints;
+        responseCreative.creative.beacons.silent_play = silentPlayEndpoints;
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
         subject.silentAutoPlayDuration(testCreative, seconds, feedPosition);
 
@@ -322,7 +319,7 @@ public class BeaconServiceTest extends TestBase {
         String[] initialUrls = {"//silentPlay/EndOne", "//silentPlay/End[Two]?cacheBuster=[timestamp]"};
 
         ArrayList<String> silentPlayEndpoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
-        responseCreative.creative.beacon.tenSecondSilentPlay = silentPlayEndpoints;
+        responseCreative.creative.beacons.ten_second_silent_play = silentPlayEndpoints;
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
         subject.silentAutoPlayDuration(testCreative, seconds, feedPosition);
 
@@ -346,7 +343,7 @@ public class BeaconServiceTest extends TestBase {
         int seconds = 15000;
         String[] initialUrls = {"//silentPlay/EndOne", "//silentPlay/End[Two]?cacheBuster=[timestamp]"};
         ArrayList<String> silentPlayEndpoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
-        responseCreative.creative.beacon.fifteenSecondSilentPlay = silentPlayEndpoints;
+        responseCreative.creative.beacons.fifteen_second_silent_play = silentPlayEndpoints;
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
         subject.silentAutoPlayDuration(testCreative, seconds, feedPosition);
 
@@ -370,7 +367,7 @@ public class BeaconServiceTest extends TestBase {
         int seconds = 30000;
         String[] initialUrls = {"//silentPlay/EndOne", "//silentPlay/End[Two]?cacheBuster=[timestamp]"};
         ArrayList<String> silentPlayEndpoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
-        responseCreative.creative.beacon.thirtySecondSilentPlay = silentPlayEndpoints;
+        responseCreative.creative.beacons.thirty_second_silent_play = silentPlayEndpoints;
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
         subject.silentAutoPlayDuration(testCreative, seconds, feedPosition);
 
@@ -393,7 +390,7 @@ public class BeaconServiceTest extends TestBase {
     public void whenSilentAutoplayDurationPlayedFor95Percent_fireCompletedThirdPartyBeacons() throws Exception {
         String[] initialUrls = {"//silentPlay/EndOne", "//silentPlay/End[Two]?cacheBuster=[timestamp]"};
         ArrayList<String> silentPlayEndpoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
-        responseCreative.creative.beacon.completedSilentPlay = silentPlayEndpoints;
+        responseCreative.creative.beacons.completed_silent_play = silentPlayEndpoints;
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
         subject.videoPlayed(RuntimeEnvironment.application, testCreative, 95, true, feedPosition);
 
@@ -408,11 +405,11 @@ public class BeaconServiceTest extends TestBase {
 
     @Test
     public void whenThirdPartyBeaconsIsEmpty_DoesNotFireThirdPartyBeacons() throws Exception{
-        responseCreative.creative.beacon.click = new ArrayList<>();
-        responseCreative.creative.beacon.play = new ArrayList<>();
-        responseCreative.creative.beacon.silentPlay = new ArrayList<>();
-        responseCreative.creative.beacon.impression = new ArrayList<>();
-        responseCreative.creative.beacon.visible = new ArrayList<>();
+        responseCreative.creative.beacons.click = new ArrayList<>();
+        responseCreative.creative.beacons.play = new ArrayList<>();
+        responseCreative.creative.beacons.silent_play = new ArrayList<>();
+        responseCreative.creative.beacons.impression = new ArrayList<>();
+        responseCreative.creative.beacons.visible = new ArrayList<>();
 
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
 
@@ -429,7 +426,7 @@ public class BeaconServiceTest extends TestBase {
     public void whenAThirdPartyBeaconIsInvalid_logsWithoutCrashing() throws Exception {
         String badUrl = "//%%%invalid%url%%%";
         List<String> clickEndoints = Arrays.asList(badUrl);
-        responseCreative.creative.beacon.click = clickEndoints;
+        responseCreative.creative.beacons.click = new ArrayList<>(clickEndoints);
         Creative testCreative = new Creative(responseCreative, mediationRequestId);
         subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition);
 

@@ -2,6 +2,7 @@ package com.sharethrough.sdk.network;
 
 import android.content.Context;
 import android.util.Pair;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.sharethrough.sdk.*;
 import com.sharethrough.sdk.mediation.ICreative;
@@ -70,7 +71,7 @@ public class STXNetworkAdapterTest extends TestBase {
     public void handleAdResponseLoaded_whenCreativesReturn_callOnAdsReady() throws Exception {
         Response response = convertJsonToResponse(SINGLE_LAYOUT_FIXTURE);
         subject.handleAdResponseLoaded(response);
-        verify(mockMediationListener).onAdLoaded((List<ICreative>) anyObject());
+        verify(mockMediationListener).onAdLoaded((List<ICreative>) anyObject(), (Placement) anyObject());
     }
 
     @Test
@@ -106,26 +107,8 @@ public class STXNetworkAdapterTest extends TestBase {
     }
 
     private Response convertJsonToResponse(String jsonPath) throws JSONException {
-        JSONObject jsonResponse = new JSONObject(jsonPath);
-        Response response = new Response();
-        JSONObject jsonPlacement = jsonResponse.getJSONObject("placement");
-        Response.Placement placement = new Response.Placement();
-        placement.allowInstantPlay = jsonPlacement.optBoolean("allowInstantPlay", false);
-        response.placement = placement;
-
-        JSONArray creatives = jsonResponse.getJSONArray("creatives");
-        response.creatives = new ArrayList<>(creatives.length());
-        for (int i = 0; i < creatives.length(); i++) {
-            JSONObject jsonCreative = creatives.getJSONObject(i);
-            Response.Creative creative = new Response.Creative();
-            JSONObject jsonCreativeInner = jsonCreative.getJSONObject("creative");
-            creative.creative = new Response.Creative.CreativeInner();
-            creative.creative.action = jsonCreativeInner.getString("action");
-            creative.creative.forceClickToPlay = jsonCreativeInner.optBoolean("force_click_to_play", false);
-            response.creatives.add(creative);
-        }
-
-        return response;
+        Gson gson = new Gson();
+        return gson.fromJson(jsonPath, Response.class);
     }
 
     @Test

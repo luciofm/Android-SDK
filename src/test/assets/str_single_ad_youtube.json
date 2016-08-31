@@ -3,7 +3,11 @@
   "placement": {
     "template": "<div/>",
     "layout": "single",
-    "status": "live"
+    "status": "live",
+    "placementAttributes" : {
+      "direct_sell_promoted_by_text": "Promoted by",
+      "promoted_by_text": "Promoted by"
+    }
   },
   "creatives": [
     {

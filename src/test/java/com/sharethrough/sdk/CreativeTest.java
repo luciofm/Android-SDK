@@ -20,7 +20,7 @@ public class CreativeTest extends TestBase {
     public void setUp() throws Exception {
         responseCreative = new Response.Creative();
         responseCreative.creative = new Response.Creative.CreativeInner();
-        responseCreative.creative.beacon = new Response.Creative.CreativeInner.Beacon();
+        responseCreative.creative.beacons = new Response.Creative.CreativeInner.Beacon();
         subject = new Creative(responseCreative, mediationRequestId);
     }
 
@@ -71,7 +71,7 @@ public class CreativeTest extends TestBase {
         ArrayList<String> playBeacons = new ArrayList<>();
         playBeacons.add("BeaconOne");
         playBeacons.add("BeaconTwo");
-        responseCreative.creative.beacon.play = playBeacons;
+        responseCreative.creative.beacons.play = playBeacons;
 
         assertThat(subject.getPlayBeacons()).isEqualTo(playBeacons);
     }
@@ -81,7 +81,7 @@ public class CreativeTest extends TestBase {
         ArrayList<String> visibleBeacons = new ArrayList<>();
         visibleBeacons.add("BeaconOne");
         visibleBeacons.add("BeaconTwo");
-        responseCreative.creative.beacon.visible = visibleBeacons;
+        responseCreative.creative.beacons.visible = visibleBeacons;
 
         assertThat(subject.getVisibleBeacons()).isEqualTo(visibleBeacons);
     }
@@ -91,15 +91,15 @@ public class CreativeTest extends TestBase {
         ArrayList<String> clickBeacons = new ArrayList<>();
         clickBeacons.add("BeaconOne");
         clickBeacons.add("BeaconTwo");
-        responseCreative.creative.beacon.click = clickBeacons;
+        responseCreative.creative.beacons.click = clickBeacons;
 
         assertThat(subject.getClickBeacons()).isEqualTo(clickBeacons);
     }
 
     @Test
     public void getCustomEngagementUrl_returnsCustomEngagmentURl() {
-        responseCreative.creative.customEngagementLabel = "label";
-        responseCreative.creative.customEngagementUrl = "custom/url";
+        responseCreative.creative.custom_engagement_label = "label";
+        responseCreative.creative.custom_engagement_url = "custom/url";
 
         assertThat(subject.getCustomEngagementUrl()).isEqualTo("http://custom/url");
         assertThat(subject.getCustomEngagementLabel()).isEqualTo("label");
@@ -107,13 +107,13 @@ public class CreativeTest extends TestBase {
 
     @Test
     public void getRelativeMediaUrl_returnsAbsoluteMediaUrl() {
-        responseCreative.creative.mediaUrl = "//media.url/";
+        responseCreative.creative.media_url = "//media.url/";
         assertThat(subject.getMediaUrl()).isEqualToIgnoringCase("http://media.url");
     }
 
     @Test
     public void getAbsoluteMediaUrl_returnsAbsoluteMediaUrl() {
-        responseCreative.creative.mediaUrl = "http://media.url/";
+        responseCreative.creative.media_url = "http://media.url/";
         assertThat(subject.getMediaUrl()).isEqualToIgnoringCase("http://media.url");
     }
 }

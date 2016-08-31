@@ -98,7 +98,7 @@ public class SharethroughTest extends TestBase {
 
     @Test
     public void createPlacement_createsPlacementWithCorrectParams() throws Exception {
-        Placement placement = subject.createPlacement(1, 2);
+        Placement placement = subject.createPlacement(1, 2, "", "");
         assertThat(placement.getArticlesBeforeFirstAd()).isEqualTo(2);
         assertThat(placement.getArticlesBetweenAds()).isEqualTo(1);
         assertThat(placement.getStatus()).isEqualTo("");
@@ -122,7 +122,7 @@ public class SharethroughTest extends TestBase {
     public void mediationListener_onAdLoaded_addCreativeToQueue_notifiesOnStatusChangeListenerOnMainThread() throws Exception {
         List<ICreative> creatives = new ArrayList<>();
         creatives.add(creative);
-        subject.mediationListener.onAdLoaded(creatives);
+        subject.mediationListener.onAdLoaded(creatives, placement);
         verify(creativeQueue, times(1)).add(creative);
         verify(onStatusChangeListener).newAdsToShow();
     }
@@ -188,9 +188,9 @@ public class SharethroughTest extends TestBase {
     public void whenCreativeIsPrefetched_whenNewAdsToShowHasAlreadyBeenCalled_doesNotCallItAgain() throws Exception {
         List<ICreative> creatives = new ArrayList<>();
         creatives.add(creative);
-        subject.mediationListener.onAdLoaded(creatives);
+        subject.mediationListener.onAdLoaded(creatives, placement);
         verify(onStatusChangeListener).newAdsToShow();
-        subject.mediationListener.onAdLoaded(creatives);
+        subject.mediationListener.onAdLoaded(creatives, placement);
         verifyNoMoreInteractions(onStatusChangeListener);
     }
 
@@ -205,7 +205,7 @@ public class SharethroughTest extends TestBase {
         // cause newAdsToShow
         List<ICreative> creatives = new ArrayList<>();
         creatives.add(creative);
-        subject.mediationListener.onAdLoaded(creatives);
+        subject.mediationListener.onAdLoaded(creatives, placement);
         verify(onStatusChangeListener).newAdsToShow();
         reset(onStatusChangeListener);
 
@@ -215,7 +215,7 @@ public class SharethroughTest extends TestBase {
         reset(onStatusChangeListener);
 
         // test that newAdsToShow will be called again
-        subject.mediationListener.onAdLoaded(creatives);
+        subject.mediationListener.onAdLoaded(creatives, placement);
         //creativeHandler.getValue().apply(creative);
         verify(onStatusChangeListener).newAdsToShow();
         reset(onStatusChangeListener);

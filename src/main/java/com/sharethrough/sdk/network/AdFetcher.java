@@ -4,6 +4,7 @@ import android.content.Context;
 import com.android.volley.*;
 import com.android.volley.toolbox.*;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.sharethrough.sdk.*;
 import com.sharethrough.sdk.Response;
 import org.json.JSONException;
@@ -47,13 +48,13 @@ public class AdFetcher {
     protected void handleResponse(String response, boolean isDirectSell) {
         try {
             adFetcherListener.onAdResponseLoaded(getResponse(response, isDirectSell));
-        } catch (JSONException e) {
+        } catch (JsonSyntaxException e) {
             e.printStackTrace();
             adFetcherListener.onAdResponseFailed();
         }
     }
 
-    protected Response getResponse(String stxResponse, boolean isDirectSell) throws JSONException {
+    protected Response getResponse(String stxResponse, boolean isDirectSell) throws JsonSyntaxException {
         Gson gson = new Gson();
         Response response = gson.fromJson(stxResponse, Response.class);
         setAdRequestIdForEachCreative(response);
