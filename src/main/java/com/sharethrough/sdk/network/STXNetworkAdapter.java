@@ -32,7 +32,6 @@ public class STXNetworkAdapter implements STRMediationAdapter {
         this.mediationListener = mediationListener;
         this.network = network;
 
-        //todo: make android id accessible through singleton
         fetchAds(sharethroughEndPoint, generateQueryStringParams(asapResponse, network), AdvertisingIdProvider.getAdvertisingId(), asapResponse.mrid);
     }
 

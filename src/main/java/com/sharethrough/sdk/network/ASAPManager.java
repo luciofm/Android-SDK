@@ -28,7 +28,6 @@ public class ASAPManager {
     private String placementKey;
     private RequestQueue requestQueue;
 
-    //todo: make isRunning last for entire waterfall
     private boolean isRunning = false;
     private String asapEndpoint;
 
