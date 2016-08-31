@@ -4,6 +4,7 @@ import android.net.Uri;
 import com.google.gson.Gson;
 import com.sharethrough.sdk.mediation.ICreative;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Creative implements ICreative {
@@ -50,36 +51,6 @@ public class Creative implements ICreative {
         return className;
     }
 
-    public static String serialize(ICreative creative) {
-        Gson gson = new Gson();
-        return gson.toJson(creative);
-    }
-
-    public static ICreative deserialize(String serializedCreative) {
-        Gson gson = new Gson();
-        return ((Creative)gson.fromJson(serializedCreative, Creative.class));
-    }
-
-    public String getTitle() {
-        return returnEmptyIfNull(responseCreative.creative.title);
-    }
-
-    public String getAdvertiser() {
-        return returnEmptyIfNull(responseCreative.creative.advertiser);
-    }
-
-    public String getDescription() {
-        return returnEmptyIfNull(responseCreative.creative.description);
-    }
-
-    public String getThumbnailUrl() {
-        return returnEmptyIfNull(convertToAbsoluteUrl(responseCreative.creative.thumbnail_url));
-    }
-
-    public String getBrandLogoUrl() {
-        return returnEmptyIfNull(convertToAbsoluteUrl(responseCreative.creative.brand_logo_url));
-    }
-
     public CreativeType getType() {
         switch (responseCreative.creative.action) {
             case "video":
@@ -100,69 +71,111 @@ public class Creative implements ICreative {
         }
     }
 
+    public static String serialize(ICreative creative) {
+        Gson gson = new Gson();
+        return gson.toJson(creative);
+    }
+
+    public static ICreative deserialize(String serializedCreative) {
+        Gson gson = new Gson();
+        return ((Creative)gson.fromJson(serializedCreative, Creative.class));
+    }
+
+    public String getTitle() {
+        return returnEmptyStringIfNull(responseCreative.creative.title);
+    }
+
+    public String getAdvertiser() {
+        return returnEmptyStringIfNull(responseCreative.creative.advertiser);
+    }
+
+    public String getDescription() {
+        return returnEmptyStringIfNull(responseCreative.creative.description);
+    }
+
+    public String getThumbnailUrl() {
+        return returnEmptyStringIfNull(convertToAbsoluteUrl(responseCreative.creative.thumbnail_url));
+    }
+
+    public String getBrandLogoUrl() {
+        return returnEmptyStringIfNull(convertToAbsoluteUrl(responseCreative.creative.brand_logo_url));
+    }
+
     public String getAdserverRequestId() {
-        return returnEmptyIfNull(responseCreative.adserverRequestId);
+        return returnEmptyStringIfNull(responseCreative.adserverRequestId);
     }
 
     public String getMediationRequestId() {
-        return returnEmptyIfNull(responseCreative.mediationRequestId);
+        return returnEmptyStringIfNull(responseCreative.mediationRequestId);
     }
 
     public String getAuctionWinId() {
-        return returnEmptyIfNull(responseCreative.auctionWinId);
+        return returnEmptyStringIfNull(responseCreative.auctionWinId);
     }
 
     public String getShareUrl() {
-        return returnEmptyIfNull(convertToAbsoluteUrl(responseCreative.creative.share_url));
+        return returnEmptyStringIfNull(convertToAbsoluteUrl(responseCreative.creative.share_url));
     }
 
     public String getMediaUrl() {
-        return returnEmptyIfNull(convertToAbsoluteUrl(responseCreative.creative.media_url));
+        return returnEmptyStringIfNull(convertToAbsoluteUrl(responseCreative.creative.media_url));
     }
 
     public String getVariantKey() {
-        return responseCreative.creative.variant_key;
+        return returnEmptyStringIfNull(responseCreative.creative.variant_key);
     }
 
     public String getCreativeKey() {
-        return returnEmptyIfNull(responseCreative.creative.creative_key);
+        return returnEmptyStringIfNull(responseCreative.creative.creative_key);
     }
 
     public String getCampaignKey() {
-        return returnEmptyIfNull(responseCreative.creative.campaign_key);
+        return returnEmptyStringIfNull(responseCreative.creative.campaign_key);
     }
 
     public String getCustomEngagementUrl() {
-        return returnEmptyIfNull(convertToAbsoluteUrl(responseCreative.creative.custom_engagement_url));
+        return returnEmptyStringIfNull(convertToAbsoluteUrl(responseCreative.creative.custom_engagement_url));
     }
 
     public String getCustomEngagementLabel() {
-        return responseCreative.creative.custom_engagement_label;
+        return returnEmptyStringIfNull(responseCreative.creative.custom_engagement_label);
     }
 
     public List<String> getClickBeacons() {
-        return responseCreative.creative.beacons.click;
+        return returnEmptyListIfNull(responseCreative.creative.beacons.click);
     }
 
     public List<String> getPlayBeacons() {
-        return responseCreative.creative.beacons.play;
+        return returnEmptyListIfNull(responseCreative.creative.beacons.play);
     }
 
     public List<String> getVisibleBeacons() {
-        return responseCreative.creative.beacons.visible;
+        return returnEmptyListIfNull(responseCreative.creative.beacons.visible);
     }
 
-    public List<String> getImpressionBeacons() { return responseCreative.creative.beacons.impression; }
+    public List<String> getImpressionBeacons() {
+        return returnEmptyListIfNull(responseCreative.creative.beacons.impression);
+    }
 
-    public List<String> getSilentPlayBeacons() { return responseCreative.creative.beacons.silent_play; }
+    public List<String> getSilentPlayBeacons() {
+        return returnEmptyListIfNull(responseCreative.creative.beacons.silent_play);
+    }
 
-    public List<String> getTenSecondSilentPlayBeacons() { return responseCreative.creative.beacons.ten_second_silent_play; }
+    public List<String> getTenSecondSilentPlayBeacons() {
+        return returnEmptyListIfNull(responseCreative.creative.beacons.ten_second_silent_play);
+    }
 
-    public List<String> getFifteenSecondSilentPlayBeacons() { return responseCreative.creative.beacons.fifteen_second_silent_play; }
+    public List<String> getFifteenSecondSilentPlayBeacons() {
+        return returnEmptyListIfNull(responseCreative.creative.beacons.fifteen_second_silent_play);
+    }
 
-    public List<String> getThirtySecondSilentPlayBeacons() { return responseCreative.creative.beacons.thirty_second_silent_play; }
+    public List<String> getThirtySecondSilentPlayBeacons() {
+        return returnEmptyListIfNull(responseCreative.creative.beacons.thirty_second_silent_play);
+    }
 
-    public List<String> getCompletedSilentPlayBeacons() { return responseCreative.creative.beacons.completed_silent_play; }
+    public List<String> getCompletedSilentPlayBeacons() {
+        return returnEmptyListIfNull(responseCreative.creative.beacons.completed_silent_play);
+    }
 
     public boolean wasClicked(){
         return wasClicked;
@@ -170,6 +183,22 @@ public class Creative implements ICreative {
 
     public void setClicked() {
         wasClicked = true;
+    }
+
+    public String getOptOutText() {
+        return "";
+    }
+
+    public String getOptOutUrl() {
+        return "";
+    }
+
+    public String getDealId(){
+        return returnEmptyStringIfNull(responseCreative.creative.deal_id);
+    }
+
+    public String getSlug() {
+        return returnEmptyStringIfNull(responseCreative.creative.custom_set_promoted_by_text);
     }
 
     public static String convertToAbsoluteUrl(String url) {
@@ -182,27 +211,19 @@ public class Creative implements ICreative {
         }
     }
 
-    public String getOptOutText() {
-        return "";
-    }
-
-    public String getOptOutUrl() {
-        return "";
-    }
-
-    public String getDealId(){
-        return returnEmptyIfNull(responseCreative.creative.deal_id);
-    }
-
-    public String getSlug() {
-        return returnEmptyIfNull(responseCreative.creative.custom_set_promoted_by_text);
-    }
-
-    private String returnEmptyIfNull(String value) {
+    private String returnEmptyStringIfNull(String value) {
         if (value == null) {
             return "";
         } else {
             return value;
+        }
+    }
+
+    private List<String> returnEmptyListIfNull(List<String> list) {
+        if (list == null) {
+            return new ArrayList<>();
+        } else {
+            return list;
         }
     }
 }

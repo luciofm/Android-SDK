@@ -73,11 +73,11 @@ public class AdFetcherTest extends TestBase {
     @Test
     public void getResponse_willNotParseBeacons_ifPlacementIsPreLive() throws Exception {
         Response response = subject.getResponse(PRE_LIVE_PLACEMENT_FIXTURE, false);
-        assertThat(response.creatives.get(0).creative.beacons.impression).isEmpty();
-        assertThat(response.creatives.get(0).creative.beacons.visible).isEmpty();
-        assertThat(response.creatives.get(0).creative.beacons.play).isEmpty();
-        assertThat(response.creatives.get(0).creative.beacons.click).isEmpty();
-        assertThat(response.creatives.get(0).creative.beacons.silent_play).isEmpty();
+        assertThat(response.creatives.get(0).creative.beacons.impression).isNull();
+        assertThat(response.creatives.get(0).creative.beacons.visible).isNull();
+        assertThat(response.creatives.get(0).creative.beacons.play).isNull();
+        assertThat(response.creatives.get(0).creative.beacons.click).isNull();
+        assertThat(response.creatives.get(0).creative.beacons.silent_play).isNull();
     }
 
     @Test

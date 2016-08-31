@@ -57,10 +57,19 @@ public class AdFetcher {
     protected Response getResponse(String stxResponse, boolean isDirectSell) throws JsonSyntaxException {
         Gson gson = new Gson();
         Response response = gson.fromJson(stxResponse, Response.class);
+        
         setAdRequestIdForEachCreative(response);
         setPromotedByTextForEachCreative(isDirectSell, response);
-        //todo don't fire third party beacons if pre-live
+        removeThirdPartyBeaconsIfPreLive(response);
         return response;
+    }
+
+    protected void removeThirdPartyBeaconsIfPreLive(Response response) {
+        if (response.placement.status.equals("pre-live")) {
+            for (Response.Creative creative : response.creatives) {
+                creative.creative.beacons = new Response.Creative.CreativeInner.Beacon();
+            }
+        }
     }
 
     protected void setAdRequestIdForEachCreative(Response response) {
