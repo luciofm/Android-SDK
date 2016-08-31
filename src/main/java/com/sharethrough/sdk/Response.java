@@ -1,110 +1,63 @@
 package com.sharethrough.sdk;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class Response {
-    @JsonProperty("placement")
     public Placement placement;
+    public ArrayList<Creative> creatives;
+    public String adserverRequestId;
 
     public static class Placement {
-        @JsonProperty("layout")
-        public String layout;
-        @JsonProperty("articlesBeforeFirstAd")
         public int articlesBeforeFirstAd;
-        @JsonProperty("articlesBetweenAds")
         public int articlesBetweenAds;
-        @JsonProperty("status")
         public String status;
-        @JsonProperty("allowInstantPlay")
         public Boolean allowInstantPlay;
-        @JsonProperty("promoted_by_text")
-        public String promotedByText;
-        @JsonProperty("direct_sell_promoted_by_text")
-        public String directSellPromotedByText;
+        public PlacementAttributes placementAttributes;
+
+        public static class PlacementAttributes {
+            public String promotedByText;
+            public String directSellPromotedByText;
+        }
     }
 
-    @JsonProperty("creatives")
-    public List<Creative> creatives;
-
     public static class Creative {
-        @JsonProperty("adserverRequestId")
-        public String adserverRequestId;
-        @JsonProperty("mediationRequestId")
-        public String mediationRequestId;
+        public String adserverRequestId; /** not in actual stxMediation response */
+        public String mediationRequestId; /** not in actual stxMediation response */
 
-        @JsonProperty("auctionWinId")
         public String auctionWinId;
-        @JsonProperty("price")
-        public Integer price;
-        @JsonProperty("signature")
-        public String signature;
-
-        @JsonProperty("creative")
+        public int version;
         public CreativeInner creative;
 
-        @JsonProperty("priceType")
-        public String priceType;
-        @JsonProperty("version")
-        public int version;
-
         public static class CreativeInner {
-            @JsonProperty("opt_out_text")
-            public String optOutText;
-            @JsonProperty("creative_key")
-            public String creativeKey;
-            @JsonProperty("campaign_key")
-            public String campaignKey;
-            @JsonProperty("description")
+            public String creative_key;
+            public String campaign_key;
             public String description;
-            @JsonProperty("opt_out_url")
-            public String optOutUrl;
-            @JsonProperty("media_url")
-            public String mediaUrl;
-            @JsonProperty("share_url")
-            public String brandLogoUrl;
-            @JsonProperty("brand_logo_url")
-            public String shareUrl;
-            @JsonProperty("variant_key")
-            public String variantKey;
-            @JsonProperty("advertiser")
+            public String media_url;
+            public String brand_logo_url;
+            public String share_url;
+            public String variant_key;
             public String advertiser;
-            @JsonProperty("beacons")
-            public Beacon beacon;
-            @JsonProperty("thumbnail_url")
-            public String thumbnailUrl;
-            @JsonProperty("title")
+            public String thumbnail_url;
             public String title;
-            @JsonProperty("action")
             public String action;
-            public String customEngagementUrl;
-            @JsonProperty("custom_engagement_label")
-            public String customEngagementLabel;
-            @JsonProperty("deal_id")
-            public String dealId;
-            @JsonProperty("force_click_to_play")
-            public Boolean forceClickToPlay;
-            @JsonProperty("promoted_by_text")
-            public String promotedByText;
+            public String custom_engagement_url;
+            public String custom_engagement_label;
+            public String deal_id;
+            public Boolean force_click_to_play;
+            public String promoted_by_text;
+            public String custom_set_promoted_by_text; /** not in actual stxMediation response */
 
+            public Beacon beacons;
             public static class Beacon {
-                @JsonProperty("impression")
-                public List<String> impression;
-                @JsonProperty("visible")
-                public List<String> visible;
-                @JsonProperty("click")
-                public List<String> click;
-                @JsonProperty("play")
-                public List<String> play;
-                @JsonProperty("silent_play")
-                public List<String> silentPlay;
-                @JsonProperty("ten_second_silent_play")
-                public List<String> tenSecondSilentPlay;
-                @JsonProperty("fifteen_second_silent_play")
-                public List<String> fifteenSecondSilentPlay;
-                @JsonProperty("thirty_second_silent_play")
-                public List<String> thirtySecondSilentPlay;
-                @JsonProperty("completed_silent_play")
-                public List<String> completedSilentPlay;
+                public ArrayList<String> impression;
+                public ArrayList<String> visible;
+                public ArrayList<String> click;
+                public ArrayList<String> play;
+                public ArrayList<String> silent_play;
+                public ArrayList<String> ten_second_silent_play;
+                public ArrayList<String> fifteen_second_silent_play;
+                public ArrayList<String> thirty_second_silent_play;
+                public ArrayList<String> completed_silent_play;
             }
         }
     }

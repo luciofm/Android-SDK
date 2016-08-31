@@ -61,23 +61,23 @@ public class Creative implements ICreative {
     }
 
     public String getTitle() {
-        return responseCreative.creative.title;
+        return returnEmptyIfNull(responseCreative.creative.title);
     }
 
     public String getAdvertiser() {
-        return responseCreative.creative.advertiser;
+        return returnEmptyIfNull(responseCreative.creative.advertiser);
     }
 
     public String getDescription() {
-        return responseCreative.creative.description;
+        return returnEmptyIfNull(responseCreative.creative.description);
     }
 
     public String getThumbnailUrl() {
-        return convertToAbsoluteUrl(responseCreative.creative.thumbnailUrl);
+        return returnEmptyIfNull(convertToAbsoluteUrl(responseCreative.creative.thumbnail_url));
     }
 
     public String getBrandLogoUrl() {
-        return convertToAbsoluteUrl(responseCreative.creative.brandLogoUrl);
+        return returnEmptyIfNull(convertToAbsoluteUrl(responseCreative.creative.brand_logo_url));
     }
 
     public CreativeType getType() {
@@ -101,68 +101,68 @@ public class Creative implements ICreative {
     }
 
     public String getAdserverRequestId() {
-        return responseCreative.adserverRequestId;
+        return returnEmptyIfNull(responseCreative.adserverRequestId);
     }
 
     public String getMediationRequestId() {
-        return responseCreative.mediationRequestId;
+        return returnEmptyIfNull(responseCreative.mediationRequestId);
     }
 
     public String getAuctionWinId() {
-        return responseCreative.auctionWinId;
+        return returnEmptyIfNull(responseCreative.auctionWinId);
     }
 
     public String getShareUrl() {
-        return convertToAbsoluteUrl(responseCreative.creative.shareUrl);
+        return returnEmptyIfNull(convertToAbsoluteUrl(responseCreative.creative.share_url));
     }
 
     public String getMediaUrl() {
-        return convertToAbsoluteUrl(responseCreative.creative.mediaUrl);
+        return returnEmptyIfNull(convertToAbsoluteUrl(responseCreative.creative.media_url));
     }
 
     public String getVariantKey() {
-        return responseCreative.creative.variantKey;
+        return responseCreative.creative.variant_key;
     }
 
     public String getCreativeKey() {
-        return responseCreative.creative.creativeKey;
+        return returnEmptyIfNull(responseCreative.creative.creative_key);
     }
 
     public String getCampaignKey() {
-        return responseCreative.creative.campaignKey;
+        return returnEmptyIfNull(responseCreative.creative.campaign_key);
     }
 
     public String getCustomEngagementUrl() {
-        return convertToAbsoluteUrl(responseCreative.creative.customEngagementUrl);
+        return returnEmptyIfNull(convertToAbsoluteUrl(responseCreative.creative.custom_engagement_url));
     }
 
     public String getCustomEngagementLabel() {
-        return responseCreative.creative.customEngagementLabel;
+        return responseCreative.creative.custom_engagement_label;
     }
 
     public List<String> getClickBeacons() {
-        return responseCreative.creative.beacon.click;
+        return responseCreative.creative.beacons.click;
     }
 
     public List<String> getPlayBeacons() {
-        return responseCreative.creative.beacon.play;
+        return responseCreative.creative.beacons.play;
     }
 
     public List<String> getVisibleBeacons() {
-        return responseCreative.creative.beacon.visible;
+        return responseCreative.creative.beacons.visible;
     }
 
-    public List<String> getImpressionBeacons() { return responseCreative.creative.beacon.impression; }
+    public List<String> getImpressionBeacons() { return responseCreative.creative.beacons.impression; }
 
-    public List<String> getSilentPlayBeacons() { return responseCreative.creative.beacon.silentPlay; }
+    public List<String> getSilentPlayBeacons() { return responseCreative.creative.beacons.silent_play; }
 
-    public List<String> getTenSecondSilentPlayBeacons() { return responseCreative.creative.beacon.tenSecondSilentPlay; }
+    public List<String> getTenSecondSilentPlayBeacons() { return responseCreative.creative.beacons.ten_second_silent_play; }
 
-    public List<String> getFifteenSecondSilentPlayBeacons() { return responseCreative.creative.beacon.fifteenSecondSilentPlay; }
+    public List<String> getFifteenSecondSilentPlayBeacons() { return responseCreative.creative.beacons.fifteen_second_silent_play; }
 
-    public List<String> getThirtySecondSilentPlayBeacons() { return responseCreative.creative.beacon.thirtySecondSilentPlay; }
+    public List<String> getThirtySecondSilentPlayBeacons() { return responseCreative.creative.beacons.thirty_second_silent_play; }
 
-    public List<String> getCompletedSilentPlayBeacons() { return responseCreative.creative.beacon.completedSilentPlay; }
+    public List<String> getCompletedSilentPlayBeacons() { return responseCreative.creative.beacons.completed_silent_play; }
 
     public boolean wasClicked(){
         return wasClicked;
@@ -182,19 +182,27 @@ public class Creative implements ICreative {
         }
     }
 
-    public String getDealId(){
-        return responseCreative.creative.dealId;
-    }
-
     public String getOptOutText() {
-        return responseCreative.creative.optOutText;
+        return "";
     }
 
     public String getOptOutUrl() {
-        return responseCreative.creative.optOutUrl;
+        return "";
+    }
+
+    public String getDealId(){
+        return returnEmptyIfNull(responseCreative.creative.deal_id);
     }
 
     public String getSlug() {
-        return responseCreative.creative.promotedByText;
+        return returnEmptyIfNull(responseCreative.creative.custom_set_promoted_by_text);
+    }
+
+    private String returnEmptyIfNull(String value) {
+        if (value == null) {
+            return "";
+        } else {
+            return value;
+        }
     }
 }

@@ -56,11 +56,12 @@ public class Sharethrough {
 
     protected Placement createPlacement(int articlesBetweenAds, int articlesBeforeFirstAd, String promotedByText, String directSellPromotedByText) {
         Response.Placement responsePlacement = new Response.Placement();
+        responsePlacement.placementAttributes = new Response.Placement.PlacementAttributes();
         responsePlacement.articlesBetweenAds = articlesBetweenAds;
         responsePlacement.articlesBeforeFirstAd = articlesBeforeFirstAd;
         responsePlacement.status = "";
-        responsePlacement.promotedByText = promotedByText;
-        responsePlacement.directSellPromotedByText = directSellPromotedByText;
+        responsePlacement.placementAttributes.promotedByText = promotedByText;
+        responsePlacement.placementAttributes.directSellPromotedByText = directSellPromotedByText;
         return new Placement(responsePlacement);
     }
 

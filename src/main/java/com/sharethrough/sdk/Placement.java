@@ -10,8 +10,8 @@ public class Placement {
     public Placement(Response.Placement placement) {
         this.articlesBeforeFirstAd = placement.articlesBeforeFirstAd;
         this.articlesBetweenAds = placement.articlesBetweenAds;
-        this.promotedByText = placement.promotedByText;
-        this.directSellPromotedByText = placement.directSellPromotedByText;
+        this.promotedByText = placement.placementAttributes.promotedByText;
+        this.directSellPromotedByText = placement.placementAttributes.directSellPromotedByText;
         this.status = placement.status;
     }
 
