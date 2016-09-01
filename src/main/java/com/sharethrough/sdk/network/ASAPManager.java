@@ -7,6 +7,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
+import com.sharethrough.sdk.ContextInfo;
 import com.sharethrough.sdk.Logger;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -63,6 +64,8 @@ public class ASAPManager {
         try {
             StringBuilder builder = new StringBuilder();
             builder.append(ASAP_ENDPOINT_PREFIX).append("?pkey=").append(placementKey);
+            builder.append("&pubAppName=").append(ContextInfo.getAppPackageName());
+            builder.append("&pubAppVersion=").append(ContextInfo.getAppVersionName());
             for (Map.Entry<String, String> entry : customKeyValues.entrySet()) {
                 builder.append("&customKeys" + "%5B" + URLEncoder.encode(entry.getKey(), "UTF-8") + "%5D" + "=" + URLEncoder.encode(entry.getValue(), "UTF-8"));
             }

@@ -1,6 +1,7 @@
 package com.sharethrough.sdk.network;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.sharethrough.sdk.ContextInfo;
 import com.sharethrough.sdk.TestBase;
 import junit.framework.Assert;
 import org.apache.http.NameValuePair;
@@ -8,12 +9,12 @@ import org.apache.http.message.BasicNameValuePair;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.robolectric.RuntimeEnvironment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.*;
 /**
@@ -43,10 +44,9 @@ public class ASAPManagerTest extends TestBase  {
         keyValues.put("key1", "value1");
         keyValues.put("key2", "value2");
 
-        String expectedResult = ASAPManager.ASAP_ENDPOINT_PREFIX + "?pkey=" + pkey
-                + "&customKeys%5Bkey1%5D=value1&customKeys%5Bkey2%5D=value2";
-        Assert.assertTrue(subject.generateEndpointWithCustomKeyValues(keyValues).contains("&customKeys%5Bkey1%5D=value1"));
-        Assert.assertTrue(subject.generateEndpointWithCustomKeyValues(keyValues).contains("&customKeys%5Bkey2%5D=value2"));
+        ContextInfo ci = new ContextInfo(RuntimeEnvironment.application);
+        String expectedResult = "http://asap.sharethrough.com/v1?pkey=fakePkey&pubAppName=com.sharethrough.android.sdk&pubAppVersion=v4.1.0&customKeys%5Bkey1%5D=value1&customKeys%5Bkey2%5D=value2";
+        Assert.assertTrue(subject.generateEndpointWithCustomKeyValues(keyValues).equals(expectedResult));
     }
 
     @Test
