@@ -3,12 +3,15 @@ package com.sharethrough.sdk.network;
 import android.content.Context;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.google.gson.Gson;
 import com.sharethrough.sdk.*;
 import com.sharethrough.test.Fixtures;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.robolectric.RuntimeEnvironment;
+
+import java.util.ArrayList;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -20,6 +23,7 @@ public class AdFetcherTest extends TestBase {
     private static final String MULTIPLE_CREATIVE_FIXTURE = Fixtures.getFile("assets/str_multiple_ad_youtube.json");
 
     private AdFetcherStub subject;
+    private Response emptyResponse;
     @Mock private AdFetcher.AdFetcherListener adfetcherlistener;
     @Mock private RequestQueue requestQueue;
 
@@ -36,9 +40,20 @@ public class AdFetcherTest extends TestBase {
     @Before
     public void setUp() throws Exception {
         Logger.enabled = true;
+        setUpEmptyResponse();
+
         subject = new AdFetcherStub(RuntimeEnvironment.application);
         subject.setRequestQueue(requestQueue);
         subject.setAdFetcherListener(adfetcherlistener);
+    }
+
+    private void setUpEmptyResponse() {
+        emptyResponse = new Response();
+        emptyResponse.placement = new Response.Placement();
+        emptyResponse.placement.placementAttributes = new Response.Placement.PlacementAttributes();
+        emptyResponse.creatives = new ArrayList<>();
+        emptyResponse.creatives.add(new Response.Creative());
+        emptyResponse.creatives.get(0).creative = new Response.Creative.CreativeInner();
     }
 
     @Test
@@ -71,6 +86,14 @@ public class AdFetcherTest extends TestBase {
     }
 
     @Test
+    public void getResponse_addAdServerRequestIdToEachCreative() throws Exception {
+        Response response = subject.getResponse(MULTIPLE_CREATIVE_FIXTURE, false);
+        assertThat(response.creatives.size()).isEqualTo(2);
+        assertThat(response.creatives.get(0).adserverRequestId).isEqualTo("fake-adserver-request-id");
+        assertThat(response.creatives.get(1).adserverRequestId).isEqualTo("fake-adserver-request-id");
+    }
+
+    @Test
     public void getResponse_willNotParseBeacons_ifPlacementIsPreLive() throws Exception {
         Response response = subject.getResponse(PRE_LIVE_PLACEMENT_FIXTURE, false);
         assertThat(response.creatives.get(0).creative.beacons.impression).isNull();
@@ -90,6 +113,47 @@ public class AdFetcherTest extends TestBase {
         assertThat(response.creatives.get(0).creative.beacons.silent_play.size()).isEqualTo(2);
     }
 
-    //todo test direct sell
+    @Test
+    public void setPromotedByText_ifDirectSell_andCampaignSlugOverrideExists_setsCampaignSlug() throws Exception {
+        emptyResponse.creatives.get(0).creative.promoted_by_text = "not null";
+        subject.setPromotedByTextForEachCreative(true, emptyResponse);
+
+        String customSetPromotedByText = emptyResponse.creatives.get(0).creative.custom_set_promoted_by_text;
+        assertThat(customSetPromotedByText).isEqualTo("not null");
+    }
+
+    @Test
+    public void setPromotedByText_ifDirectSell_andCampaignSlugOverrideDoesNOTExists_andDirectSoldSlugDoes_setsDirectSoldSlug() throws Exception {
+        emptyResponse.placement.placementAttributes.directSellPromotedByText = "not null";
+
+        subject.setPromotedByTextForEachCreative(true, emptyResponse);
+        String customSetPromotedByText = emptyResponse.creatives.get(0).creative.custom_set_promoted_by_text;
+        assertThat(customSetPromotedByText).isEqualTo("not null");
+    }
+
+    @Test
+    public void setPromotedByText_ifDirectSell_andOnlyProgrammaticSlugExists_setsProgrammaticSlug() throws Exception {
+        emptyResponse.placement.placementAttributes.promotedByText = "not null";
+
+        subject.setPromotedByTextForEachCreative(true, emptyResponse);
+        String customSetPromotedByText = emptyResponse.creatives.get(0).creative.custom_set_promoted_by_text;
+        assertThat(customSetPromotedByText).isEqualTo("not null");
+    }
+
+    @Test
+    public void setPromotedByText_ifProgrammatic_andProgrammaticSlugExists_setsProgrammaticSlug() throws Exception {
+        emptyResponse.placement.placementAttributes.promotedByText = "not null";
+
+        subject.setPromotedByTextForEachCreative(false, emptyResponse);
+        String customSetPromotedByText = emptyResponse.creatives.get(0).creative.custom_set_promoted_by_text;
+        assertThat(customSetPromotedByText).isEqualTo("not null");
+    }
+
+    @Test
+    public void setPromotedByText_ifProgrammatic_andProgrammaticSlugDoesNOTExist_setsAdBy() throws Exception {
+        subject.setPromotedByTextForEachCreative(false, emptyResponse);
+        String customSetPromotedByText = emptyResponse.creatives.get(0).creative.custom_set_promoted_by_text;
+        assertThat(customSetPromotedByText).isEqualTo("Ad By");
+    }
 }
 
