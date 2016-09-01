@@ -7,6 +7,7 @@ import com.sharethrough.android.sdk.BuildConfig;
 import com.sharethrough.sdk.mediation.ICreative;
 import com.sharethrough.sdk.mediation.MediationManager;
 import com.sharethrough.sdk.network.ASAPManager;
+import com.sharethrough.sdk.network.Response;
 
 import java.util.*;
 

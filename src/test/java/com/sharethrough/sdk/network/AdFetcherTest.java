@@ -8,7 +8,6 @@ import com.sharethrough.test.Fixtures;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -18,6 +17,7 @@ public class AdFetcherTest extends TestBase {
     private static final String SINGLE_LAYOUT_FIXTURE = Fixtures.getFile("assets/str_single_ad_youtube.json");
     private static final String NO_CREATIVE_FIXTURE = Fixtures.getFile("assets/str_no_creatives.json");
     private static final String PRE_LIVE_PLACEMENT_FIXTURE = Fixtures.getFile("assets/str_prelive_placement.json");
+    private static final String MULTIPLE_CREATIVE_FIXTURE = Fixtures.getFile("assets/str_multiple_ad_youtube.json");
 
     private AdFetcherStub subject;
     @Mock private AdFetcher.AdFetcherListener adfetcherlistener;

@@ -1,4 +1,4 @@
-package com.sharethrough.sdk;
+package com.sharethrough.sdk.network;
 
 import java.util.ArrayList;
 

@@ -3,10 +3,10 @@ package com.sharethrough.sdk;
 
 import android.util.LruCache;
 import com.sharethrough.sdk.mediation.ICreative;
+import com.sharethrough.sdk.network.Response;
 import org.junit.Test;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 public class SharethroughSerializerTest extends TestBase {
     @Test

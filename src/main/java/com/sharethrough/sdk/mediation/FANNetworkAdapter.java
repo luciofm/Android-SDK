@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.facebook.ads.*;
 import com.sharethrough.sdk.IAdView;
 import com.sharethrough.sdk.Logger;
+import com.sharethrough.sdk.Placement;
 import com.sharethrough.sdk.network.ASAPManager;
 
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class FANNetworkAdapter implements STRMediationAdapter {
                     convertedFbAd.setNetworkType(network.name);
                     convertedFbAd.setClassName(network.androidClassName);
                     creatives.add(convertedFbAd);
-                    mediationListener.onAdLoaded(creatives);
+                    mediationListener.onAdLoaded(creatives, null);
                     return;
                 }
             }

@@ -1,5 +1,7 @@
 package com.sharethrough.sdk;
 
+import com.sharethrough.sdk.network.Response;
+
 public class Placement {
     private final int articlesBeforeFirstAd;
     private final int articlesBetweenAds;

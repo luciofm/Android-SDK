@@ -1,6 +1,6 @@
 package com.sharethrough.sdk;
 
-import com.sharethrough.sdk.media.*;
+import com.sharethrough.sdk.network.Response;
 import org.junit.Before;
 import org.junit.Test;
 

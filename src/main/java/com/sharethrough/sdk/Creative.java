@@ -3,6 +3,7 @@ package com.sharethrough.sdk;
 import android.net.Uri;
 import com.google.gson.Gson;
 import com.sharethrough.sdk.mediation.ICreative;
+import com.sharethrough.sdk.network.Response;
 
 import java.util.ArrayList;
 import java.util.List;

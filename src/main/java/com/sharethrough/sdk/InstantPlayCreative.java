@@ -1,5 +1,7 @@
 package com.sharethrough.sdk;
 
+import com.sharethrough.sdk.network.Response;
+
 /**
  * Created by engineer on 9/4/15.
  */
