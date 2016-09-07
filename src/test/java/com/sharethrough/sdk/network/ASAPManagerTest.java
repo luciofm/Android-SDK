@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.*;
 /**
@@ -46,7 +47,11 @@ public class ASAPManagerTest extends TestBase  {
 
         ContextInfo ci = new ContextInfo(RuntimeEnvironment.application);
         String expectedResult = "http://asap.sharethrough.com/v1?pkey=fakePkey&pubAppName=com.sharethrough.android.sdk&pubAppVersion=v4.1.0&customKeys%5Bkey1%5D=value1&customKeys%5Bkey2%5D=value2";
-        Assert.assertTrue(subject.generateEndpointWithCustomKeyValues(keyValues).equals(expectedResult));
+        String result = subject.generateEndpointWithCustomKeyValues(keyValues);
+
+        assertThat(result).contains("http://asap.sharethrough.com/v1?pkey=fakePkey&pubAppName=com.sharethrough.android.sdk&pubAppVersion=v4.1.0");
+        assertThat(result).contains("customKeys%5Bkey1%5D=value1");
+        assertThat(result).contains("customKeys%5Bkey2%5D=value2");
     }
 
     @Test
