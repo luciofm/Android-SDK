@@ -48,10 +48,10 @@ public class ASAPManagerTest extends TestBase  {
         ContextInfo ci = new ContextInfo(RuntimeEnvironment.application);
         String expectedResult = "http://asap.sharethrough.com/v1?pkey=fakePkey&pubAppName=com.sharethrough.android.sdk&pubAppVersion=v4.1.0&customKeys%5Bkey1%5D=value1&customKeys%5Bkey2%5D=value2";
         String result = subject.generateEndpointWithCustomKeyValues(keyValues);
-        System.out.println("result:" + result);
-        System.out.println("expected:" + expectedResult);
 
-        assertThat(subject.generateEndpointWithCustomKeyValues(keyValues)).isEqualTo(expectedResult);
+        assertThat(result).contains("http://asap.sharethrough.com/v1?pkey=fakePkey&pubAppName=com.sharethrough.android.sdk&pubAppVersion=v4.1.0");
+        assertThat(result).contains("customKeys%5Bkey1%5D=value1");
+        assertThat(result).contains("customKeys%5Bkey2%5D=value2");
     }
 
     @Test
