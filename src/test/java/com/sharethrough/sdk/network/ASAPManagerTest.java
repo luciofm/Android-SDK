@@ -51,7 +51,7 @@ public class ASAPManagerTest extends TestBase  {
 
         assertThat(result).contains("http://asap.sharethrough.com/v1?pkey=fakePkey&pubAppName=com.sharethrough.android.sdk&pubAppVersion=v4.1.0");
         assertThat(result).contains("customKeys%5Bkey1%5D=value1");
-        assertThat(result).contains("customKeys%5Bkey2%5D=value3");
+        assertThat(result).contains("customKeys%5Bkey2%5D=value2");
     }
 
     @Test
