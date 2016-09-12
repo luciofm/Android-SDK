@@ -22,6 +22,7 @@ import java.util.List;
 public class FANNetworkAdapter implements STRMediationAdapter {
     private NativeAd nativeAd = null;
     private static String FAN_PLACEMENT_ID = "fanPlacementId";
+    private static String SHARETHROUGH = "Sharethrough";
 
     @Override
     public void loadAd(final Context context, final MediationManager.MediationListener mediationListener, final ASAPManager.AdResponse adResponse, final ASAPManager.AdResponse.Network network) {
@@ -29,6 +30,7 @@ public class FANNetworkAdapter implements STRMediationAdapter {
             mediationListener.onAdFailedToLoad();
         };
 
+        AdSettings.setMediationService(SHARETHROUGH);
         String facebookPlacementId = network.parameters.get(FAN_PLACEMENT_ID).getAsString();
         nativeAd = new NativeAd(context, facebookPlacementId);
 //        AdSettings.addTestDevice("ebe0abdb73271a5598f9a0b4f6308ff1");
