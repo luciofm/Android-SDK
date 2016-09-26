@@ -12,6 +12,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.facebook.ads.*;
+import com.sharethrough.sdk.ContextInfo;
 import com.sharethrough.sdk.IAdView;
 import com.sharethrough.sdk.Logger;
 import com.sharethrough.sdk.network.ASAPManager;
@@ -31,6 +32,7 @@ public class FANNetworkAdapter implements STRMediationAdapter {
         };
 
         AdSettings.setMediationService(SHARETHROUGH);
+        AdSettings.setIsChildDirected(ContextInfo.isChild);
         String facebookPlacementId = network.parameters.get(FAN_PLACEMENT_ID).getAsString();
         nativeAd = new NativeAd(context, facebookPlacementId);
 //        AdSettings.addTestDevice("ebe0abdb73271a5598f9a0b4f6308ff1");

@@ -10,6 +10,7 @@ public class ContextInfo {
     static private String appPackageName;
     static private String appVersionName;
     static private Point screenSize = new Point();
+    static public boolean isChild = false;
     public ContextInfo(final Context context) {
         appPackageName = context.getPackageName();
         try {
