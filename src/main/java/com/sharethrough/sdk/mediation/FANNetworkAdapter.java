@@ -26,6 +26,11 @@ public class FANNetworkAdapter implements STRMediationAdapter {
     private static String SHARETHROUGH = "Sharethrough";
     private static boolean IS_CHILD = false;
 
+    public FANNetworkAdapter() {
+        AdSettings.setMediationService(SHARETHROUGH);
+        AdSettings.setIsChildDirected(IS_CHILD);
+    }
+
     @Override
     public void loadAd(final Context context, final MediationManager.MediationListener mediationListener, final ASAPManager.AdResponse adResponse, final ASAPManager.AdResponse.Network network) {
         if (!networkHasValidParams(network)) {
