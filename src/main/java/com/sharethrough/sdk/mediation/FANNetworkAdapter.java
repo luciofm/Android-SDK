@@ -24,6 +24,7 @@ public class FANNetworkAdapter implements STRMediationAdapter {
     private NativeAd nativeAd = null;
     private static String FAN_PLACEMENT_ID = "fanPlacementId";
     private static String SHARETHROUGH = "Sharethrough";
+    private static boolean IS_CHILD = false;
 
     @Override
     public void loadAd(final Context context, final MediationManager.MediationListener mediationListener, final ASAPManager.AdResponse adResponse, final ASAPManager.AdResponse.Network network) {
@@ -32,7 +33,7 @@ public class FANNetworkAdapter implements STRMediationAdapter {
         };
 
         AdSettings.setMediationService(SHARETHROUGH);
-        AdSettings.setIsChildDirected(ContextInfo.isChild);
+        AdSettings.setIsChildDirected(IS_CHILD);
         String facebookPlacementId = network.parameters.get(FAN_PLACEMENT_ID).getAsString();
         nativeAd = new NativeAd(context, facebookPlacementId);
 //        AdSettings.addTestDevice("ebe0abdb73271a5598f9a0b4f6308ff1");
@@ -125,5 +126,9 @@ public class FANNetworkAdapter implements STRMediationAdapter {
             return false;
         }
         return true;
+    }
+
+    public static void setIsChild(boolean isChild) {
+        IS_CHILD = isChild;
     }
 }

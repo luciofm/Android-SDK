@@ -65,7 +65,6 @@ public class Sharethrough {
     public void fetchAds(Map<String, String> ... customKeyValues) {
         if (customKeyValues.length > 0) {
             strSdkConfig.getAsapManager().updateAsapEndpoint(customKeyValues[0]);
-            setCOPPA(customKeyValues[0]);
         }
 
         strSdkConfig.getAsapManager().callASAP(new ASAPManager.ASAPManagerListener() {
@@ -80,15 +79,6 @@ public class Sharethrough {
                 Logger.e("ASAP error: " + error, null);
             }
         });
-    }
-
-    private void setCOPPA(Map<String, String> customKeyValues) {
-        for (Map.Entry<String, String> entry : customKeyValues.entrySet()) {
-            if (entry.getKey().equals("isChild")) {
-                boolean isChildValue = Boolean.parseBoolean(entry.getValue());
-                ContextInfo.isChild = isChildValue;
-            }
-        }
     }
 
     protected MediationManager.MediationListener mediationListener = new MediationManager.MediationListener() {
