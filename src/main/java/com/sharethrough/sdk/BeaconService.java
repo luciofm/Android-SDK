@@ -8,13 +8,8 @@ import android.view.View;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.BasicNetwork;
-import com.android.volley.toolbox.HurlStack;
-import com.android.volley.toolbox.NoCache;
 import com.sharethrough.android.sdk.BuildConfig;
 import com.sharethrough.sdk.network.STRStringRequest;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -37,12 +32,14 @@ public class BeaconService {
                          final ContextInfo contextInfo,
                          final String pkey,
                          final RequestQueue requestQueue) {
+
         this.dateProvider = dateProvider;
         this.session = session;
         this.advertisingIdProvider = advertisingIdProvider;
         this.placementKey = pkey;
         this.contextInfo = contextInfo;
         this.requestQueue = requestQueue;
+        this.requestQueue.start();
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -210,7 +207,6 @@ public class BeaconService {
     }
 
     private void fireBeacon(final Map<String, String> beaconParams, final String uri) {
-
         Uri.Builder uriBuilder = Uri.parse(uri).buildUpon();
         for (Map.Entry<String, String> entry : beaconParams.entrySet()) {
             uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());

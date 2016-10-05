@@ -6,18 +6,14 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.sharethrough.sdk.ContextInfo;
 import com.sharethrough.sdk.Logger;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.message.BasicNameValuePair;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 
@@ -25,13 +21,15 @@ import java.util.Map;
  * Created by engineers on 4/26/16.
  */
 public class ASAPManager {
-    private static final String PROGRAMMATIC = "stx_monetize";
-    public static final String ASAP_ENDPOINT_PREFIX = "http://asap.sharethrough.com/v1";
-    private static final String PLACEMENT_KEY = "placement_key";
-    private static final String ASAP_UNDEFINED = "undefined";
+    public static final String ASAP_ENDPOINT_PREFIX = "http://asap.sharethrough.com/v2";
+    public static final String PROGRAMMATIC = "stx_monetize";
+    public static final String PLACEMENT_KEY = "placement_key";
+    public static final String ASAP_UNDEFINED = "undefined";
     private static final String ASAP_OK = "OK";
     private String placementKey;
     private RequestQueue requestQueue;
+
+    //todo: make isRunning last for entire waterfall
     private boolean isRunning = false;
     private String asapEndpoint;
 
@@ -42,17 +40,26 @@ public class ASAPManager {
     }
 
     public interface ASAPManagerListener {
-        void onSuccess(ArrayList<NameValuePair> queryStringParams, String mediationRequestId);
+        void onSuccess(AdResponse asapResponse);
         void onError(String error);
     }
 
-    public class AdResponse {
-        String mrid;
-        String pkey;
-        String adServer;
-        String keyType;
-        String keyValue;
-        String status;
+    public static class AdResponse {
+        public String mrid;
+        public String pkey;
+        public String adServer;
+        public String getAdServerPath;
+        public String articlesBeforeFirstAd;
+        public String articlesBetweenAds;
+        public ArrayList<Network> mediationNetworks;
+        public String status;
+
+        public static class Network {
+            public String key;
+            public String name;
+            public String androidClassName;
+            public JsonObject parameters;
+        }
     }
 
     public void updateAsapEndpoint(Map<String, String> customKeyValues) {
@@ -80,22 +87,25 @@ public class ASAPManager {
         Gson gson = new Gson();
         try {
             AdResponse adResponse = gson.fromJson(response, AdResponse.class);
-            if (adResponse.mrid == null || adResponse.pkey == null || adResponse.adServer == null
-                    || adResponse.keyType == null || adResponse.keyValue == null || adResponse.status == null) {
+            if (adResponse.mrid == null || adResponse.pkey == null || adResponse.status == null) {
                 asapManagerListener.onError("ASAP response does not have correct key values");
             } else if (!adResponse.status.equals(ASAP_OK)) {
                 asapManagerListener.onError(adResponse.status);
             } else {
-                ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
-                queryStringParams.add(new BasicNameValuePair(PLACEMENT_KEY, placementKey));
-                if (!adResponse.keyType.equals(PROGRAMMATIC) && !adResponse.keyType.equals(ASAP_UNDEFINED) && !adResponse.keyValue.equals(ASAP_UNDEFINED)) {
-                    queryStringParams.add(new BasicNameValuePair(adResponse.keyType, adResponse.keyValue));
-                }
-                asapManagerListener.onSuccess(queryStringParams, adResponse.mrid);
+                asapManagerListener.onSuccess(adResponse);
             }
         } catch (JsonParseException e) {
             asapManagerListener.onError(e.toString());
         }
+    }
+
+    /**
+     * Needs to be called by MediationListener when an ad loads successfully so the next
+     * waterfall can be initiated properly. Also needs to be called when waterfall is
+     * exhausted and all ads failed to load
+     */
+    public void setWaterfallComplete() {
+        isRunning = false;
     }
 
     public void callASAP(final ASAPManagerListener asapManagerListener) {
@@ -109,13 +119,12 @@ public class ASAPManager {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        isRunning = false;
                         handleResponse(response, asapManagerListener);
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                isRunning = false;
+                setWaterfallComplete();
                 asapManagerListener.onError(error.toString());
             }
         });

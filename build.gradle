@@ -33,7 +33,7 @@ android {
         }
     }
 
-    compileSdkVersion 21
+    compileSdkVersion 23
     buildToolsVersion '21.1.2'
 
     compileOptions {
@@ -61,7 +61,7 @@ android {
             versionCode code
             versionName version
             minSdkVersion 15
-            targetSdkVersion 18
+            targetSdkVersion 23
         }
     }
     else {
@@ -70,7 +70,7 @@ android {
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 18
+        targetSdkVersion 23
         versionCode 1
         versionName version
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
@@ -101,6 +101,8 @@ android {
             setRoot('src/test')
         }
     }
+
+    sourceSets.main.java.exclude 'com/sharethrough/sdk/mediation/FANNetworkAdapter.java'
 
     packagingOptions {
         exclude 'LICENSE.txt'
@@ -172,11 +174,18 @@ dependencies {
     repositories {
         mavenCentral()
         jcenter()
+        flatDir {
+            dirs 'lib'
+        }
     }
     compile 'com.google.android.gms:play-services:6.+'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.google.code.gson:gson:2.5'
     compile 'com.android.volley:volley:1.0.0'
+    compile(name: 'AudienceNetwork', ext: 'aar')
+    //compile 'com.facebook.android:audience-network-sdk:4.13.0'
+    //compile project(':facebook')
+
     // Espresso
     androidTestCompile('junit:junit:4.11') {
         exclude module: 'hamcrest-core'

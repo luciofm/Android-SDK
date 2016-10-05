@@ -21,6 +21,7 @@ public class BasicAdView extends FrameLayout implements IAdView {
     private int thumbnailViewId;
     private int optoutViewId;
     private int brandLogoId;
+    private int slug;
     private View view;
     private ProgressBar spinner;
     private ScreenVisibilityListener screenVisibilityListener;
@@ -52,13 +53,14 @@ public class BasicAdView extends FrameLayout implements IAdView {
      * @param advertiserViewId The view which will display the ad's advertiser.
      * @param thumbnailViewId The view which will display the ad's thumbnail image.
      */
-    public void prepareWithResourceIds(final int layoutResourceId, final int titleViewId, final int descriptionViewId, final int advertiserViewId, final int thumbnailViewId, final int optoutViewId, final int brandLogoId) {
+    public void prepareWithResourceIds(final int layoutResourceId, final int titleViewId, final int descriptionViewId, final int advertiserViewId, final int thumbnailViewId, final int optoutViewId, final int brandLogoId, final int slug) {
         this.titleViewId = titleViewId;
         this.descriptionViewId = descriptionViewId;
         this.advertiserViewId = advertiserViewId;
         this.thumbnailViewId = thumbnailViewId;
         this.optoutViewId = optoutViewId;
         this.brandLogoId = brandLogoId;
+        this.slug = slug;
         checkResources();
         createChildren(layoutResourceId);
     }
@@ -83,6 +85,11 @@ public class BasicAdView extends FrameLayout implements IAdView {
     public void adReady() {
         spinner.setVisibility(GONE);
         view.setVisibility(VISIBLE);
+    }
+
+    @Override
+    public TextView getSlug() {
+        return (TextView) this.findViewById(slug);
     }
 
     @Override

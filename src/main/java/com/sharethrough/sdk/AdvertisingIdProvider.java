@@ -13,46 +13,44 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 
 public class AdvertisingIdProvider {
-    private String advertisingId;
+    public static String advertisingId;
+    public static boolean hasRetrievedAdvertisingId = false;
 
     public AdvertisingIdProvider(final Context context) {
+        if (hasRetrievedAdvertisingId) {
+            return;
+        }
+
+        hasRetrievedAdvertisingId = true;
         int googlePlayServicesAvailable = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
-        if (googlePlayServicesAvailable != ConnectionResult.SUCCESS) {
-//            GooglePlayServicesUtil.getErrorDialog(googlePlayServicesAvailable, (Activity) context, 0).show();
-        } else {
+        if (googlePlayServicesAvailable == ConnectionResult.SUCCESS) {
             STRExecutorService.getInstance().execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        AdvertisingIdClient.Info adInfo = getAdvertisingInfo(context);
+                        AdvertisingIdClient.Info adInfo = getAdvertisingIdInfo(context);
                         advertisingId = adInfo.getId();
                         if (adInfo.isLimitAdTrackingEnabled()) {
                             advertisingId = null;
                         }
-                    } catch (Exception e) {
-                        Log.d("Sharethrough", "Google Play Advertising Id failure", e);
+                        Logger.d("Google Advertising ID: %s", advertisingId);
+                    } catch (IOException e) {
+                        Logger.d("Fail to retrieve Google Play Advertising Id", e);
+                    } catch (GooglePlayServicesNotAvailableException e) {
+                        Logger.d("Fail to retrieve Google Play Advertising Id", e);
+                    } catch (GooglePlayServicesRepairableException e) {
+                        Logger.d("Fail to retrieve Google Play Advertising Id", e);
                     }
                 }
             });
         }
-        Log.i("Sharethrough", "advertising ID: " + advertisingId);
     }
 
-    protected AdvertisingIdClient.Info getAdvertisingInfo(Context context){
-        try {
-            return AdvertisingIdClient.getAdvertisingIdInfo(context);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (GooglePlayServicesNotAvailableException e) {
-            e.printStackTrace();
-        } catch (GooglePlayServicesRepairableException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+    public AdvertisingIdClient.Info getAdvertisingIdInfo(Context context) throws GooglePlayServicesNotAvailableException, IOException, GooglePlayServicesRepairableException {
+        return AdvertisingIdClient.getAdvertisingIdInfo(context);
     }
 
-    public String getAdvertisingId() {
+    public static String getAdvertisingId() {
         return advertisingId;
     }
 }

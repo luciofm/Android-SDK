@@ -1,13 +1,12 @@
 package com.sharethrough.sdk;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import com.sharethrough.sdk.media.*;
+import com.google.gson.Gson;
+import com.sharethrough.sdk.mediation.ICreative;
 
 import java.util.List;
 
-public class Creative {
+public class Creative implements ICreative {
     public enum CreativeType {
         HOSTEDVIDEO,
         CLICKOUT,
@@ -22,11 +21,43 @@ public class Creative {
     public long renderedTime = Long.MAX_VALUE;
     private boolean wasClicked = false;
     public boolean wasVisible = false;
+    private String networkType;
+    private String className;
 
     public Creative(Response.Creative responseCreative, String mediationRequestId) {
         this.responseCreative = responseCreative;
         // To remove for asap v2
         this.responseCreative.mediationRequestId = mediationRequestId;
+    }
+
+    @Override
+    public void setNetworkType(String networkType) {
+        this.networkType = networkType;
+    }
+
+    @Override
+    public String getNetworkType() {
+        return networkType;
+    }
+
+    @Override
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    @Override
+    public String getClassName() {
+        return className;
+    }
+
+    public static String serialize(ICreative creative) {
+        Gson gson = new Gson();
+        return gson.toJson(creative);
+    }
+
+    public static ICreative deserialize(String serializedCreative) {
+        Gson gson = new Gson();
+        return ((Creative)gson.fromJson(serializedCreative, Creative.class));
     }
 
     public String getTitle() {

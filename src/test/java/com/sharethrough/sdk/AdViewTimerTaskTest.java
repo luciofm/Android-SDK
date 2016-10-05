@@ -47,7 +47,7 @@ public class AdViewTimerTaskTest extends TestBase {
         sharethrough = mock(Sharethrough.class);
         sharethrough.placement = placement;
 
-        subject = new AdViewTimerTask(adView, feedPosition, creative, beaconService, dateProvider, sharethrough);
+        subject = new AdViewTimerTask(adView, feedPosition, creative, beaconService, dateProvider);
     }
 
     @Test

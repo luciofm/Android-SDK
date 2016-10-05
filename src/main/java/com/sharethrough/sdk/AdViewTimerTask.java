@@ -12,21 +12,18 @@ public class AdViewTimerTask extends TimerTask {
     private final Creative creative;
     private final BeaconService beaconService;
     private final Provider<Date> dateProvider;
-    private final Sharethrough sharethrough;
     private final int feedPosition;
     private boolean isCancelled;
     private Date onScreenStartTimeForVisibleBeacon;
     private Date onScreenStartTimeForAutoPlayStart;
     protected boolean adViewHasBeenVisible = false;
 
-    public AdViewTimerTask(IAdView adView, int feedPosition, Creative creative, BeaconService beaconService, Provider<Date> dateProvider,
-                           Sharethrough sharethrough) {
+    public AdViewTimerTask(IAdView adView, int feedPosition, Creative creative, BeaconService beaconService, Provider<Date> dateProvider) {
         this.adViewRef = new WeakReference<>(adView);
         this.feedPosition = feedPosition;
         this.creative = creative;
         this.beaconService = beaconService;
         this.dateProvider = dateProvider;
-        this.sharethrough = sharethrough;
     }
 
     private void setOnScreenStartTimeForAutoplay() {

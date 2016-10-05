@@ -15,20 +15,20 @@ import android.widget.TextView;
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.beacons.VideoCompletionBeaconService;
 import com.sharethrough.sdk.media.*;
+import com.sharethrough.sdk.mediation.IRenderer;
 import com.squareup.picasso.Picasso;
 
 
 import java.util.Timer;
 
-public class Renderer {
+public class Renderer implements IRenderer {
 
-    public void putCreativeIntoAdView(final IAdView adView, final Creative creative, final BeaconService beaconService,
-    final Sharethrough sharethrough, final Timer timer) {
-        putCreativeIntoAdView(adView, creative, beaconService, sharethrough, 0, timer);
+    public void putCreativeIntoAdView(final IAdView adView, final Creative creative, final BeaconService beaconService, final Timer timer) {
+        putCreativeIntoAdView(adView, creative, beaconService, 0, timer);
     }
 
     public void putCreativeIntoAdView(final IAdView adView, final Creative creative, final BeaconService beaconService,
-                                      final Sharethrough sharethrough, final int feedPosition, final Timer timer) {
+                                      final int feedPosition, final Timer timer) {
         final ViewGroup container = adView.getAdView();
         if (!creative.wasRendered) {
             beaconService.adReceived(container.getContext(), creative, feedPosition);
@@ -66,13 +66,11 @@ public class Renderer {
                 FrameLayout thumbnailContainer = adView.getThumbnail();
 
                 thumbnailContainer.removeAllViews();
-                final AdImageView thumbnailImage = new AdImageView(container.getContext(), sharethrough, creative, adView, feedPosition, beaconService);
+                final AdImageView thumbnailImage = new AdImageView(container.getContext(), creative, adView, feedPosition, beaconService);
                 if (creative.getThumbnailUrl() != null && !creative.getThumbnailUrl().isEmpty())
                     Picasso.with(container.getContext()).load(creative.getThumbnailUrl()).fit().centerCrop().tag("STRAdImage").into(thumbnailImage);
-                sharethrough.fetchAdsIfReadyForMore();
                 thumbnailContainer.addView(thumbnailImage,
                         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
-
                 final Media media = createMedia(adView, creative, beaconService, feedPosition);
                 handler.post(new Runnable() { // give thumbnailImage a chance to render so we can use its size
                     @Override

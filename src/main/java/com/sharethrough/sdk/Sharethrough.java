@@ -4,9 +4,10 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import com.sharethrough.android.sdk.BuildConfig;
+import com.sharethrough.sdk.mediation.ICreative;
+import com.sharethrough.sdk.mediation.MediationManager;
 import com.sharethrough.sdk.network.ASAPManager;
-import com.sharethrough.sdk.network.AdManager;
-import org.apache.http.NameValuePair;
+
 import java.util.*;
 
 /**
@@ -18,7 +19,6 @@ public class Sharethrough {
     public static String USER_AGENT = System.getProperty("http.agent") + "; STR " + SDK_VERSION_NUMBER;
     protected boolean firedNewAdsToShow;
 
-    private String apiUrlPrefix = "http://btlr.sharethrough.com/v4";
     private Handler handler = new Handler(Looper.getMainLooper());
 
     protected Placement placement;
@@ -52,8 +52,6 @@ public class Sharethrough {
             int articlesBeforeFirstAd = SharethroughSerializer.getArticlesBefore(strSdkConfig.getSerializedSharethrough());
             this.placement = createPlacement(articlesBetweenAds, articlesBeforeFirstAd);
         }
-
-        strSdkConfig.getAdManager().setAdManagerListener(adManagerListener);
     }
 
     protected Placement createPlacement(int articlesBetweenAds, int articlesBeforeFirstAd) {
@@ -71,46 +69,43 @@ public class Sharethrough {
 
         strSdkConfig.getAsapManager().callASAP(new ASAPManager.ASAPManagerListener() {
             @Override
-            public void onSuccess(ArrayList<NameValuePair> queryStringParams, String mediationRequestId) {
-                invokeAdFetcher(apiUrlPrefix, queryStringParams, mediationRequestId);
+            public void onSuccess(ASAPManager.AdResponse asapResponse) {
+                strSdkConfig.getMediationManager().initiateWaterfallAndLoadAd(asapResponse, mediationListener, new MediationManager.MediationWaterfall(asapResponse.mediationNetworks));
             }
 
             @Override
             public void onError(String error) {
+                strSdkConfig.getAsapManager().setWaterfallComplete();
                 Logger.e("ASAP error: " + error, null);
             }
         });
     }
 
-    protected AdManager.AdManagerListener adManagerListener = new AdManager.AdManagerListener() {
+    protected MediationManager.MediationListener mediationListener = new MediationManager.MediationListener() {
         @Override
-        public void onAdsReady(List<Creative> listOfCreativesReadyForShow, Placement placement) {
-            if (!placementSet) {
-                Sharethrough.this.placement = placement;
-                placementSet = true;
-                placementCallback.call(placement);
-            }
+        public void onAdLoaded(List<ICreative> creatives) {
+            strSdkConfig.getAsapManager().setWaterfallComplete();
 
-            for(Creative creative : listOfCreativesReadyForShow) {
+            for(ICreative creative : creatives) {
                 strSdkConfig.getCreativeQueue().add(creative);
-                if (creative != null) {
-                    Logger.d("insert creative ckey: %s, creative cache size %d", creative.getCreativeKey(), strSdkConfig.getCreativeQueue().size());
-                }
+                Logger.d("insert creative, creative cache size %d", strSdkConfig.getCreativeQueue().size());
                 fireNewAdsToShow();
             }
         }
 
         @Override
-        public void onNoAdsToShow(){
-            fireNoAdsToShow();
+        public void onAdFailedToLoad() {
+            strSdkConfig.getMediationManager().loadNextAd();
         }
 
         @Override
-        public void onAdsFailedToLoad() {
+        public void onAllAdsFailedToLoad() {
+            strSdkConfig.getAsapManager().setWaterfallComplete();
+            fireNoAdsToShow();
         }
     };
 
-    private void insertCreativeIntoSlot(int feedPosition, Creative creative) {
+    private void insertCreativeIntoSlot(int feedPosition, ICreative creative) {
         if( creative != null ) {
             strSdkConfig.getCreativesBySlot().put(feedPosition, creative);
             strSdkConfig.getCreativeIndices().add(feedPosition);
@@ -139,10 +134,6 @@ public class Sharethrough {
         });
     }
 
-    private void invokeAdFetcher(String url, ArrayList<NameValuePair> queryStringParams, String mediationRequestId) {
-        strSdkConfig.getAdManager().fetchAds(url, queryStringParams, strSdkConfig.getAdvertisingIdProvider().getAdvertisingId(), mediationRequestId);
-    }
-
     /**
      *
      * @param adView Any class that implements IAdView.
@@ -158,25 +149,21 @@ public class Sharethrough {
      * @return null if there is no creatives to show in both the slot and queue, and sets the isAdRenewed to true if
      * there is a new creative to show
      */
-    private Creative getCreativeToShow(int feedPosition, boolean[] isAdRenewed) {
-        Creative creative = strSdkConfig.getCreativesBySlot().get(feedPosition);
-        if (creative == null) {
 
+    private ICreative getCreativeToShow(int feedPosition) {
+        ICreative creative = strSdkConfig.getCreativesBySlot().get(feedPosition);
+        if (creative == null) {
             if (strSdkConfig.getCreativeQueue().size() != 0) {
                 synchronized (strSdkConfig.getCreativeQueue()) {
                     creative = strSdkConfig.getCreativeQueue().getNext();
                 }
                 insertCreativeIntoSlot(feedPosition, creative);
-                (isAdRenewed[0]) = true;
+                Logger.d("pop creative at position %d , creative cache size: %d ", feedPosition , strSdkConfig.getCreativeQueue().size());
             }
         }
 
         if (creative != null) {
-            if (isAdRenewed[0]) {
-                Logger.d("pop creative ckey: %s at position %d , creative cache size: %d ", creative.getCreativeKey() ,feedPosition , strSdkConfig.getCreativeQueue().size());
-            } else {
-                Logger.d("get creative ckey: %s from creative slot at position %d",creative.getCreativeKey(), feedPosition);
-            }
+            Logger.d("get creative from creative slot at position %d", feedPosition);
         }
 
         return creative;
@@ -188,17 +175,9 @@ public class Sharethrough {
      * @param feedPosition The starting position in your feed where you would like your first ad.
      */
     public void putCreativeIntoAdView(final IAdView adView, final int feedPosition) {
-
-        //prevent pubs from calling this before we fire new ads to show
-        boolean[] isAdRenewed = new boolean[1];
-        isAdRenewed[0] = false;
-
-        Creative creative = getCreativeToShow(feedPosition, isAdRenewed);
+        ICreative creative = getCreativeToShow(feedPosition);
         if (creative != null) {
-            strSdkConfig.getRenderer().putCreativeIntoAdView(adView, creative, strSdkConfig.getBeaconService(), this, feedPosition, new Timer("AdView timer for " + creative));
-            if( isAdRenewed[0] ){
-                fireNewAdsToShow();
-            }
+            strSdkConfig.getMediationManager().render(adView, creative, feedPosition);
         }
 
         //grab more ads if appropriate
@@ -302,11 +281,11 @@ public class Sharethrough {
     }
 
     public IAdView getAdView(Context context, int feedPosition, int adLayoutResourceId, int title, int description,
-                             int advertiser, int thumbnail, int optoutId, int brandLogoId, IAdView convertView) {
+                             int advertiser, int thumbnail, int optoutId, int brandLogoId, IAdView convertView, int slug) {
         IAdView view = convertView;
         if (view == null) {
             BasicAdView v = new BasicAdView(context);
-            v.prepareWithResourceIds(adLayoutResourceId, title, description, advertiser, thumbnail, optoutId, brandLogoId);
+            v.prepareWithResourceIds(adLayoutResourceId, title, description, advertiser, thumbnail, optoutId, brandLogoId, slug);
             view = v;
         }
         putCreativeIntoAdView(view, feedPosition);

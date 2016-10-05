@@ -20,7 +20,7 @@ public class BasicAdViewTest extends TestBase {
     public void setUp() throws Exception {
         subject = new BasicAdView(RuntimeEnvironment.application);
         subject.layout(0, 0, 1000, 100);
-        subject.prepareWithResourceIds(R.layout.ad, R.id.title, R.id.description, R.id.advertiser, R.id.thumbnail, R.id.optout, R.id.brand_logo);
+        subject.prepareWithResourceIds(R.layout.ad, R.id.title, R.id.description, R.id.advertiser, R.id.thumbnail, R.id.optout, R.id.brand_logo, R.id.slug);
     }
 
     @Test

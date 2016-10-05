@@ -7,9 +7,12 @@ import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.NoCache;
 import com.android.volley.toolbox.Volley;
+import com.sharethrough.sdk.mediation.ICreative;
+import com.sharethrough.sdk.mediation.MediationManager;
+import com.sharethrough.sdk.mediation.STRMediationAdapter;
 import com.sharethrough.sdk.network.ASAPManager;
-import com.sharethrough.sdk.network.AdManager;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -18,17 +21,19 @@ public class STRSdkConfig {
     private String placementKey;
     private String serializedSharethrough;
     private BeaconService beaconService;
-    private AdManager adManager;
-    private Renderer renderer;
     private CreativesQueue creativeQueue;
-    private LruCache<Integer, Creative> creativesBySlot;
+    private LruCache<Integer, ICreative> creativesBySlot;
     private Set<Integer> creativeIndices;
     private AdvertisingIdProvider advertisingIdProvider;
     private RequestQueue requestQueue;
     private ASAPManager asapManager;
+    private MediationManager mediationManager;
     private ContextInfo contextInfo;
 
-    public STRSdkConfig(Context context, String placementKey){
+    public Context context;
+
+    public STRSdkConfig(Context context, String placementKey) {
+        this.context = context;
         Logger.setContext(context);
         Logger.enabled = true;
 
@@ -41,16 +46,15 @@ public class STRSdkConfig {
                 contextInfo,
                 placementKey,
                 new RequestQueue(new NoCache(), new BasicNetwork(new HurlStack())));
-        this.adManager = new AdManager(context);
-        this.renderer = new Renderer();
         this.creativeQueue = new CreativesQueue();
         this.requestQueue = Volley.newRequestQueue(context.getApplicationContext());
         this.asapManager = new ASAPManager(placementKey, requestQueue);
         this.creativesBySlot = new LruCache<>(10);
         this.creativeIndices = new HashSet<>(); //contains history of all indices for creatives, whereas creativesBySlot only caches the last 10
+        this.mediationManager = new MediationManager(context, beaconService, new HashMap<String, STRMediationAdapter>());
     }
 
-    public void setSerializedSharethrough( String serializedSharethrough ){
+    public void setSerializedSharethrough(String serializedSharethrough) {
         this.serializedSharethrough = serializedSharethrough;
         this.creativeQueue = SharethroughSerializer.getCreativesQueue(serializedSharethrough);
         this.creativesBySlot = SharethroughSerializer.getSlot(serializedSharethrough);
@@ -64,19 +68,11 @@ public class STRSdkConfig {
         return beaconService;
     }
 
-    public AdManager getAdManager() {
-        return adManager;
-    }
-
-    public Renderer getRenderer() {
-        return renderer;
-    }
-
     public CreativesQueue getCreativeQueue() {
         return creativeQueue;
     }
 
-    public LruCache<Integer, Creative> getCreativesBySlot() {
+    public LruCache<Integer, ICreative> getCreativesBySlot() {
         return creativesBySlot;
     }
 
@@ -94,5 +90,9 @@ public class STRSdkConfig {
 
     public ASAPManager getAsapManager() {
         return asapManager;
+    }
+
+    public MediationManager getMediationManager() {
+        return mediationManager;
     }
 }

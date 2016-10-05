@@ -15,6 +15,11 @@ public interface IAdView {
     void adReady();
 
     /**
+     * @return The <code>TextView</code> into which the slug text should be rendered. May not be null.
+     */
+    TextView getSlug();
+
+    /**
      * @return The <code>TextView</code> into which the title text should be rendered. May not be null.
      */
     TextView getTitle();

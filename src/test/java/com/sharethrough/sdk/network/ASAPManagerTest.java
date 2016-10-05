@@ -3,24 +3,17 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.sharethrough.sdk.ContextInfo;
 import com.sharethrough.sdk.TestBase;
-import junit.framework.Assert;
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.robolectric.RuntimeEnvironment;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.*;
-/**
- Created by engineers on 5/2/16.
- */
+
 public class ASAPManagerTest extends TestBase  {
     private ASAPManager subject;
     private String pkey;
@@ -46,10 +39,9 @@ public class ASAPManagerTest extends TestBase  {
         keyValues.put("key2", "value2");
 
         ContextInfo ci = new ContextInfo(RuntimeEnvironment.application);
-        String expectedResult = "http://asap.sharethrough.com/v1?pkey=fakePkey&pubAppName=com.sharethrough.android.sdk&pubAppVersion=v4.1.0&customKeys%5Bkey1%5D=value1&customKeys%5Bkey2%5D=value2";
         String result = subject.generateEndpointWithCustomKeyValues(keyValues);
 
-        assertThat(result).contains("http://asap.sharethrough.com/v1?pkey=fakePkey&pubAppName=com.sharethrough.android.sdk&pubAppVersion=v4.1.0");
+        assertThat(result).contains("http://asap.sharethrough.com/v2?pkey=fakePkey&pubAppName=com.sharethrough.android.sdk&pubAppVersion=v4.1.0");
         assertThat(result).contains("customKeys%5Bkey1%5D=value1");
         assertThat(result).contains("customKeys%5Bkey2%5D=value2");
     }
@@ -64,30 +56,20 @@ public class ASAPManagerTest extends TestBase  {
     public void handleResponse_callsSuccessWithCorrectParamsForDirectSell() {
         String responseForDirectSell = "{ 'mrid': 'fakeMrid', 'pkey': 'c1a0a591', 'adServer': 'DFP', 'keyType': 'creative_key', 'keyValue': 'fakeckey', 'status': 'OK'}";
         subject.handleResponse(responseForDirectSell, asapManagerListener);
-
-        ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
-        queryStringParams.add(new BasicNameValuePair("placement_key", "fakePkey"));
-        queryStringParams.add(new BasicNameValuePair("creative_key", "fakeckey"));
-        verify(asapManagerListener).onSuccess(queryStringParams, mediationRequestId);
+        verify(asapManagerListener).onSuccess(any(ASAPManager.AdResponse.class));
     }
     @Test
     public void handleResponse_callsSuccessWithCorrectParamsForProgrammatic() {
         String responseForProgrammatic = "{ 'mrid': 'fakeMrid', 'pkey': 'c1a0a591', 'adServer': 'DFP', 'keyType': 'stx_monetize', 'keyValue': 'undefined', 'status': 'OK'}";
         subject.handleResponse(responseForProgrammatic, asapManagerListener);
-
-        ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
-        queryStringParams.add(new BasicNameValuePair("placement_key", "fakePkey"));
-        verify(asapManagerListener).onSuccess(queryStringParams, mediationRequestId);
+        verify(asapManagerListener).onSuccess(any(ASAPManager.AdResponse.class));
     }
 
     @Test
     public void handleResponse_callsSuccessWithCorrectParamsNoAdServerSetup() {
         String responseForNoAdServer = "{ 'mrid': 'fakeMrid', 'pkey': 'c1a0a591', 'adServer': 'DFP', 'keyType': 'undefined', 'keyValue': 'undefined', 'status': 'OK'}";
         subject.handleResponse(responseForNoAdServer, asapManagerListener);
-
-        ArrayList<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
-        queryStringParams.add(new BasicNameValuePair("placement_key", "fakePkey"));
-        verify(asapManagerListener).onSuccess(queryStringParams, mediationRequestId);
+        verify(asapManagerListener).onSuccess(any(ASAPManager.AdResponse.class));
     }
     @Test
     public void handleResponse_callsOnErrorWithInCorrectParams() {
@@ -95,7 +77,6 @@ public class ASAPManagerTest extends TestBase  {
         subject.handleResponse(responseForIncorrectResponse, asapManagerListener);
         verify(asapManagerListener).onError(anyString());
     }
-
     @Test
     public void handleResponse_callsOnErrorWithInCorrectJson() {
         String responseIncorrectJson = "{'pkey'l;}";
