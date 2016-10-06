@@ -102,16 +102,20 @@
     <orderEntry type="library" exported="" name="play-services-6.5.87" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="shadows-support-v4-3.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="asm-5.0.1" level="project" />
+    <orderEntry type="library" exported="" name="audience-network-sdk-4.16.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="shadows-core-3.0" level="project" />
+    <orderEntry type="library" exported="" name="recyclerview-v7-23.1.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="fest-android-1.0.8" level="project" />
-    <orderEntry type="library" exported="" name="AudienceNetwork-" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="asm-util-5.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="bcprov-jdk16-1.46" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="mockito-core-1.10.19" level="project" />
+    <orderEntry type="library" exported="" name="support-v4-23.1.0" level="project" />
+    <orderEntry type="library" exported="" name="appcompat-v7-23.1.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="objenesis-2.1" level="project" />
+    <orderEntry type="library" exported="" name="support-annotations-23.1.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="fest-util-1.2.5" level="project" />
+    <orderEntry type="library" exported="" name="exoplayer-r1.5.8" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="shadows-play-services-3.0" level="project" />
-    <orderEntry type="library" exported="" name="support-v4-21.0.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="icu4j-53.1" level="project" />
     <orderEntry type="library" exported="" name="gson-2.5" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="robolectric-resources-3.0" level="project" />
@@ -128,6 +132,5 @@
     <orderEntry type="library" exported="" scope="TEST" name="shadows-httpclient-3.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="fest-assert-core-2.0M10" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="robolectric-3.0" level="project" />
-    <orderEntry type="library" exported="" name="support-annotations-21.0.0" level="project" />
   </component>
 </module>
