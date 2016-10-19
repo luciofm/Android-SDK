@@ -15,6 +15,7 @@ import java.util.Map;
  * Created by danicashei on 7/28/16.
  */
 public class MediationManager {
+    private int baseOnePlacementIndex = 1;
     private Context context;
     private BeaconService beaconService;
     private MediationListener mediationListener;
@@ -65,6 +66,11 @@ public class MediationManager {
      * Loads ad(s) using appropriate mediation adapter based on waterfall order
      */
     public void loadNextAd() {
+        if (mediationWaterfall.waterfallStarted()) {
+            ASAPManager.AdResponse.Network currentNetwork = mediationWaterfall.getCurrentThirdPartyNetwork();
+            fireNetworkNoFillBeacon(currentNetwork.key, mediationWaterfall.getCurrentIndex() + 1, asapResponse.mrid, baseOnePlacementIndex);
+        }
+
         ASAPManager.AdResponse.Network network = mediationWaterfall.getNextThirdPartyNetwork();
         if (network == null) { // end of waterfall
             mediationListener.onAllAdsFailedToLoad();
@@ -82,7 +88,16 @@ public class MediationManager {
         }
 
         mediationAdapters.put(network.name, mediationAdapter);
+        fireNetworkImpressionRequestBeacon(network.key, mediationWaterfall.getCurrentIndex() + 1, asapResponse.mrid, baseOnePlacementIndex);
         mediationAdapter.loadAd(context, mediationListener, asapResponse, network);
+    }
+
+    private void fireNetworkNoFillBeacon(String networkKey, int baseOneNetworkOrder, String mrid, int baseOnePlacementIndex) {
+        beaconService.networkNoFill(networkKey, baseOneNetworkOrder, mrid, baseOnePlacementIndex);
+    }
+
+    private void fireNetworkImpressionRequestBeacon(String networkKey, int baseOneNetworkOrder, String mrid, int baseOnePlacementIndex) {
+        beaconService.networkImpressionRequest(networkKey, baseOneNetworkOrder, mrid, baseOnePlacementIndex);
     }
 
     /**
@@ -138,6 +153,10 @@ public class MediationManager {
         }
     }
 
+    public void incrementPlacementIndex() {
+        baseOnePlacementIndex++;
+    }
+
     public static class MediationWaterfall {
         List<ASAPManager.AdResponse.Network> thirdPartyNetworks = new ArrayList<>();
         int currentIndex = -1;
@@ -150,11 +169,11 @@ public class MediationManager {
             }
         }
 
-        private void incrementIndex() {
+        void incrementIndex() {
             currentIndex++;
         }
 
-        private int getCurrentIndex() {
+        int getCurrentIndex() {
             return currentIndex;
         }
 
@@ -168,11 +187,15 @@ public class MediationManager {
         }
 
         public ASAPManager.AdResponse.Network getCurrentThirdPartyNetwork() {
-            if (getCurrentIndex() < thirdPartyNetworks.size()) {
+            if (getCurrentIndex() >= 0 && getCurrentIndex() < thirdPartyNetworks.size()) {
                 return thirdPartyNetworks.get(getCurrentIndex());
             } else {
                 return null;
             }
+        }
+
+        public boolean waterfallStarted() {
+            return currentIndex != -1;
         }
     }
 }

@@ -114,6 +114,30 @@ public class BeaconService {
         fireBeacon(beaconParams);
     }
 
+    public void networkImpressionRequest(final String networkKey, final int baseOneNetworkOrder, final String mrid, final int baseOnePlacementIndex) {
+        Map<String, String> beaconParams = commonParams();
+        beaconParams.put("pkey", placementKey);
+        beaconParams.put("type", "networkImpressionRequest");
+        beaconParams.put("networkKey", networkKey);
+        beaconParams.put("networkOrder", String.valueOf(baseOneNetworkOrder));
+        beaconParams.put("mrid", mrid);
+        beaconParams.put("placementIndex", String.valueOf(baseOnePlacementIndex));
+
+        fireBeacon(beaconParams);
+    }
+
+    public void networkNoFill(final String networkKey, final int baseOneNetworkOrder, final String mrid, final int baseOnePlacementIndex) {
+        Map<String, String> beaconParams = commonParams();
+        beaconParams.put("pkey", placementKey);
+        beaconParams.put("type", "networkNoFill");
+        beaconParams.put("networkKey", networkKey);
+        beaconParams.put("networkOrder", String.valueOf(baseOneNetworkOrder));
+        beaconParams.put("mrid", mrid);
+        beaconParams.put("placementIndex", String.valueOf(baseOnePlacementIndex));
+
+        fireBeacon(beaconParams);
+    }
+
     public void adReceived(final Context context, final Creative creative, int feedPosition) {
         Map<String, String> beaconParams = commonParamsWithCreative(creative);
         beaconParams.put("type", "impression");

@@ -50,6 +50,34 @@ public class MediationManagerTest extends TestBase {
     }
 
     @Test
+    public void loadNextAd_firesNoFillBeaconIfWaterfallStarted() throws Exception {
+        network1.key = "fake-network-key";
+        asapResponse.mrid = "fake-mrid";
+        when(mediationWaterfall.waterfallStarted()).thenReturn(true);
+        when(mediationWaterfall.getCurrentThirdPartyNetwork()).thenReturn(network1);
+        when(mediationWaterfall.getCurrentIndex()).thenReturn(2);
+        subject.loadNextAd();
+        verify(beaconService, times(1)).networkNoFill("fake-network-key", 3, "fake-mrid", 1);
+    }
+
+    @Test
+    public void loadNextAd_firesNetworkImpressionRequestBeacon() throws Exception {
+        network1.key = "fake-network-key";
+        asapResponse.mrid = "fake-mrid";
+        when(mediationWaterfall.getNextThirdPartyNetwork()).thenReturn(network1);
+        when(mediationWaterfall.getCurrentIndex()).thenReturn(2);
+        when(mediationAdapters.get(anyString())).thenReturn(mediationAdapter);
+        subject.loadNextAd();
+        verify(beaconService, times(1)).networkImpressionRequest("fake-network-key", 3, "fake-mrid", 1);
+    }
+
+    @Test
+    public void loadNextAd_doesNotFireNoFillBeaconIfBeginningWaterfall() throws Exception {
+        when(mediationWaterfall.waterfallStarted()).thenReturn(false);
+        verify(beaconService, never()).networkNoFill(anyString(), anyInt(), anyString(), anyInt());
+    }
+
+    @Test
     public void loadNextAd_callsOnAllAdsFailedToLoad_ifWaterfallComplete() throws Exception {
         when(mediationWaterfall.getNextThirdPartyNetwork()).thenReturn(null);
         subject.loadNextAd();
@@ -85,7 +113,10 @@ public class MediationManagerTest extends TestBase {
     @Test
     public void simulatesEntireWaterfall() throws Exception {
         network1.name = "network1";
+        network1.key = "network1Key";
         network2.name = "network2";
+        network2.key = "network2Key";
+        asapResponse.mrid = "mrid";
         List<ASAPManager.AdResponse.Network> networks = new ArrayList<>();
         networks.add(network1);
         networks.add(network2);
@@ -103,6 +134,11 @@ public class MediationManagerTest extends TestBase {
                 any(ASAPManager.AdResponse.Network.class)
         );
         verify(mediationListener, never()).onAllAdsFailedToLoad();
+        verify(beaconService, never()).networkNoFill(
+                anyString(),
+                anyInt(),
+                anyString(),
+                anyInt());
 
         // on first network failed to load ad
         subject.loadNextAd();
@@ -113,6 +149,16 @@ public class MediationManagerTest extends TestBase {
                 any(ASAPManager.AdResponse.Network.class)
         );
         verify(mediationListener, never()).onAllAdsFailedToLoad();
+        verify(beaconService, times(1)).networkNoFill(
+               "network1Key",
+                1,
+                "mrid",
+                1);
+        verify(beaconService, times(1)).networkImpressionRequest(
+                "network2Key",
+                2,
+                "mrid",
+                1);
 
         // on second network failed to load ad
         subject.loadNextAd();
@@ -123,6 +169,11 @@ public class MediationManagerTest extends TestBase {
                 any(ASAPManager.AdResponse.Network.class)
         );
         verify(mediationListener, times(1)).onAllAdsFailedToLoad();
+        verify(beaconService, times(1)).networkNoFill(
+                "network2Key",
+                2,
+                "mrid",
+                1);
 
     }
 

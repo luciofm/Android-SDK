@@ -87,6 +87,7 @@ public class Sharethrough {
             strSdkConfig.getAsapManager().setWaterfallComplete();
 
             for(ICreative creative : creatives) {
+                strSdkConfig.getMediationManager().incrementPlacementIndex();
                 strSdkConfig.getCreativeQueue().add(creative);
                 Logger.d("insert creative, creative cache size %d", strSdkConfig.getCreativeQueue().size());
                 fireNewAdsToShow();
@@ -100,6 +101,7 @@ public class Sharethrough {
 
         @Override
         public void onAllAdsFailedToLoad() {
+            strSdkConfig.getMediationManager().incrementPlacementIndex();
             strSdkConfig.getAsapManager().setWaterfallComplete();
             fireNoAdsToShow();
         }
