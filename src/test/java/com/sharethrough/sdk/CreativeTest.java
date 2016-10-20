@@ -21,7 +21,8 @@ public class CreativeTest extends TestBase {
         responseCreative = new Response.Creative();
         responseCreative.creative = new Response.Creative.CreativeInner();
         responseCreative.creative.beacon = new Response.Creative.CreativeInner.Beacon();
-        subject = new Creative(responseCreative, mediationRequestId);
+        subject = new Creative("networkType", "className", mediationRequestId);
+        subject.setResponseCreative(responseCreative);
     }
 
     @Test

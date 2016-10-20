@@ -92,15 +92,16 @@ public class STXNetworkAdapter implements STRMediationAdapter {
             Creative creative;
             if (responseCreative.creative.action.equals("hosted-video")) {
                 if (!responseCreative.creative.forceClickToPlay && response.placement.allowInstantPlay) {
-                    creative = new InstantPlayCreative(responseCreative, mediationRequestId);
+                    creative = new InstantPlayCreative(network.name, network.androidClassName, mediationRequestId);
+                    creative.setResponseCreative(responseCreative);
                 } else {
-                    creative = new Creative(responseCreative, mediationRequestId);
+                    creative = new Creative(network.name, network.androidClassName, mediationRequestId);
+                    creative.setResponseCreative(responseCreative);
                 }
             } else {
-                creative = new Creative(responseCreative, mediationRequestId);
+                creative = new Creative(network.name, network.androidClassName, mediationRequestId);
+                creative.setResponseCreative(responseCreative);
             }
-            creative.setNetworkType(network.name);
-            creative.setClassName(network.androidClassName);
             creatives.add(creative);
         }
         return creatives;

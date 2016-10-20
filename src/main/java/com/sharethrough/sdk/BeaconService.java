@@ -91,7 +91,7 @@ public class BeaconService {
         beaconParams.put("type", "userEvent");
         beaconParams.put("userEvent", userEvent);
         beaconParams.put("engagement", "true");
-        beaconParams.put("placementIndex", String.valueOf(feedPosition));
+        beaconParams.put("placementIndex", String.valueOf(creative.getPlacementIndex()));
 
 
         fireThirdPartyBeacons(creative.getClickBeacons());
@@ -141,7 +141,7 @@ public class BeaconService {
     public void adReceived(final Context context, final Creative creative, int feedPosition) {
         Map<String, String> beaconParams = commonParamsWithCreative(creative);
         beaconParams.put("type", "impression");
-        beaconParams.put("placementIndex", String.valueOf(feedPosition));
+        beaconParams.put("placementIndex", String.valueOf(creative.getPlacementIndex()));
 
         fireThirdPartyBeacons(creative.getImpressionBeacons());
         fireBeacon(beaconParams);
@@ -153,7 +153,7 @@ public class BeaconService {
         beaconParams.put("pheight", "" + adView.getHeight());
         beaconParams.put("pwidth", "" + adView.getWidth());
         beaconParams.put("type", "visible");
-        beaconParams.put("placementIndex", String.valueOf(feedPosition));
+        beaconParams.put("placementIndex", String.valueOf(creative.getPlacementIndex()));
 
         fireThirdPartyBeacons(creative.getVisibleBeacons());
         fireBeacon(beaconParams);
@@ -166,7 +166,7 @@ public class BeaconService {
         beaconParams.put("userEvent", "share");
         beaconParams.put("engagement", "true");
         beaconParams.put("share", medium);
-        beaconParams.put("placementIndex", String.valueOf(feedPosition));
+        beaconParams.put("placementIndex", String.valueOf(creative.getPlacementIndex()));
         fireBeacon(beaconParams);
     }
 
@@ -175,7 +175,7 @@ public class BeaconService {
         beaconParams.put("type", "userEvent");
         beaconParams.put("userEvent", "autoplayVideoEngagement");
         beaconParams.put("videoDuration", String.valueOf(duration));
-        beaconParams.put("placementIndex", String.valueOf(feedPosition));
+        beaconParams.put("placementIndex", String.valueOf(creative.getPlacementIndex()));
         fireBeacon(beaconParams);
     }
 
@@ -183,7 +183,7 @@ public class BeaconService {
         Map<String, String> beaconParams = commonParamsWithCreative(creative);
         beaconParams.put("type", "silentAutoPlayDuration");
         beaconParams.put("duration", String.valueOf(duration));
-        beaconParams.put("placementIndex", String.valueOf(feedPosition));
+        beaconParams.put("placementIndex", String.valueOf(creative.getPlacementIndex()));
         silentThirdPartyAutoDuration(creative, duration);
         fireBeacon(beaconParams);
 
@@ -209,7 +209,7 @@ public class BeaconService {
         beaconParams.put("type", "videoViewDuration");
         beaconParams.put("duration", String.valueOf(duration));
         beaconParams.put("silent", String.valueOf(isSilent));
-        beaconParams.put("placementIndex", String.valueOf(feedPosition));
+        beaconParams.put("placementIndex", String.valueOf(creative.getPlacementIndex()));
         fireBeacon(beaconParams);
     }
 
@@ -222,7 +222,7 @@ public class BeaconService {
         beaconParams.put("type", "completionPercent");
         beaconParams.put("value", String.valueOf(percent));
         beaconParams.put("isSilentPlay", String.valueOf(isSilent));
-        beaconParams.put("placementIndex", String.valueOf(feedPosition));
+        beaconParams.put("placementIndex", String.valueOf(creative.getPlacementIndex()));
         fireBeacon(beaconParams);
     }
 

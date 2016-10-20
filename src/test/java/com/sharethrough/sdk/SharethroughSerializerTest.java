@@ -54,14 +54,15 @@ public class SharethroughSerializerTest extends TestBase {
     @Test
     public void GetCreativesQueue_SerializedStringShouldReturnCreativesQueue() throws Exception {
         CreativesQueue cq = new CreativesQueue();
-        Creative creative1 = new Creative(new Response.Creative(), "mrid");
-        creative1.setNetworkType("STX");
+
+        Creative creative1 = new Creative("STX", "className", "mrid");
+        creative1.setResponseCreative(new Response.Creative());
         cq.add(creative1);
-        Creative creative2 = new Creative(new Response.Creative(), "mrid");
-        creative2.setNetworkType("STX");
+        Creative creative2 = new Creative("STX", "className", "mrid");
+        creative2.setResponseCreative(new Response.Creative());
         cq.add(creative2);
-        Creative creative3 = new Creative(new Response.Creative(), "mrid");
-        creative3.setNetworkType("STX");
+        Creative creative3 = new Creative("STX", "className", "mrid");
+        creative3.setResponseCreative(new Response.Creative());
         cq.add(creative3);
         assertThat(cq.size()).isEqualTo(3);
 
@@ -76,14 +77,14 @@ public class SharethroughSerializerTest extends TestBase {
     @Test
     public void GetCreativesQueue_SerializedStringShouldReturnCreativesQueueWithOnlySharethrough() throws Exception {
         CreativesQueue cq = new CreativesQueue();
-        Creative creative1 = new Creative(new Response.Creative(), "mrid");
-        creative1.setNetworkType("STX");
+        Creative creative1 = new Creative("STX", "className", "mrid");
+        creative1.setResponseCreative(new Response.Creative());
         cq.add(creative1);
-        Creative creative2 = new Creative(new Response.Creative(), "mrid");
-        creative2.setNetworkType("NOT STX");
+        Creative creative2 = new Creative("NOT STX", "className", "mrid");
+        creative2.setResponseCreative(new Response.Creative());
         cq.add(creative2);
-        Creative creative3 = new Creative(new Response.Creative(), "mrid");
-        creative3.setNetworkType("STX");
+        Creative creative3 = new Creative("STX", "className", "mrid");
+        creative3.setResponseCreative(new Response.Creative());
         cq.add(creative3);
         assertThat(cq.size()).isEqualTo(3);
 
@@ -106,9 +107,16 @@ public class SharethroughSerializerTest extends TestBase {
     public void GetSlot_SerializedStringShouldReturnSlot() throws Exception {
         LruCache<Integer, ICreative> slot = new LruCache<>(10);
 
-        slot.put(0, new Creative(new Response.Creative(), "mrid"));
-        slot.put(1, new Creative(new Response.Creative(), "mrid"));
-        slot.put(2, new Creative(new Response.Creative(), "mrid"));
+        Creative creative1 = new Creative("STX", "className", "mrid");
+        creative1.setResponseCreative(new Response.Creative());
+        Creative creative2 = new Creative("STX", "className", "mrid");
+        creative2.setResponseCreative(new Response.Creative());
+        Creative creative3 = new Creative("STX", "className", "mrid");
+        creative3.setResponseCreative(new Response.Creative());
+
+        slot.put(0, creative1);
+        slot.put(1, creative2);
+        slot.put(2, creative3);
         assertThat(slot.size()).isEqualTo(3);
 
         String serializedSharethroughObj = SharethroughSerializer.serialize(new CreativesQueue(), slot, 2, 5);

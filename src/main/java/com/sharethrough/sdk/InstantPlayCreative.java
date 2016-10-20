@@ -7,8 +7,8 @@ public class InstantPlayCreative extends Creative {
     private int currentPosition = 0;
     private boolean isVideoCompleted = false;
 
-    public InstantPlayCreative(Response.Creative responseCreative, String mediationRequestId) {
-        super(responseCreative, mediationRequestId);
+    public InstantPlayCreative(String networkType, String className, String mrid) {
+        super(networkType, className, mrid);
     }
 
     public boolean isVideoCompleted() {

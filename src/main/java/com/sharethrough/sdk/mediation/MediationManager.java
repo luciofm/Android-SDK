@@ -157,6 +157,10 @@ public class MediationManager {
         baseOnePlacementIndex++;
     }
 
+    public int getPlacementIndex() {
+        return baseOnePlacementIndex;
+    }
+
     public static class MediationWaterfall {
         List<ASAPManager.AdResponse.Network> thirdPartyNetworks = new ArrayList<>();
         int currentIndex = -1;
