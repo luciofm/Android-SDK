@@ -50,6 +50,7 @@ public class MediationManager {
     public void initiateWaterfallAndLoadAd(final ASAPManager.AdResponse asapResponse,
                                            final MediationListener mediationListener,
                                            final MediationWaterfall mediationWaterfall) {
+        fireMediationStartBeacon(asapResponse.mrid, baseOnePlacementIndex);
         setUpWaterfall(asapResponse, mediationListener, mediationWaterfall);
         loadNextAd();
     }
@@ -90,6 +91,10 @@ public class MediationManager {
         mediationAdapters.put(network.name, mediationAdapter);
         fireNetworkImpressionRequestBeacon(network.key, mediationWaterfall.getCurrentIndex() + 1, asapResponse.mrid, baseOnePlacementIndex);
         mediationAdapter.loadAd(context, mediationListener, asapResponse, network);
+    }
+
+    private void fireMediationStartBeacon(String mrid, int baseOnePlacementIndex) {
+        beaconService.mediationStart(mrid, baseOnePlacementIndex);
     }
 
     private void fireNetworkNoFillBeacon(String networkKey, int baseOneNetworkOrder, String mrid, int baseOnePlacementIndex) {

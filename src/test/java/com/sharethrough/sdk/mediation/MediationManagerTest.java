@@ -43,6 +43,13 @@ public class MediationManagerTest extends TestBase {
     }
 
     @Test
+    public void initiateWaterfallAndLoadAd_firesMediationStartBeacon() throws Exception {
+        asapResponse.mrid = "fake-mrid";
+        subject.initiateWaterfallAndLoadAd(asapResponse, mediationListener, mediationWaterfall);
+        verify(beaconService, times(1)).mediationStart("fake-mrid", 1);
+    }
+
+    @Test
     public void loadNextAd_getsNextThirdPartyNetWork() throws Exception {
         when(mediationWaterfall.getNextThirdPartyNetwork()).thenReturn(null);
         subject.loadNextAd();

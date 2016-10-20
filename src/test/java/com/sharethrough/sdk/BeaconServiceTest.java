@@ -297,6 +297,59 @@ public class BeaconServiceTest extends TestBase {
     }
 
     @Test
+    public void whenNetworkImpressionRequestCalled_firesBeacon() throws Exception {
+        int baseOneNetworkOrder = 1;
+        int baseOnePlacementIndex = 5;
+        String mrid = "fake-mrid";
+        String networkKey = "fake-network-key";
+        Map<String, String> expectedBeaconParams = subject.commonParams();
+        expectedBeaconParams.put("pkey", "placement key");
+        expectedBeaconParams.put("type", "networkImpressionRequest");
+        expectedBeaconParams.put("networkKey", networkKey);
+        expectedBeaconParams.put("networkOrder", String.valueOf(baseOneNetworkOrder));
+        expectedBeaconParams.put("mrid", mrid);
+        expectedBeaconParams.put("placementIndex", String.valueOf(baseOnePlacementIndex));
+
+        subject.networkImpressionRequest(networkKey, baseOneNetworkOrder, mrid, baseOnePlacementIndex);
+        STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
+        assertBeaconFired(request.getUrl(), expectedBeaconParams);
+    }
+
+    @Test
+    public void whenNetworkNoFillCalled_firesBeacon() throws Exception {
+        int baseOneNetworkOrder = 1;
+        int baseOnePlacementIndex = 5;
+        String mrid = "fake-mrid";
+        String networkKey = "fake-network-key";
+        Map<String, String> expectedBeaconParams = subject.commonParams();
+        expectedBeaconParams.put("pkey", "placement key");
+        expectedBeaconParams.put("type", "networkNoFill");
+        expectedBeaconParams.put("networkKey", networkKey);
+        expectedBeaconParams.put("networkOrder", String.valueOf(baseOneNetworkOrder));
+        expectedBeaconParams.put("mrid", mrid);
+        expectedBeaconParams.put("placementIndex", String.valueOf(baseOnePlacementIndex));
+
+        subject.networkNoFill(networkKey, baseOneNetworkOrder, mrid, baseOnePlacementIndex);
+        STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
+        assertBeaconFired(request.getUrl(), expectedBeaconParams);
+    }
+
+    @Test
+    public void whenMediationStartCalled_firesBeacon() throws Exception {
+        int baseOnePlacementIndex = 5;
+        String mrid = "fake-mrid";
+        Map<String, String> expectedBeaconParams = subject.commonParams();
+        expectedBeaconParams.put("pkey", "placement key");
+        expectedBeaconParams.put("type", "mediationStart");
+        expectedBeaconParams.put("mrid", mrid);
+        expectedBeaconParams.put("placementIndex", String.valueOf(baseOnePlacementIndex));
+
+        subject.mediationStart(mrid, baseOnePlacementIndex);
+        STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
+        assertBeaconFired(request.getUrl(), expectedBeaconParams);
+    }
+
+    @Test
     public void whenSilentAutoplayDuration3SecondsCalled_fire3SecondBeacons() throws Exception {
         int seconds = 3000;
         String[] initialUrls = {"//silentPlay/EndOne", "//silentPlay/End[Two]?cacheBuster=[timestamp]"};

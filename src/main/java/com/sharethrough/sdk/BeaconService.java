@@ -138,6 +138,16 @@ public class BeaconService {
         fireBeacon(beaconParams);
     }
 
+    public void mediationStart(final String mrid, final int baseOnePlacementIndex) {
+        Map<String, String> beaconParams = commonParams();
+        beaconParams.put("pkey", placementKey);
+        beaconParams.put("type", "mediationStart");
+        beaconParams.put("mrid", mrid);
+        beaconParams.put("placementIndex", String.valueOf(baseOnePlacementIndex));
+
+        fireBeacon(beaconParams);
+    }
+
     public void adReceived(final Context context, final Creative creative, int feedPosition) {
         Map<String, String> beaconParams = commonParamsWithCreative(creative);
         beaconParams.put("type", "impression");
