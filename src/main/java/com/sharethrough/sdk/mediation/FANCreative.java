@@ -5,14 +5,18 @@ import com.facebook.ads.Ad;
 /**
  * Created by engineer on 8/3/16.
  */
-public class FANCreative implements ICreative {
+public class FANCreative extends ICreative {
     private Ad fbAd;
-    private String networkType;
-    private String className;
 
-    @Override
-    public void setNetworkType(String networkType) {
-        this.networkType = networkType;
+    public FANCreative(String networkType, String className, String mrid) {
+        super(networkType, className, mrid);
+    }
+    public void setFbAd(Ad ad) {
+        this.fbAd = ad;
+    }
+
+    public Ad getFbAd() {
+        return fbAd;
     }
 
     @Override
@@ -21,20 +25,17 @@ public class FANCreative implements ICreative {
     }
 
     @Override
-    public void setClassName(String className) {
-        this.className = className;
-    }
-
-    @Override
     public String getClassName() {
         return className;
     }
 
-    public FANCreative(Ad ad) {
-        this.fbAd = ad;
+    @Override
+    public void setPlacementIndex(int placementIndex) {
+        this.placementIndex = placementIndex;
     }
 
-    public Ad getFbAd() {
-        return fbAd;
+    @Override
+    public int getPlacementIndex() {
+        return placementIndex;
     }
 }

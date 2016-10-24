@@ -128,9 +128,24 @@ public class SharethroughTest extends TestBase {
     }
 
     @Test
+    public void mediationListener_onAdLoaded_incrementsPlacementIndexForEachCreative() throws Exception {
+        List<ICreative> creatives = new ArrayList<>();
+        creatives.add(creative);
+        creatives.add(creative);
+        subject.mediationListener.onAdLoaded(creatives);
+        verify(mediationManager, times(2)).incrementPlacementIndex();
+    }
+
+    @Test
     public void mediationListener_onAdFailedToShow_loadsNextAd() throws Exception {
         subject.mediationListener.onAdFailedToLoad();
         verify(mediationManager, times(1)).loadNextAd();
+    }
+
+    @Test
+    public void mediationListener_onAllAdsFailedToShow_incrementsPlacementIndexBy1() throws Exception {
+        subject.mediationListener.onAllAdsFailedToLoad();
+        verify(mediationManager, times(1)).incrementPlacementIndex();
     }
 
     @Test

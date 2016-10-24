@@ -106,7 +106,8 @@ public class BeaconServiceTest extends TestBase {
         responseCreative.creative.beacon = beacon;
 
         mediationRequestId = "fake-mrid"; // To remove for asap v2
-        creative = new Creative(responseCreative, mediationRequestId);
+        creative = new Creative("networkType", "className", mediationRequestId);
+        creative.setResponseCreative(responseCreative);
 
         packageInfo.versionName = "fake_app_id";
         when(placement.getStatus()).thenReturn("live");
@@ -156,7 +157,8 @@ public class BeaconServiceTest extends TestBase {
         responseCreativeWithDealId.creative.campaignKey= "campaign key";
         responseCreativeWithDealId.creative.dealId = "fake_deal_id";
 
-        creative = new Creative(responseCreativeWithDealId, mediationRequestId);
+        creative = new Creative("networkType", "className", mediationRequestId);
+        creative.setResponseCreative(responseCreativeWithDealId);
 
         expectedCommonParams.put("pkey", "placement key");
         expectedCommonParams.put("vkey", "variant key");
@@ -175,7 +177,7 @@ public class BeaconServiceTest extends TestBase {
         expectedBeaconParams.put("type", "userEvent");
         expectedBeaconParams.put("userEvent", "fake user event");
         expectedBeaconParams.put("engagement", "true");
-        expectedBeaconParams.put("placementIndex", String.valueOf(feedPosition));
+        expectedBeaconParams.put("placementIndex", String.valueOf(creative.getPlacementIndex()));
         expectedBeaconParams.put("pheight", "0");
         expectedBeaconParams.put("pwidth", "0");
         subject.adClicked("fake user event", creative, RendererTest.makeAdView().getAdView(), feedPosition);
@@ -198,7 +200,7 @@ public class BeaconServiceTest extends TestBase {
     public void fireAdReceived() throws Exception {
         Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(creative);
         expectedBeaconParams.put("type", "impression");
-        expectedBeaconParams.put("placementIndex", String.valueOf(feedPosition));
+        expectedBeaconParams.put("placementIndex", String.valueOf(creative.getPlacementIndex()));
         subject.adReceived(RuntimeEnvironment.application, creative, feedPosition);
         STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
         assertBeaconFired(request.getUrl(), expectedBeaconParams);
@@ -210,7 +212,7 @@ public class BeaconServiceTest extends TestBase {
         expectedBeaconParams.put("pheight","0");
         expectedBeaconParams.put("pwidth","0");
         expectedBeaconParams.put("type", "visible");
-        expectedBeaconParams.put("placementIndex", String.valueOf(feedPosition));
+        expectedBeaconParams.put("placementIndex", String.valueOf(creative.getPlacementIndex()));
 
         subject.adVisible(RendererTest.makeAdView(), creative, feedPosition);
         STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
@@ -225,7 +227,7 @@ public class BeaconServiceTest extends TestBase {
         expectedBeaconParams.put("userEvent", "share");
         expectedBeaconParams.put("share", "shareType");
         expectedBeaconParams.put("engagement", "true");
-        expectedBeaconParams.put("placementIndex", String.valueOf(feedPosition));
+        expectedBeaconParams.put("placementIndex", String.valueOf(creative.getPlacementIndex()));
         subject.adShared(RuntimeEnvironment.application, creative, "shareType", feedPosition);
         STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
         assertBeaconFired(request.getUrl(), expectedBeaconParams);
@@ -237,7 +239,8 @@ public class BeaconServiceTest extends TestBase {
 
         ArrayList<String> impressionEndoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
         responseCreative.creative.beacon.impression = impressionEndoints;
-        Creative testCreative = new Creative(responseCreative, mediationRequestId);
+        Creative testCreative = new Creative("networkType", "className", mediationRequestId);
+        testCreative.setResponseCreative(responseCreative);
         subject.adReceived(RuntimeEnvironment.application, testCreative, feedPosition);
         assertThat(fakeRequestQueue.cache.size() == 3);
 
@@ -254,7 +257,8 @@ public class BeaconServiceTest extends TestBase {
         String[] initialUrls = {"//visibleEndOne?cacheBuster=[timestamp]", "//visibleEndTwo?cacheBuster=[timestamp]"};
         ArrayList<String> visibleEndoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
         responseCreative.creative.beacon.visible = visibleEndoints;
-        Creative testCreative = new Creative(responseCreative, mediationRequestId);
+        Creative testCreative = new Creative("networkType", "className", mediationRequestId);
+        testCreative.setResponseCreative(responseCreative);
 
         subject.adVisible(RendererTest.makeAdView(), testCreative, feedPosition);
 
@@ -278,7 +282,8 @@ public class BeaconServiceTest extends TestBase {
         responseCreative.creative.beacon.click = clickEndoints;
         responseCreative.creative.beacon.play = playEndoints;
 
-        Creative testCreative = new Creative(responseCreative, mediationRequestId);
+        Creative testCreative = new Creative("networkType", "className", mediationRequestId);
+        testCreative.setResponseCreative(responseCreative);
 
         subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition);
 
@@ -292,13 +297,67 @@ public class BeaconServiceTest extends TestBase {
     }
 
     @Test
+    public void whenNetworkImpressionRequestCalled_firesBeacon() throws Exception {
+        int baseOneNetworkOrder = 1;
+        int baseOnePlacementIndex = 5;
+        String mrid = "fake-mrid";
+        String networkKey = "fake-network-key";
+        Map<String, String> expectedBeaconParams = subject.commonParams();
+        expectedBeaconParams.put("pkey", "placement key");
+        expectedBeaconParams.put("type", "networkImpressionRequest");
+        expectedBeaconParams.put("networkKey", networkKey);
+        expectedBeaconParams.put("networkOrder", String.valueOf(baseOneNetworkOrder));
+        expectedBeaconParams.put("mrid", mrid);
+        expectedBeaconParams.put("placementIndex", String.valueOf(baseOnePlacementIndex));
+
+        subject.networkImpressionRequest(networkKey, baseOneNetworkOrder, mrid, baseOnePlacementIndex);
+        STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
+        assertBeaconFired(request.getUrl(), expectedBeaconParams);
+    }
+
+    @Test
+    public void whenNetworkNoFillCalled_firesBeacon() throws Exception {
+        int baseOneNetworkOrder = 1;
+        int baseOnePlacementIndex = 5;
+        String mrid = "fake-mrid";
+        String networkKey = "fake-network-key";
+        Map<String, String> expectedBeaconParams = subject.commonParams();
+        expectedBeaconParams.put("pkey", "placement key");
+        expectedBeaconParams.put("type", "networkNoFill");
+        expectedBeaconParams.put("networkKey", networkKey);
+        expectedBeaconParams.put("networkOrder", String.valueOf(baseOneNetworkOrder));
+        expectedBeaconParams.put("mrid", mrid);
+        expectedBeaconParams.put("placementIndex", String.valueOf(baseOnePlacementIndex));
+
+        subject.networkNoFill(networkKey, baseOneNetworkOrder, mrid, baseOnePlacementIndex);
+        STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
+        assertBeaconFired(request.getUrl(), expectedBeaconParams);
+    }
+
+    @Test
+    public void whenMediationStartCalled_firesBeacon() throws Exception {
+        int baseOnePlacementIndex = 5;
+        String mrid = "fake-mrid";
+        Map<String, String> expectedBeaconParams = subject.commonParams();
+        expectedBeaconParams.put("pkey", "placement key");
+        expectedBeaconParams.put("type", "mediationStart");
+        expectedBeaconParams.put("mrid", mrid);
+        expectedBeaconParams.put("placementIndex", String.valueOf(baseOnePlacementIndex));
+
+        subject.mediationStart(mrid, baseOnePlacementIndex);
+        STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
+        assertBeaconFired(request.getUrl(), expectedBeaconParams);
+    }
+
+    @Test
     public void whenSilentAutoplayDuration3SecondsCalled_fire3SecondBeacons() throws Exception {
         int seconds = 3000;
         String[] initialUrls = {"//silentPlay/EndOne", "//silentPlay/End[Two]?cacheBuster=[timestamp]"};
 
         ArrayList<String> silentPlayEndpoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
         responseCreative.creative.beacon.silentPlay = silentPlayEndpoints;
-        Creative testCreative = new Creative(responseCreative, mediationRequestId);
+        Creative testCreative = new Creative("networkType", "className", mediationRequestId);
+        testCreative.setResponseCreative(responseCreative);
         subject.silentAutoPlayDuration(testCreative, seconds, feedPosition);
 
         assertThat(fakeRequestQueue.cache.size() == 3);
@@ -313,7 +372,7 @@ public class BeaconServiceTest extends TestBase {
         String returnedUrl = ((STRStringRequest)fakeRequestQueue.cache.get(2)).getUrl();
         assertThat(returnedUrl).contains("type=silentAutoPlayDuration");
         assertThat(returnedUrl).contains("duration=" + seconds);
-        assertThat(returnedUrl).contains("placementIndex=" + feedPosition);
+        assertThat(returnedUrl).contains("placementIndex=" + creative.getPlacementIndex());
     }
 
     @Test
@@ -323,7 +382,8 @@ public class BeaconServiceTest extends TestBase {
 
         ArrayList<String> silentPlayEndpoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
         responseCreative.creative.beacon.tenSecondSilentPlay = silentPlayEndpoints;
-        Creative testCreative = new Creative(responseCreative, mediationRequestId);
+        Creative testCreative = new Creative("networkType", "className", mediationRequestId);
+        testCreative.setResponseCreative(responseCreative);
         subject.silentAutoPlayDuration(testCreative, seconds, feedPosition);
 
         assertThat(fakeRequestQueue.cache.size() == 3);
@@ -338,7 +398,7 @@ public class BeaconServiceTest extends TestBase {
         String returnedUrl = ((STRStringRequest)fakeRequestQueue.cache.get(2)).getUrl();
         assertThat(returnedUrl).contains("type=silentAutoPlayDuration");
         assertThat(returnedUrl).contains("duration=" + seconds);
-        assertThat(returnedUrl).contains("placementIndex=" + feedPosition);
+        assertThat(returnedUrl).contains("placementIndex=" + creative.getPlacementIndex());
     }
 
     @Test
@@ -347,7 +407,8 @@ public class BeaconServiceTest extends TestBase {
         String[] initialUrls = {"//silentPlay/EndOne", "//silentPlay/End[Two]?cacheBuster=[timestamp]"};
         ArrayList<String> silentPlayEndpoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
         responseCreative.creative.beacon.fifteenSecondSilentPlay = silentPlayEndpoints;
-        Creative testCreative = new Creative(responseCreative, mediationRequestId);
+        Creative testCreative = new Creative("networkType", "className", mediationRequestId);
+        testCreative.setResponseCreative(responseCreative);
         subject.silentAutoPlayDuration(testCreative, seconds, feedPosition);
 
         assertThat(fakeRequestQueue.cache.size() == 3);
@@ -362,7 +423,7 @@ public class BeaconServiceTest extends TestBase {
         String returnedUrl = ((STRStringRequest)fakeRequestQueue.cache.get(2)).getUrl();
         assertThat(returnedUrl).contains("type=silentAutoPlayDuration");
         assertThat(returnedUrl).contains("duration=" + seconds);
-        assertThat(returnedUrl).contains("placementIndex="+ feedPosition);
+        assertThat(returnedUrl).contains("placementIndex="+ creative.getPlacementIndex());
     }
 
     @Test
@@ -371,7 +432,8 @@ public class BeaconServiceTest extends TestBase {
         String[] initialUrls = {"//silentPlay/EndOne", "//silentPlay/End[Two]?cacheBuster=[timestamp]"};
         ArrayList<String> silentPlayEndpoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
         responseCreative.creative.beacon.thirtySecondSilentPlay = silentPlayEndpoints;
-        Creative testCreative = new Creative(responseCreative, mediationRequestId);
+        Creative testCreative = new Creative("networkType", "className", mediationRequestId);
+        testCreative.setResponseCreative(responseCreative);
         subject.silentAutoPlayDuration(testCreative, seconds, feedPosition);
 
         assertThat(fakeRequestQueue.cache.size() == 3);
@@ -386,7 +448,7 @@ public class BeaconServiceTest extends TestBase {
         String returnedUrl = ((STRStringRequest)fakeRequestQueue.cache.get(2)).getUrl();
         assertThat(returnedUrl).contains("type=silentAutoPlayDuration");
         assertThat(returnedUrl).contains("duration=" + seconds);
-        assertThat(returnedUrl).contains("placementIndex="+ feedPosition);
+        assertThat(returnedUrl).contains("placementIndex="+ creative.getPlacementIndex());
     }
 
     @Test
@@ -394,7 +456,8 @@ public class BeaconServiceTest extends TestBase {
         String[] initialUrls = {"//silentPlay/EndOne", "//silentPlay/End[Two]?cacheBuster=[timestamp]"};
         ArrayList<String> silentPlayEndpoints = new ArrayList<>(Arrays.asList(initialUrls[0], initialUrls[1]));
         responseCreative.creative.beacon.completedSilentPlay = silentPlayEndpoints;
-        Creative testCreative = new Creative(responseCreative, mediationRequestId);
+        Creative testCreative = new Creative("networkType", "className", mediationRequestId);
+        testCreative.setResponseCreative(responseCreative);
         subject.videoPlayed(RuntimeEnvironment.application, testCreative, 95, true, feedPosition);
 
         assertThat(fakeRequestQueue.cache.size() == 3);
@@ -414,7 +477,8 @@ public class BeaconServiceTest extends TestBase {
         responseCreative.creative.beacon.impression = new ArrayList<>();
         responseCreative.creative.beacon.visible = new ArrayList<>();
 
-        Creative testCreative = new Creative(responseCreative, mediationRequestId);
+        Creative testCreative = new Creative("networkType", "className", mediationRequestId);
+        testCreative.setResponseCreative(responseCreative);
 
         subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition);
 
@@ -430,7 +494,8 @@ public class BeaconServiceTest extends TestBase {
         String badUrl = "//%%%invalid%url%%%";
         List<String> clickEndoints = Arrays.asList(badUrl);
         responseCreative.creative.beacon.click = clickEndoints;
-        Creative testCreative = new Creative(responseCreative, mediationRequestId);
+        Creative testCreative = new Creative("networkType", "className", mediationRequestId);
+        testCreative.setResponseCreative(responseCreative);
         subject.adClicked("test-creative", testCreative, RendererTest.makeAdView().getAdView(), feedPosition);
 
         assertThat(fakeRequestQueue.cache.size() == 1);
@@ -443,7 +508,7 @@ public class BeaconServiceTest extends TestBase {
         expectedBeaconParams.put("type", "completionPercent");
         expectedBeaconParams.put("value", "123");
         expectedBeaconParams.put("isSilentPlay", "false");
-        expectedBeaconParams.put("placementIndex", String.valueOf(feedPosition));
+        expectedBeaconParams.put("placementIndex", String.valueOf(creative.getPlacementIndex()));
         subject.videoPlayed(RuntimeEnvironment.application, creative, 123, false, feedPosition);
         STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
         assertBeaconFired(request.getUrl(), expectedBeaconParams);
@@ -455,7 +520,7 @@ public class BeaconServiceTest extends TestBase {
         Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(creative);
         expectedBeaconParams.put("type", "silentAutoPlayDuration");
         expectedBeaconParams.put("duration", "3000");
-        expectedBeaconParams.put("placementIndex", String.valueOf(feedPosition));
+        expectedBeaconParams.put("placementIndex", String.valueOf(creative.getPlacementIndex()));
         subject.silentAutoPlayDuration(creative, 3000, feedPosition);
         STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
         assertBeaconFired(request.getUrl(), expectedBeaconParams);
@@ -467,7 +532,7 @@ public class BeaconServiceTest extends TestBase {
         expectedBeaconParams.put("type", "userEvent");
         expectedBeaconParams.put("videoDuration", "4567");
         expectedBeaconParams.put("userEvent", "autoplayVideoEngagement");
-        expectedBeaconParams.put("placementIndex", String.valueOf(feedPosition));
+        expectedBeaconParams.put("placementIndex", String.valueOf(creative.getPlacementIndex()));
         subject.autoplayVideoEngagement(RuntimeEnvironment.application, creative, 4567, feedPosition);
 
         STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
@@ -481,7 +546,7 @@ public class BeaconServiceTest extends TestBase {
         expectedBeaconParams.put("duration", "4567");
         expectedBeaconParams.put("type", "videoViewDuration");
         expectedBeaconParams.put("silent", "false");
-        expectedBeaconParams.put("placementIndex", String.valueOf(feedPosition));
+        expectedBeaconParams.put("placementIndex", String.valueOf(creative.getPlacementIndex()));
         subject.videoViewDuration(creative, 4567, false, feedPosition);
         STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
         assertBeaconFired(request.getUrl(), expectedBeaconParams);

@@ -55,9 +55,8 @@ public class FANNetworkAdapter implements STRMediationAdapter {
                 if (nativeAd.equals(ad)) {
                     Logger.d("Facebook returned 1 creative");
                     List<ICreative> creatives = new ArrayList<>();
-                    FANCreative convertedFbAd = new FANCreative(nativeAd);
-                    convertedFbAd.setNetworkType(network.name);
-                    convertedFbAd.setClassName(network.androidClassName);
+                    FANCreative convertedFbAd = new FANCreative(network.name, network.androidClassName, adResponse.mrid);
+                    convertedFbAd.setFbAd(nativeAd);
                     creatives.add(convertedFbAd);
                     mediationListener.onAdLoaded(creatives);
                     return;
