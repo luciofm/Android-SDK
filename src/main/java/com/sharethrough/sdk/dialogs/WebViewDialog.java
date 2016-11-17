@@ -78,7 +78,7 @@ public class WebViewDialog extends ShareableDialog {
                     }
 
                     Uri uri = Uri.parse(url);
-                    if (uri.getScheme().equals("http") == false && uri.getScheme().equals("https") == false) {
+                    if (uri.getScheme()!= null && uri.getScheme().equals("http") == false && uri.getScheme().equals("https") == false) {
                         Intent intent = new Intent(Intent.ACTION_VIEW);
                         intent.setData(uri);
                         PackageManager pm = getContext().getPackageManager();
