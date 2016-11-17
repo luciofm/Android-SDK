@@ -76,14 +76,15 @@ public class WebViewDialog extends ShareableDialog {
                     if (newHost != null && false == newHost.equals(originalHost)) {
                         fireTimeInViewBeacon();
                     }
-                }
 
-                if (url.contains("intent://")){
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setData(Uri.parse(url));
-                    PackageManager pm = getContext().getPackageManager();
-                    if(intent.resolveActivity(pm) != null){
-                        getContext().startActivity(intent);
+                    Uri uri = Uri.parse(url);
+                    if (uri.getScheme().equals("http") == false && uri.getScheme().equals("https") == false) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(uri);
+                        PackageManager pm = getContext().getPackageManager();
+                        if (intent.resolveActivity(pm) != null) {
+                            getContext().startActivity(intent);
+                        }
                         return true;
                     }
                 }
