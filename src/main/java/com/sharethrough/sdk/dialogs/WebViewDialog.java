@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -74,7 +76,19 @@ public class WebViewDialog extends ShareableDialog {
                     if (newHost != null && false == newHost.equals(originalHost)) {
                         fireTimeInViewBeacon();
                     }
+
+                    Uri uri = Uri.parse(url);
+                    if (uri.getScheme()!= null && uri.getScheme().equals("http") == false && uri.getScheme().equals("https") == false) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(uri);
+                        PackageManager pm = getContext().getPackageManager();
+                        if (intent.resolveActivity(pm) != null) {
+                            getContext().startActivity(intent);
+                        }
+                        return true;
+                    }
                 }
+
                 return false;
             }
         });
