@@ -1,10 +1,5 @@
 language: android
 script: "./gradlew test assembleRelease createEclipseZip"
-notifications:
-  email: false
-  slack:
-    rooms:
-      secure: FmwlMa/1p/XSm3ksvWTtj51pr38B9xxwfAy99q5wP2JDc8So3ksqB9eNGdd2XwQGYJAfpaca3NlvahgKDST9e+qXcBnZhwO3N8uKqyk4rKvoEX8lx/MN48ynOjdcbIDL4U7qkgFcHFWTq86+u4LooK/i3U+tPQ431AqWoucHL8M=
 after_success: "./scripts/build-artifacts"
 after_failure: find build/test-report/debug -type f | xargs cat
 android:
