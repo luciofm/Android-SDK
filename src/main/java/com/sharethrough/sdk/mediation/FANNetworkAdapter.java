@@ -40,7 +40,7 @@ public class FANNetworkAdapter implements STRMediationAdapter {
         AdSettings.setMediationService(SHARETHROUGH);
         AdSettings.setIsChildDirected(IS_CHILD);
         String facebookPlacementId = network.parameters.get(FAN_PLACEMENT_ID).getAsString();
-        nativeAd = new NativeAd(context, facebookPlacementId);
+        nativeAd = new NativeAd(context.getApplicationContext(), facebookPlacementId);
 //        AdSettings.addTestDevice("ebe0abdb73271a5598f9a0b4f6308ff1");
         nativeAd.setAdListener(new AdListener() {
 

@@ -43,7 +43,7 @@ public abstract class Media {
         int overlayMax = Math.min(thumbnailImage.getWidth(), thumbnailImage.getHeight()) / 4;
 
         overlayIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        int gravity = isThumbnailOverlayCentered() ? Gravity.CENTER : Gravity.TOP | Gravity.LEFT;
+        int gravity = Gravity.CENTER;
         thumbnail.addView(overlayIcon, new FrameLayout.LayoutParams(overlayMax, overlayMax, gravity));
 
         thumbnailImage.setTag(THUMBNAIL);

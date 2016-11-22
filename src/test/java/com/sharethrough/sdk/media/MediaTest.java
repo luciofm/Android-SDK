@@ -26,7 +26,7 @@ public class MediaTest extends TestBase {
 
     @Before
     public void setUp() throws Exception {
-        overlayImageResourceId = R.drawable.youtube;
+        overlayImageResourceId = R.drawable.video_play;
 
         when(thumbnailImageView.getWidth()).thenReturn(100);
         when(thumbnailImageView.getHeight()).thenReturn(200);
@@ -71,7 +71,7 @@ public class MediaTest extends TestBase {
         int overlayDimensionMax = 25;
 
         FrameLayout.LayoutParams layoutParams = layoutParamsArgumentCaptor.getValue();
-        assertThat(layoutParams.gravity).isEqualTo(Gravity.TOP | Gravity.LEFT);
+        assertThat(layoutParams.gravity).isEqualTo(Gravity.CENTER);
         assertThat(layoutParams.width).isEqualTo(overlayDimensionMax);
         assertThat(layoutParams.height).isEqualTo(overlayDimensionMax);
     }

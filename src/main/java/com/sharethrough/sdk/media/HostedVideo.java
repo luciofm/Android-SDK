@@ -6,7 +6,6 @@ import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
 import com.sharethrough.sdk.IAdView;
-import com.sharethrough.sdk.Placement;
 import com.sharethrough.sdk.beacons.VideoCompletionBeaconService;
 import com.sharethrough.sdk.dialogs.VideoDialog;
 
@@ -37,6 +36,6 @@ public class HostedVideo extends Media {
 
     @Override
     public int getOverlayImageResourceId() {
-        return R.drawable.non_yt_play;
+        return R.drawable.video_play;
     }
 }

@@ -1,7 +1,6 @@
 package com.sharethrough.sdk.media;
 
 import android.content.Context;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
@@ -12,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import com.sharethrough.sdk.media.MutedVideoView;
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.*;
 import com.sharethrough.sdk.beacons.VideoCompletionBeaconService;
@@ -292,6 +290,6 @@ public class InstantPlayVideo extends Media {
 
     @Override
     public int getOverlayImageResourceId() {
-        return R.drawable.non_yt_play;
+        return R.drawable.video_play;
     }
 }

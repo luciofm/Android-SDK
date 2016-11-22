@@ -6,7 +6,6 @@ import com.sharethrough.sdk.*;
 import com.sharethrough.test.util.TestAdView;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -57,7 +56,7 @@ public class YoutubeTest extends TestBase {
     @Test
     public void thumbnailImageOverlaysYoutubeIcon() throws Exception {
         Youtube subject = new Youtube(creative);
-        assertThat(subject.getOverlayImageResourceId()).isEqualTo(R.drawable.youtube);
+        assertThat(subject.getOverlayImageResourceId()).isEqualTo(R.drawable.video_play);
     }
 
     @Test

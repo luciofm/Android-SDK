@@ -83,6 +83,7 @@ public class Renderer implements IRenderer {
                     public void onClick(View v) {
                         media.fireAdClickBeaconOnFirstClick(creative, adView, beaconService, feedPosition);
                         media.wasClicked(v, beaconService, feedPosition);
+
                     }
                   }
                 );
@@ -128,6 +129,7 @@ public class Renderer implements IRenderer {
                     privacyPolicyUrl = privacyPolicyUrl.replace("?opt_out_url={OPT_OUT_URL}&opt_out_text={OPT_OUT_TEXT}", "");
                 }
                 Intent privacyIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(privacyPolicyUrl));
+                privacyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 v.getContext().startActivity(privacyIntent);
             }
         });

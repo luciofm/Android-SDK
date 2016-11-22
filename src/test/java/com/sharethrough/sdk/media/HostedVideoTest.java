@@ -4,15 +4,12 @@ import android.view.View;
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BeaconService;
 import com.sharethrough.sdk.Creative;
-import com.sharethrough.sdk.Placement;
 import com.sharethrough.sdk.TestBase;
 import com.sharethrough.sdk.dialogs.ShareableDialogTest;
 import com.sharethrough.sdk.dialogs.VideoDialog;
 import com.sharethrough.sdk.dialogs.WebViewDialogTest;
 import com.sharethrough.test.util.TestAdView;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowDialog;
@@ -24,7 +21,7 @@ public class HostedVideoTest extends TestBase {
 
     @Test
     public void overlaysImage() throws Exception {
-        assertThat(new HostedVideo(mock(Creative.class)).getOverlayImageResourceId()).isEqualTo(R.drawable.non_yt_play);
+        assertThat(new HostedVideo(mock(Creative.class)).getOverlayImageResourceId()).isEqualTo(R.drawable.video_play);
     }
 
     @Config(sdk = 18, shadows = {WebViewDialogTest.WebViewShadow.class, ShareableDialogTest.MenuInflaterShadow.class})
