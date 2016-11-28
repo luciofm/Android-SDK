@@ -37,8 +37,8 @@ public class STXNetworkAdapter implements STRMediationAdapter {
     }
 
     @Override
-    public void render(IAdView adview, ICreative creative, int feedPosition) {
-        renderer.putCreativeIntoAdView(adview, ((Creative) creative), beaconService, feedPosition, new Timer("AdView timer for " + creative));
+    public void render(IAdView adview, ICreative creative, int feedPosition, Sharethrough.AdListener adListener) {
+        renderer.putCreativeIntoAdView(adview, ((Creative) creative), beaconService, feedPosition, new Timer("AdView timer for " + creative), adListener);
     }
 
     public STXNetworkAdapter(Context context, BeaconService beaconService) {

@@ -22,13 +22,12 @@ import com.squareup.picasso.Picasso;
 import java.util.Timer;
 
 public class Renderer implements IRenderer {
-
-    public void putCreativeIntoAdView(final IAdView adView, final Creative creative, final BeaconService beaconService, final Timer timer) {
-        putCreativeIntoAdView(adView, creative, beaconService, 0, timer);
+    public void putCreativeIntoAdView(final IAdView adView, final Creative creative, final BeaconService beaconService, final Timer timer, Sharethrough.AdListener adListener) {
+        putCreativeIntoAdView(adView, creative, beaconService, 0, timer, adListener);
     }
 
     public void putCreativeIntoAdView(final IAdView adView, final Creative creative, final BeaconService beaconService,
-                                      final int feedPosition, final Timer timer) {
+                                      final int feedPosition, final Timer timer, final Sharethrough.AdListener adListener) {
         final ViewGroup container = adView.getAdView();
         if (!creative.wasRendered) {
             beaconService.adReceived(container.getContext(), creative, feedPosition);
@@ -84,11 +83,17 @@ public class Renderer implements IRenderer {
                         media.fireAdClickBeaconOnFirstClick(creative, adView, beaconService, feedPosition);
                         media.wasClicked(v, beaconService, feedPosition);
 
+                        if (adListener != null) {
+                            adListener.onAdClicked(creative);
+                        }
                     }
                   }
                 );
 
                 placeOptoutIcon(adView, creative.getOptOutUrl(), creative.getOptOutText());
+                if (adListener != null) {
+                    adListener.onAdRendered(creative);
+                }
             }
         });
     }

@@ -15,6 +15,7 @@ import com.facebook.ads.*;
 import com.sharethrough.sdk.ContextInfo;
 import com.sharethrough.sdk.IAdView;
 import com.sharethrough.sdk.Logger;
+import com.sharethrough.sdk.Sharethrough;
 import com.sharethrough.sdk.network.ASAPManager;
 
 import java.util.ArrayList;
@@ -73,7 +74,7 @@ public class FANNetworkAdapter implements STRMediationAdapter {
     }
 
     @Override
-    public void render(final IAdView adview, final ICreative creative, int feedPosition) {
+    public void render(final IAdView adview, final ICreative creative, int feedPosition, final Sharethrough.AdListener adListener) {
         final Handler handler = new Handler(Looper.getMainLooper());
         final ViewGroup container = adview.getAdView();
         handler.post(new Runnable() {

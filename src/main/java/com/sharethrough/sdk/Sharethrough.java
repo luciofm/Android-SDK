@@ -41,6 +41,7 @@ public class Sharethrough {
 
         }
     };
+    private AdListener adListener;
 
     public Sharethrough(STRSdkConfig config) {
         this.strSdkConfig = config;
@@ -181,7 +182,7 @@ public class Sharethrough {
     public void putCreativeIntoAdView(final IAdView adView, final int feedPosition) {
         ICreative creative = getCreativeToShow(feedPosition);
         if (creative != null) {
-            strSdkConfig.getMediationManager().render(adView, creative, feedPosition);
+            strSdkConfig.getMediationManager().render(adView, creative, feedPosition, adListener);
         }
 
         //grab more ads if appropriate
@@ -275,6 +276,10 @@ public class Sharethrough {
         this.onStatusChangeListener = onStatusChangeListener;
     }
 
+    public void setAdListener(AdListener adListener) {
+        this.adListener = adListener;
+    }
+
     /**
      * Returns status change callback registered when the status of having or not having ads to show changes.
      *
@@ -309,6 +314,11 @@ public class Sharethrough {
          * This method is invoked when there are no ads to be shown.
          */
         void noAdsToShow();
+    }
+
+    public interface AdListener {
+        void onAdClicked(ICreative creative);
+        void onAdRendered(ICreative creative);
     }
 
     public String serialize() {

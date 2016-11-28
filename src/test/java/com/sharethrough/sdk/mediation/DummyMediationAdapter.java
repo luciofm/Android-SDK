@@ -2,6 +2,7 @@ package com.sharethrough.sdk.mediation;
 
 import android.content.Context;
 import com.sharethrough.sdk.IAdView;
+import com.sharethrough.sdk.Sharethrough;
 import com.sharethrough.sdk.network.ASAPManager;
 
 /**
@@ -14,7 +15,7 @@ public class DummyMediationAdapter implements STRMediationAdapter {
     }
 
     @Override
-    public void render(IAdView adview, ICreative creative, int feedPosition) {
+    public void render(IAdView adview, ICreative creative, int feedPosition, Sharethrough.AdListener adListener) {
 
     }
 }

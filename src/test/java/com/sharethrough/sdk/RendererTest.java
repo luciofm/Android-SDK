@@ -46,6 +46,7 @@ public class RendererTest extends TestBase {
     private int feedPosition;
     @Mock private Placement placement;
     @Mock private Media media;
+    @Mock Sharethrough.AdListener adListener;
 
     public class RendererStub extends Renderer {
         protected Media createMedia(IAdView adView, Creative creative, BeaconService beaconService, int feedPosition) {
@@ -75,7 +76,7 @@ public class RendererTest extends TestBase {
     @Test
     public void onUIthread_callsCallback_andShowsTitleDescriptionAdvertiserAndThumbnailWithOverlay() throws Exception {
         ShadowLooper.pauseMainLooper();
-        subject.putCreativeIntoAdView(adView, creative, beaconService, timer);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, timer, adListener);
 
         verifyNoMoreInteractions(adView.getTitle());
         assertThat(adView.adReady_wasCalled).isFalse();
@@ -100,26 +101,57 @@ public class RendererTest extends TestBase {
 
     @Test
     public void firesImpressionBeaconOnlyOnce() throws Exception {
-        subject.putCreativeIntoAdView(adView, creative, beaconService, timer);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, timer, adListener);
         verify(beaconService).adReceived(any(Context.class), eq(creative), eq(feedPosition));
-        subject.putCreativeIntoAdView(adView, creative, beaconService, timer);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, timer, adListener);
         verifyNoMoreInteractions(beaconService);
     }
 
     @Test
     public void whenAdIsClicked_firesMediaBeacon_andMediaClickListener() throws Exception {
-        subject.putCreativeIntoAdView(adView, creative, beaconService, timer);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, timer, adListener);
 
         adView.performClick();
 
         verify(media).wasClicked(adView, beaconService, feedPosition);
         verify(media).fireAdClickBeaconOnFirstClick(creative, adView, beaconService, feedPosition);
+        verify(adListener).onAdClicked(creative);
+    }
+
+    @Test
+    public void whenAdIsClick_callAdListenerOnClick_ifAdListenerIsNotNull() throws Exception {
+        subject.putCreativeIntoAdView(adView, creative, beaconService, timer, adListener);
+        adView.performClick();
+
+        verify(adListener).onAdClicked(creative);
+    }
+
+    @Test
+    public void whenAdIsClick_doesNothing_ifAdListenerIsNull() throws Exception {
+        subject.putCreativeIntoAdView(adView, creative, beaconService, timer, null);
+        adView.performClick();
+
+        verifyNoMoreInteractions(adListener);
+    }
+
+    @Test
+    public void whenAdRendered_callAdListenerOnRendered_ifAdListenerIsNotNull() throws Exception {
+        subject.putCreativeIntoAdView(adView, creative, beaconService, timer, adListener);
+
+        verify(adListener).onAdRendered(creative);
+    }
+
+    @Test
+    public void whenAdRendered_doesNothing_ifAdListenerIsNull() throws Exception {
+        subject.putCreativeIntoAdView(adView, creative, beaconService, timer, null);
+
+        verifyNoMoreInteractions(adListener);
     }
 
     @Test
     public void whenDescriptionIsNull_NothingBadHappens() throws Exception {
         adView.description = null;
-        subject.putCreativeIntoAdView(adView, creative, beaconService, timer);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, timer, adListener);
     }
 
     @Test
@@ -127,8 +159,8 @@ public class RendererTest extends TestBase {
         ShadowLooper.pauseMainLooper();
 
         Creative creative1 = mock(Creative.class);
-        subject.putCreativeIntoAdView(adView, creative1, beaconService, timer);
-        subject.putCreativeIntoAdView(adView, creative, beaconService, timer);
+        subject.putCreativeIntoAdView(adView, creative1, beaconService, timer, adListener);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, timer, adListener);
 
         verifyNoMoreInteractions(creative1);
         verifyNoMoreInteractions(creative);
@@ -142,7 +174,7 @@ public class RendererTest extends TestBase {
     @Test
     public void whenCreativeHasBrandLogo_andAdViewHasImageViewForIt_BrandLogoIsDisplayed() {
         ImageView brandLogo = adView.getBrandLogo();
-        subject.putCreativeIntoAdView(adView, creative, beaconService, timer);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, timer, adListener);
 
         ShadowLooper shadowLooper = Shadows.shadowOf(Looper.getMainLooper());
         shadowLooper.runOneTask();
@@ -154,7 +186,7 @@ public class RendererTest extends TestBase {
     @Test
     public void whenCreativeDoesNotHaveBrandLogo_andAdViewHasImageViewForIt_BrandLogoIsNotDisplayed() {
         when(creative.getBrandLogoUrl()).thenReturn("");
-        subject.putCreativeIntoAdView(adView, creative, beaconService, timer);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, timer, adListener);
 
         ShadowLooper shadowLooper = Shadows.shadowOf(Looper.getMainLooper());
         shadowLooper.runOneTask();
@@ -167,7 +199,7 @@ public class RendererTest extends TestBase {
     @Test
     public void whenCreativeHasBrandLogo_andAdViewDoesNotHasImageViewForIt_NothingBadHappens() {
         adView.brandLogo = null;
-        subject.putCreativeIntoAdView(adView, creative, beaconService, timer);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, timer, adListener);
 
         ShadowLooper shadowLooper = Shadows.shadowOf(Looper.getMainLooper());
         shadowLooper.runOneTask();
@@ -177,14 +209,14 @@ public class RendererTest extends TestBase {
     @Test
     public void whenBrandLogoIsNull_NothingBadHappens() throws Exception {
         adView.brandLogo = null;
-        subject.putCreativeIntoAdView(adView, creative, beaconService, timer);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, timer, adListener);
     }
 
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Test
     public void onceAdIsReady_showsProportionalOptoutButton_thatLinksToPrivacyInformation() throws Exception {
-        subject.putCreativeIntoAdView(adView, creative, beaconService, timer);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, timer, adListener);
 
         ShadowLooper shadowLooper = Shadows.shadowOf(Looper.getMainLooper());
         shadowLooper.runOneTask();
@@ -204,7 +236,7 @@ public class RendererTest extends TestBase {
     public void whenOptoutInfoIsProvided_addsOptOutParamsToUrl() throws Exception {
         when(creative.getOptOutText()).thenReturn("New Opt Out Text");
         when(creative.getOptOutUrl()).thenReturn("http://example.com");
-        subject.putCreativeIntoAdView(adView, creative, beaconService, timer);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, timer, adListener);
 
         ShadowLooper shadowLooper = Shadows.shadowOf(Looper.getMainLooper());
         shadowLooper.runOneTask();
@@ -224,7 +256,7 @@ public class RendererTest extends TestBase {
     public void whenOptoutMissingText_BlankOptoutParam() throws Exception {
         when(creative.getOptOutText()).thenReturn("");
         when(creative.getOptOutUrl()).thenReturn("http://example.com");
-        subject.putCreativeIntoAdView(adView, creative, beaconService, timer);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, timer, adListener);
 
         ShadowLooper shadowLooper = Shadows.shadowOf(Looper.getMainLooper());
         shadowLooper.runOneTask();
@@ -244,7 +276,7 @@ public class RendererTest extends TestBase {
     public void whenOptoutMissingUrl_BlankOptoutParam() throws Exception {
         when(creative.getOptOutText()).thenReturn("OptOutText");
         when(creative.getOptOutUrl()).thenReturn("");
-        subject.putCreativeIntoAdView(adView, creative, beaconService, timer);
+        subject.putCreativeIntoAdView(adView, creative, beaconService, timer, adListener);
 
         ShadowLooper shadowLooper = Shadows.shadowOf(Looper.getMainLooper());
         shadowLooper.runOneTask();

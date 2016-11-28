@@ -145,13 +145,13 @@ public class MediationManager {
      * @param creative
      * @param feedPosition
      */
-    public void render(IAdView adView, ICreative creative, int feedPosition) {
+    public void render(IAdView adView, ICreative creative, int feedPosition, Sharethrough.AdListener adListener) {
         ASAPManager.AdResponse.Network network = new ASAPManager.AdResponse.Network();
         network.androidClassName = creative.getClassName();
         network.name =creative.getNetworkType();
         try {
             STRMediationAdapter mediationAdapter  = getMediationAdapter(network);
-            mediationAdapter.render(adView, creative, feedPosition);
+            mediationAdapter.render(adView, creative, feedPosition, adListener);
         } catch (Exception e) {
             Logger.e("Needed to instantiate adapter before rendering ad but could not instantiate a STRNetworkManager based off class name: %s", e, network.androidClassName);
             return;

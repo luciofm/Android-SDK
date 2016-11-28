@@ -2,6 +2,7 @@ package com.sharethrough.sdk.mediation;
 
 import android.content.Context;
 import com.sharethrough.sdk.IAdView;
+import com.sharethrough.sdk.Sharethrough;
 import com.sharethrough.sdk.network.ASAPManager;
 
 /**
@@ -9,5 +10,5 @@ import com.sharethrough.sdk.network.ASAPManager;
  */
 public interface STRMediationAdapter {
     void loadAd(Context context, MediationManager.MediationListener mediationListener, ASAPManager.AdResponse adResponse, ASAPManager.AdResponse.Network network);
-    void render(IAdView adview, ICreative creative, int feedPosition);
+    void render(IAdView adview, ICreative creative, int feedPosition, Sharethrough.AdListener adListener);
 }

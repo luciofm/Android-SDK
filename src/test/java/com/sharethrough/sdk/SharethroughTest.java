@@ -37,6 +37,7 @@ public class SharethroughTest extends TestBase {
     @Mock private RequestQueue requestQueue;
     @Mock private ASAPManager asapManager;
     @Mock private MediationManager mediationManager;
+    @Mock private Sharethrough.AdListener adListener;
 
     @Mock private Creative creative;
     @Mock private Placement placement;
@@ -70,6 +71,7 @@ public class SharethroughTest extends TestBase {
 
         subject = new Sharethrough(strSdkConfig);
         subject.setOnStatusChangeListener(onStatusChangeListener);
+        subject.setAdListener(adListener);
     }
 
     private TestAdView makeMockAdView() {
@@ -86,7 +88,7 @@ public class SharethroughTest extends TestBase {
 
     private void verifyCreativeHasBeenPlacedInAdview(TestAdView adView) {
         ArgumentCaptor<Creative> creativeArgumentCaptor = ArgumentCaptor.forClass(Creative.class);
-        verify(mediationManager).render(eq(adView), creativeArgumentCaptor.capture(), anyInt());
+        verify(mediationManager).render(eq(adView), creativeArgumentCaptor.capture(), anyInt(), same(adListener));
         assertThat(creativeArgumentCaptor.getValue()).isSameAs(this.creative);
     }
 
@@ -244,8 +246,8 @@ public class SharethroughTest extends TestBase {
         IAdView generatedAdView = subject.getAdView(RuntimeEnvironment.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null, 7);
         IAdView generatedAdView2 = subject.getAdView(RuntimeEnvironment.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null, 7);
 
-        verify(mediationManager).render(same(generatedAdView), same(creative), eq(adSlot));
-        verify(mediationManager).render(same(generatedAdView2), same(creative), eq(adSlot));
+        verify(mediationManager).render(same(generatedAdView), same(creative), eq(adSlot), same(adListener));
+        verify(mediationManager).render(same(generatedAdView2), same(creative), eq(adSlot), same(adListener));
     }
 
     @Test
@@ -258,7 +260,7 @@ public class SharethroughTest extends TestBase {
 
         assertThat(generatedAdView).isSameAs(generatedAdView2);
 
-        verify(mediationManager, times(2)).render(same(generatedAdView), same(creative), eq(adSlot));
+        verify(mediationManager, times(2)).render(same(generatedAdView), same(creative), eq(adSlot), same(adListener));
     }
 
 
@@ -271,8 +273,8 @@ public class SharethroughTest extends TestBase {
         IAdView generatedAdView2 = subject.getAdView(RuntimeEnvironment.application, 2, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView, 7);
 
         assertThat(generatedAdView).isSameAs(generatedAdView2);
-        verify(mediationManager).render(same(generatedAdView), same(creative), eq(1));
-        verify(mediationManager).render(same(generatedAdView2), same(creative2),eq(2));
+        verify(mediationManager).render(same(generatedAdView), same(creative), eq(1), same(adListener));
+        verify(mediationManager).render(same(generatedAdView2), same(creative2),eq(2), same(adListener));
     }
 
     @Test
