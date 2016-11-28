@@ -12,10 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.MenuItem;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.webkit.*;
 import com.sharethrough.android.sdk.R;
 import com.sharethrough.sdk.BaseActivityLifecycleCallbacks;
 import com.sharethrough.sdk.BeaconService;
@@ -59,7 +56,7 @@ public class WebViewDialog extends ShareableDialog {
 
     }
 
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +89,10 @@ public class WebViewDialog extends ShareableDialog {
                 return false;
             }
         });
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
+        }
 
         if(creative.getMediaUrl() != null){
             originalHost = Uri.parse(creative.getMediaUrl()).getHost();
