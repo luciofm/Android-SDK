@@ -17,7 +17,6 @@ public class Sharethrough {
     public static final String SDK_VERSION_NUMBER = BuildConfig.VERSION_NAME;
     public static final String PRIVACY_POLICY_ENDPOINT = "http://platform-cdn.sharethrough.com/privacy-policy.html?opt_out_url={OPT_OUT_URL}&opt_out_text={OPT_OUT_TEXT}";
     public static String USER_AGENT = System.getProperty("http.agent") + "; STR " + SDK_VERSION_NUMBER;
-    protected boolean firedNewAdsToShow;
 
     private Handler handler = new Handler(Looper.getMainLooper());
 
@@ -30,17 +29,7 @@ public class Sharethrough {
         public void call(Placement result) {
         }
     };
-    private OnStatusChangeListener onStatusChangeListener = new OnStatusChangeListener() {
-        @Override
-        public void newAdsToShow() {
-
-        }
-
-        @Override
-        public void noAdsToShow() {
-
-        }
-    };
+    private OnStatusChangeListener onStatusChangeListener;
     private AdListener adListener;
 
     public Sharethrough(STRSdkConfig config) {
@@ -93,6 +82,7 @@ public class Sharethrough {
 
                 strSdkConfig.getCreativeQueue().add(creative);
                 Logger.d("insert creative, creative cache size %d", strSdkConfig.getCreativeQueue().size());
+
                 fireNewAdsToShow();
             }
         }
@@ -118,23 +108,23 @@ public class Sharethrough {
     }
 
     protected void fireNoAdsToShow() {
-        firedNewAdsToShow = false;
-        if( strSdkConfig.getCreativeQueue().size() != 0 ) return;
         handler.post(new Runnable() {
             @Override
             public void run() {
-                onStatusChangeListener.noAdsToShow();
+                if (onStatusChangeListener != null) {
+                    onStatusChangeListener.noAdsToShow();
+                }
             }
         });
     }
 
     protected void fireNewAdsToShow() {
-        if (firedNewAdsToShow) return;
-        firedNewAdsToShow = true;
         handler.post(new Runnable() {
             @Override
             public void run() {
-                onStatusChangeListener.newAdsToShow();
+                if (onStatusChangeListener != null) {
+                    onStatusChangeListener.newAdsToShow();
+                }
             }
         });
     }
@@ -183,13 +173,6 @@ public class Sharethrough {
         ICreative creative = getCreativeToShow(feedPosition);
         if (creative != null) {
             strSdkConfig.getMediationManager().render(adView, creative, feedPosition, adListener);
-        }
-
-        //grab more ads if appropriate
-        synchronized (strSdkConfig.getCreativeQueue()) {
-            if (strSdkConfig.getCreativeQueue().readyForMore()) {
-                fetchAds();
-            }
         }
     }
 

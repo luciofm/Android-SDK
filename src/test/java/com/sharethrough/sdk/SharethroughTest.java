@@ -151,64 +151,12 @@ public class SharethroughTest extends TestBase {
     }
 
     @Test
-    public void fireNoAdsToShow_callsListenerNoAdsToShow_whenCreativeQueueIsEmpty() throws Exception {
-        when(creativeQueue.size()).thenReturn(0);
-        subject.fireNoAdsToShow();
-
-        verify(onStatusChangeListener).noAdsToShow();
-        assertThat(subject.firedNewAdsToShow).isEqualTo(false);
-    }
-
-    @Test
-    public void fireNoAdsToShow_doesNotCallNoAdsToShow_whenCreativeQueueHasCreatives() throws Exception {
-        when(creativeQueue.size()).thenReturn(1);
-        subject.fireNoAdsToShow();
-
-        verify(onStatusChangeListener, never()).noAdsToShow();
-        assertThat(subject.firedNewAdsToShow).isEqualTo(false);
-    }
-
-    @Test
-    public void fireNewAdsToShow_callsNewAdsToShow_whenFireNewAdsToShowBooleanIsFalse() throws Exception {
-        subject.firedNewAdsToShow = false;
-        subject.fireNewAdsToShow();
-
-        verify(onStatusChangeListener).newAdsToShow();
-    }
-
-    @Test
-    public void fireNewAdsToShow_doesNotCallNewAdsToShow_whenFireNewAdsToShowBooleanIsTrue() throws Exception {
-        subject.firedNewAdsToShow = true;
-        subject.fireNewAdsToShow();
-
-        verify(onStatusChangeListener, never()).newAdsToShow();
-    }
-
-    @Test
-    public void putCreativeIntoAdView_whenQueueWantsMore_fetchesMoreAds() throws Exception {
-        when(creativeQueue.readyForMore()).thenReturn(true);
-        subject.putCreativeIntoAdView(adView);
-
-        verify(asapManager, times(1)).callASAP((ASAPManager.ASAPManagerListener) anyObject());
-    }
-
-    @Test
     public void putCreativeIntoAdView_whenQueueHasCreatives_usesNextCreative() {
         when(creativeQueue.size()).thenReturn(1);
         when(creativeQueue.getNext()).thenReturn(creative).thenThrow(new RuntimeException("Too many calls to getNext"));
 
         subject.putCreativeIntoAdView(adView);
         verifyCreativeHasBeenPlacedInAdview(adView);
-    }
-
-    @Test
-    public void whenCreativeIsPrefetched_whenNewAdsToShowHasAlreadyBeenCalled_doesNotCallItAgain() throws Exception {
-        List<ICreative> creatives = new ArrayList<>();
-        creatives.add(creative);
-        subject.mediationListener.onAdLoaded(creatives);
-        verify(onStatusChangeListener).newAdsToShow();
-        subject.mediationListener.onAdLoaded(creatives);
-        verifyNoMoreInteractions(onStatusChangeListener);
     }
 
     @Test
@@ -286,16 +234,6 @@ public class SharethroughTest extends TestBase {
     }
 
     @Test
-    public void ifSlotIsEmptyAndThereAreMoreAdsToShow_fireNewAdsIsCalled() {
-        int adSlot = 2;
-        when(creativeQueue.size()).thenReturn(1);
-        when(creativeQueue.getNext()).thenReturn(creative);
-        IAdView generatedAdView = subject.getAdView(RuntimeEnvironment.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null, 7);
-
-        assertThat(subject.firedNewAdsToShow);
-    }
-
-    @Test
     public void creativeIndicesStoresAllUniqueCreativeIndexHistory_creativesBySlotOnlyCachesTenUniqueIndices() {
         LruCache<Integer, ICreative> slot = new LruCache<>(10);
         Set<Integer> creativeIndices = new HashSet<>();
@@ -328,47 +266,6 @@ public class SharethroughTest extends TestBase {
     }
 
     @Test
-    public void ifSlotNOTEmptyAndCreativeNOTExpired_fireNewAdsIsNOTCalled() {
-        Creative creative2 = mock(Creative.class);
-        when(creativeQueue.size()).thenReturn(2);
-        when(creativeQueue.getNext()).thenReturn(creative).thenReturn(creative2).thenThrow(new RuntimeException("Too many calls"));
-        IAdView generatedAdView = subject.getAdView(RuntimeEnvironment.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null, 7);
-        subject.firedNewAdsToShow = false;
-        IAdView generatedAdView2 = subject.getAdView(RuntimeEnvironment.application, 1, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, generatedAdView, 7);
-        assertThat(generatedAdView).isSameAs(generatedAdView2);
-
-        assertThat(false == subject.firedNewAdsToShow);
-    }
-
-    @Test
-    public void ifSlotEmptyAndNoAdsAvailable_fireNewAdsIsNOTCalled() {
-        int adSlot = 2;
-        when(creativeQueue.size()).thenReturn(0);
-        IAdView generatedAdView = subject.getAdView(RuntimeEnvironment.application, adSlot, android.R.layout.simple_list_item_1, 1, 2, 3, 4, 5, 6, null, 7);
-
-        assertThat(false == subject.firedNewAdsToShow);
-    }
-
-//    @Test
-//    public void whenPlacementIsNotSet_setsPlacementAndCallsPlacementCallback() {
-//        final boolean[] callbackWasInvoked = {false};
-//        subject.setOrCallPlacementCallback(new Callback<Placement>() {
-//            @Override
-//            public void call(Placement result) {
-//                callbackWasInvoked[0] = true;
-//            }
-//        });
-//        List<ICreative> creatives = new ArrayList<>();
-//        creatives.add(creative);
-//        subject.mediationListener.onAdLoaded(creatives);
-//        subject.putCreativeIntoAdView(adView);
-//
-//        assertThat(callbackWasInvoked[0]).isTrue();
-//        assertThat(subject.placement).isEqualTo(placement);
-//        assertThat(subject.placementSet).isTrue();
-//    }
-
-    @Test
     public void whenPlacementIsSet_doesNotSetPlacementOrCallPlacementCallback() {
         final boolean[] callbackWasInvoked = {false};
         subject.setOrCallPlacementCallback(new Callback<Placement>() {
@@ -382,7 +279,6 @@ public class SharethroughTest extends TestBase {
 
         subject.putCreativeIntoAdView(adView);
 
-        verify(asapManager).callASAP((ASAPManager.ASAPManagerListener)anyObject());
         assertThat(subject.placement).isNotEqualTo(placement);
         assertThat(callbackWasInvoked[0]).isFalse();
     }
