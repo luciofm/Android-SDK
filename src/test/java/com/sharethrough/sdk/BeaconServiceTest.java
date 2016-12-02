@@ -186,17 +186,6 @@ public class BeaconServiceTest extends TestBase {
     }
 
     @Test
-    public void fireAdRequested() throws Exception {
-        final String key = "abc";
-        Map<String, String> expectedBeaconParams = subject.commonParams();
-        expectedBeaconParams.put("type", "impressionRequest");
-        expectedBeaconParams.put("pkey", key);
-        subject.adRequested(key);
-        STRStringRequest request = (STRStringRequest)fakeRequestQueue.cache.get(0);
-        assertBeaconFired(request.getUrl(), expectedBeaconParams);
-    }
-
-    @Test
     public void fireAdReceived() throws Exception {
         Map<String, String> expectedBeaconParams = subject.commonParamsWithCreative(creative);
         expectedBeaconParams.put("type", "impression");
