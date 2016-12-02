@@ -106,14 +106,6 @@ public class BeaconService {
         }
     }
 
-    public void adRequested(final String placementKey) {
-        Map<String, String> beaconParams = commonParams();
-        beaconParams.put("type", "impressionRequest");
-        beaconParams.put("pkey", placementKey);
-
-        fireBeacon(beaconParams);
-    }
-
     public void networkImpressionRequest(final String networkKey, final int baseOneNetworkOrder, final String mrid, final int baseOnePlacementIndex) {
         Map<String, String> beaconParams = commonParams();
         beaconParams.put("pkey", placementKey);
