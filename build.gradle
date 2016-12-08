@@ -98,7 +98,7 @@ dependencies {
         mavenCentral()
         jcenter()
     }
-    compile 'com.google.android.gms:play-services:6.+'
+    compile 'com.google.android.gms:play-services-ads:9.4.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.google.code.gson:gson:2.5'
     compile 'com.android.volley:volley:1.0.0'
