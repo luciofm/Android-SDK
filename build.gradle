@@ -1,10 +1,10 @@
 buildscript {
     repositories {
         mavenCentral()
+        jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.0.0'
-        classpath 'org.robolectric:robolectric-gradle-plugin:0.14.+'
+        classpath 'com.android.tools.build:gradle:2.2.0'
     }
 }
 
@@ -12,28 +12,16 @@ buildscript {
 allprojects {
     repositories {
         mavenCentral()
+        jcenter()
     }
     version = version
 }
 
-apply plugin: 'android-library'
-apply plugin: 'robolectric'
+apply plugin: 'com.android.library'
 
 android {
 
-    tasks.whenTaskAdded { theTask ->
-        def taskName = theTask.name.toString()
-        if ("testDebug".toString().equals(taskName)) {
-            /**
-             * Listen for when robolectric adds the 'testDebug' task and when it does, add the -noverify
-             * option to that task's jvmArgs.  This allows us to turn off byte code verification when
-             * running our unit tests.
-             */
-            theTask.jvmArgs('-noverify')
-        }
-    }
-
-    compileSdkVersion 21
+    compileSdkVersion 23
     buildToolsVersion '21.1.2'
 
     compileOptions {
@@ -61,7 +49,7 @@ android {
             versionCode code
             versionName version
             minSdkVersion 15
-            targetSdkVersion 18
+            targetSdkVersion 23
         }
     }
     else {
@@ -70,10 +58,9 @@ android {
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 18
+        targetSdkVersion 23
         versionCode 1
         versionName version
-        testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
         multiDexEnabled true
     }
 
@@ -96,12 +83,6 @@ android {
         jumboMode = true
     }
 
-    sourceSets {
-        androidTest {
-            setRoot('src/test')
-        }
-    }
-
     packagingOptions {
         exclude 'LICENSE.txt'
         exclude 'META-INF/LICENSE.txt'
@@ -109,63 +90,6 @@ android {
         exclude 'META-INF/NOTICE'
         exclude 'META-INF/ASL2.0'
     }
-}
-
-task uploadArchives(type: Copy) {
-    from 'build/outputs/aar/'
-    include '*.aar'
-
-    into '../app/lib'
-}
-uploadArchives.dependsOn test
-uploadArchives.dependsOn assembleDebug
-
-def eclipseZipFolder = 'build/tmp/EclipseZip'
-task createEclipseZip(type: Zip) {
-    baseName = 'Sharethrough_Android_SDK'
-    from eclipseZipFolder
-    include '**/*'
-    includeEmptyDirs(true)
-}
-task createEclipseZipFolder << {
-    def source = 'build/intermediates/bundles/release/'
-    copy {
-        from(source)
-        include 'AndroidManifest.xml'
-        into eclipseZipFolder
-    }
-    copy {
-        from(source)
-        include 'res/**/*'
-        into eclipseZipFolder
-    }
-    copy {
-        from(projectDir)
-        include 'project.properties'
-        include '.classpath'
-        include '.project'
-        into eclipseZipFolder
-    }
-    copy {
-        from(source)
-        include 'classes.jar'
-        into "${eclipseZipFolder}/libs/"
-    }
-}
-createEclipseZip.dependsOn createEclipseZipFolder
-createEclipseZipFolder.dependsOn test
-createEclipseZip.dependsOn assembleRelease
-assemble.dependsOn(createEclipseZip)
-
-task copyTestAssets(type: Copy) {
-    from('src/test/assets/')
-    into 'build/test-classes/assets/'
-}
-test.dependsOn copyTestAssets
-
-robolectric {
-    include '**/*Test.class'
-    exclude '**/espresso/**/*.class'
 }
 
 dependencies {
@@ -177,46 +101,4 @@ dependencies {
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.google.code.gson:gson:2.5'
     compile 'com.android.volley:volley:1.0.0'
-    // Espresso
-    androidTestCompile('junit:junit:4.11') {
-        exclude module: 'hamcrest-core'
-    }
-    testCompile 'com.google.guava:guava:14.0.1'
-    testCompile 'org.hamcrest:hamcrest-integration:1.1'
-    testCompile 'org.hamcrest:hamcrest-core:1.1'
-    testCompile 'org.hamcrest:hamcrest-library:1.1'
-    androidTestCompile 'org.robolectric:robolectric:3.0'
-    androidTestCompile 'org.robolectric:shadows-play-services:3.0'
-    androidTestCompile 'org.robolectric:shadows-support-v4:3.0'
-    androidTestCompile 'org.robolectric:shadows-httpclient:3.0'
-    androidTestCompile('com.squareup:fest-android:1.0.+') {
-        exclude group: 'com.android.support', module: 'support-v4'
-    }
-    androidTestCompile 'org.mockito:mockito-core:1.+'
-}
-
-apply plugin: 'idea'
-
-idea {
-    module {
-        testOutputDir = file('build/test-classes/debug')
-    }
-}
-
-sourceSets {
-    docs {
-        java {
-            srcDir "$projectDir"
-            include  'src/main/java/com/sharethrough/sdk/Sharethrough.java'
-            include  'src/main/java/com/sharethrough/sdk/BasicAdView.java'
-            include  'src/main/java/com/sharethrough/sdk/IAdView.java'
-        }
-    }
-}
-
-task generateSDKDocs(type: Javadoc) {
-    title = "Sharethrough Android SDK Docs"
-    description = "Generates Javadoc for SDK"
-    source = sourceSets.docs.allJava
-    destinationDir = file("$projectDir/docs")
 }

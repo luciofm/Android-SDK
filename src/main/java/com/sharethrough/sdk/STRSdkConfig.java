@@ -25,7 +25,11 @@ public class STRSdkConfig {
     private ASAPManager asapManager;
     private ContextInfo contextInfo;
 
-    public STRSdkConfig(Context context, String placementKey){
+    public STRSdkConfig(Context context, String placementKey) {
+        this(context, placementKey, null);
+    }
+
+    public STRSdkConfig(Context context, String placementKey, RequestQueue requestQueue) {
         Logger.setContext(context);
         Logger.enabled = true;
 
@@ -36,8 +40,13 @@ public class STRSdkConfig {
         this.adManager = new AdManager(context);
         this.renderer = new Renderer();
         this.creativeQueue = new CreativesQueue();
-        this.requestQueue = Volley.newRequestQueue(context.getApplicationContext());
-        this.asapManager = new ASAPManager(placementKey, requestQueue);
+
+        if (requestQueue == null)
+            this.requestQueue = Volley.newRequestQueue(context.getApplicationContext());
+        else
+            this.requestQueue = requestQueue;
+
+        this.asapManager = new ASAPManager(placementKey, this.requestQueue);
         this.creativesBySlot = new LruCache<>(10);
         this.creativeIndices = new HashSet<>(); //contains history of all indices for creatives, whereas creativesBySlot only caches the last 10
     }
